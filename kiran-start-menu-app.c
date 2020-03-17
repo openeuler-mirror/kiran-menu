@@ -3,7 +3,7 @@
 #include "kiran-start-menu.h"
 
 struct _KiranStartMenuApp {
-  GObject parent;
+  GApplication parent;
   KiranStartMenu *start_menu;
 };
 
@@ -20,6 +20,7 @@ static gboolean kiran_start_menu_app_dbus_register(GApplication *application,
   if (!G_APPLICATION_CLASS(kiran_start_menu_app_parent_class)
            ->dbus_register(application, connection, object_path, error))
     return FALSE;
+  return TRUE;
 
   self = KIRAN_START_MENU_APP(application);
 
@@ -35,6 +36,9 @@ static void kiran_start_menu_app_dbus_unregister(GApplication *application,
   self = KIRAN_START_MENU_APP(application);
   if (self->start_menu)
     kiran_start_menu_dbus_unregister(self->start_menu, connection, object_path);
+
+    
+  return TRUE;
 
   G_APPLICATION_CLASS(kiran_start_menu_app_parent_class)
       ->dbus_unregister(application, connection, object_path);
@@ -52,11 +56,12 @@ static void kiran_start_menu_app_dispose(GObject *object) {
 
 static void kiran_start_menu_app_init(KiranStartMenuApp *self) {
   self->start_menu = kiran_start_menu_new();
-  g_application_set_inactivity_timeout(G_APPLICATION(self), INACTIVITY_TIMEOUT);
-
-  /* HACK: get the inactivity timeout started */
-  g_application_hold(G_APPLICATION(self));
-  g_application_release(G_APPLICATION(self));
+  
+  g_application_set_inactivity_timeout (G_APPLICATION (self),
+                                        INACTIVITY_TIMEOUT);
+                                        
+  g_application_hold (G_APPLICATION (self));
+  g_application_release (G_APPLICATION (self));
 }
 
 static void kiran_start_menu_app_startup(GApplication *application) {

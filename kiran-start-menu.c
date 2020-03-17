@@ -10,8 +10,7 @@ G_DEFINE_TYPE(KiranStartMenu, kiran_start_menu, G_TYPE_OBJECT)
 static gboolean handle_search_app(KiranStartMenuS *skeleton,
                                   GDBusMethodInvocation *invocation,
                                   char *keyword, KiranStartMenu *self) {
-  gchar **results = NULL;
-  kiran_start_menu_s_complete_search_app(skeleton, invocation, results);
+  kiran_start_menu_s_complete_search_app(skeleton, invocation, NULL);
   return TRUE;
 }
 
@@ -86,8 +85,10 @@ gboolean kiran_start_menu_dbus_register(KiranStartMenu *self,
 
   skeleton = G_DBUS_INTERFACE_SKELETON(self->skeleton);
 
-  return g_dbus_interface_skeleton_export(skeleton, connection, object_path,
-                                          error);
+  gboolean ret = g_dbus_interface_skeleton_export(skeleton, connection,
+                                                  object_path, error);
+
+  return ret;
 }
 
 void kiran_start_menu_dbus_unregister(KiranStartMenu *self,
@@ -107,7 +108,6 @@ static void kiran_start_menu_dispose(GObject *object) {
   self = KIRAN_START_MENU(object);
 
   g_clear_object(&self->skeleton);
-  // g_clear_pointer (&self->iter_table, g_hash_table_destroy);
 
   G_OBJECT_CLASS(kiran_start_menu_parent_class)->dispose(object);
 }
