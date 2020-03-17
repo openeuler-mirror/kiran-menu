@@ -1,0 +1,78 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+    <interface name="com.unikylin.StartMenuS">
+        <method name="SearchApp" >
+            <arg direction="in"  name="keyword" type="s"/>
+            <arg direction="out" name="desktop_files" type="as"/>
+        </method>
+
+        <method name="AddFavoriteApp">
+            <arg direction="in"  name="desktop_file" type="s"/>
+            <arg direction="out" name="success" type="b"/>
+        </method>
+        <method name="DelFavoriteApp">
+            <arg direction="in"  name="desktop_file" type="s"/>
+            <arg direction="out" name="success" type="b"/>
+        </method>
+
+        <method name="AddCategoricalApp">
+            <arg direction="in"  name="category" type="s"/>
+            <arg direction="in"  name="desktop_file" type="s"/>
+            <arg direction="out" name="success" type="b"/>
+        </method>
+        <method name="DelCategoricalApp">
+            <arg direction="in"  name="category" type="s"/>
+            <arg direction="in"  name="desktop_file" type="s"/>
+            <arg direction="out" name="success" type="b"/>
+        </method>
+        <method name="GetCategoricalApps">
+            <arg direction="in"  name="category" type="s"/>
+            <arg direction="out" name="desktop_files" type="as"/>
+        </method>
+
+        <property name="FrequentApps" type="as" access="read">
+            <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="true"/>
+        </property>
+        <property name="FavoriteApps" type="as" access="read">
+            <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="true"/>
+        </property>
+        <property name="NewApps" type="as" access="read">
+            <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="true"/>
+        </property>
+        <property name="AllApps" type="a(ss)" access="read">
+            <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="invalidates"/>
+        </property>
+        <signal name="AppChnaged">
+            <arg type="y"/>
+            <arg type="s"/>
+        </signal>
+    </interface>
+    <interface name="org.freedesktop.DBus.Properties">
+        <method name="Get">
+            <arg direction="in" type="s"/>
+            <arg direction="in" type="s"/>
+            <arg direction="out" type="v"/>
+        </method>
+        <method name="GetAll">
+            <arg direction="in" type="s"/>
+            <arg direction="out" type="a{sv}"/>
+        </method>
+        <method name="Set">
+            <arg direction="in" type="s"/>
+            <arg direction="in" type="s"/>
+            <arg direction="in" type="v"/>
+        </method>
+        <signal name="PropertiesChanged">
+            <arg type="s" name="interface_name"/>
+            <arg type="a{sv}" name="changed_properties"/>
+            <arg type="as" name="invalidated_properties"/>
+        </signal>
+    </interface>
+    <interface name="org.freedesktop.DBus.Introspectable">
+        <method name="Introspect">
+            <arg direction="out" type="s"/>
+        </method>
+    </interface>
+</node>
+
