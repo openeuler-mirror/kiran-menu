@@ -20,7 +20,6 @@ static gboolean kiran_start_menu_app_dbus_register(GApplication *application,
   if (!G_APPLICATION_CLASS(kiran_start_menu_app_parent_class)
            ->dbus_register(application, connection, object_path, error))
     return FALSE;
-  return TRUE;
 
   self = KIRAN_START_MENU_APP(application);
 
@@ -36,9 +35,6 @@ static void kiran_start_menu_app_dbus_unregister(GApplication *application,
   self = KIRAN_START_MENU_APP(application);
   if (self->start_menu)
     kiran_start_menu_dbus_unregister(self->start_menu, connection, object_path);
-
-    
-  return TRUE;
 
   G_APPLICATION_CLASS(kiran_start_menu_app_parent_class)
       ->dbus_unregister(application, connection, object_path);
