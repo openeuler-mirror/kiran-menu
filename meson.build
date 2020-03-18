@@ -11,6 +11,7 @@ start_menu_prefix = get_option('prefix')
 start_menu_libexecdir = join_paths(start_menu_prefix, get_option('libexecdir'))
 start_menu_datadir = join_paths(start_menu_prefix, get_option('datadir'))
 start_menu_localedir = join_paths(start_menu_prefix, get_option('localedir'))
+start_menu_schemadir = join_paths(start_menu_datadir, 'glib-2.0', 'schemas')
 
 
 service_conf = configuration_data()
@@ -44,6 +45,16 @@ sources += gnome.gdbus_codegen(
          namespace : 'Kiran'
 )
 
+schemaconf = configuration_data()
+schemaconf.set('GETTEXT_PACKAGE', meson.project_name())
+schema = configure_file(
+  input: 'com.unikylin.Kiran.StartMenu.gschema.xml.in',
+  output: 'com.unikylin.Kiran.StartMenu.gschema.xml',
+  configuration: schemaconf,
+  install_dir: start_menu_schemadir
+)
+
+
 top_inc = include_directories('.')
 
 gio_dep = dependency('gio-2.0')
@@ -69,3 +80,9 @@ executable(
               install : true,
           install_dir : start_menu_libexecdir
 )
+
+custom_target('compile-schemas',
+  input: schema,
+  output: 'gschemas.compiled',
+  command: [find_program('glib-compile-schemas'), meson.current_build_dir()],
+  build_by_default: true)

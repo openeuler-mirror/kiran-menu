@@ -9,7 +9,7 @@ struct _KiranStartMenuApp {
 
 G_DEFINE_TYPE(KiranStartMenuApp, kiran_start_menu_app, G_TYPE_APPLICATION);
 
-#define INACTIVITY_TIMEOUT 60 * 1000 /* One minute, in milliseconds */
+#define INACTIVITY_TIMEOUT 60 * 60 * 1000 /* One minute, in milliseconds */
 
 static gboolean kiran_start_menu_app_dbus_register(GApplication *application,
                                                    GDBusConnection *connection,
