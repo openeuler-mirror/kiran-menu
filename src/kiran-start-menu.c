@@ -21,7 +21,6 @@ static gboolean handle_search_app(KiranStartMenuS *skeleton,
     gchar *desktop_file;
     for (gsize i = 0; i < child_num; ++i) {
       g_variant_get_child(all_apps, i, "(ss)", &desktop_file, &catergory);
-      // g_print("entry: %s %s\n", desktop_file, keyword);
       gchar *p = g_strrstr(desktop_file, keyword);
       if (p) {
         g_ptr_array_add(hit_apps, desktop_file);

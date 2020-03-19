@@ -34,7 +34,7 @@
         <property name="FrequentApps" type="as" access="read">
             <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="true"/>
         </property>
-        <property name="FavoriteApps" type="as" access="read">
+        <property name="FavoriteApps" type="as" access="readwrite">
             <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="true"/>
         </property>
         <property name="NewApps" type="as" access="read">
