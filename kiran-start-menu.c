@@ -13,25 +13,25 @@ G_DEFINE_TYPE(KiranStartMenu, kiran_start_menu, G_TYPE_OBJECT)
 static gboolean handle_search_app(KiranStartMenuS *skeleton,
                                   GDBusMethodInvocation *invocation,
                                   char *keyword, KiranStartMenu *self) {
-
   GVariant *all_apps = kiran_start_menu_s_get_all_apps(skeleton);
-  gsize child_num = g_variant_n_children(all_apps);
-  gchar *catergory;
-  gchar *desktop_file;
-
   GPtrArray *hit_apps = g_ptr_array_new();
-
-  for (gsize i = 0; i < child_num; ++i)
-  {
-    g_variant_get_child(all_apps, i, "(ss)", &catergory, &desktop_file);
-    gchar *p = g_strrstr(desktop_file, keyword);
-    if (p)
-    {
-      g_ptr_array_add(hit_apps, desktop_file);
+  if (all_apps) {
+    gsize child_num = g_variant_n_children(all_apps);
+    gchar *catergory;
+    gchar *desktop_file;
+    for (gsize i = 0; i < child_num; ++i) {
+      g_variant_get_child(all_apps, i, "(ss)", &desktop_file, &catergory);
+      // g_print("entry: %s %s\n", desktop_file, keyword);
+      gchar *p = g_strrstr(desktop_file, keyword);
+      if (p) {
+        g_ptr_array_add(hit_apps, desktop_file);
+      }
     }
   }
+  g_ptr_array_add(hit_apps, NULL);
   gpointer *result = g_ptr_array_free(hit_apps, FALSE);
-  kiran_start_menu_s_complete_search_app(skeleton, invocation, (const gchar *const *)result);
+  kiran_start_menu_s_complete_search_app(skeleton, invocation,
+                                         (const gchar *const *)result);
   return TRUE;
 }
 
@@ -43,13 +43,13 @@ static gboolean handle_add_favorite_app(KiranStartMenuS *skeleton,
   if (!g_strv_contains(apps, desktop_file)) {
     GPtrArray *new_apps = g_ptr_array_new();
     GString *t_str;
-    for (guint i = 0; apps[i] != NULL; ++i)
-    {
+    for (guint i = 0; apps[i] != NULL; ++i) {
       t_str = g_string_new(apps[i]);
-      g_ptr_array_add(new_apps, g_string_free(t_str, FALSE));  
+      g_ptr_array_add(new_apps, g_string_free(t_str, FALSE));
     }
     t_str = g_string_new(desktop_file);
     g_ptr_array_add(new_apps, g_string_free(t_str, FALSE));
+    g_ptr_array_add(new_apps, NULL);
     const gchar *const *result =
         (const gchar *const *)g_ptr_array_free(new_apps, FALSE);
     kiran_start_menu_s_set_favorite_apps(skeleton, result);
@@ -62,6 +62,21 @@ static gboolean handle_del_favorite_app(KiranStartMenuS *skeleton,
                                         GDBusMethodInvocation *invocation,
                                         char *desktop_file,
                                         KiranStartMenu *self) {
+  const gchar *const *apps = kiran_start_menu_s_get_favorite_apps(skeleton);
+  if (g_strv_contains(apps, desktop_file)) {
+    GPtrArray *new_apps = g_ptr_array_new();
+    GString *t_str;
+    for (guint i = 0; apps[i] != NULL; ++i) {
+      if (!g_str_equal(apps[i], desktop_file)) {
+        t_str = g_string_new(apps[i]);
+        g_ptr_array_add(new_apps, g_string_free(t_str, FALSE));
+      }
+    }
+    g_ptr_array_add(new_apps, NULL);
+    const gchar *const *result =
+        (const gchar *const *)g_ptr_array_free(new_apps, FALSE);
+    kiran_start_menu_s_set_favorite_apps(skeleton, result);
+  }
   kiran_start_menu_s_complete_del_favorite_app(skeleton, invocation, TRUE);
   return TRUE;
 }
@@ -70,6 +85,36 @@ static gboolean handle_add_categorical_app(KiranStartMenuS *skeleton,
                                            GDBusMethodInvocation *invocation,
                                            char *category, char *desktop_file,
                                            KiranStartMenu *self) {
+  GVariant *all_apps = kiran_start_menu_s_get_all_apps(skeleton);
+  GVariantBuilder builder;
+  g_variant_builder_init(&builder, G_VARIANT_TYPE("a(ss)"));
+  gboolean match_app = FALSE;
+
+  if (all_apps) {
+    gsize child_num = g_variant_n_children(all_apps);
+    for (gsize i = 0; i < child_num; ++i) {
+      gchar *elem_category;
+      gchar *elem_desktop_file;
+      g_variant_get_child(all_apps, i, "(ss)", &elem_category,
+                          &elem_desktop_file);
+
+      if (g_str_equal(desktop_file, elem_desktop_file)) {
+        if (g_str_equal(category, elem_category)) {
+          match_app = TRUE;
+          break;
+        }
+      } else {
+        g_variant_builder_add(&builder, "(ss)", elem_desktop_file,
+                              elem_category);
+      }
+    }
+  }
+  if (match_app) {
+    g_variant_builder_unref(&builder);
+  } else {
+    g_variant_builder_add(&builder, "(ss)", desktop_file, category);
+    kiran_start_menu_s_set_all_apps(skeleton, g_variant_builder_end(&builder));
+  }
   kiran_start_menu_s_complete_add_categorical_app(skeleton, invocation, TRUE);
   return TRUE;
 }
@@ -78,6 +123,33 @@ static gboolean handle_del_categorical_app(KiranStartMenuS *skeleton,
                                            GDBusMethodInvocation *invocation,
                                            char *category, char *desktop_file,
                                            KiranStartMenu *self) {
+  GVariant *all_apps = kiran_start_menu_s_get_all_apps(skeleton);
+  GVariantBuilder builder;
+  g_variant_builder_init(&builder, G_VARIANT_TYPE("a(ss)"));
+  gsize child_num = g_variant_n_children(all_apps);
+
+  gboolean match_app = FALSE;
+  if (all_apps) {
+    for (gsize i = 0; i < child_num; ++i) {
+      gchar *elem_category;
+      gchar *elem_desktop_file;
+      g_variant_get_child(all_apps, i, "(ss)", &elem_desktop_file,
+                          &elem_category);
+      if (!match_app && g_str_equal(desktop_file, elem_desktop_file) &&
+          g_str_equal(category, elem_category)) {
+        match_app = TRUE;
+      } else {
+        g_variant_builder_add(&builder, "(ss)", elem_desktop_file,
+                              elem_category);
+      }
+    }
+  }
+  if (match_app) {
+    kiran_start_menu_s_set_all_apps(skeleton, g_variant_builder_end(&builder));
+  } else {
+    g_variant_builder_unref(&builder);
+  }
+
   kiran_start_menu_s_complete_del_categorical_app(skeleton, invocation, TRUE);
   return TRUE;
 }
@@ -87,20 +159,70 @@ static gboolean handle_get_categorical_apps(KiranStartMenuS *skeleton,
                                             char *category,
                                             char **desktop_files,
                                             KiranStartMenu *self) {
-  kiran_start_menu_s_complete_get_categorical_apps(skeleton, invocation, NULL);
+  GVariant *all_apps = kiran_start_menu_s_get_all_apps(skeleton);
+  GPtrArray *category_apps = g_ptr_array_new();
+
+  if (all_apps) {
+    gsize child_num = g_variant_n_children(all_apps);
+    gchar *elem_category;
+    gchar *elem_desktop_file;
+
+    for (gsize i = 0; i < child_num; ++i) {
+      g_variant_get_child(all_apps, i, "(ss)", &elem_desktop_file,
+                          &elem_category);
+      if (g_str_equal(category, elem_category)) {
+        g_ptr_array_add(category_apps, elem_desktop_file);
+      }
+    }
+  }
+  g_ptr_array_add(category_apps, NULL);
+  gpointer *result = g_ptr_array_free(category_apps, FALSE);
+  kiran_start_menu_s_complete_get_categorical_apps(
+      skeleton, invocation, (const gchar *const *)result);
   return TRUE;
 }
 
-gboolean all_apps_get_mapping(GValue *value, GVariant *variant,
-                              gpointer user_data) {
+static void all_apps_init(KiranStartMenuS *skeleton) {
+  GVariant *all_apps = kiran_start_menu_s_get_all_apps(skeleton);
+  GVariantDict dict;
+  g_variant_dict_init(&dict, NULL);
+
+  GVariantBuilder builder;
+  g_variant_builder_init(&builder, G_VARIANT_TYPE("a(ss)"));
+
+  if (all_apps) {
+    gchar *elem_desktop_file;
+    gchar *elem_category;
+    GVariantIter iter;
+    g_variant_iter_init(&iter, all_apps);
+    while (g_variant_iter_loop(&iter, "(ss)", &elem_desktop_file,
+                               &elem_category)) {
+      g_variant_builder_add(&builder, "(ss)", elem_desktop_file, elem_category);
+      g_variant_dict_insert(&dict, elem_desktop_file, "s", elem_category);
+    }
+  }
+
+  GList *installed_apps = g_app_info_get_all();
+  for (GList *l = installed_apps; l != NULL; l = l->next) {
+    GAppInfo *info = l->data;
+    const char *id = g_app_info_get_id(info);
+    if (!g_variant_dict_contains(&dict, id)) {
+      g_variant_builder_add(&builder, "(ss)", id, "Other");
+    }
+  }
+  kiran_start_menu_s_set_all_apps(skeleton, g_variant_builder_end(&builder));
+}
+
+static gboolean all_apps_get_mapping(GValue *value, GVariant *variant,
+                                     gpointer user_data) {
   g_value_set_variant(value, variant);
   return TRUE;
 }
 
-GVariant *all_apps_set_mapping(const GValue *value,
-                               const GVariantType *expected_type,
-                               gpointer user_data) {
-  return g_value_get_variant(value);
+static GVariant *all_apps_set_mapping(const GValue *value,
+                                      const GVariantType *expected_type,
+                                      gpointer user_data) {
+  return g_value_dup_variant(value);
 }
 
 static void kiran_start_menu_init(KiranStartMenu *self) {
@@ -138,6 +260,8 @@ static void kiran_start_menu_init(KiranStartMenu *self) {
                                "all-apps", G_SETTINGS_BIND_DEFAULT,
                                all_apps_get_mapping, all_apps_set_mapping, NULL,
                                NULL);
+
+  all_apps_init(self->skeleton);
 }
 
 gboolean kiran_start_menu_dbus_register(KiranStartMenu *self,

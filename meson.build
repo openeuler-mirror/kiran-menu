@@ -78,6 +78,7 @@ executable(
          dependencies : common_deps,
                c_args : cflags,
               install : true,
+              link_args: '-g',
           install_dir : start_menu_libexecdir
 )
 
