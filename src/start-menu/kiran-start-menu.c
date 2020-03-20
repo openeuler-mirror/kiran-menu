@@ -181,7 +181,9 @@ static gboolean handle_get_categorical_apps(KiranStartMenuS *skeleton,
   return TRUE;
 }
 
-static void all_apps_init(KiranStartMenuS *skeleton) {
+static void installed_app_change(GAppInfoMonitor *gappinfomonitor,
+                                 gpointer user_data) {
+  KiranStartMenuS *skeleton = KIRAN_START_MENU_S(user_data);
   GVariant *all_apps = kiran_start_menu_s_get_all_apps(skeleton);
   GVariantDict dict;
   g_variant_dict_init(&dict, NULL);
@@ -260,7 +262,9 @@ static void kiran_start_menu_init(KiranStartMenu *self) {
                                all_apps_get_mapping, all_apps_set_mapping, NULL,
                                NULL);
 
-  all_apps_init(self->skeleton);
+  GAppInfoMonitor *monitor = g_app_info_monitor_get();
+  g_signal_connect(monitor, "changed", G_CALLBACK(installed_app_change), self);
+  installed_app_change(monitor, self->skeleton);
 }
 
 gboolean kiran_start_menu_dbus_register(KiranStartMenu *self,
