@@ -1,18 +1,18 @@
-#include "kiran-start-menu.h"
+#include "kiran-start-menu-bus.h"
 
-struct _KiranStartMenu {
+struct _KiranStartMenuBus {
   GObject parent;
   KiranStartMenuS *skeleton;
   GSettings *settings;
 };
 
-G_DEFINE_TYPE(KiranStartMenu, kiran_start_menu, G_TYPE_OBJECT)
+G_DEFINE_TYPE(KiranStartMenuBus, kiran_start_menu_bus, G_TYPE_OBJECT)
 
 #define START_MENU_SCHEMA "com.unikylin.Kiran.StartMenu"
 
 static gboolean handle_search_app(KiranStartMenuS *skeleton,
                                   GDBusMethodInvocation *invocation,
-                                  char *keyword, KiranStartMenu *self) {
+                                  char *keyword, KiranStartMenuBus *self) {
   GVariant *all_apps = kiran_start_menu_s_get_all_apps(skeleton);
   GPtrArray *hit_apps = g_ptr_array_new();
   if (all_apps) {
@@ -37,7 +37,7 @@ static gboolean handle_search_app(KiranStartMenuS *skeleton,
 static gboolean handle_add_favorite_app(KiranStartMenuS *skeleton,
                                         GDBusMethodInvocation *invocation,
                                         char *desktop_file,
-                                        KiranStartMenu *self) {
+                                        KiranStartMenuBus *self) {
   const gchar *const *apps = kiran_start_menu_s_get_favorite_apps(skeleton);
   if (!g_strv_contains(apps, desktop_file)) {
     GPtrArray *new_apps = g_ptr_array_new();
@@ -60,7 +60,7 @@ static gboolean handle_add_favorite_app(KiranStartMenuS *skeleton,
 static gboolean handle_del_favorite_app(KiranStartMenuS *skeleton,
                                         GDBusMethodInvocation *invocation,
                                         char *desktop_file,
-                                        KiranStartMenu *self) {
+                                        KiranStartMenuBus *self) {
   const gchar *const *apps = kiran_start_menu_s_get_favorite_apps(skeleton);
   if (g_strv_contains(apps, desktop_file)) {
     GPtrArray *new_apps = g_ptr_array_new();
@@ -83,7 +83,7 @@ static gboolean handle_del_favorite_app(KiranStartMenuS *skeleton,
 static gboolean handle_add_categorical_app(KiranStartMenuS *skeleton,
                                            GDBusMethodInvocation *invocation,
                                            char *category, char *desktop_file,
-                                           KiranStartMenu *self) {
+                                           KiranStartMenuBus *self) {
   GVariant *all_apps = kiran_start_menu_s_get_all_apps(skeleton);
   GVariantBuilder builder;
   g_variant_builder_init(&builder, G_VARIANT_TYPE("a(ss)"));
@@ -121,7 +121,7 @@ static gboolean handle_add_categorical_app(KiranStartMenuS *skeleton,
 static gboolean handle_del_categorical_app(KiranStartMenuS *skeleton,
                                            GDBusMethodInvocation *invocation,
                                            char *category, char *desktop_file,
-                                           KiranStartMenu *self) {
+                                           KiranStartMenuBus *self) {
   GVariant *all_apps = kiran_start_menu_s_get_all_apps(skeleton);
   GVariantBuilder builder;
   g_variant_builder_init(&builder, G_VARIANT_TYPE("a(ss)"));
@@ -157,7 +157,7 @@ static gboolean handle_get_categorical_apps(KiranStartMenuS *skeleton,
                                             GDBusMethodInvocation *invocation,
                                             char *category,
                                             char **desktop_files,
-                                            KiranStartMenu *self) {
+                                            KiranStartMenuBus *self) {
   GVariant *all_apps = kiran_start_menu_s_get_all_apps(skeleton);
   GPtrArray *category_apps = g_ptr_array_new();
 
@@ -226,7 +226,7 @@ static GVariant *all_apps_set_mapping(const GValue *value,
   return g_value_dup_variant(value);
 }
 
-static void kiran_start_menu_init(KiranStartMenu *self) {
+static void kiran_start_menu_bus_init(KiranStartMenuBus *self) {
   self->skeleton = kiran_start_menu_s_skeleton_new();
 
   g_signal_connect(self->skeleton, "handle-search-app",
@@ -267,10 +267,10 @@ static void kiran_start_menu_init(KiranStartMenu *self) {
   installed_app_change(monitor, self->skeleton);
 }
 
-gboolean kiran_start_menu_dbus_register(KiranStartMenu *self,
-                                        GDBusConnection *connection,
-                                        const gchar *object_path,
-                                        GError **error) {
+gboolean kiran_start_menu_bus_dbus_register(KiranStartMenuBus *self,
+                                            GDBusConnection *connection,
+                                            const gchar *object_path,
+                                            GError **error) {
   GDBusInterfaceSkeleton *skeleton;
 
   skeleton = G_DBUS_INTERFACE_SKELETON(self->skeleton);
@@ -281,9 +281,9 @@ gboolean kiran_start_menu_dbus_register(KiranStartMenu *self,
   return ret;
 }
 
-void kiran_start_menu_dbus_unregister(KiranStartMenu *self,
-                                      GDBusConnection *connection,
-                                      const gchar *object_path) {
+void kiran_start_menu_bus_dbus_unregister(KiranStartMenuBus *self,
+                                          GDBusConnection *connection,
+                                          const gchar *object_path) {
   GDBusInterfaceSkeleton *skeleton;
 
   skeleton = G_DBUS_INTERFACE_SKELETON(self->skeleton);
@@ -292,22 +292,22 @@ void kiran_start_menu_dbus_unregister(KiranStartMenu *self,
     g_dbus_interface_skeleton_unexport_from_connection(skeleton, connection);
 }
 
-static void kiran_start_menu_dispose(GObject *object) {
-  KiranStartMenu *self;
+static void kiran_start_menu_bus_dispose(GObject *object) {
+  KiranStartMenuBus *self;
 
-  self = KIRAN_START_MENU(object);
+  self = KIRAN_START_MENU_BUS(object);
 
   g_clear_object(&self->skeleton);
 
-  G_OBJECT_CLASS(kiran_start_menu_parent_class)->dispose(object);
+  G_OBJECT_CLASS(kiran_start_menu_bus_parent_class)->dispose(object);
 }
 
-static void kiran_start_menu_class_init(KiranStartMenuClass *klass) {
+static void kiran_start_menu_bus_class_init(KiranStartMenuBusClass *klass) {
   GObjectClass *object_class = G_OBJECT_CLASS(klass);
 
-  object_class->dispose = kiran_start_menu_dispose;
+  object_class->dispose = kiran_start_menu_bus_dispose;
 }
 
-KiranStartMenu *kiran_start_menu_new(void) {
-  return g_object_new(KIRAN_TYPE_START_MENU, NULL);
+KiranStartMenuBus *kiran_start_menu_bus_new(void) {
+  return g_object_new(KIRAN_TYPE_START_MENU_BUS, NULL);
 }

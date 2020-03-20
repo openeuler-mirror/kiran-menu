@@ -1,10 +1,10 @@
 #include "kiran-start-menu-app.h"
 
-#include "kiran-start-menu.h"
+#include "kiran-start-menu-bus.h"
 
 struct _KiranStartMenuApp {
   GApplication parent;
-  KiranStartMenu *start_menu;
+  KiranStartMenuBus *start_menu;
 };
 
 G_DEFINE_TYPE(KiranStartMenuApp, kiran_start_menu_app, G_TYPE_APPLICATION);
@@ -23,8 +23,8 @@ static gboolean kiran_start_menu_app_dbus_register(GApplication *application,
 
   self = KIRAN_START_MENU_APP(application);
 
-  return kiran_start_menu_dbus_register(self->start_menu, connection,
-                                        object_path, error);
+  return kiran_start_menu_bus_dbus_register(self->start_menu, connection,
+                                            object_path, error);
 }
 
 static void kiran_start_menu_app_dbus_unregister(GApplication *application,
@@ -34,7 +34,8 @@ static void kiran_start_menu_app_dbus_unregister(GApplication *application,
 
   self = KIRAN_START_MENU_APP(application);
   if (self->start_menu)
-    kiran_start_menu_dbus_unregister(self->start_menu, connection, object_path);
+    kiran_start_menu_bus_dbus_unregister(self->start_menu, connection,
+                                         object_path);
 
   G_APPLICATION_CLASS(kiran_start_menu_app_parent_class)
       ->dbus_unregister(application, connection, object_path);
@@ -51,13 +52,12 @@ static void kiran_start_menu_app_dispose(GObject *object) {
 }
 
 static void kiran_start_menu_app_init(KiranStartMenuApp *self) {
-  self->start_menu = kiran_start_menu_new();
-  
-  g_application_set_inactivity_timeout (G_APPLICATION (self),
-                                        INACTIVITY_TIMEOUT);
-                                        
-  g_application_hold (G_APPLICATION (self));
-  g_application_release (G_APPLICATION (self));
+  self->start_menu = kiran_start_menu_bus_new();
+
+  g_application_set_inactivity_timeout(G_APPLICATION(self), INACTIVITY_TIMEOUT);
+
+  g_application_hold(G_APPLICATION(self));
+  g_application_release(G_APPLICATION(self));
 }
 
 static void kiran_start_menu_app_startup(GApplication *application) {

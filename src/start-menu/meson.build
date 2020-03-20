@@ -20,7 +20,7 @@ configure_file(
 
 sources = files(
   'kiran-start-menu-app.c',
-  'kiran-start-menu.c'
+  'kiran-start-menu-bus.c'
 )
 
 sources += gnome.gdbus_codegen(
