@@ -19,8 +19,13 @@ configure_file(
 #)
 
 sources = files(
+  'kiran-app-category.c',
+  'kiran-app-favorite.c',
+  'kiran-app-search.c',
+  'kiran-app-system.c',
+  'kiran-app-usage.c',
   'kiran-start-menu-app.c',
-  'kiran-start-menu-bus.c'
+  'kiran-skeleton.c',
 )
 
 sources += gnome.gdbus_codegen(
@@ -30,8 +35,9 @@ sources += gnome.gdbus_codegen(
          namespace : 'Kiran'
 )
 
-testa = join_paths(meson.build_root(), 'src', 'com.unikylin.Kiran.StartMenu.gschema.xml')
-message(testa)
+
+#testa = join_paths(meson.build_root(), 'src', 'com.unikylin.Kiran.StartMenu.gschema.xml')
+#message(testa)
 
 
 schemaconf = configuration_data()

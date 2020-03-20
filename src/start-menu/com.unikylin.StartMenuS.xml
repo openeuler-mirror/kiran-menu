@@ -16,23 +16,32 @@
             <arg direction="out" name="success" type="b"/>
         </method>
 
-        <method name="AddCategoricalApp">
+        <method name="AddCategoryApp">
             <arg direction="in"  name="category" type="s"/>
             <arg direction="in"  name="desktop_file" type="s"/>
             <arg direction="out" name="success" type="b"/>
         </method>
-        <method name="DelCategoricalApp">
+        <method name="DelCategoryApp">
             <arg direction="in"  name="category" type="s"/>
             <arg direction="in"  name="desktop_file" type="s"/>
             <arg direction="out" name="success" type="b"/>
         </method>
-        <method name="GetCategoricalApps">
+        <method name="GetCategoryApps">
             <arg direction="in"  name="category" type="s"/>
             <arg direction="out" name="desktop_files" type="as"/>
         </method>
 
-        <property name="FrequentApps" type="as" access="read">
-            <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="true"/>
+        <method name="GetNFrequentApps">
+            <arg direction="in"  name="top_n" type="i"/>
+            <arg direction="out" name="most_frequent_apps" type="as"/>
+        </method>
+
+        <method name="GetAllSortedApps" >
+            <arg direction="out" name="all_sorted_apps" type="as"/>
+        </method>
+
+        <property name="FrequentApps" type="a(suu)" access="read">
+            <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="invalidates"/>
         </property>
         <property name="FavoriteApps" type="as" access="readwrite">
             <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="true"/>
@@ -40,10 +49,10 @@
         <property name="NewApps" type="as" access="read">
             <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="true"/>
         </property>
-        <property name="AllApps" type="a(ss)" access="read">
+        <property name="CategoryApps" type="a(ss)" access="read">
             <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="invalidates"/>
         </property>
-        <signal name="AppChnaged">
+        <signal name="AppChanged">
             <arg type="y"/>
             <arg type="s"/>
         </signal>

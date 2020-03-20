@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
   <schema id="com.unikylin.Kiran.StartMenu" path="/com/unikylin/kiran/StartMenu/">
-    <key name="frequent-apps" type="as">
+    <key name="frequent-apps" type="a(suu)">
       <default>[]</default>
     </key>
     <key name="favorite-apps" type="as">
@@ -10,7 +10,7 @@
     <key name="new-apps" type="as">
       <default>[]</default>
     </key>
-    <key name="all-apps" type="a(ss)" >
+    <key name="category-apps" type="a(ss)" >
       <default>[]</default>
     </key>
   </schema>
