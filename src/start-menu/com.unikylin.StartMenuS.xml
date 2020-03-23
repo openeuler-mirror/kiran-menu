@@ -31,31 +31,32 @@
             <arg direction="out" name="desktop_files" type="as"/>
         </method>
 
+        <method name="FocusApp">
+            <arg direction="in"  name="desktop_file" type="s"/>
+        </method>
         <method name="GetNFrequentApps">
             <arg direction="in"  name="top_n" type="i"/>
             <arg direction="out" name="most_frequent_apps" type="as"/>
+        </method>
+
+        <method name="GetNNewApps" >
+            <arg direction="in"  name="top_n" type="i"/>
+            <arg direction="out" name="most_new_apps" type="as"/>
         </method>
 
         <method name="GetAllSortedApps" >
             <arg direction="out" name="all_sorted_apps" type="as"/>
         </method>
 
-        <property name="FrequentApps" type="a(suu)" access="read">
+        <property name="FrequentApps" type="a(sdi)" access="read">
             <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="invalidates"/>
         </property>
         <property name="FavoriteApps" type="as" access="readwrite">
             <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="true"/>
         </property>
-        <property name="NewApps" type="as" access="read">
-            <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="true"/>
-        </property>
         <property name="CategoryApps" type="a(ss)" access="read">
             <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="invalidates"/>
         </property>
-        <signal name="AppChanged">
-            <arg type="y"/>
-            <arg type="s"/>
-        </signal>
     </interface>
 </node>
 

@@ -96,8 +96,6 @@ static void kiran_start_menu_app_init(KiranStartMenuApp *self) {
                                frequent_apps_set_mapping, NULL, NULL);
   g_settings_bind(self->settings, "favorite-apps", sskeleton, "favorite-apps",
                   G_SETTINGS_BIND_DEFAULT);
-  g_settings_bind(self->settings, "new-apps", sskeleton, "new-apps",
-                  G_SETTINGS_BIND_DEFAULT);
   g_settings_bind_with_mapping(self->settings, "category-apps", sskeleton,
                                "category-apps", G_SETTINGS_BIND_DEFAULT,
                                category_apps_get_mapping, category_apps_set_mapping, NULL,
