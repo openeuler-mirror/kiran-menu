@@ -9,20 +9,37 @@ struct _KiranAppSystem {
   GObject parent;
   KiranStartMenuS *skeleton;
   GList *registered_apps;
-  GHashTable *id_to_gapp;
-  GHashTable *id_to_desktop_app;
+  GHashTable *id_to_app;
 };
 
 G_DEFINE_TYPE(KiranAppSystem, kiran_app_system, G_TYPE_OBJECT)
+
+KiranAppInfo *kiran_app_system_lookup_app(KiranAppSystem *self,
+                                          const char *app_id)
+{
+  KiranAppInfo *app;
+  app = g_hash_table_lookup (self->id_to_app, app_id);
+  if (app)
+    return app;
+
+  app = kiran_app_get_new (app_id);
+  g_hash_table_insert (self->id_to_app, g_strdup(app_id), app);
+  return app;
+}
 
 gint sort_by_app_name (gconstpointer a,
                      gconstpointer b,
                      gpointer user_data)
 {
   KiranAppSystem *self = KIRAN_APP_SYSTEM(user_data);
+  char *appa_id = *(gchar **)a;
+  char *appb_id = *(gchar **)b;
+  KiranAppInfo *appa = kiran_app_system_lookup_app(self, appa_id);
+  KiranAppInfo *appb = kiran_app_system_lookup_app(self, appb_id);
+
   GDesktopAppInfo *desktop_app_info_a, *desktop_app_info_b;
-  desktop_app_info_a = (GDesktopAppInfo *)g_hash_table_lookup(self->id_to_desktop_app, *(gchar **)a);
-  desktop_app_info_b = (GDesktopAppInfo *)g_hash_table_lookup(self->id_to_desktop_app, *(gchar **)b);
+  desktop_app_info_a = kiran_app_info_get_desktop_app(appa);
+  desktop_app_info_b = kiran_app_info_get_desktop_app(appb);
 
   g_autofree char *appa_name = (desktop_app_info_a != NULL) ? g_desktop_app_info_get_string(desktop_app_info_a, "Name") : NULL;
   g_autofree char *appb_name = (desktop_app_info_b != NULL) ? g_desktop_app_info_get_string(desktop_app_info_b, "Name") : NULL;
@@ -41,8 +58,6 @@ static gboolean handle_get_all_sorted_apps(KiranStartMenuS *skeleton,
       const char *id = g_app_info_get_id(info);
       gchar *dup_id = g_strdup(id);
       g_array_append_val(apps, dup_id);
-      //GDesktopAppInfo *desk = g_desktop_app_info_new(id);
-      //g_printf("name: %s %s %s\n", id, g_app_info_get_name(info), g_desktop_app_info_get_string(desk, "Name"));
     }
   }
   g_array_sort_with_data(apps, sort_by_app_name, self);
@@ -115,22 +130,16 @@ static void installed_app_change(GAppInfoMonitor *gappinfomonitor,
   if (self->registered_apps) {
     g_list_free_full(self->registered_apps, g_object_unref);
   }
-  if (self->id_to_gapp) {
-    g_hash_table_unref(self->id_to_gapp);
-  }
-  if (self->id_to_desktop_app)
-  {
-    g_hash_table_unref(self->id_to_desktop_app);
+  if (self->id_to_app) {
+    g_hash_table_unref(self->id_to_app);
   }
 
   self->registered_apps = g_app_info_get_all();
-  self->id_to_gapp = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
-  self->id_to_desktop_app = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_object_unref);
+  self->id_to_app = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_object_unref);
   for (GList *l = self->registered_apps; l != NULL; l = l->next) {
     GAppInfo *info = l->data;
     const char *id = g_app_info_get_id(info);
-    g_hash_table_insert(self->id_to_gapp, g_strdup(id), info);
-    g_hash_table_insert(self->id_to_desktop_app, g_strdup(id), g_desktop_app_info_new(id));
+    g_hash_table_insert(self->id_to_app, g_strdup(id), kiran_app_get_new(id));
   }
 }
 

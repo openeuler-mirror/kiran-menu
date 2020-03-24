@@ -26,6 +26,7 @@ sources = files(
   'kiran-app-usage.c',
   'kiran-start-menu-app.c',
   'kiran-skeleton.c',
+  'kiran-app-info.c'
 )
 
 sources += gnome.gdbus_codegen(
