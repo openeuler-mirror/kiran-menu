@@ -101,7 +101,7 @@ static void kiran_start_menu_app_init(KiranStartMenuApp *self) {
                                category_apps_get_mapping, category_apps_set_mapping, NULL,
                                NULL);
 
-  self->system = kiran_app_system_get_new();
+  self->system = kiran_app_system_get_default();
   self->usage = kiran_app_usage_get_new();
   self->search = kiran_app_search_get_new();
   self->favorite = kiran_app_favorite_get_new();

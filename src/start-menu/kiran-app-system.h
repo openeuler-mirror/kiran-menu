@@ -11,4 +11,6 @@ G_DECLARE_FINAL_TYPE(KiranAppSystem, kiran_app_system, KIRAN, APP_SYSTEM,
 KiranAppInfo *kiran_app_system_lookup_app(KiranAppSystem *self,
                                           const char *app_id);
 
-KiranAppSystem *kiran_app_system_get_new();
+GList *kiran_app_system_get_registered_apps(KiranAppSystem *self);
+
+KiranAppSystem *kiran_app_system_get_default (void);

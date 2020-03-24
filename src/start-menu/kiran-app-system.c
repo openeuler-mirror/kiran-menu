@@ -27,6 +27,11 @@ KiranAppInfo *kiran_app_system_lookup_app(KiranAppSystem *self,
   return app;
 }
 
+GList *kiran_app_system_get_registered_apps(KiranAppSystem *self)
+{
+  return self->registered_apps;
+}
+
 gint sort_by_app_name (gconstpointer a,
                      gconstpointer b,
                      gpointer user_data)
@@ -168,6 +173,9 @@ static void kiran_app_system_class_init(KiranAppSystemClass *klass) {
   object_class->dispose = kiran_app_system_dispose;
 }
 
-KiranAppSystem *kiran_app_system_get_new() {
-  return g_object_new(KIRAN_TYPE_APP_SYSTEM, NULL);
+KiranAppSystem *kiran_app_system_get_default() {
+  static KiranAppSystem *instance = NULL;
+  if (instance == NULL)
+    instance = g_object_new (KIRAN_TYPE_APP_SYSTEM, NULL);
+  return instance;
 }

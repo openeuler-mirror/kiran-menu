@@ -3,6 +3,7 @@
 #include <gio/gdesktopappinfo.h>
 
 #include "src/start-menu/kiran-skeleton.h"
+#include "src/start-menu/kiran-app-system.h"
 
 struct _KiranAppSearch {
   GObject parent;
@@ -13,26 +14,28 @@ G_DEFINE_TYPE(KiranAppSearch, kiran_app_search, G_TYPE_OBJECT)
 static gboolean handle_search_app(KiranStartMenuS *skeleton,
                                   GDBusMethodInvocation *invocation,
                                   char *keyword, KiranAppSearch *self) {
-  GList *registed_apps = g_app_info_get_all();
+  KiranAppSystem *system = kiran_app_system_get_default();
+  GList *registed_apps = kiran_app_system_get_registered_apps(system);
   GPtrArray *hit_apps = g_ptr_array_new();
 
   for (GList *l = registed_apps; l != NULL; l = l->next) {
     GAppInfo *info = l->data;
     const char *id = g_app_info_get_id(info);
 
+    KiranAppInfo *app = kiran_app_system_lookup_app(system, id);
+
     const char *category = NULL;
-    GDesktopAppInfo *app_info = g_desktop_app_info_new(id);
-    if (app_info) {
-      category = g_desktop_app_info_get_categories(app_info);
+    //const char *name = NULL;
+    GDesktopAppInfo *desktop_app = kiran_app_info_get_desktop_app(app);
+    if (desktop_app) {
+      category = g_desktop_app_info_get_categories(desktop_app);
+      //name = g_desktop_app_info_get_string(desktop_app, "Name")
     }
+
 
     if (g_strrstr(id, keyword) != NULL ||
         (category && g_strrstr(category, keyword))) {
       g_ptr_array_add(hit_apps, g_strdup(id));
-    }
-
-    if (app_info) {
-      g_object_unref(app_info);
     }
   }
 
