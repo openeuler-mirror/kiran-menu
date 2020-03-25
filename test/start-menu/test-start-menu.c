@@ -1,5 +1,6 @@
 #include <gio/gio.h>
 #include <glib.h>
+#include "src/start-menu/kiran-start-menu-generated.h"
 
 #define DBUS_NAME "com.unikylin.Kiran.StartMenu"
 #define DBUS_OBJECT_PATH "/com/unikylin/Kiran/StartMenu"
@@ -24,28 +25,21 @@
 
 static void test_favorite_apps(gconstpointer data) {
   GError *error = NULL;
-  GDBusProxy *proxy = G_DBUS_PROXY(data);
-  GVariant *result;
+  KiranStartMenuS *proxy = KIRAN_START_MENU_S(data);
 
   gchar *empty_strv[] = {NULL};
-  result = g_dbus_proxy_call_sync(
-      proxy, "org.freedesktop.DBus.Properties.Set",
-      g_variant_new("(ssv)", DBUS_OBJECT_MAIN_INTERFACE, "FavoriteApps",
-                    g_variant_new_strv((const gchar *const *)empty_strv, -1)),
-      G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
-  CHECK_PROXY_CALL_ERR(result, error);
+  kiran_start_menu_s_set_favorite_apps(proxy, g_variant_new_strv(empty_strv, 0));
 
   const int kAppMaxLen = 10;
   gchar app[kAppMaxLen];
+  gboolean call_success;
 
   for (guint i = 0; i < 10; ++i) {
     g_snprintf(app, kAppMaxLen, "apple%u", i);
-    result = g_dbus_proxy_call_sync(
-        proxy, "com.unikylin.StartMenuS.AddFavoriteApp",
-        g_variant_new("(s)", app), G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
-    CHECK_PROXY_CALL_ERR(result, error);
-    CHECK_RESULT_BOOL(result);
-    g_variant_unref(result);
+    gboolean call_output;
+    call_success = kiran_start_menu_s_call_add_favorite_app_sync(proxy, app, &call_output, NULL, &error);
+    CHECK_PROXY_CALL_ERR(call_success, error);
+    g_assert_true(call_output);
   }
 
   for (guint i = 0; i < 10; ++i) {
@@ -53,12 +47,9 @@ static void test_favorite_apps(gconstpointer data) {
       continue;
     }
     g_snprintf(app, kAppMaxLen, "apple%u", i);
-    result = g_dbus_proxy_call_sync(
-        proxy, "com.unikylin.StartMenuS.DelFavoriteApp",
-        g_variant_new("(s)", app), G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
-    CHECK_PROXY_CALL_ERR(result, error);
-    CHECK_RESULT_BOOL(result);
-    g_variant_unref(result);
+    call_success = kiran_start_menu_s_call_del_favorite_app_sync(proxy, app, &call_output, NULL, &error);
+    CHECK_PROXY_CALL_ERR(call_success, error);
+    g_assert_true(call_output);
   }
 
   result = g_dbus_proxy_call_sync(
@@ -82,10 +73,9 @@ static void test_favorite_apps(gconstpointer data) {
 
 int main(int argc, char **argv) {
   GError *error = NULL;
-  GDBusProxy *proxy = NULL;
-  proxy = g_dbus_proxy_new_for_bus_sync(
-      G_BUS_TYPE_SESSION, G_DBUS_PROXY_FLAGS_NONE, NULL, DBUS_NAME,
-      DBUS_OBJECT_PATH, DBUS_OBJECT_MAIN_INTERFACE, NULL, &error);
+  KiranStartMenuS *proxy = kiran_start_menu_s_proxy_new_for_bus_sync(
+      G_BUS_TYPE_SESSION, G_DBUS_PROXY_FLAGS_NONE, DBUS_NAME,
+      DBUS_OBJECT_PATH, NULL, &error);
 
   if (!proxy) {
     g_printerr("Error creating proxy: %s\n", error->message);
