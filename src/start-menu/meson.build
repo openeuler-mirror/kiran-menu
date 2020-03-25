@@ -50,8 +50,6 @@ schema = configure_file(
   install_dir: schemadir
 )
 
-cflags = '-DKIRANLOCALEDIR="@0@"'.format(localedir)
-
 sub_libs += static_library(
           'start-menu',
               sources : sources,
