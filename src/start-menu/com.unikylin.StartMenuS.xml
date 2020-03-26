@@ -62,7 +62,7 @@
         <property name="FavoriteApps" type="as" access="readwrite">
             <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="true"/>
         </property>
-        <property name="CategoryApps" type="a(sv)" access="read">
+        <property name="CategoryApps" type="a{sv}" access="read">
             <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="invalidates"/>
         </property>
     </interface>
