@@ -4,6 +4,9 @@ message('source_root:' + meson.source_root())
 
 sources = files(
   test_unit + '.c',
+  'test-app-category.c',
+  'test-app-favorite.c',
+  'test-app-frequent.c',
   meson.build_root() + '/src/start-menu/kiran-start-menu-generated.c'
 )
 

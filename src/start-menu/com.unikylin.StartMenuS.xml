@@ -46,6 +46,9 @@
             <arg direction="in"  name="top_n" type="i"/>
             <arg direction="out" name="most_frequent_apps" type="as"/>
         </method>
+        <method name="ResetFrequentApps">
+            <arg direction="out" name="success" type="b"/>
+        </method>
 
         <method name="GetNNewApps" >
             <arg direction="in"  name="top_n" type="i"/>
@@ -56,7 +59,7 @@
             <arg direction="out" name="all_sorted_apps" type="as"/>
         </method>
 
-        <property name="FrequentApps" type="a(sdi)" access="read">
+        <property name="FrequentApps" type="a{sv}" access="read">
             <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="invalidates"/>
         </property>
         <property name="FavoriteApps" type="as" access="readwrite">

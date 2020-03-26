@@ -15,27 +15,21 @@ struct _KiranAppSystem {
 G_DEFINE_TYPE(KiranAppSystem, kiran_app_system, G_TYPE_OBJECT)
 
 KiranAppInfo *kiran_app_system_lookup_app(KiranAppSystem *self,
-                                          const char *app_id)
-{
+                                          const char *app_id) {
   KiranAppInfo *app;
-  app = g_hash_table_lookup (self->id_to_app, app_id);
-  if (app)
-    return app;
+  app = g_hash_table_lookup(self->id_to_app, app_id);
+  if (app) return app;
 
-  app = kiran_app_get_new (app_id);
-  g_hash_table_insert (self->id_to_app, g_strdup(app_id), app);
+  app = kiran_app_get_new(app_id);
+  g_hash_table_insert(self->id_to_app, g_strdup(app_id), app);
   return app;
 }
 
-GList *kiran_app_system_get_registered_apps(KiranAppSystem *self)
-{
+GList *kiran_app_system_get_registered_apps(KiranAppSystem *self) {
   return self->registered_apps;
 }
 
-gint sort_by_app_name (gconstpointer a,
-                     gconstpointer b,
-                     gpointer user_data)
-{
+gint sort_by_app_name(gconstpointer a, gconstpointer b, gpointer user_data) {
   KiranAppSystem *self = KIRAN_APP_SYSTEM(user_data);
   char *appa_id = *(gchar **)a;
   char *appb_id = *(gchar **)b;
@@ -46,8 +40,14 @@ gint sort_by_app_name (gconstpointer a,
   desktop_app_info_a = kiran_app_info_get_desktop_app(appa);
   desktop_app_info_b = kiran_app_info_get_desktop_app(appb);
 
-  g_autofree char *appa_name = (desktop_app_info_a != NULL) ? g_desktop_app_info_get_string(desktop_app_info_a, "Name") : NULL;
-  g_autofree char *appb_name = (desktop_app_info_b != NULL) ? g_desktop_app_info_get_string(desktop_app_info_b, "Name") : NULL;
+  g_autofree char *appa_name =
+      (desktop_app_info_a != NULL)
+          ? g_desktop_app_info_get_string(desktop_app_info_a, "Name")
+          : NULL;
+  g_autofree char *appb_name =
+      (desktop_app_info_b != NULL)
+          ? g_desktop_app_info_get_string(desktop_app_info_b, "Name")
+          : NULL;
 
   return g_strcmp0(appa_name, appb_name);
 }
@@ -58,8 +58,7 @@ static gboolean handle_get_all_sorted_apps(KiranStartMenuS *skeleton,
   GArray *apps = g_array_new(FALSE, FALSE, sizeof(gchar *));
   for (GList *l = self->registered_apps; l != NULL; l = l->next) {
     GAppInfo *info = l->data;
-    if (g_app_info_should_show(info))
-    {
+    if (g_app_info_should_show(info)) {
       const char *id = g_app_info_get_id(info);
       gchar *dup_id = g_strdup(id);
       g_array_append_val(apps, dup_id);
@@ -70,8 +69,7 @@ static gboolean handle_get_all_sorted_apps(KiranStartMenuS *skeleton,
   g_array_append_val(apps, null);
 
   kiran_start_menu_s_complete_get_all_sorted_apps(
-      skeleton, invocation,
-      (const gchar *const *)g_array_free(apps, FALSE));
+      skeleton, invocation, (const gchar *const *)g_array_free(apps, FALSE));
   return TRUE;
 }
 
@@ -140,7 +138,8 @@ static void installed_app_change(GAppInfoMonitor *gappinfomonitor,
   }
 
   self->registered_apps = g_app_info_get_all();
-  self->id_to_app = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_object_unref);
+  self->id_to_app =
+      g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_object_unref);
   for (GList *l = self->registered_apps; l != NULL; l = l->next) {
     GAppInfo *info = l->data;
     const char *id = g_app_info_get_id(info);
@@ -175,7 +174,6 @@ static void kiran_app_system_class_init(KiranAppSystemClass *klass) {
 
 KiranAppSystem *kiran_app_system_get_default() {
   static KiranAppSystem *instance = NULL;
-  if (instance == NULL)
-    instance = g_object_new (KIRAN_TYPE_APP_SYSTEM, NULL);
+  if (instance == NULL) instance = g_object_new(KIRAN_TYPE_APP_SYSTEM, NULL);
   return instance;
 }
