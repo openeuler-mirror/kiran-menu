@@ -36,18 +36,9 @@ gint sort_by_app_name(gconstpointer a, gconstpointer b, gpointer user_data) {
   KiranAppInfo *appa = kiran_app_system_lookup_app(self, appa_id);
   KiranAppInfo *appb = kiran_app_system_lookup_app(self, appb_id);
 
-  GDesktopAppInfo *desktop_app_info_a, *desktop_app_info_b;
-  desktop_app_info_a = kiran_app_info_get_desktop_app(appa);
-  desktop_app_info_b = kiran_app_info_get_desktop_app(appb);
-
-  g_autofree char *appa_name =
-      (desktop_app_info_a != NULL)
-          ? g_desktop_app_info_get_string(desktop_app_info_a, "Name")
-          : NULL;
-  g_autofree char *appb_name =
-      (desktop_app_info_b != NULL)
-          ? g_desktop_app_info_get_string(desktop_app_info_b, "Name")
-          : NULL;
+  char *appa_name, *appb_name;
+  appa_name = kiran_app_info_get_name(appa);
+  appb_name = kiran_app_info_get_name(appb);
 
   return g_strcmp0(appa_name, appb_name);
 }
@@ -188,14 +179,7 @@ gchar **kiran_app_system_get_all_sorted_apps(KiranAppSystem *self) {
       g_array_append_val(apps, dup_id);
     }
   }
-  static gint64 sum_clock = 0;
-  static int i = 0;
-  gint64 start_clock = g_get_real_time();
   g_array_sort_with_data(apps, sort_by_app_name, self);
-  gint64 end_clock = g_get_real_time();
-  sum_clock += (end_clock - start_clock);
-  if (++i == 10000)
-    g_print("clock: %f\n", sum_clock * 1.0 / G_TIME_SPAN_SECOND);
 
   char *null = NULL;
   g_array_append_val(apps, null);

@@ -4,7 +4,7 @@ struct _KiranAppInfo {
   GObject parent;
   char *app_id;
   GDesktopAppInfo *desktop_app;
-  gint32 create_time;
+  gchar *name;
 };
 
 G_DEFINE_TYPE(KiranAppInfo, kiran_app_info, G_TYPE_OBJECT)
@@ -13,6 +13,7 @@ enum {
   PROP_NONE,
   PROP_APP_ID,
   PROP_DESKTOP_APP,
+  PROP_APP_NAME,
 };
 
 GDesktopAppInfo *kiran_app_info_get_desktop_app(KiranAppInfo *app) {
@@ -20,6 +21,13 @@ GDesktopAppInfo *kiran_app_info_get_desktop_app(KiranAppInfo *app) {
     return NULL;
   }
   return app->desktop_app;
+}
+
+gchar *kiran_app_info_get_name(KiranAppInfo *app) {
+  if (!app) {
+    return NULL;
+  }
+  return app->name;
 }
 
 static void kiran_app_info_init(KiranAppInfo *self) {}
@@ -35,6 +43,9 @@ static void kiran_app_info_get_property(GObject *gobject, guint prop_id,
     case PROP_DESKTOP_APP:
       if (app->desktop_app) g_value_set_object(value, app->desktop_app);
       break;
+    case PROP_APP_NAME:
+      g_value_set_string(value, app->name);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID(gobject, prop_id, pspec);
       break;
@@ -44,6 +55,7 @@ static void kiran_app_info_get_property(GObject *gobject, guint prop_id,
 static void kiran_app_set_app_info(KiranAppInfo *app, const char *app_id) {
   app->app_id = g_strdup(app_id);
   app->desktop_app = g_desktop_app_info_new(app_id);
+  app->name = g_desktop_app_info_get_string(app->desktop_app, "Name");
 }
 
 static void kiran_app_info_set_property(GObject *gobject, guint prop_id,
@@ -65,6 +77,7 @@ static void kiran_app_info_dispose(GObject *object) {
   KiranAppInfo *app = KIRAN_APP_INFO(object);
   g_clear_pointer(&app->app_id, g_free);
   g_clear_object(&app->desktop_app);
+  g_clear_pointer(&app->name, g_free);
 
   G_OBJECT_CLASS(kiran_app_info_parent_class)->dispose(object);
 }
@@ -86,6 +99,11 @@ static void kiran_app_info_class_init(KiranAppInfoClass *klass) {
       g_param_spec_object("desktop-app", "DesktopAppInfo",
                           "The DesktopAppInfo associated with this app",
                           G_TYPE_DESKTOP_APP_INFO,
+                          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property(
+      object_class, PROP_APP_NAME,
+      g_param_spec_string("name", "Name", "the desktop file name.", NULL,
                           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 }
 
