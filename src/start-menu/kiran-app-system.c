@@ -177,3 +177,27 @@ KiranAppSystem *kiran_app_system_get_default() {
   if (instance == NULL) instance = g_object_new(KIRAN_TYPE_APP_SYSTEM, NULL);
   return instance;
 }
+
+gchar **kiran_app_system_get_all_sorted_apps(KiranAppSystem *self) {
+  GArray *apps = g_array_new(FALSE, FALSE, sizeof(gchar *));
+  for (GList *l = self->registered_apps; l != NULL; l = l->next) {
+    GAppInfo *info = l->data;
+    if (g_app_info_should_show(info)) {
+      const char *id = g_app_info_get_id(info);
+      gchar *dup_id = g_strdup(id);
+      g_array_append_val(apps, dup_id);
+    }
+  }
+  static gint64 sum_clock = 0;
+  static int i = 0;
+  gint64 start_clock = g_get_real_time();
+  g_array_sort_with_data(apps, sort_by_app_name, self);
+  gint64 end_clock = g_get_real_time();
+  sum_clock += (end_clock - start_clock);
+  if (++i == 10000)
+    g_print("clock: %f\n", sum_clock * 1.0 / G_TIME_SPAN_SECOND);
+
+  char *null = NULL;
+  g_array_append_val(apps, null);
+  return (gchar **)g_array_free(apps, FALSE);
+}

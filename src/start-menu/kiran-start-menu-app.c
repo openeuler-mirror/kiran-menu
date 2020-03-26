@@ -8,7 +8,6 @@
 #include "src/start-menu/kiran-app-usage.h"
 #include "src/start-menu/kiran-skeleton.h"
 
-
 struct _KiranStartMenuApp {
   GApplication parent;
   KiranStartMenuS *skeleton;
@@ -73,14 +72,14 @@ static GVariant *frequent_apps_set_mapping(const GValue *value,
 }
 
 static gboolean category_apps_get_mapping(GValue *value, GVariant *variant,
-                                     gpointer user_data) {
+                                          gpointer user_data) {
   g_value_set_variant(value, variant);
   return TRUE;
 }
 
 static GVariant *category_apps_set_mapping(const GValue *value,
-                                      const GVariantType *expected_type,
-                                      gpointer user_data) {
+                                           const GVariantType *expected_type,
+                                           gpointer user_data) {
   return g_value_dup_variant(value);
 }
 
@@ -98,8 +97,8 @@ static void kiran_start_menu_app_init(KiranStartMenuApp *self) {
                   G_SETTINGS_BIND_DEFAULT);
   g_settings_bind_with_mapping(self->settings, "category-apps", sskeleton,
                                "category-apps", G_SETTINGS_BIND_DEFAULT,
-                               category_apps_get_mapping, category_apps_set_mapping, NULL,
-                               NULL);
+                               category_apps_get_mapping,
+                               category_apps_set_mapping, NULL, NULL);
 
   self->system = kiran_app_system_get_default();
   self->usage = kiran_app_usage_get_new();

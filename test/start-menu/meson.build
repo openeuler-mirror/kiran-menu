@@ -1,21 +1,37 @@
-test_unit = 'test-start-menu'
+test_unit_client = 'test-start-menu-client'
 
-message('source_root:' + meson.source_root())
-
-sources = files(
-  test_unit + '.c',
+client_sources = files(
+  test_unit_client + '.c',
   'test-app-category.c',
   'test-app-favorite.c',
-  'test-app-frequent.c',
-  meson.build_root() + '/src/start-menu/kiran-start-menu-generated.c'
+  'test-app-frequent.c'
 )
 
-exe = executable(
-           test_unit,
-             sources,
+client_exe = executable(
+           test_unit_client,
+             client_sources,
   include_directories : [ top_inc ],
          dependencies : common_deps,
-         c_args : cflags
+         c_args : cflags,
+         link_with : sub_libs
 )
 
-test(test_unit, exe)
+test(test_unit_client, client_exe)
+
+
+test_unit_server = 'test-start-menu-server'
+server_sources = files(
+  test_unit_server + '.c',
+  'test-all-apps.c',
+)
+
+server_exe = executable(
+           test_unit_server,
+             server_sources,
+  include_directories : [ top_inc ],
+         dependencies : common_deps,
+         c_args : cflags,
+         link_with : sub_libs
+)
+
+test(test_unit_server, server_exe)

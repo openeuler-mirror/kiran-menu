@@ -2,7 +2,6 @@ gnome = import('gnome')
 
 
 
-sub_libs = []
 subdir('start-menu')
 
 sources = files(

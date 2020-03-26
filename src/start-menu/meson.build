@@ -8,7 +8,7 @@ service = 'com.unikylin.Kiran.StartMenu.service'
 configure_file(
           input : service + '.in',
          output : service,
-        install : false,
+        install : true,
     install_dir : join_paths(datadir, 'dbus-1', 'services'),
   configuration : service_conf
 )
@@ -46,9 +46,12 @@ schemaconf.set('GETTEXT_PACKAGE', meson.project_name())
 schema = configure_file(
   input: 'com.unikylin.Kiran.StartMenu.gschema.xml.in',
   output: 'com.unikylin.Kiran.StartMenu.gschema.xml',
-  configuration: schemaconf,
-  install_dir: schemadir
+  install : true,
+  install_dir: schemadir,
+  configuration: schemaconf  
 )
+
+run_command(find_program('glib-compile-schemas'), schemadir)
 
 sub_libs += static_library(
           'start-menu',
@@ -57,9 +60,3 @@ sub_libs += static_library(
          dependencies : common_deps,
                c_args : cflags
 )
-
-custom_target('compile-schemas',
-  input: schema,
-  output: 'gschemas.compiled',
-  command: [find_program('glib-compile-schemas'), meson.current_build_dir()],
-  build_by_default: true)

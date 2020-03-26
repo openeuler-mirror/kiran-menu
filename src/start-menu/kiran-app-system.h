@@ -13,4 +13,6 @@ KiranAppInfo *kiran_app_system_lookup_app(KiranAppSystem *self,
 
 GList *kiran_app_system_get_registered_apps(KiranAppSystem *self);
 
-KiranAppSystem *kiran_app_system_get_default (void);
+gchar **kiran_app_system_get_all_sorted_apps(KiranAppSystem *self);
+
+KiranAppSystem *kiran_app_system_get_default(void);
