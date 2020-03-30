@@ -1,0 +1,12 @@
+[Applet Factory]
+Id=KiranMenuAppletFactory
+InProcess=false
+Location=@INSTALL_PREFIX@/lib/mate-panel/kiran-menu-applet
+Name=Kiran Start Menu Factory
+Description=Factory for Kiran Start Menu
+
+[KiranMenuApplet]
+Name=Kiran Start Menu
+Description=Kiran Start Menu
+Icon=user-info
+MateComponentId=OAFIID:KiranMenuApplet;
