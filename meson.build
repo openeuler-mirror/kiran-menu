@@ -1,7 +1,7 @@
 project('kiran-menu-applet', 'c', meson_version: '>=0.47')
 
 appletdep = dependency('libmatepanelapplet-4.0')
-executable('kiran-menu-applet', 'kiran-menu-applet.c',
+executable('kiran-menu-applet', ['kiran-menu-applet-button.c', 'applet.c'],
         dependencies: appletdep,
         install: true,
         install_dir: 'libexec/mate-panel/')
