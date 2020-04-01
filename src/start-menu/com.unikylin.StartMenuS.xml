@@ -4,43 +4,44 @@
     <interface name="com.unikylin.StartMenuS">
         <method name="SearchApp" >
             <arg direction="in"  name="keyword" type="s"/>
-            <arg direction="out" name="desktop_files" type="as"/>
+            <arg direction="out" name="desktop_ids" type="as"/>
         </method>
 
         <method name="AddFavoriteApp">
-            <arg direction="in"  name="desktop_file" type="s"/>
+            <arg direction="in"  name="desktop_id" type="s"/>
             <arg direction="out" name="success" type="b"/>
         </method>
         <method name="DelFavoriteApp">
-            <arg direction="in"  name="desktop_file" type="s"/>
+            <arg direction="in"  name="desktop_id" type="s"/>
             <arg direction="out" name="success" type="b"/>
         </method>
 
-         <method name="AddCategory">
-            <arg direction="in"  name="category" type="s"/>
-            <arg direction="out" name="success" type="b"/>
-        </method>
-        <method name="DelCategory">
-            <arg direction="in"  name="category" type="s"/>
-            <arg direction="out" name="success" type="b"/>
-        </method>
         <method name="AddCategoryApp">
             <arg direction="in"  name="category" type="s"/>
-            <arg direction="in"  name="desktop_file" type="s"/>
+            <arg direction="in"  name="desktop_id" type="s"/>
             <arg direction="out" name="success" type="b"/>
         </method>
         <method name="DelCategoryApp">
             <arg direction="in"  name="category" type="s"/>
-            <arg direction="in"  name="desktop_file" type="s"/>
+            <arg direction="in"  name="desktop_id" type="s"/>
+            <arg direction="out" name="success" type="b"/>
+        </method>
+        <method name="MoveCategoryApp">
+            <arg direction="in"  name="src_category" type="s"/>
+            <arg direction="in"  name="dst_category" type="s"/>
+            <arg direction="in"  name="desktop_id" type="s"/>
             <arg direction="out" name="success" type="b"/>
         </method>
         <method name="GetCategoryApps">
             <arg direction="in"  name="category" type="s"/>
-            <arg direction="out" name="desktop_files" type="as"/>
+            <arg direction="out" name="desktop_ids" type="as"/>
+        </method>
+        <method name="GetAllCategoryApps">
+            <arg direction="out" name="category_apps" type="a{sv}"/>
         </method>
 
         <method name="FocusApp">
-            <arg direction="in"  name="desktop_file" type="s"/>
+            <arg direction="in"  name="desktop_id" type="s"/>
         </method>
         <method name="GetNFrequentApps">
             <arg direction="in"  name="top_n" type="i"/>
@@ -64,9 +65,6 @@
         </property>
         <property name="FavoriteApps" type="as" access="readwrite">
             <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="true"/>
-        </property>
-        <property name="CategoryApps" type="a{sv}" access="read">
-            <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="invalidates"/>
         </property>
     </interface>
 </node>

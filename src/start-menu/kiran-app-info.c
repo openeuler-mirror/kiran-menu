@@ -17,17 +17,24 @@ enum {
 };
 
 GDesktopAppInfo *kiran_app_info_get_desktop_app(KiranAppInfo *app) {
-  if (!app) {
-    return NULL;
-  }
+  g_return_val_if_fail(app != NULL, NULL);
   return app->desktop_app;
 }
 
-gchar *kiran_app_info_get_name(KiranAppInfo *app) {
-  if (!app) {
-    return NULL;
-  }
+char *kiran_app_info_get_name(KiranAppInfo *app) {
+  g_return_val_if_fail(app != NULL, NULL);
   return app->name;
+}
+
+char *kiran_app_info_get_desktop_id(KiranAppInfo *app) {
+  g_return_val_if_fail(app != NULL, NULL);
+  return app->app_id;
+}
+
+const char *kiran_app_info_get_categories(KiranAppInfo *app) {
+  g_return_val_if_fail(app != NULL, NULL);
+  g_return_val_if_fail(app->desktop_app != NULL, NULL);
+  return g_desktop_app_info_get_categories(app->desktop_app);
 }
 
 static void kiran_app_info_init(KiranAppInfo *self) {}

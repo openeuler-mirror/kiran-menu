@@ -14,6 +14,16 @@ struct _KiranAppSystem {
 
 G_DEFINE_TYPE(KiranAppSystem, kiran_app_system, G_TYPE_OBJECT)
 
+void kiran_app_system_iter_init(KiranAppSystemIter *iter) {
+  KiranAppSystem *self = kiran_app_system_get_default();
+  g_hash_table_iter_init(&(iter->iter), self->id_to_app);
+}
+
+gboolean kiran_app_system_iter_next(KiranAppSystemIter *iter, gpointer *key,
+                                    gpointer *value) {
+  return g_hash_table_iter_next(&(iter->iter), key, value);
+}
+
 KiranAppInfo *kiran_app_system_lookup_app(KiranAppSystem *self,
                                           const char *app_id) {
   KiranAppInfo *app;

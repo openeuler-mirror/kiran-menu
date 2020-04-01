@@ -7,8 +7,5 @@
     <key name="favorite-apps" type="as">
       <default>[]</default>
     </key>
-    <key name="category-apps" type="a{sv}" >
-      <default>[]</default>
-    </key>
   </schema>
 </schemalist>

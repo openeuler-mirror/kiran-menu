@@ -1,5 +1,5 @@
 project(
-  'kiran-control-center', 'c',
+  'kiran-menu-backend', 'c',
         version : '3.3.0',
   meson_version : '>= 0.50.0'
 )
