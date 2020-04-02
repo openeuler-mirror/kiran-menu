@@ -59,11 +59,9 @@ static gboolean handle_get_all_sorted_apps(KiranStartMenuS *skeleton,
   GArray *apps = g_array_new(FALSE, FALSE, sizeof(gchar *));
   for (GList *l = self->registered_apps; l != NULL; l = l->next) {
     GAppInfo *info = l->data;
-    if (g_app_info_should_show(info)) {
-      const char *id = g_app_info_get_id(info);
-      gchar *dup_id = g_strdup(id);
-      g_array_append_val(apps, dup_id);
-    }
+    const char *id = g_app_info_get_id(info);
+    gchar *dup_id = g_strdup(id);
+    g_array_append_val(apps, dup_id);
   }
   g_array_sort_with_data(apps, sort_by_app_name, self);
   char *null = NULL;

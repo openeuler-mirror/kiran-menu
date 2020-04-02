@@ -87,6 +87,9 @@ G_DEFINE_TYPE(KiranAppCategory, kiran_app_category, G_TYPE_OBJECT)
 
 static gboolean kiran_app_category_insert(KiranAppCategory *self,
                                           char *category, char *desktop_id) {
+  g_return_val_if_fail(category != NULL, FALSE);
+  g_return_val_if_fail(desktop_id != NULL, FALSE);
+
   CategoryInfo *category_info = g_hash_table_lookup(self->categorys, category);
   if (category_info == NULL) {
     category_info = category_info_new();
@@ -135,7 +138,9 @@ void kiran_app_category_load(KiranAppCategory *self) {
     gchar **strv = g_strsplit(categories, ";", -1);
     gint i = 0;
     for (; strv[i] != NULL; ++i) {
-      kiran_app_category_insert(self, strv[i], app_id);
+      if (strv[i][0] != '\0') {
+        kiran_app_category_insert(self, strv[i], app_id);
+      }
     }
     g_strfreev(strv);
   }
@@ -148,6 +153,11 @@ static gboolean handle_add_category_app(KiranStartMenuS *skeleton,
   gboolean existing = kiran_app_category_contain(self, category, desktop_id);
   if (!existing) {
     kiran_app_category_insert(self, category, desktop_id);
+    KiranAppInfo *app_info =
+        kiran_app_system_lookup_app(self->system, desktop_id);
+    if (app_info) {
+      kiran_app_info_add_category(app_info, category);
+    }
   }
 
   kiran_start_menu_s_complete_add_category_app(skeleton, invocation, TRUE);
@@ -161,6 +171,11 @@ static gboolean handle_del_category_app(KiranStartMenuS *skeleton,
   gboolean existing = kiran_app_category_contain(self, category, desktop_id);
   if (existing) {
     kiran_app_category_del(self, category, desktop_id);
+    KiranAppInfo *app_info =
+        kiran_app_system_lookup_app(self->system, desktop_id);
+    if (app_info) {
+      kiran_app_info_del_category(app_info, category);
+    }
   }
   kiran_start_menu_s_complete_del_category_app(skeleton, invocation, TRUE);
   return TRUE;
@@ -182,6 +197,21 @@ static gboolean handle_get_category_apps(KiranStartMenuS *skeleton,
 static gboolean handle_get_all_category_apps(KiranStartMenuS *skeleton,
                                              GDBusMethodInvocation *invocation,
                                              KiranAppCategory *self) {
+  GVariantBuilder builder;
+  g_variant_builder_init(&builder, G_VARIANT_TYPE("a{sv}"));
+  GHashTableIter iter;
+  char *key;
+  CategoryInfo *value;
+
+  g_hash_table_iter_init(&iter, self->categorys);
+  while (g_hash_table_iter_next(&iter, (gpointer *)&key, (gpointer *)&value)) {
+    g_auto(GStrv) apps = category_info_get_desktop_ids(value);
+    GVariant *v_apps = g_variant_new_strv((const gchar *const *)apps, -1);
+    g_variant_builder_add(&builder, "{sv}", key, v_apps);
+  }
+
+  kiran_start_menu_s_complete_get_all_category_apps(
+      skeleton, invocation, g_variant_builder_end(&builder));
   return TRUE;
 }
 
