@@ -12,6 +12,4 @@ G_DECLARE_FINAL_TYPE(KiranAppCategory, kiran_app_category, KIRAN, APP_CATEGORY,
 
 KiranAppCategory *kiran_app_category_get_new(KiranAppSystem *app_system);
 
-void kiran_app_category_load(KiranAppCategory *self);
-
 G_END_DECLS

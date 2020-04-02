@@ -13,6 +13,10 @@ struct _KiranAppSystem {
 
 G_DEFINE_TYPE(KiranAppSystem, kiran_app_system, G_TYPE_OBJECT)
 
+enum { INSTALLED_CHANGED, LAST_SIGNAL };
+
+static guint signals[LAST_SIGNAL] = {0};
+
 GList *kiran_app_system_get_apps(KiranAppSystem *self) {
   GList *apps = NULL;
   GHashTableIter iter;
@@ -146,6 +150,7 @@ static void installed_app_change(GAppInfoMonitor *gappinfomonitor,
     }
   }
   g_list_free_full(registered_apps, g_object_unref);
+  g_signal_emit(self, signals[INSTALLED_CHANGED], 0, NULL);
 }
 
 static void kiran_app_system_init(KiranAppSystem *self) {
@@ -171,6 +176,10 @@ static void kiran_app_system_dispose(GObject *object) {
 static void kiran_app_system_class_init(KiranAppSystemClass *klass) {
   GObjectClass *object_class = G_OBJECT_CLASS(klass);
   object_class->dispose = kiran_app_system_dispose;
+
+  signals[INSTALLED_CHANGED] =
+      g_signal_new("installed-changed", KIRAN_TYPE_APP_SYSTEM,
+                   G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 }
 
 KiranAppSystem *kiran_app_system_get_new() {

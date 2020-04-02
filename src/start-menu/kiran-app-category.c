@@ -125,10 +125,16 @@ static gboolean kiran_app_category_contain(KiranAppCategory *self,
   }
   KiranAppInfo *app_info =
       kiran_app_system_lookup_app(self->app_system, desktop_id);
+  // g_print("contain id: %s app: %d\n", desktop_id, app_info);
   return category_info_contain_app(category_info, app_info);
 }
 
 void kiran_app_category_load(KiranAppCategory *self) {
+  if (self->categorys) {
+    g_hash_table_destroy(self->categorys);
+  }
+  self->categorys = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
+                                          (GDestroyNotify)category_info_unref);
   GList *apps = kiran_app_system_get_apps(self->app_system);
   for (GList *l = apps; l != NULL; l = l->next) {
     KiranAppInfo *app_info = l->data;
@@ -157,6 +163,7 @@ static gboolean handle_add_category_app(KiranStartMenuS *skeleton,
   if (!existing) {
     KiranAppInfo *app_info =
         kiran_app_system_lookup_app(self->app_system, desktop_id);
+    // g_print("add id: %s app: %u\n", desktop_id, app_info);
     if (app_info && kiran_app_info_add_category(app_info, category)) {
       kiran_app_category_insert(self, category, desktop_id);
       add_success = TRUE;
@@ -178,6 +185,7 @@ static gboolean handle_del_category_app(KiranStartMenuS *skeleton,
     if (kiran_app_category_del(self, category, desktop_id)) {
       KiranAppInfo *app_info =
           kiran_app_system_lookup_app(self->app_system, desktop_id);
+      // g_print("del id: %s app: %u\n", desktop_id, app_info);
       if (app_info && kiran_app_info_del_category(app_info, category)) {
         del_success = TRUE;
       }
@@ -225,9 +233,6 @@ static gboolean handle_get_all_category_apps(KiranStartMenuS *skeleton,
 static void kiran_app_category_init(KiranAppCategory *self) {}
 
 static void _kiran_app_category_init(KiranAppCategory *self) {
-  self->categorys = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
-                                          (GDestroyNotify)category_info_unref);
-
   KiranStartMenuS *skeleton = kiran_start_menu_s_get_default();
 
   g_signal_connect(skeleton, "handle-add-category-app",
@@ -241,6 +246,9 @@ static void _kiran_app_category_init(KiranAppCategory *self) {
 
   g_signal_connect(skeleton, "handle-get-all-category-apps",
                    G_CALLBACK(handle_get_all_category_apps), self);
+
+  g_signal_connect(self->app_system, "installed-changed",
+                   G_CALLBACK(kiran_app_category_load), self);
 
   kiran_app_category_load(self);
 }
