@@ -9,19 +9,11 @@
 G_DECLARE_FINAL_TYPE(KiranAppSystem, kiran_app_system, KIRAN, APP_SYSTEM,
                      GObject)
 
-typedef struct {
-  GHashTableIter iter;
-} KiranAppSystemIter;
-
-void kiran_app_system_iter_init(KiranAppSystemIter *iter);
-gboolean kiran_app_system_iter_next(KiranAppSystemIter *iter, gpointer *key,
-                                    gpointer *value);
+GList *kiran_app_system_get_apps(KiranAppSystem *self);
 
 KiranAppInfo *kiran_app_system_lookup_app(KiranAppSystem *self,
                                           const char *app_id);
 
-GList *kiran_app_system_get_registered_apps(KiranAppSystem *self);
-
 gchar **kiran_app_system_get_all_sorted_apps(KiranAppSystem *self);
 
-KiranAppSystem *kiran_app_system_get_default(void);
+KiranAppSystem *kiran_app_system_get_new(void);

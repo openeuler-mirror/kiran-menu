@@ -103,6 +103,17 @@ gboolean kiran_app_info_del_category(KiranAppInfo *app, const char *category) {
 
 static void kiran_app_info_init(KiranAppInfo *self) {}
 
+GObject *kiran_app_info_constructor(
+    GType type, guint n_construct_properties,
+    GObjectConstructParam *construct_properties) {
+  GObject *object;
+
+  object =
+      G_OBJECT_CLASS(kiran_app_info_parent_class)
+          ->constructor(type, n_construct_properties, construct_properties);
+  return object;
+}
+
 static void kiran_app_info_get_property(GObject *gobject, guint prop_id,
                                         GValue *value, GParamSpec *pspec) {
   KiranAppInfo *app = KIRAN_APP_INFO(gobject);
@@ -155,6 +166,7 @@ static void kiran_app_info_dispose(GObject *object) {
 
 static void kiran_app_info_class_init(KiranAppInfoClass *klass) {
   GObjectClass *object_class = G_OBJECT_CLASS(klass);
+  object_class->constructor = kiran_app_info_constructor;
   object_class->get_property = kiran_app_info_get_property;
   object_class->set_property = kiran_app_info_set_property;
   object_class->dispose = kiran_app_info_dispose;

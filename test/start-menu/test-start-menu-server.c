@@ -8,10 +8,11 @@ int main(int argc, char **argv) {
   GApplication *app = G_APPLICATION(kiran_start_menu_app_get());
   g_application_register(app, 0, NULL);
 
-  KiranStartMenuS *skeleton = kiran_start_menu_s_get_default();
+  KiranAppSystem *app_system =
+      kiran_start_menu_get_app_system(kiran_start_menu_app_get());
 
   g_test_init(&argc, &argv, NULL);
-  g_test_add_data_func("/test-start-menu/test-all-apps", skeleton,
+  g_test_add_data_func("/test-start-menu/test-all-apps", app_system,
                        test_all_apps);
 
   return g_test_run();

@@ -13,6 +13,7 @@ GDesktopAppInfo *kiran_app_info_get_desktop_app(KiranAppInfo *app);
 char *kiran_app_info_get_name(KiranAppInfo *app);
 char *kiran_app_info_get_desktop_id(KiranAppInfo *app);
 const char *kiran_app_info_get_categories(KiranAppInfo *app);
+
 gboolean kiran_app_info_add_category(KiranAppInfo *app, const char *category);
 gboolean kiran_app_info_del_category(KiranAppInfo *app, const char *category);
 

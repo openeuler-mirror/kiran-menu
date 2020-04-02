@@ -1,35 +1,19 @@
 #include "test/start-menu/test-start-menu.h"
 
-#define ADD_CATEGORY_SYNC(category, check_ret)                \
-  {                                                           \
-    call_success = kiran_start_menu_s_call_add_category_sync( \
-        proxy, category, &out_b1, NULL, &error);              \
-    CHECK_PROXY_CALL_ERR(call_success, error);                \
-    g_assert_true(!check_ret || out_b1);                      \
-  }
-
-#define DEL_CATEGORY_SYNC(category, check_ret)                \
-  {                                                           \
-    call_success = kiran_start_menu_s_call_del_category_sync( \
-        proxy, category, &out_b1, NULL, &error);              \
-    CHECK_PROXY_CALL_ERR(call_success, error);                \
-    g_assert_true(!check_ret || out_b1);                      \
-  }
-
-#define ADD_CATEGORY_APP_SYNC(category, desktop_file)             \
+#define ADD_CATEGORY_APP_SYNC(category, desktop_file, check_ret)  \
   {                                                               \
     call_success = kiran_start_menu_s_call_add_category_app_sync( \
         proxy, category, desktop_file, &out_b1, NULL, &error);    \
     CHECK_PROXY_CALL_ERR(call_success, error);                    \
-    g_assert_true(out_b1);                                        \
+    g_assert_true(out_b1 == check_ret);                           \
   }
 
-#define DEL_CATEGORY_APP_SYNC(category, desktop_file)             \
+#define DEL_CATEGORY_APP_SYNC(category, desktop_file, check_ret)  \
   {                                                               \
     call_success = kiran_start_menu_s_call_del_category_app_sync( \
         proxy, category, desktop_file, &out_b1, NULL, &error);    \
     CHECK_PROXY_CALL_ERR(call_success, error);                    \
-    g_assert_true(out_b1);                                        \
+    g_assert_true(out_b1 == check_ret);                           \
   }
 
 void test_category_apps(gconstpointer data) {
@@ -38,17 +22,39 @@ void test_category_apps(gconstpointer data) {
   gboolean call_success;
   gboolean out_b1;
 
-  ADD_CATEGORY_APP_SYNC("category_test1", "app1");
-  ADD_CATEGORY_APP_SYNC("category_test1", "app2");
-  ADD_CATEGORY_APP_SYNC("category_test1", "app3");
-  DEL_CATEGORY_APP_SYNC("category_test1", "app2");
+  ADD_CATEGORY_APP_SYNC("category_test1", "app1", FALSE);
+  DEL_CATEGORY_APP_SYNC("category_test1", "app2", FALSE);
 
-  gchar **out_apps;
-  call_success = kiran_start_menu_s_call_get_category_apps_sync(
-      proxy, "category_test1", &out_apps, NULL, &error);
+  gchar **sorted_apps;
+  call_success = kiran_start_menu_s_call_get_all_sorted_apps_sync(
+      proxy, &sorted_apps, NULL, &error);
   CHECK_PROXY_CALL_ERR(call_success, error);
-  gsize apps_len = g_strv_length(out_apps);
-  g_assert_true(apps_len == 2);
-  g_assert_cmpstr(out_apps[0], ==, "app1");
-  g_assert_cmpstr(out_apps[1], ==, "app3");
+
+  if (g_strv_length(sorted_apps) > 0) {
+    g_print("s: %s\n", sorted_apps[0]);
+    ADD_CATEGORY_APP_SYNC("category_test1", sorted_apps[0], TRUE);
+  }
+
+  gchar **category_apps = NULL;
+  call_success = kiran_start_menu_s_call_get_category_apps_sync(
+      proxy, "category_test1", &category_apps, NULL, &error);
+  CHECK_PROXY_CALL_ERR(call_success, error);
+
+  gboolean exist_first_sort_app = FALSE;
+  for (gint i = 0; category_apps[i] != NULL; ++i) {
+    if (g_strcmp0(category_apps[i], sorted_apps[0]) == 0) {
+      exist_first_sort_app = TRUE;
+    }
+  }
+  g_assert_true(exist_first_sort_app);
+
+  g_print("s %s\n", sorted_apps[0]);
+
+  DEL_CATEGORY_APP_SYNC("category_test1", sorted_apps[0], TRUE);
+  DEL_CATEGORY_APP_SYNC("category_test1", sorted_apps[0], FALSE);
+
+  GVariant *all_category_apps;
+  call_success = kiran_start_menu_s_call_get_all_category_apps_sync(
+      proxy, &all_category_apps, NULL, &error);
+  CHECK_PROXY_CALL_ERR(call_success, error);
 }

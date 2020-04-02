@@ -5,7 +5,6 @@
 #include "src/start-menu/kiran-app-category.h"
 #include "src/start-menu/kiran-app-favorite.h"
 #include "src/start-menu/kiran-app-search.h"
-#include "src/start-menu/kiran-app-system.h"
 #include "src/start-menu/kiran-app-usage.h"
 #include "src/start-menu/kiran-skeleton.h"
 
@@ -85,11 +84,11 @@ static void kiran_start_menu_app_init(KiranStartMenuApp *self) {
   g_settings_bind(self->settings, "favorite-apps", sskeleton, "favorite-apps",
                   G_SETTINGS_BIND_DEFAULT);
 
-  self->system = kiran_app_system_get_default();
+  self->system = kiran_app_system_get_new();
   self->usage = kiran_app_usage_get_new();
-  self->search = kiran_app_search_get_new();
   self->favorite = kiran_app_favorite_get_new();
-  self->category = kiran_app_category_get_new();
+  self->search = kiran_app_search_get_new(self->system);
+  self->category = kiran_app_category_get_new(self->system);
 
   g_application_set_inactivity_timeout(G_APPLICATION(self), INACTIVITY_TIMEOUT);
   g_application_hold(G_APPLICATION(self));
@@ -120,4 +119,8 @@ KiranStartMenuApp *kiran_start_menu_app_get() {
                            G_APPLICATION_IS_SERVICE, NULL);
 
   return singleton;
+}
+
+KiranAppSystem *kiran_start_menu_get_app_system(KiranStartMenuApp *self) {
+  return self->system;
 }

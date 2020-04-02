@@ -1,13 +1,25 @@
 #include "src/start-menu/kiran-app-category.h"
 
 #include "src/start-menu/kiran-app-info.h"
-#include "src/start-menu/kiran-app-system.h"
 #include "src/start-menu/kiran-skeleton.h"
 
 typedef struct {
   gint refcount;
   GList *apps;
 } CategoryInfo;
+
+struct _KiranAppCategory {
+  GObject parent;
+  KiranAppSystem *app_system;
+  GHashTable *categorys;
+};
+
+G_DEFINE_TYPE(KiranAppCategory, kiran_app_category, G_TYPE_OBJECT)
+
+enum {
+  CATEGORY_PROP_NONE,
+  CATEGORY_PROP_APP_SYSTEM,
+};
 
 CategoryInfo *category_info_new(void) {
   CategoryInfo *category;
@@ -76,17 +88,9 @@ gchar **category_info_get_desktop_ids(CategoryInfo *category) {
   return (gchar **)g_ptr_array_free(desktop_ids, FALSE);
 }
 
-struct _KiranAppCategory {
-  GObject parent;
-  KiranAppSystem *system;
-  KiranStartMenuS *skeleton;
-  GHashTable *categorys;
-};
-
-G_DEFINE_TYPE(KiranAppCategory, kiran_app_category, G_TYPE_OBJECT)
-
 static gboolean kiran_app_category_insert(KiranAppCategory *self,
-                                          char *category, char *desktop_id) {
+                                          const char *category,
+                                          const char *desktop_id) {
   g_return_val_if_fail(category != NULL, FALSE);
   g_return_val_if_fail(desktop_id != NULL, FALSE);
 
@@ -97,7 +101,7 @@ static gboolean kiran_app_category_insert(KiranAppCategory *self,
   }
   // g_print("c: %s d: %s\n", category, desktop_id);
   KiranAppInfo *app_info =
-      kiran_app_system_lookup_app(self->system, desktop_id);
+      kiran_app_system_lookup_app(self->app_system, desktop_id);
   g_return_val_if_fail(app_info != NULL, FALSE);
   return category_info_add_app(category_info, g_object_ref(app_info));
 }
@@ -109,7 +113,7 @@ static gboolean kiran_app_category_del(KiranAppCategory *self, char *category,
     return FALSE;
   }
   KiranAppInfo *app_info =
-      kiran_app_system_lookup_app(self->system, desktop_id);
+      kiran_app_system_lookup_app(self->app_system, desktop_id);
   return category_info_del_app(category_info, app_info);
 }
 
@@ -120,30 +124,28 @@ static gboolean kiran_app_category_contain(KiranAppCategory *self,
     return FALSE;
   }
   KiranAppInfo *app_info =
-      kiran_app_system_lookup_app(self->system, desktop_id);
+      kiran_app_system_lookup_app(self->app_system, desktop_id);
   return category_info_contain_app(category_info, app_info);
 }
 
 void kiran_app_category_load(KiranAppCategory *self) {
-  KiranAppSystemIter iter;
-  kiran_app_system_iter_init(&iter);
-  gchar *app_id;
-  KiranAppInfo *app_info;
-  while (kiran_app_system_iter_next(&iter, (gpointer *)&app_id,
-                                    (gpointer *)&app_info)) {
+  GList *apps = kiran_app_system_get_apps(self->app_system);
+  for (GList *l = apps; l != NULL; l = l->next) {
+    KiranAppInfo *app_info = l->data;
+    const char *desktop_id = kiran_app_info_get_desktop_id(app_info);
     const char *categories = kiran_app_info_get_categories(app_info);
-    if (categories == NULL) {
+    if (!categories || !desktop_id) {
       continue;
     }
-    gchar **strv = g_strsplit(categories, ";", -1);
+    g_auto(GStrv) strv = g_strsplit(categories, ";", -1);
     gint i = 0;
     for (; strv[i] != NULL; ++i) {
       if (strv[i][0] != '\0') {
-        kiran_app_category_insert(self, strv[i], app_id);
+        kiran_app_category_insert(self, strv[i], desktop_id);
       }
     }
-    g_strfreev(strv);
   }
+  g_list_free_full(apps, g_object_unref);
 }
 
 static gboolean handle_add_category_app(KiranStartMenuS *skeleton,
@@ -151,16 +153,18 @@ static gboolean handle_add_category_app(KiranStartMenuS *skeleton,
                                         char *category, char *desktop_id,
                                         KiranAppCategory *self) {
   gboolean existing = kiran_app_category_contain(self, category, desktop_id);
+  gboolean add_success = FALSE;
   if (!existing) {
-    kiran_app_category_insert(self, category, desktop_id);
     KiranAppInfo *app_info =
-        kiran_app_system_lookup_app(self->system, desktop_id);
-    if (app_info) {
-      kiran_app_info_add_category(app_info, category);
+        kiran_app_system_lookup_app(self->app_system, desktop_id);
+    if (app_info && kiran_app_info_add_category(app_info, category)) {
+      kiran_app_category_insert(self, category, desktop_id);
+      add_success = TRUE;
     }
   }
 
-  kiran_start_menu_s_complete_add_category_app(skeleton, invocation, TRUE);
+  kiran_start_menu_s_complete_add_category_app(skeleton, invocation,
+                                               add_success);
   return TRUE;
 }
 
@@ -169,15 +173,18 @@ static gboolean handle_del_category_app(KiranStartMenuS *skeleton,
                                         char *category, char *desktop_id,
                                         KiranAppCategory *self) {
   gboolean existing = kiran_app_category_contain(self, category, desktop_id);
+  gboolean del_success = FALSE;
   if (existing) {
-    kiran_app_category_del(self, category, desktop_id);
-    KiranAppInfo *app_info =
-        kiran_app_system_lookup_app(self->system, desktop_id);
-    if (app_info) {
-      kiran_app_info_del_category(app_info, category);
+    if (kiran_app_category_del(self, category, desktop_id)) {
+      KiranAppInfo *app_info =
+          kiran_app_system_lookup_app(self->app_system, desktop_id);
+      if (app_info && kiran_app_info_del_category(app_info, category)) {
+        del_success = TRUE;
+      }
     }
   }
-  kiran_start_menu_s_complete_del_category_app(skeleton, invocation, TRUE);
+  kiran_start_menu_s_complete_del_category_app(skeleton, invocation,
+                                               del_success);
   return TRUE;
 }
 
@@ -215,25 +222,55 @@ static gboolean handle_get_all_category_apps(KiranStartMenuS *skeleton,
   return TRUE;
 }
 
-static void kiran_app_category_init(KiranAppCategory *self) {
-  self->system = kiran_app_system_get_default();
-  self->skeleton = kiran_start_menu_s_get_default();
+static void kiran_app_category_init(KiranAppCategory *self) {}
+
+static void _kiran_app_category_init(KiranAppCategory *self) {
   self->categorys = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
                                           (GDestroyNotify)category_info_unref);
 
-  g_signal_connect(self->skeleton, "handle-add-category-app",
+  KiranStartMenuS *skeleton = kiran_start_menu_s_get_default();
+
+  g_signal_connect(skeleton, "handle-add-category-app",
                    G_CALLBACK(handle_add_category_app), self);
 
-  g_signal_connect(self->skeleton, "handle-del-category-app",
+  g_signal_connect(skeleton, "handle-del-category-app",
                    G_CALLBACK(handle_del_category_app), self);
 
-  g_signal_connect(self->skeleton, "handle-get-category-apps",
+  g_signal_connect(skeleton, "handle-get-category-apps",
                    G_CALLBACK(handle_get_category_apps), self);
 
-  g_signal_connect(self->skeleton, "handle-get-all-category-apps",
+  g_signal_connect(skeleton, "handle-get-all-category-apps",
                    G_CALLBACK(handle_get_all_category_apps), self);
 
   kiran_app_category_load(self);
+}
+
+static void kiran_app_category_get_property(GObject *gobject, guint prop_id,
+                                            GValue *value, GParamSpec *pspec) {
+  KiranAppCategory *category = KIRAN_APP_CATEGORY(gobject);
+
+  switch (prop_id) {
+    case CATEGORY_PROP_APP_SYSTEM:
+      if (category->app_system) g_value_set_object(value, category->app_system);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID(gobject, prop_id, pspec);
+      break;
+  }
+}
+
+static void kiran_app_category_set_property(GObject *gobject, guint prop_id,
+                                            const GValue *value,
+                                            GParamSpec *pspec) {
+  KiranAppCategory *category = KIRAN_APP_CATEGORY(gobject);
+  switch (prop_id) {
+    case CATEGORY_PROP_APP_SYSTEM:
+      category->app_system = g_value_get_object(value);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID(gobject, prop_id, pspec);
+      break;
+  }
 }
 
 static void kiran_app_category_dispose(GObject *object) {
@@ -242,9 +279,20 @@ static void kiran_app_category_dispose(GObject *object) {
 
 static void kiran_app_category_class_init(KiranAppCategoryClass *klass) {
   GObjectClass *object_class = G_OBJECT_CLASS(klass);
+  object_class->get_property = kiran_app_category_get_property;
+  object_class->set_property = kiran_app_category_set_property;
   object_class->dispose = kiran_app_category_dispose;
+
+  g_object_class_install_property(
+      object_class, CATEGORY_PROP_APP_SYSTEM,
+      g_param_spec_object("kiran-app-system", "KiranAppSystem",
+                          "KiranAppSystem Object", KIRAN_TYPE_APP_SYSTEM,
+                          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 }
 
-KiranAppCategory *kiran_app_category_get_new(void) {
-  return g_object_new(KIRAN_TYPE_APP_CATEGORY, NULL);
+KiranAppCategory *kiran_app_category_get_new(KiranAppSystem *app_system) {
+  KiranAppCategory *category = g_object_new(
+      KIRAN_TYPE_APP_CATEGORY, "kiran-app-system", app_system, NULL);
+  _kiran_app_category_init(category);
+  return category;
 }
