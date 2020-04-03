@@ -31,7 +31,7 @@ void test_category_apps(gconstpointer data) {
   CHECK_PROXY_CALL_ERR(call_success, error);
 
   if (g_strv_length(sorted_apps) > 0) {
-    g_print("s: %s\n", sorted_apps[0]);
+    DEL_CATEGORY_APP_SYNC("category_test1", sorted_apps[0], FALSE);
     ADD_CATEGORY_APP_SYNC("category_test1", sorted_apps[0], TRUE);
   }
 
@@ -48,7 +48,7 @@ void test_category_apps(gconstpointer data) {
   }
   g_assert_true(exist_first_sort_app);
 
-  g_print("s %s\n", sorted_apps[0]);
+  // g_print("s %s\n", sorted_apps[0]);
 
   DEL_CATEGORY_APP_SYNC("category_test1", sorted_apps[0], TRUE);
   DEL_CATEGORY_APP_SYNC("category_test1", sorted_apps[0], FALSE);

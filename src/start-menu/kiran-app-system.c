@@ -20,8 +20,8 @@ static guint signals[LAST_SIGNAL] = {0};
 GList *kiran_app_system_get_apps(KiranAppSystem *self) {
   GList *apps = NULL;
   GHashTableIter iter;
-  gchar *key;
-  KiranAppInfo *app_info;
+  gchar *key = NULL;
+  KiranAppInfo *app_info = NULL;
   g_hash_table_iter_init(&iter, self->id_to_app);
   while (
       g_hash_table_iter_next(&iter, (gpointer *)&key, (gpointer *)&app_info)) {

@@ -129,13 +129,14 @@ static gboolean kiran_app_category_contain(KiranAppCategory *self,
   return category_info_contain_app(category_info, app_info);
 }
 
-void kiran_app_category_load(KiranAppCategory *self) {
+void kiran_app_category_load(KiranAppSystem *app_system,
+                             KiranAppCategory *self) {
   if (self->categorys) {
     g_hash_table_destroy(self->categorys);
   }
   self->categorys = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
                                           (GDestroyNotify)category_info_unref);
-  GList *apps = kiran_app_system_get_apps(self->app_system);
+  GList *apps = kiran_app_system_get_apps(app_system);
   for (GList *l = apps; l != NULL; l = l->next) {
     KiranAppInfo *app_info = l->data;
     const char *desktop_id = kiran_app_info_get_desktop_id(app_info);
@@ -250,7 +251,7 @@ static void _kiran_app_category_init(KiranAppCategory *self) {
   g_signal_connect(self->app_system, "installed-changed",
                    G_CALLBACK(kiran_app_category_load), self);
 
-  kiran_app_category_load(self);
+  kiran_app_category_load(self->app_system, self);
 }
 
 static void kiran_app_category_get_property(GObject *gobject, guint prop_id,
