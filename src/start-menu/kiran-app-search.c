@@ -26,8 +26,11 @@ static gboolean handle_search_app(KiranStartMenuS *skeleton,
     KiranAppInfo *app = l->data;
     const char *desktop_id = kiran_app_info_get_desktop_id(app);
     const char *categories = kiran_app_info_get_categories(app);
+    g_autofree char *name = kiran_app_info_get_name(app);
+    g_autofree char *locale_name = kiran_app_info_get_locale_name(app);
 
-    if (g_strrstr(desktop_id, keyword) != NULL ||
+    if ((name && g_strrstr(name, keyword) != NULL) ||
+        (locale_name && g_strrstr(locale_name, keyword) != NULL) ||
         (categories && g_strrstr(categories, keyword))) {
       g_ptr_array_add(hit_apps, g_strdup(desktop_id));
     }

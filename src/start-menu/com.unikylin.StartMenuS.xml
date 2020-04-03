@@ -26,12 +26,6 @@
             <arg direction="in"  name="desktop_id" type="s"/>
             <arg direction="out" name="success" type="b"/>
         </method>
-        <method name="MoveCategoryApp">
-            <arg direction="in"  name="src_category" type="s"/>
-            <arg direction="in"  name="dst_category" type="s"/>
-            <arg direction="in"  name="desktop_id" type="s"/>
-            <arg direction="out" name="success" type="b"/>
-        </method>
         <method name="GetCategoryApps">
             <arg direction="in"  name="category" type="s"/>
             <arg direction="out" name="desktop_ids" type="as"/>

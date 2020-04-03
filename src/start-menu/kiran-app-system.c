@@ -43,9 +43,8 @@ gint sort_by_app_name(gconstpointer a, gconstpointer b, gpointer user_data) {
   KiranAppInfo *appa = kiran_app_system_lookup_app(self, appa_id);
   KiranAppInfo *appb = kiran_app_system_lookup_app(self, appb_id);
 
-  char *appa_name, *appb_name;
-  appa_name = kiran_app_info_get_name(appa);
-  appb_name = kiran_app_info_get_name(appb);
+  g_autofree char *appa_name = kiran_app_info_get_name(appa);
+  g_autofree char *appb_name = kiran_app_info_get_name(appb);
 
   return g_strcmp0(appa_name, appb_name);
 }

@@ -11,6 +11,7 @@ G_DECLARE_FINAL_TYPE(KiranAppInfo, kiran_app_info, KIRAN, APP_INFO, GObject)
 GDesktopAppInfo *kiran_app_info_get_desktop_app(KiranAppInfo *app);
 
 char *kiran_app_info_get_name(KiranAppInfo *app);
+char *kiran_app_info_get_locale_name(KiranAppInfo *app);
 char *kiran_app_info_get_desktop_id(KiranAppInfo *app);
 const char *kiran_app_info_get_categories(KiranAppInfo *app);
 
