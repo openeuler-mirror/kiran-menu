@@ -19,14 +19,16 @@ configure_file(
 #)
 
 sources = files(
-  'kiran-app-category.c',
-  'kiran-app-favorite.c',
-  'kiran-app-search.c',
-  'kiran-app-system.c',
-  'kiran-app-usage.c',
-  'kiran-start-menu-app.c',
+  'kiran-menu-category.c',
+  'kiran-menu-favorite.c',
+  'kiran-menu-search.c',
+  'kiran-menu-system.c',
+  'kiran-menu-usage.c',
+  'kiran-menu-skeleton.c',
+  'kiran-menu-based.c',
   'kiran-skeleton.c',
-  'kiran-app-info.c'
+  'kiran-app.c',
+  'kiran-menu-app.c'
 )
 
 sources += gnome.gdbus_codegen(
