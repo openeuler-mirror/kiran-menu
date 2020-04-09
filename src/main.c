@@ -1,10 +1,16 @@
+/*
+ * @Author       : tangjie02
+ * @Date         : 2020-04-09 23:19:03
+ * @LastEditors  : tangjie02
+ * @LastEditTime : 2020-04-09 23:19:40
+ * @Description  :
+ * @FilePath     : /kiran-menu-backend/src/main.c
+ */
 #include <gio/gio.h>
 
-#include "src/start-menu/kiran-start-menu-app.h"
+#include "src/start-menu/kiran-menu-based.h"
 
 int main(int argc, char **argv) {
-  // g_setenv("GSETTINGS_SCHEMA_DIR", "start-menu/", FALSE);
-  GApplication *app;
-  app = G_APPLICATION(kiran_start_menu_app_get());
-  return g_application_run(app, argc, argv);
+  kiran_menu_based_skeleton_new();
+  return 0;
 }

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:23:14
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-04-08 17:11:26
+ * @LastEditTime : 2020-04-10 01:16:20
  * @Description  :
  * @FilePath     : /kiran-menu-backend/src/start-menu/kiran-menu-based.h
  */
@@ -15,6 +15,8 @@ G_BEGIN_DECLS
 #define KIRAN_TYPE_MENU_BASED (kiran_menu_based_get_type())
 G_DECLARE_INTERFACE(KiranMenuBased, kiran_menu_based, KIRAN, MENU_BASED,
                     GObject);
+
+typedef struct _KiranMenuBasedInterface KiranMenuBasedInterface;
 
 struct _KiranMenuBasedInterface {
   GTypeInterface parent;

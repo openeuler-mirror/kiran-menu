@@ -13,10 +13,6 @@ configure_file(
   configuration : service_conf
 )
 
-#install_data(
-#  'gnome-control-center-search-provider.ini',
-#  install_dir: join_paths(datadir, 'kiran', 'start-menu')
-#)
 
 sources = files(
   'kiran-menu-category.c',
@@ -26,22 +22,16 @@ sources = files(
   'kiran-menu-usage.c',
   'kiran-menu-skeleton.c',
   'kiran-menu-based.c',
-  'kiran-skeleton.c',
   'kiran-app.c',
   'kiran-menu-app.c'
 )
 
-sources += gnome.gdbus_codegen(
-  'kiran-start-menu-generated',
-  'com.unikylin.StartMenuS.xml',
-  interface_prefix : 'com.unikylin.',
-         namespace : 'Kiran'
-)
-
-
-#testa = join_paths(meson.build_root(), 'src', 'com.unikylin.Kiran.StartMenu.gschema.xml')
-#message(testa)
-
+# sources += gnome.gdbus_codegen(
+#   'kiran-start-menu-generated',
+#   'com.unikylin.StartMenuS.xml',
+#   interface_prefix : 'com.unikylin.',
+#          namespace : 'Kiran'
+# )
 
 schemaconf = configuration_data()
 schemaconf.set('GETTEXT_PACKAGE', meson.project_name())

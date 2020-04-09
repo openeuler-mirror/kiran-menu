@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:22:36
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-04-08 15:08:31
+ * @LastEditTime : 2020-04-10 01:14:20
  * @Description  :
  * @FilePath     : /kiran-menu-backend/src/start-menu/kiran-menu-app.c
  */
@@ -17,7 +17,7 @@ struct _KiranMenuApp {
 G_DEFINE_TYPE(KiranMenuApp, kiran_menu_app, KIRAN_TYPE_APP)
 
 gboolean kiran_menu_app_add_category(KiranMenuApp *self, const char *category) {
-  const char *categories = kiran_menu_app_get_categories(self);
+  const char *categories = kiran_app_get_categories(KIRAN_APP(self));
   const char *file_name = kiran_app_get_file_name(KIRAN_APP(self));
   g_return_val_if_fail(file_name != NULL, FALSE);
   GString *new_categories = g_string_new(categories);
@@ -89,6 +89,6 @@ static void kiran_menu_app_class_init(KiranMenuAppClass *klass) {
   object_class->dispose = kiran_menu_app_dispose;
 }
 
-KiranMenuApp *kiran_app_get_new(const char *desktop_id) {
+KiranMenuApp *kiran_menu_app_get_new(const char *desktop_id) {
   return g_object_new(KIRAN_TYPE_MENU_APP, "desktop-id", desktop_id, NULL);
 }

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:23:21
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-04-08 17:09:34
+ * @LastEditTime : 2020-04-10 01:18:27
  * @Description  :
  * @FilePath     : /kiran-menu-backend/src/start-menu/kiran-menu-based.c
  */
@@ -10,6 +10,10 @@
 #include "src/start-menu/kiran-menu-based.h"
 
 #include "src/start-menu/kiran-menu-skeleton.h"
+
+G_DEFINE_INTERFACE(KiranMenuBased, kiran_menu_based, G_TYPE_OBJECT)
+
+static void kiran_menu_based_default_init(KiranMenuBasedInterface *g_iface) {}
 
 KiranMenuBased *kiran_menu_based_skeleton_new() {
   return g_object_new(KIRAN_TYPE_MENU_SKELETON, NULL);
@@ -54,7 +58,7 @@ GList *kiran_menu_based_get_favorite_apps(KiranMenuBased *self) {
 
   iface = KIRAN_MENU_BASED_GET_IFACE(self);
   g_return_val_if_fail(iface->impl_del_favorite_app != NULL, FALSE);
-  return iface->impl_del_favorite_app(self, desktop_id);
+  return iface->impl_get_favorite_apps(self);
 }
 
 gboolean kiran_menu_based_add_category_app(KiranMenuBased *self,
@@ -125,7 +129,7 @@ void kiran_menu_based_reset_frequent_apps(KiranMenuBased *self) {
 GList *kiran_menu_based_get_nnew_apps(KiranMenuBased *self, gint top_n) {
   KiranMenuBasedInterface *iface;
 
-  g_return_val_if_fail(KIRAN_IS_MENU_BASED(self, NULL);
+  g_return_val_if_fail(KIRAN_IS_MENU_BASED(self), NULL);
 
   iface = KIRAN_MENU_BASED_GET_IFACE(self);
   g_return_val_if_fail(iface->impl_get_nnew_apps != NULL, NULL);
@@ -135,7 +139,7 @@ GList *kiran_menu_based_get_nnew_apps(KiranMenuBased *self, gint top_n) {
 GList *kiran_menu_based_get_all_sorted_apps(KiranMenuBased *self) {
   KiranMenuBasedInterface *iface;
 
-  g_return_val_if_fail(KIRAN_IS_MENU_BASED(self, NULL);
+  g_return_val_if_fail(KIRAN_IS_MENU_BASED(self), NULL);
 
   iface = KIRAN_MENU_BASED_GET_IFACE(self);
   g_return_val_if_fail(iface->impl_get_all_sorted_apps != NULL, NULL);

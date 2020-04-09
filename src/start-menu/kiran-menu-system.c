@@ -1,13 +1,21 @@
+/*
+ * @Author       : tangjie02
+ * @Date         : 2020-04-09 21:42:15
+ * @LastEditors  : tangjie02
+ * @LastEditTime : 2020-04-09 23:58:29
+ * @Description  :
+ * @FilePath     : /kiran-menu-backend/src/start-menu/kiran-menu-system.c
+ */
+#include "src/start-menu/kiran-menu-system.h"
+
 #include <gio/gdesktopappinfo.h>
 #include <gio/gio.h>
 
-#include "src/start-menu/kiran-app-system.h"
-#include "src/start-menu/kiran-skeleton.h"
+#include "src/utils/helper.h"
 
 struct _KiranMenuSystem {
   GObject parent;
-  KiranStartMenuS *skeleton;
-  GHashTable *id_to_app;
+  GHashTable *apps;
 };
 
 G_DEFINE_TYPE(KiranMenuSystem, kiran_menu_system, G_TYPE_OBJECT)
@@ -19,132 +27,98 @@ static guint signals[LAST_SIGNAL] = {0};
 GList *kiran_menu_system_get_apps(KiranMenuSystem *self) {
   GList *apps = NULL;
   GHashTableIter iter;
-  gchar *key = NULL;
-  KiranAppInfo *app_info = NULL;
-  g_hash_table_iter_init(&iter, self->id_to_app);
-  while (
-      g_hash_table_iter_next(&iter, (gpointer *)&key, (gpointer *)&app_info)) {
-    apps = g_list_append(apps, g_object_ref(app_info));
+  gpointer key = NULL;
+  KiranMenuApp *app = NULL;
+  g_hash_table_iter_init(&iter, self->apps);
+  while (g_hash_table_iter_next(&iter, (gpointer *)&key, (gpointer *)&app)) {
+    apps = g_list_append(apps, g_object_ref(app));
   }
   return apps;
 }
 
-KiranAppInfo *kiran_menu_system_lookup_app(KiranMenuSystem *self,
-                                           const char *app_id) {
-  KiranAppInfo *app = g_hash_table_lookup(self->id_to_app, app_id);
-  return app;
+KiranMenuApp *kiran_menu_system_lookup_app(KiranMenuSystem *self,
+                                           const char *desktop_id) {
+  GQuark quark = g_quark_from_string(desktop_id);
+  return g_hash_table_lookup(self->apps, GUINT_TO_POINTER(quark));
+}
+
+static gint sort_by_ctime(gconstpointer a, gconstpointer b,
+                          gpointer user_data) {
+  GQuark qa = g_quark_from_string((const gchar *)a);
+  GQuark qb = g_quark_from_string((const gchar *)b);
+  GHashTable *apps_ctime = user_data;
+
+  gpointer timea = g_hash_table_lookup(apps_ctime, GUINT_TO_POINTER(qa));
+  gpointer timeb = g_hash_table_lookup(apps_ctime, GUINT_TO_POINTER(qb));
+  return GPOINTER_TO_UINT(timeb) - GPOINTER_TO_UINT(timea);
+}
+
+GList *kiran_menu_system_get_nnew_apps(KiranMenuSystem *self, gint top_n) {
+  GList *new_apps = NULL;
+  g_autoptr(GHashTable) apps_ctime = g_hash_table_new(NULL, NULL);
+
+  GHashTableIter iter;
+  gpointer *key = NULL;
+  KiranMenuApp *menu_app = NULL;
+
+  g_hash_table_iter_init(&iter, self->apps);
+  while (
+      g_hash_table_iter_next(&iter, (gpointer *)&key, (gpointer *)&menu_app)) {
+    GQuark quark = GPOINTER_TO_UINT(key);
+    const char *desktop_id = g_quark_to_string(quark);
+    new_apps = g_list_append(new_apps, g_strdup(desktop_id));
+
+    guint64 ctime = kiran_app_get_create_time(KIRAN_APP(menu_app));
+    g_hash_table_insert(apps_ctime, key, GUINT_TO_POINTER((ctime >> 32)));
+  }
+
+  new_apps = g_list_sort_with_data(new_apps, sort_by_ctime, apps_ctime);
+  return list_remain_headn(new_apps, top_n, g_free);
 }
 
 gint sort_by_app_name(gconstpointer a, gconstpointer b, gpointer user_data) {
+  GQuark qa = g_quark_from_string((const gchar *)a);
+  GQuark qb = g_quark_from_string((const gchar *)b);
   KiranMenuSystem *self = KIRAN_MENU_SYSTEM(user_data);
-  char *appa_id = *(gchar **)a;
-  char *appb_id = *(gchar **)b;
-  KiranAppInfo *appa = kiran_menu_system_lookup_app(self, appa_id);
-  KiranAppInfo *appb = kiran_menu_system_lookup_app(self, appb_id);
 
-  g_autofree char *appa_name = kiran_app_info_get_name(appa);
-  g_autofree char *appb_name = kiran_app_info_get_name(appb);
+  KiranMenuApp *appa = kiran_menu_system_lookup_app(self, GUINT_TO_POINTER(qa));
+  KiranMenuApp *appb = kiran_menu_system_lookup_app(self, GUINT_TO_POINTER(qb));
+
+  const char *appa_name = kiran_app_get_name(KIRAN_APP(appa));
+  const char *appb_name = kiran_app_get_name(KIRAN_APP(appb));
 
   return g_strcmp0(appa_name, appb_name);
 }
 
-gchar **kiran_menu_system_get_all_sorted_apps(KiranMenuSystem *self) {
-  GArray *apps = g_array_new(FALSE, FALSE, sizeof(gchar *));
+GList *kiran_menu_system_get_all_sorted_apps(KiranMenuSystem *self) {
+  GList *apps = NULL;
   GHashTableIter iter;
-  gchar *key;
-  KiranAppInfo *app_info;
-  g_hash_table_iter_init(&iter, self->id_to_app);
-  while (
-      g_hash_table_iter_next(&iter, (gpointer *)&key, (gpointer *)&app_info)) {
-    const char *desktop_id = kiran_app_info_get_desktop_id(app_info);
-    gchar *dup_id = g_strdup(desktop_id);
-    g_array_append_val(apps, dup_id);
+  gpointer key;
+  KiranMenuApp *app;
+
+  g_hash_table_iter_init(&iter, self->apps);
+  while (g_hash_table_iter_next(&iter, (gpointer *)&key, (gpointer *)&app)) {
+    const char *desktop_id = kiran_app_get_desktop_id(KIRAN_APP(app));
+    apps = g_list_append(apps, g_strdup(desktop_id));
   }
 
-  g_array_sort_with_data(apps, sort_by_app_name, self);
-
-  char *null = NULL;
-  g_array_append_val(apps, null);
-  return (gchar **)g_array_free(apps, FALSE);
-}
-
-static gboolean handle_get_all_sorted_apps(KiranStartMenuS *skeleton,
-                                           GDBusMethodInvocation *invocation,
-                                           KiranMenuSystem *self) {
-  gchar **apps = kiran_menu_system_get_all_sorted_apps(self);
-  kiran_start_menu_s_complete_get_all_sorted_apps(skeleton, invocation,
-                                                  (const gchar *const *)apps);
-  return TRUE;
-}
-
-static gint sort_by_create_time(gconstpointer a, gconstpointer b,
-                                gpointer user_data) {
-  GHashTable *apps_create_time = user_data;
-  guint64 *ca = g_hash_table_lookup(apps_create_time, *(gchar **)a);
-  guint64 *cb = g_hash_table_lookup(apps_create_time, *(gchar **)b);
-  return *cb - *ca;
-}
-
-static gboolean handle_get_nnew_apps(KiranStartMenuS *skeleton,
-                                     GDBusMethodInvocation *invocation,
-                                     gint top_n, KiranMenuSystem *self) {
-  GArray *sort_apps = g_array_new(FALSE, FALSE, sizeof(gchar *));
-  GHashTable *apps_create_time = g_hash_table_new(g_str_hash, g_str_equal);
-  GList *registered_apps = g_app_info_get_all();
-  for (GList *l = registered_apps; l != NULL; l = l->next) {
-    GAppInfo *info = l->data;
-    const char *id = g_app_info_get_id(info);
-    gchar *dup_id = g_strdup(id);
-    g_array_append_val(sort_apps, dup_id);
-    GDesktopAppInfo *desktop_app = g_desktop_app_info_new(id);
-    if (!desktop_app) continue;
-    const char *full_path = g_desktop_app_info_get_filename(desktop_app);
-    if (!full_path) continue;
-    GFile *file = g_file_new_for_path(full_path);
-
-    GFileInfo *file_info =
-        g_file_query_info(file, G_FILE_ATTRIBUTE_TIME_CREATED,
-                          G_FILE_QUERY_INFO_NONE, NULL, NULL);
-    if (file_info) {
-      guint64 *create_time = g_new(guint64, 1);
-      *create_time = g_file_info_get_attribute_uint64(
-          file_info, G_FILE_ATTRIBUTE_TIME_CREATED);
-      gchar *dup2_id = g_strdup(id);
-      g_hash_table_insert(apps_create_time, dup2_id, create_time);
-    }
-
-    g_object_unref(file);
-    g_object_unref(desktop_app);
-    g_list_free_full(registered_apps, g_object_unref);
-  }
-
-  g_array_sort_with_data(sort_apps, sort_by_create_time, apps_create_time);
-  if (top_n > sort_apps->len) top_n = sort_apps->len;
-  g_array_remove_range(sort_apps, top_n, sort_apps->len - top_n);
-  gchar *null = NULL;
-  g_array_append_val(sort_apps, null);
-
-  kiran_start_menu_s_complete_get_nnew_apps(
-      skeleton, invocation,
-      (const gchar *const *)g_array_free(sort_apps, FALSE));
-  g_list_free_full(registered_apps, g_object_unref);
-  g_hash_table_unref(apps_create_time);
-  return TRUE;
+  return g_list_sort_with_data(apps, sort_by_app_name, self);
 }
 
 static void installed_app_change(GAppInfoMonitor *gappinfomonitor,
                                  gpointer user_data) {
   KiranMenuSystem *self = KIRAN_MENU_SYSTEM(user_data);
-  g_clear_pointer(&self->id_to_app, (GDestroyNotify)g_hash_table_unref);
+  g_clear_pointer(&self->apps, (GDestroyNotify)g_hash_table_unref);
 
-  self->id_to_app =
-      g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_object_unref);
+  self->apps = g_hash_table_new_full(NULL, NULL, NULL, g_object_unref);
   GList *registered_apps = g_app_info_get_all();
   for (GList *l = registered_apps; l != NULL; l = l->next) {
     GAppInfo *info = l->data;
     if (g_app_info_should_show(info)) {
-      const char *id = g_app_info_get_id(info);
-      g_hash_table_insert(self->id_to_app, g_strdup(id), kiran_app_get_new(id));
+      const gchar *desktop_id = g_app_info_get_id(info);
+      GQuark quark = g_quark_from_string(desktop_id);
+      g_hash_table_insert(self->apps, GUINT_TO_POINTER(quark),
+                          kiran_menu_app_get_new(desktop_id));
     }
   }
   g_list_free_full(registered_apps, g_object_unref);
@@ -152,13 +126,6 @@ static void installed_app_change(GAppInfoMonitor *gappinfomonitor,
 }
 
 static void kiran_menu_system_init(KiranMenuSystem *self) {
-  self->skeleton = kiran_start_menu_s_get_default();
-  g_signal_connect(self->skeleton, "handle-get-all-sorted-apps",
-                   G_CALLBACK(handle_get_all_sorted_apps), self);
-
-  g_signal_connect(self->skeleton, "handle-get-nnew-apps",
-                   G_CALLBACK(handle_get_nnew_apps), self);
-
   GAppInfoMonitor *monitor = g_app_info_monitor_get();
   g_signal_connect(monitor, "changed", G_CALLBACK(installed_app_change), self);
   installed_app_change(monitor, self);
@@ -166,8 +133,7 @@ static void kiran_menu_system_init(KiranMenuSystem *self) {
 
 static void kiran_menu_system_dispose(GObject *object) {
   KiranMenuSystem *self = KIRAN_MENU_SYSTEM(object);
-  self->skeleton = NULL;
-  g_clear_pointer(&self->id_to_app, (GDestroyNotify)g_hash_table_unref);
+  g_clear_pointer(&self->apps, (GDestroyNotify)g_hash_table_unref);
   G_OBJECT_CLASS(kiran_menu_system_parent_class)->dispose(object);
 }
 

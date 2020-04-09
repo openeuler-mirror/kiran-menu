@@ -43,5 +43,5 @@ cflags = '-std=c99'
 
 
 subdir('src')
-subdir('test')
+#subdir('test')
 

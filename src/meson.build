@@ -3,6 +3,7 @@ gnome = import('gnome')
 
 
 subdir('start-menu')
+subdir('utils')
 
 sources = files(
   'main.c'

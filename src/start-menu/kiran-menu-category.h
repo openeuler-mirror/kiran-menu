@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 17:30:32
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-04-08 18:06:22
+ * @LastEditTime : 2020-04-09 23:40:53
  * @Description  : 管理菜单中的APP的分类
  * @FilePath     : /kiran-menu-backend/src/start-menu/kiran-menu-category.h
  */
@@ -26,6 +26,14 @@ G_DECLARE_FINAL_TYPE(KiranMenuCategory, kiran_menu_category, KIRAN,
 KiranMenuCategory *kiran_menu_category_get_new();
 
 /**
+ * @description: 创建KiranMenuCategory对象,
+ * 并用apps进行初始化（调用kiran_menu_category_load函数）
+ * @return:
+ * @author: tangjie02
+ */
+KiranMenuCategory *kiran_menu_category_get_new_with_apps(const GList *apps);
+
+/**
  * @description: 通过app集合来初始化app分类
  * @param {KiranMenuCategory*} self KiranMenuCategory对象
  * @param {const GList*} apps 链表元素类型为KiranMenuApp*
@@ -42,7 +50,7 @@ gboolean kiran_menu_category_load(KiranMenuCategory *self, const GList *apps);
  */
 gboolean kiran_menu_category_add_app(KiranMenuCategory *self,
                                      const char *category,
-                                     const KiranMenuApp *menu_app);
+                                     KiranMenuApp *menu_app);
 
 /**
  * @description:
@@ -52,7 +60,7 @@ gboolean kiran_menu_category_add_app(KiranMenuCategory *self,
  */
 gboolean kiran_menu_category_del_app(KiranMenuCategory *self,
                                      const char *category,
-                                     const KiranMenuApp *menu_app);
+                                     KiranMenuApp *menu_app);
 
 /**
  * @description:
@@ -64,10 +72,19 @@ GList *kiran_menu_category_get_apps(KiranMenuCategory *self,
                                     const char *category);
 
 /**
- * @description:
+ * @description: 获取所有分类
+ * @param {type}
+ * @return:
+ * @author: tangjie02
+ */
+GList *kiran_menu_category_get_categorys(KiranMenuCategory *self);
+
+/**
+ * @description: 获取所有分类和APP
  * @param {type}
  * @return:
  * @author: tangjie02
  */
 GHashTable *kiran_menu_category_get_all(KiranMenuCategory *self);
+
 G_END_DECLS
