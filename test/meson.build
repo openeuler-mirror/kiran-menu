@@ -1,2 +1,0 @@
-
-subdir('start-menu')
