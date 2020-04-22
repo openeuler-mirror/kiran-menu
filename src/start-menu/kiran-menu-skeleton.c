@@ -36,9 +36,10 @@ static GList *trans_ids_to_apps(KiranMenuSkeleton *skeleton,
 
   for (GList *l = desktop_ids; l != NULL; l = l->next) {
     gchar *desktop_id = l->data;
-    KiranApp *app = kiran_menu_system_lookup_app(skeleton->system, desktop_id);
-    if (app) {
-      apps = g_list_append(apps, g_object_ref(app));
+    KiranMenuApp *menu_app =
+        kiran_menu_system_lookup_app(skeleton->system, desktop_id);
+    if (menu_app) {
+      apps = g_list_append(apps, g_object_ref(KIRAN_APP(menu_app)));
     }
   }
   return apps;
@@ -115,6 +116,7 @@ GList *kiran_menu_skeleton_get_category_apps(KiranMenuBased *self,
   KiranMenuSkeleton *skeleton = KIRAN_MENU_SKELETON(self);
   GList *desktop_ids =
       kiran_menu_category_get_apps(skeleton->category, category);
+
   GList *apps = trans_ids_to_apps(skeleton, desktop_ids);
 
   g_list_free_full(desktop_ids, (GDestroyNotify)g_free);
@@ -205,8 +207,7 @@ static void kiran_menu_based_interface_init(KiranMenuBasedInterface *iface) {
   iface->impl_get_all_sorted_apps = kiran_menu_skeleton_get_all_sorted_apps;
 }
 
-G_DEFINE_TYPE_WITH_CODE(KiranMenuSkeleton, kiran_menu_skeleton,
-                        KIRAN_TYPE_MENU_SKELETON,
+G_DEFINE_TYPE_WITH_CODE(KiranMenuSkeleton, kiran_menu_skeleton, G_TYPE_OBJECT,
                         G_IMPLEMENT_INTERFACE(KIRAN_TYPE_MENU_BASED,
                                               kiran_menu_based_interface_init))
 

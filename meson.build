@@ -1,7 +1,7 @@
 project(
   'kiran-menu-backend', 'c',
         version : '3.3.0',
-  meson_version : '>= 0.50.0'
+  meson_version : '>= 0.47.0'
 )
 
 gnome = import('gnome')
@@ -43,5 +43,5 @@ cflags = '-std=c99'
 
 
 subdir('src')
-#subdir('test')
+subdir('test')
 

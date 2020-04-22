@@ -27,7 +27,8 @@ static gboolean write_favorite_to_settings(KiranMenuFavorite *self) {
   g_array_append_val(apps, null);
 
   g_auto(GStrv) favorite_apps = (gchar **)g_array_free(apps, FALSE);
-  return g_settings_set_strv(self->settings, "favorite-apps", favorite_apps);
+  return g_settings_set_strv(self->settings, "favorite-apps",
+                             (const gchar *const *)favorite_apps);
 }
 
 static gboolean read_favorite_from_settings(KiranMenuFavorite *self) {

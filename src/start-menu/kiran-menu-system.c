@@ -37,7 +37,7 @@ GList *kiran_menu_system_get_apps(KiranMenuSystem *self) {
 }
 
 KiranMenuApp *kiran_menu_system_lookup_app(KiranMenuSystem *self,
-                                           const char *desktop_id) {
+                                           const gchar *desktop_id) {
   GQuark quark = g_quark_from_string(desktop_id);
   return g_hash_table_lookup(self->apps, GUINT_TO_POINTER(quark));
 }
@@ -77,12 +77,10 @@ GList *kiran_menu_system_get_nnew_apps(KiranMenuSystem *self, gint top_n) {
 }
 
 gint sort_by_app_name(gconstpointer a, gconstpointer b, gpointer user_data) {
-  GQuark qa = g_quark_from_string((const gchar *)a);
-  GQuark qb = g_quark_from_string((const gchar *)b);
   KiranMenuSystem *self = KIRAN_MENU_SYSTEM(user_data);
 
-  KiranMenuApp *appa = kiran_menu_system_lookup_app(self, GUINT_TO_POINTER(qa));
-  KiranMenuApp *appb = kiran_menu_system_lookup_app(self, GUINT_TO_POINTER(qb));
+  KiranMenuApp *appa = kiran_menu_system_lookup_app(self, (const gchar *)a);
+  KiranMenuApp *appb = kiran_menu_system_lookup_app(self, (const gchar *)b);
 
   const char *appa_name = kiran_app_get_name(KIRAN_APP(appa));
   const char *appb_name = kiran_app_get_name(KIRAN_APP(appb));

@@ -92,8 +92,8 @@ GList *kiran_menu_based_get_category_apps(KiranMenuBased *self,
   g_return_val_if_fail(KIRAN_IS_MENU_BASED(self), NULL);
 
   iface = KIRAN_MENU_BASED_GET_IFACE(self);
-  g_return_val_if_fail(iface->impl_get_favorite_apps != NULL, NULL);
-  return iface->impl_get_favorite_apps(self);
+  g_return_val_if_fail(iface->impl_get_category_apps != NULL, NULL);
+  return iface->impl_get_category_apps(self, category);
 }
 
 GHashTable *kiran_menu_based_get_all_category_apps(KiranMenuBased *self) {

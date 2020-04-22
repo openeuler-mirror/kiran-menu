@@ -32,7 +32,7 @@ GList *kiran_menu_system_get_apps(KiranMenuSystem *self);
  * @author: tangjie02
  */
 KiranMenuApp *kiran_menu_system_lookup_app(KiranMenuSystem *self,
-                                           const char *app_id);
+                                           const gchar *app_id);
 
 /**
  * @description:

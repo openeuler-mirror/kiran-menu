@@ -31,7 +31,7 @@ KiranMenuCategory *kiran_menu_category_get_new();
  * @return:
  * @author: tangjie02
  */
-KiranMenuCategory *kiran_menu_category_get_new_with_apps(const GList *apps);
+KiranMenuCategory *kiran_menu_category_get_new_with_apps(GList *apps);
 
 /**
  * @description: 通过app集合来初始化app分类
@@ -40,7 +40,7 @@ KiranMenuCategory *kiran_menu_category_get_new_with_apps(const GList *apps);
  * @return:
  * @author: tangjie02
  */
-gboolean kiran_menu_category_load(KiranMenuCategory *self, const GList *apps);
+gboolean kiran_menu_category_load(KiranMenuCategory *self, GList *apps);
 
 /**
  * @description:

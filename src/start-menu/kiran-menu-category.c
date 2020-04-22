@@ -19,7 +19,7 @@ struct _KiranMenuCategory {
 G_DEFINE_TYPE(KiranMenuCategory, kiran_menu_category, G_TYPE_OBJECT)
 
 static gboolean category_add_app(KiranMenuCategory *self, const char *category,
-                                 const KiranApp *app) {
+                                 KiranApp *app) {
   g_return_val_if_fail(category != NULL, FALSE);
 
   GHashTable *category_info = g_hash_table_lookup(self->categorys, category);
@@ -37,11 +37,11 @@ static gboolean category_add_app(KiranMenuCategory *self, const char *category,
 }
 
 static gboolean category_del_app(KiranMenuCategory *self, const char *category,
-                                 const KiranApp *app) {
+                                 KiranApp *app) {
   g_return_val_if_fail(category != NULL, FALSE);
 
   GHashTable *category_info = g_hash_table_lookup(self->categorys, category);
-  RETURN_VAL_IF_TRUE(category_info, FALSE);
+  RETURN_VAL_IF_TRUE(category_info == NULL, FALSE);
 
   const char *desktop_id = kiran_app_get_desktop_id(app);
   g_return_val_if_fail(desktop_id != NULL, FALSE);
@@ -67,7 +67,7 @@ static gboolean category_del_app(KiranMenuCategory *self, const char *category,
 //   NULL);
 // }
 
-gboolean kiran_menu_category_load(KiranMenuCategory *self, const GList *apps) {
+gboolean kiran_menu_category_load(KiranMenuCategory *self, GList *apps) {
   if (self->categorys) {
     g_hash_table_destroy(self->categorys);
   }
@@ -94,8 +94,6 @@ gboolean kiran_menu_category_add_app(KiranMenuCategory *self,
                                      const char *category,
                                      KiranMenuApp *menu_app) {
   g_return_val_if_fail(menu_app != NULL, FALSE);
-
-  const gchar *desktop_id = kiran_app_get_desktop_id(KIRAN_APP(menu_app));
 
   if (kiran_menu_app_add_category(menu_app, category) &&
       category_add_app(self, category, KIRAN_APP(menu_app))) {
@@ -191,7 +189,7 @@ KiranMenuCategory *kiran_menu_category_get_new() {
   return g_object_new(KIRAN_TYPE_MENU_CATEGORY, NULL);
 }
 
-KiranMenuCategory *kiran_menu_category_get_new_with_apps(const GList *apps) {
+KiranMenuCategory *kiran_menu_category_get_new_with_apps(GList *apps) {
   KiranMenuCategory *menu_category = kiran_menu_category_get_new();
   if (menu_category) {
     kiran_menu_category_load(menu_category, apps);
