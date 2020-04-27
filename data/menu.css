@@ -1,0 +1,133 @@
+@define-color placeholder_text_color #c8c8c8;
+kiran-app-item {
+    background: transparent;
+
+    padding-left: 36px;
+    min-height: 40px;
+    font-family: "Noto Sans CJK SC";
+    font-size: 14pt;
+    border-width: 0px;
+    border-right-width: 3px;
+    border-style: solid;
+    border-color: transparent;
+
+    color: white;
+    -gtk-dpi: 72;
+}
+
+kiran-app-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #4cb5ff;
+    border-style: solid;
+}
+
+kiran-category-item {
+    background-color: transparent;
+    border-width: 0px;
+    border-left-width: 3px;
+    border-color: #4cb5ff;
+    border-style: solid;
+
+    min-height: 40px;
+    color: white;
+
+    margin: 0px;
+    margin-left: 10px;
+}
+
+kiran-category-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);;
+}
+
+kiran-category-item > label {
+    margin-left: 20px;
+    font-size: 14pt;
+    font-weight: bold;
+    -gtk-dpi: 72;
+}
+
+entry {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    padding-left: 10px;
+}
+
+button {
+    background: transparent;
+    border: none;
+    color: white;
+}
+
+button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+}
+
+separator {
+    color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+button#all-apps-button, button#back-button {
+    background: #4cb5ff;
+}
+
+window#menu-window {
+    background-color: #1f1f1f;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+scrollbar {
+    border-width: 1px;
+    background-color: transparent;
+}
+scrollbar slider {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-width: 1px;
+    border-radius: 5px;
+}
+
+scrollbar slider:active, scrollbar slider:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-width: 1px;
+    border-radius: 5px;
+}
+
+scrollbar button.up scrollbar button.down {
+    background: transparent;
+    background-image: none;
+    border: none;
+}
+
+button.kiran-category-selector {
+   
+    min-height: 40px;
+    border-width: 1px;
+    border-color: transparent;
+    border-style: solid;
+    font-weight: bold;
+}
+
+button.kiran-category-selector:hover {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+popover button{
+    color: white;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+popover {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+popover.background {
+    background-color: #1f1f1f;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}

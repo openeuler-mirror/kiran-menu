@@ -1,10 +1,15 @@
-project('kiran-menu-applet', 'c', meson_version: '>=0.47')
+project('kiran-menu-applet', 'c', version: '2.0', meson_version: '>=0.47')
 
 appletdep = dependency('libmatepanelapplet-4.0')
-executable('kiran-menu-applet', ['kiran-menu-applet-button.c', 'applet.c'],
-        dependencies: appletdep,
-        install: true,
-        install_dir: 'libexec/mate-panel/')
+config_data = configuration_data()
+config_data.set('INSTALL_PREFIX', get_option('prefix'))
+config_data.set('PACKAGE_NAME', meson.project_name())
+
+config_header = configure_file(
+        configuration: config_data,
+        input: 'config.h.in',
+        output: 'config.h')
+
 
 sed = find_program('sed', '/usr/bin/sed', required: true)
 custom_target('dbus-services', 
@@ -15,7 +20,7 @@ custom_target('dbus-services',
         capture: true,
         install: true,
         install_mode: 'rw-r--r--',
-        install_dir: 'share/dbus-1/services/')
+        install_dir: get_option('datadir') + '/dbus-1/services/')
 
 custom_target('applet-services', 
         build_by_default: true,
@@ -25,4 +30,33 @@ custom_target('applet-services',
         capture: true,
         install: true,
         install_mode: 'rw-r--r--',
-        install_dir: 'share/mate-panel/applets/')
+        install_dir: get_option('datadir') + '/mate-panel/applets/')
+
+compile_resource = find_program('glib-compile-resources', '/usr/bin/glib-compile-resources', required: true)
+custom_target('resource-binary',
+        build_by_default: true,
+        build_always_stale: true,
+        input: 'data/menu.gresource.xml',
+        output: 'menu.gresource',
+        command: [compile_resource, '@INPUT@', '--target', '@OUTPUT@', '--sourcedir', '@SOURCE_DIR@'],
+        install: true,
+        install_mode: 'r--r--r--',
+        install_dir: get_option('datadir') + '/' + meson.project_name())
+
+
+sources=['kiran-menu-applet-button.c',
+        'applet.c',
+        'kiran-menu-window.c',
+        'kiran-search-entry.c',
+        'kiran-app-button.c',
+        'kiran-power-button.c',
+        'kiran-power-menu.c',
+        config_header]
+
+executable('kiran-menu-applet', 
+        sources,
+        dependencies: appletdep,
+        link_args: '-rdynamic',
+        c_args: '-std=c99',
+        install: true,
+        install_dir: get_option('libexecdir') + '/mate-panel/')

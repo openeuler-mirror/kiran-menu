@@ -1,10 +1,11 @@
 #include "kiran-menu-applet-button.h"
+#include "kiran-menu-window.h"
 
 struct _KiranMenuAppletButton
 {
 	GtkToggleButton parent;
 
-	GtkWidget *menu_window;
+	KiranMenuWindow *menu_window;
 	GdkPixbuf *icon;
 	MatePanelApplet *applet;
 	gboolean icon_size_fixed;
@@ -134,16 +135,18 @@ static void kiran_menu_applet_button_toggled(GtkToggleButton *button)
 	KiranMenuAppletButton *self = KIRAN_MENU_APPLET_BUTTON(button);
 	int root_x, root_y;
 	GtkAllocation allocation, popup_allocation;
+	GtkWidget *window;
 
+	window = kiran_menu_window_get_window(self->menu_window);
 	orient = mate_panel_applet_get_orient(self->applet);
 	if (gtk_toggle_button_get_active(button))
 	{
-		gtk_widget_show_all(self->menu_window);
+		gtk_widget_show_all(window);
 
 		gdk_window_get_origin(gtk_widget_get_window(GTK_WIDGET(button)), &root_x,
 							  &root_y);
 		gtk_widget_get_allocation(GTK_WIDGET(button), &allocation);
-		gtk_widget_get_allocation(self->menu_window, &popup_allocation);
+		gtk_widget_get_allocation(window, &popup_allocation);
 
 		switch (orient)
 		{
@@ -163,12 +166,21 @@ static void kiran_menu_applet_button_toggled(GtkToggleButton *button)
 			g_error("invalid applet orientation: %d\n", orient);
 			break;
 		}
-		gtk_window_move(GTK_WINDOW(self->menu_window), root_x, root_y);
+		gtk_window_move(GTK_WINDOW(window), root_x, root_y);
 	}
 	else
 	{
-		gtk_widget_hide(self->menu_window);
+		gtk_widget_hide(window);
 	}
+}
+
+static void menu_window_active_callback(GtkWindow *window, GParamSpec *spec, GtkToggleButton *button)
+{
+	g_message("window active changed %d, visible %d\n",
+			gtk_window_is_active(window),
+			gtk_widget_is_visible(window));
+	if (!gtk_window_is_active(window) && gtk_widget_is_visible(window))
+		gtk_toggle_button_set_active(button, FALSE);
 }
 
 void kiran_menu_applet_button_init(KiranMenuAppletButton *self)
@@ -185,8 +197,9 @@ void kiran_menu_applet_button_init(KiranMenuAppletButton *self)
 		icon_theme, "start-here", 96,
 		GTK_ICON_LOOKUP_FORCE_SIZE | GTK_ICON_LOOKUP_FORCE_SVG, NULL);
 
-	self->menu_window = gtk_window_new(GTK_WINDOW_POPUP);
-	gtk_window_set_default_size(GTK_WINDOW(self->menu_window), 300, 600);
+	self->menu_window = kiran_menu_window_new(GTK_WIDGET(self));
+	g_signal_connect(kiran_menu_window_get_window(self->menu_window), "notify::is-active", G_CALLBACK(menu_window_active_callback), self);
+	//gtk_window_set_default_size(GTK_WINDOW(self->menu_window), 300, 600);
 }
 
 void kiran_menu_applet_button_finalize(GObject *obj)
@@ -194,7 +207,7 @@ void kiran_menu_applet_button_finalize(GObject *obj)
 	KiranMenuAppletButton *self = KIRAN_MENU_APPLET_BUTTON(obj);
 
 	g_object_unref(self->icon);
-	gtk_widget_destroy(self->menu_window);
+	g_object_unref(self->menu_window);
 }
 
 void kiran_menu_applet_button_class_init(KiranMenuAppletButtonClass *kclass)
