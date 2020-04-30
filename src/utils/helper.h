@@ -12,33 +12,33 @@
 #include <gio/gio.h>
 
 #define RETURN_VAL_IF_FALSE(cond, val) \
-  {                                    \
-    if (!(cond)) return val;           \
-  }
+    {                                  \
+        if (!(cond)) return val;       \
+    }
 
 #define RETURN_VAL_IF_TRUE(cond, val) \
-  {                                   \
-    if (cond) return val;             \
-  }
+    {                                 \
+        if (cond) return val;         \
+    }
 
 #define RETURN_IF_FALSE(cond) \
-  {                           \
-    if (!(cond)) return;      \
-  }
+    {                         \
+        if (!(cond)) return;  \
+    }
 
 #define RETURN_IF_TRUE(cond) \
-  {                          \
-    if (cond) return;        \
-  }
+    {                        \
+        if (cond) return;    \
+    }
 
 #define CONTINUE_IF_FALSE(cond) \
-  {                             \
-    if (!(cond)) continue;      \
-  }
+    {                           \
+        if (!(cond)) continue;  \
+    }
 
 #define CONTINUE_IF_TRUE(cond) \
-  {                            \
-    if (cond) continue;        \
-  }
+    {                          \
+        if (cond) continue;    \
+    }
 
 GList *list_remain_headn(GList *list, guint n, GDestroyNotify free_func);

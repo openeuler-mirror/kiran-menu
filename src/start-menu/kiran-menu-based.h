@@ -18,36 +18,37 @@ G_DECLARE_INTERFACE(KiranMenuBased, kiran_menu_based, KIRAN, MENU_BASED,
 
 typedef struct _KiranMenuBasedInterface KiranMenuBasedInterface;
 
-struct _KiranMenuBasedInterface {
-  GTypeInterface parent;
+struct _KiranMenuBasedInterface
+{
+    GTypeInterface parent;
 
-  GList *(*impl_search_app)(KiranMenuBased *self, const char *keyword);
+    GList *(*impl_search_app)(KiranMenuBased *self, const char *keyword);
 
-  gboolean (*impl_add_favorite_app)(KiranMenuBased *self,
-                                    const char *desktop_id);
+    gboolean (*impl_add_favorite_app)(KiranMenuBased *self,
+                                      const char *desktop_id);
 
-  gboolean (*impl_del_favorite_app)(KiranMenuBased *self,
-                                    const char *desktop_id);
+    gboolean (*impl_del_favorite_app)(KiranMenuBased *self,
+                                      const char *desktop_id);
 
-  GList *(*impl_get_favorite_apps)(KiranMenuBased *self);
+    GList *(*impl_get_favorite_apps)(KiranMenuBased *self);
 
-  gboolean (*impl_add_category_app)(KiranMenuBased *self, const char *category,
-                                    const char *desktop_id);
+    gboolean (*impl_add_category_app)(KiranMenuBased *self, const char *category,
+                                      const char *desktop_id);
 
-  gboolean (*impl_del_category_app)(KiranMenuBased *self, const char *category,
-                                    const char *desktop_id);
+    gboolean (*impl_del_category_app)(KiranMenuBased *self, const char *category,
+                                      const char *desktop_id);
 
-  GList *(*impl_get_category_apps)(KiranMenuBased *self, const char *category);
+    GList *(*impl_get_category_apps)(KiranMenuBased *self, const char *category);
 
-  GHashTable *(*impl_get_all_category_apps)(KiranMenuBased *self);
+    GHashTable *(*impl_get_all_category_apps)(KiranMenuBased *self);
 
-  GList *(*impl_get_nfrequent_apps)(KiranMenuBased *self, gint top_n);
+    GList *(*impl_get_nfrequent_apps)(KiranMenuBased *self, gint top_n);
 
-  void (*impl_reset_frequent_apps)(KiranMenuBased *self);
+    void (*impl_reset_frequent_apps)(KiranMenuBased *self);
 
-  GList *(*impl_get_nnew_apps)(KiranMenuBased *self, gint top_n);
+    GList *(*impl_get_nnew_apps)(KiranMenuBased *self, gint top_n);
 
-  GList *(*impl_get_all_sorted_apps)(KiranMenuBased *self);
+    GList *(*impl_get_all_sorted_apps)(KiranMenuBased *self);
 };
 
 /**

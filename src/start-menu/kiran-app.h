@@ -16,10 +16,11 @@ G_BEGIN_DECLS
 #define KIRAN_TYPE_APP (kiran_app_get_type())
 G_DECLARE_DERIVABLE_TYPE(KiranApp, kiran_app, KIRAN, APP, GObject);
 
-struct _KiranAppClass {
-  GObjectClass parent_class;
+struct _KiranAppClass
+{
+    GObjectClass parent_class;
 
-  gpointer padding[12];
+    gpointer padding[12];
 };
 
 /**
