@@ -4,12 +4,12 @@
  * @LastEditors  : tangjie02
  * @LastEditTime : 2020-04-10 01:18:27
  * @Description  :
- * @FilePath     : /kiran-menu-backend/src/start-menu/kiran-menu-based.c
+ * @FilePath     : /kiran-menu-backend/lib/kiran-menu-based.c
  */
 
-#include "src/start-menu/kiran-menu-based.h"
+#include "lib/kiran-menu-based.h"
 
-#include "src/start-menu/kiran-menu-skeleton.h"
+#include "lib/kiran-menu-skeleton.h"
 
 G_DEFINE_INTERFACE(KiranMenuBased, kiran_menu_based, G_TYPE_OBJECT)
 

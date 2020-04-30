@@ -4,7 +4,7 @@
  * @LastEditors  : tangjie02
  * @LastEditTime : 2020-04-10 00:09:13
  * @Description  : 用于菜单搜索功能
- * @FilePath     : /kiran-menu-backend/src/start-menu/kiran-menu-search.h
+ * @FilePath     : /kiran-menu-backend/lib/kiran-menu-search.h
  */
 #pragma once
 

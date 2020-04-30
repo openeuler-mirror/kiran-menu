@@ -4,14 +4,14 @@
  * @LastEditors  : tangjie02
  * @LastEditTime : 2020-04-10 00:55:21
  * @Description  :
- * @FilePath     : /kiran-menu-backend/src/start-menu/kiran-app.c
+ * @FilePath     : /kiran-menu-backend/lib/start-menu/kiran-app.c
  */
 
-#include "src/start-menu/kiran-app.h"
+#include "lib/kiran-app.h"
 
 #include <gio/gdesktopappinfo.h>
 
-#include "src/start-menu/kiran-menu-app.h"
+#include "lib/kiran-menu-app.h"
 
 typedef struct _KiranAppPrivate KiranAppPrivate;
 

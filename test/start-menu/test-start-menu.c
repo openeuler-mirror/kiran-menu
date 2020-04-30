@@ -1,6 +1,6 @@
 #include "test/start-menu/test-start-menu.h"
 
-#include "src/start-menu/kiran-menu-based.h"
+#include "lib/kiran-menu-based.h"
 
 void test_favorite_apps(gconstpointer data);
 void test_category_apps(gconstpointer data);

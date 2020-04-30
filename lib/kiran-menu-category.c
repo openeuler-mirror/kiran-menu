@@ -4,12 +4,12 @@
  * @LastEditors  : tangjie02
  * @LastEditTime : 2020-04-09 23:42:17
  * @Description  :
- * @FilePath     : /kiran-menu-backend/src/start-menu/kiran-menu-category.c
+ * @FilePath     : /kiran-menu-backend/lib/kiran-menu-category.c
  */
-#include "src/start-menu/kiran-menu-category.h"
+#include "lib/kiran-menu-category.h"
 
-#include "src/start-menu/kiran-menu-app.h"
-#include "src/utils/helper.h"
+#include "lib/helper.h"
+#include "lib/kiran-menu-app.h"
 
 struct _KiranMenuCategory
 {

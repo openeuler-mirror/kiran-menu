@@ -1,7 +1,7 @@
-#include "src/start-menu/kiran-menu-favorite.h"
+#include "lib/kiran-menu-favorite.h"
 
-#include "src/start-menu/kiran-app.h"
-#include "src/start-menu/kiran-menu-common.h"
+#include "lib/kiran-app.h"
+#include "lib/kiran-menu-common.h"
 
 struct _KiranMenuFavorite
 {

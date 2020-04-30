@@ -4,13 +4,13 @@
  * @LastEditors  : tangjie02
  * @LastEditTime : 2020-04-09 22:22:05
  * @Description  :
- * @FilePath     : /kiran-menu-backend/src/start-menu/kiran-menu-system.h
+ * @FilePath     : /kiran-menu-backend/lib/kiran-menu-system.h
  */
 #pragma once
 
 #include <gio/gio.h>
 
-#include "src/start-menu/kiran-menu-app.h"
+#include "lib/kiran-menu-app.h"
 
 #define KIRAN_TYPE_MENU_SYSTEM (kiran_menu_system_get_type())
 

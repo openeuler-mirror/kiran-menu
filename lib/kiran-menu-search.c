@@ -4,11 +4,11 @@
  * @LastEditors  : tangjie02
  * @LastEditTime : 2020-04-10 00:08:58
  * @Description  : 用于菜单搜索功能
- * @FilePath     : /kiran-menu-backend/src/start-menu/kiran-menu-search.c
+ * @FilePath     : /kiran-menu-backend/lib/kiran-menu-search.c
  */
-#include "src/start-menu/kiran-menu-search.h"
+#include "lib/kiran-menu-search.h"
 
-#include "src/start-menu/kiran-app.h"
+#include "lib/kiran-app.h"
 
 struct _KiranMenuSearch
 {

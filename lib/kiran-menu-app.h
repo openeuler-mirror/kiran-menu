@@ -4,14 +4,14 @@
  * @LastEditors  : tangjie02
  * @LastEditTime : 2020-04-09 23:47:30
  * @Description  :
- * @FilePath     : /kiran-menu-backend/src/start-menu/kiran-menu-app.h
+ * @FilePath     : /kiran-menu-backend/lib/start-menu/kiran-menu-app.h
  */
 #pragma once
 
 #include <gio/gdesktopappinfo.h>
 #include <gio/gio.h>
 
-#include "src/start-menu/kiran-app.h"
+#include "lib/kiran-app.h"
 
 G_BEGIN_DECLS
 

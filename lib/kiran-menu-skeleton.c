@@ -4,17 +4,17 @@
  * @LastEditors  : tangjie02
  * @LastEditTime : 2020-04-10 01:13:22
  * @Description  : 开始菜单类
- * @FilePath     : /kiran-menu-backend/src/start-menu/kiran-menu-skeleton.c
+ * @FilePath     : /kiran-menu-backend/lib/kiran-menu-skeleton.c
  */
-#include "src/start-menu/kiran-menu-skeleton.h"
+#include "lib/kiran-menu-skeleton.h"
 
 #include <gio/gio.h>
 
-#include "src/start-menu/kiran-menu-category.h"
-#include "src/start-menu/kiran-menu-favorite.h"
-#include "src/start-menu/kiran-menu-search.h"
-#include "src/start-menu/kiran-menu-system.h"
-#include "src/start-menu/kiran-menu-usage.h"
+#include "lib/kiran-menu-category.h"
+#include "lib/kiran-menu-favorite.h"
+#include "lib/kiran-menu-search.h"
+#include "lib/kiran-menu-system.h"
+#include "lib/kiran-menu-usage.h"
 
 struct _KiranMenuSkeleton
 {

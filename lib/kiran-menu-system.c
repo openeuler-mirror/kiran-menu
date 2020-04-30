@@ -4,14 +4,14 @@
  * @LastEditors  : tangjie02
  * @LastEditTime : 2020-04-09 23:58:29
  * @Description  :
- * @FilePath     : /kiran-menu-backend/src/start-menu/kiran-menu-system.c
+ * @FilePath     : /kiran-menu-backend/lib/kiran-menu-system.c
  */
-#include "src/start-menu/kiran-menu-system.h"
+#include "lib/kiran-menu-system.h"
 
 #include <gio/gdesktopappinfo.h>
 #include <gio/gio.h>
 
-#include "src/utils/helper.h"
+#include "lib/helper.h"
 
 struct _KiranMenuSystem
 {

@@ -4,9 +4,9 @@
  * @LastEditors  : tangjie02
  * @LastEditTime : 2020-04-09 23:01:16
  * @Description  :
- * @FilePath     : /kiran-menu-backend/src/utils/helper.c
+ * @FilePath     : /kiran-menu-backend/lib/utils/helper.c
  */
-#include "src/utils/helper.h"
+#include "lib/helper.h"
 
 GList *list_remain_headn(GList *list, guint n, GDestroyNotify free_func)
 {

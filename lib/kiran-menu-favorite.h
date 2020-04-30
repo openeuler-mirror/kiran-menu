@@ -4,7 +4,7 @@
  * @LastEditors  : tangjie02
  * @LastEditTime : 2020-04-08 17:04:18
  * @Description  :
- * @FilePath     : /kiran-menu-backend/src/start-menu/kiran-menu-favorite.h
+ * @FilePath     : /kiran-menu-backend/lib/kiran-menu-favorite.h
  */
 #pragma once
 

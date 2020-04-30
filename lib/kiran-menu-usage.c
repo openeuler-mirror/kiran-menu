@@ -4,13 +4,13 @@
  * @LastEditors  : tangjie02
  * @LastEditTime : 2020-04-10 01:14:43
  * @Description  :
- * @FilePath     : /kiran-menu-backend/src/start-menu/kiran-menu-usage.c
+ * @FilePath     : /kiran-menu-backend/lib/kiran-menu-usage.c
  */
-#include "src/start-menu/kiran-menu-usage.h"
+#include "lib/kiran-menu-usage.h"
 
-#include "src/start-menu/kiran-menu-common.h"
-#include "src/utils/helper.h"
-#include "src/utils/math_helper.h"
+#include "lib/helper.h"
+#include "lib/kiran-menu-common.h"
+#include "lib/math_helper.h"
 
 struct _KiranMenuUsage
 {

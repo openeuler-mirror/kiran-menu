@@ -1,8 +1,8 @@
 #pragma once
 #include <gio/gio.h>
 
-#include "src/start-menu/kiran-app.h"
-#include "src/start-menu/kiran-menu-based.h"
+#include "lib/kiran-app.h"
+#include "lib/kiran-menu-based.h"
 
 #define CHECK_PROXY_CALL_ERR(result, error)                       \
     {                                                             \

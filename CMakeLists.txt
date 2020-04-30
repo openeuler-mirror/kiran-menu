@@ -26,6 +26,6 @@ set(DEP_LIBRARIES
 set(DEP_LIBDIR ${GLIB_LIBDIR})
 
 
-add_subdirectory(src)
+add_subdirectory(lib)
 add_subdirectory(test/start-menu)
 

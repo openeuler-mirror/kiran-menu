@@ -4,7 +4,7 @@
  * @LastEditors  : tangjie02
  * @LastEditTime : 2020-04-10 00:43:04
  * @Description  : 维护APP的一些基本信息
- * @FilePath     : /kiran-menu-backend/src/start-menu/kiran-app.h
+ * @FilePath     : /kiran-menu-backend/lib/start-menu/kiran-app.h
  */
 
 #pragma once

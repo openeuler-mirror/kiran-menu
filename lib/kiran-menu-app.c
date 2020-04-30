@@ -4,9 +4,9 @@
  * @LastEditors  : tangjie02
  * @LastEditTime : 2020-04-10 01:14:20
  * @Description  :
- * @FilePath     : /kiran-menu-backend/src/start-menu/kiran-menu-app.c
+ * @FilePath     : /kiran-menu-backend/lib/kiran-menu-app.c
  */
-#include "src/start-menu/kiran-menu-app.h"
+#include "lib/kiran-menu-app.h"
 
 #define DESKTOP_FILE_GROUP "Desktop Entry"
 

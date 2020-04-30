@@ -4,13 +4,13 @@
  * @LastEditors  : tangjie02
  * @LastEditTime : 2020-04-09 23:40:53
  * @Description  : 管理菜单中的APP的分类
- * @FilePath     : /kiran-menu-backend/src/start-menu/kiran-menu-category.h
+ * @FilePath     : /kiran-menu-backend/lib/kiran-menu-category.h
  */
 #pragma once
 
 #include <gio/gio.h>
 
-#include "src/start-menu/kiran-menu-system.h"
+#include "lib/kiran-menu-system.h"
 
 G_BEGIN_DECLS
 
