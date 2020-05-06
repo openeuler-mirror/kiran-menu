@@ -7,6 +7,8 @@
 #include <kiran-menu-based.h>
 #include "config.h"
 
+#define FREQUENT_APPS_SHOW_MAX  4           //开始菜单中显示的最常使用应用数量
+
 struct _KiranMenuWindow {
     GObject obj;
 
@@ -52,6 +54,11 @@ static gboolean kiran_menu_window_load_styles(KiranMenuWindow *self)
     }
 }
 
+/**
+ *
+ * 加载应用程序和分类列表
+ *
+ */
 void kiran_menu_window_load_applications(KiranMenuWindow *self)
 {
     GHashTableIter iter;
@@ -76,7 +83,6 @@ void kiran_menu_window_load_applications(KiranMenuWindow *self)
         apps = value;
 
         category_item = kiran_category_item_new(category, TRUE);
-        //app_item = kiran_app_item_new()
         gtk_container_add(GTK_CONTAINER(self->all_apps_box), GTK_WIDGET(category_item));
         for (ptr = apps; ptr != NULL; ptr = ptr->next) {
             KiranApp *app = ptr->data;
@@ -85,6 +91,70 @@ void kiran_menu_window_load_applications(KiranMenuWindow *self)
             gtk_container_add(GTK_CONTAINER(self->all_apps_box), GTK_WIDGET(app_item));
         }
     }
+}
+
+/**
+ *
+ * 加载收藏夹列表
+ */
+void kiran_menu_window_load_favorites(KiranMenuWindow *self)
+{
+    GList *fav_list, *ptr;
+    KiranCategoryItem *category_item;
+
+    category_item = kiran_category_item_new("Favorites", FALSE);
+    fav_list = kiran_menu_based_get_favorite_apps(self->backend);
+    gtk_container_add(GTK_CONTAINER(self->default_apps_box), GTK_WIDGET(category_item));
+    g_message("%d favorite apps found\n", g_list_length(fav_list));
+    for (ptr = fav_list; ptr != NULL; ptr = ptr->next)
+    {
+        KiranAppItem *app_item;
+        KiranApp *app = ptr->data;
+
+        app_item = kiran_app_item_new(app);
+        g_message("Found favoriate app '%s'\n", kiran_app_get_name(app));
+        gtk_container_add(GTK_CONTAINER(self->default_apps_box), GTK_WIDGET(app_item));
+    }
+    //g_list_free_full(fav_list, g_object_unref);
+}
+
+/**
+ *
+ * 加载常用应用列表
+ */
+void kiran_menu_window_load_frequent_apps(KiranMenuWindow *self)
+{
+    GList *recently_apps, *ptr;
+    KiranCategoryItem *category_item;
+
+
+    category_item = kiran_category_item_new("Recently Used", FALSE);
+    gtk_container_add(GTK_CONTAINER(self->default_apps_box), GTK_WIDGET(category_item));
+
+    recently_apps = kiran_menu_based_get_nfrequent_apps(self->backend, FREQUENT_APPS_SHOW_MAX);
+    g_message("%d recently apps found\n", g_list_length(recently_apps));
+
+    if (!g_list_length(recently_apps)) {
+        //最近使用列表为空
+
+        GtkWidget *label = gtk_label_new("No apps available");
+
+        gtk_widget_set_name(label, "app-empty-prompt");
+        gtk_widget_set_halign(label, GTK_ALIGN_START);
+        gtk_container_add(GTK_CONTAINER(self->default_apps_box), label);
+        return;
+    }
+    for (ptr = recently_apps; ptr != NULL; ptr = ptr->next)
+    {
+        KiranAppItem *app_item;
+        KiranApp *app = ptr->data;
+
+        app_item = kiran_app_item_new(app);
+        g_message("Found recently app '%s'\n", kiran_app_get_name(app));
+        gtk_container_add(GTK_CONTAINER(self->default_apps_box), GTK_WIDGET(app_item));
+    }
+
+    //g_list_free_full(recently_apps, g_object_unref);
 }
 
 void kiran_menu_window_init(KiranMenuWindow *self)
@@ -97,6 +167,9 @@ void kiran_menu_window_init(KiranMenuWindow *self)
 
     self->resource = g_resource_load(RESOURCE_PATH, &error);
     if (!self->resource) {
+        /**
+         * 如果资源加载失败，所有界面元素都将无法获取，所以要直接退出程序
+         */
         g_error("Failed to load resource '%s': %s\n", RESOURCE_PATH, error->message);
         exit(1);
     }
@@ -130,6 +203,10 @@ void kiran_menu_window_init(KiranMenuWindow *self)
     gtk_container_add(GTK_CONTAINER(bottom_box), GTK_WIDGET(kiran_power_button_new()));
     gtk_widget_set_name(self->window, "menu-window");
 
+
+    /* 加载应用程序数据 */
+    kiran_menu_window_load_frequent_apps(self);
+    kiran_menu_window_load_favorites(self);
     kiran_menu_window_load_applications(self);
 }
 
