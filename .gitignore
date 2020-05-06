@@ -2,3 +2,5 @@ kiran-menu-applet
 .vscode/
 build/
 menu.gresource
+/builddir
+/.vscode

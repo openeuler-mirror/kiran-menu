@@ -1,13 +1,11 @@
 # 开始菜单
 
 ## 编译安装
-
 ```
 # yum install mate-panel-devel meson gcc
-# meson build 
-# meson configure --prefix=/usr build
-# ninja-build -C build 
-# ninja-build install
+# mkdir build
+# cd build && cmake -DCMAKE_INSTALL_PREFIX=/usr ..
+# make
 ```
 
 ## 运行

@@ -1,0 +1,169 @@
+@startuml
+
+KiranMenuSkeleton -up..|> KiranMenuBased
+KiranMenuSkeleton o..> KiranMenuSystem
+KiranMenuSkeleton o..> KiranMenuUsage
+KiranMenuSkeleton o..> KiranMenuCategory
+KiranMenuSkeleton o..> KiranMenuFavorite
+KiranMenuSkeleton o..> KiranMenuSearch
+KiranMenuSystem o..> KiranMenuApp
+KiranMenuApp --|> KiranApp
+KiranApp --|> GObject
+
+note top of KiranMenuBased : "desktop_id即为'desktop file ID'，例如'org.foo.bar.desktop'。\n如未特殊说明，函数参数和返回值中的dekstop_id均应在当前系统的菜单中可显示(g_app_info_should_show函数返回TRUE)，否则为非法desktop_id。"
+
+interface KiranMenuBased {
+    * @class    KiranMenuBased 开始菜单接口类，使用者应该仅通过KiranMenuBased和KiranApp接口类来进行创建、设置和获取等与开始菜单后台程序相关的操作。
+    __
+    * 创建一个KiranMenuSkeleton对象。
+    KiranMenuBased* kiran_menu_based_skeleton_new()
+    __
+    * 通过关键词进行检索，会跟.desktop文件的name/localename/comment字段进行字符串匹配，如果关键词为其中任何一个字段的子串，则匹配成功。最后返回所有匹配成功的KiranApp。
+    * @param    {KiranMenuBased*} self KiranMenuSkeleton对象
+    * @param    {const char*} keyword 检索的关键词
+    * @return   {GList*} return_val 返回匹配成功列表，链表元素类型为KiranApp*，调用者需要通过g_list_free_full(return_val, g_object_unref)进行释放。
+    GList*   kiran_menu_based_search_app(KiranMenuBased *self, const char *keyword)
+    __
+    * 将desktop_id加入收藏列表。
+    * @param    {KiranMenuBased*} self KiranMenuSkeleton对象
+    * @param    {const char*} desktop_id 收藏的desktop_id
+    * @return   {gboolean} return_val 如果dekstop_id不合法，或者已经在收藏列表中，则返回FALSE，否则返回TRUE。
+    gboolean  kiran_menu_based_add_favorite_app(KiranMenuBased *self, const char *desktop_id)
+
+    * 从收藏列表删除desktop_id。
+    * @param    {KiranMenuBased*} self KiranMenuSkeleton对象
+    * @param    {const char*} desktop_id 删除的desktop_id
+    * @return   {gboolean} return_val 如果dekstop_id不在收藏列表中，则返回FALSE，否则返回TRUE。
+    gboolean  kiran_menu_based_del_favorite_app(KiranMenuBased *self, const char *desktop_id)
+
+    * 获取收藏列表。
+    * @param    {KiranMenuBased*} self KiranMenuSkeleton对象
+    * @return   {gboolean} return_val 返回收藏列表，链表元素类型为KiranApp*，调用者需要通过g_list_free_full(return_val, g_object_unref)进行释放。
+    GList*  kiran_menu_based_get_favorite_apps(KiranMenuBased *self)
+    __
+    * 将desktop_id添加到category分类中。
+    * @param    {KiranMenuBased*} self KiranMenuSkeleton对象
+    * @param    {const char*} category 选择的分类
+    * @param    {const char*} desktop_id 添加的desktop_id
+    * @return   {gboolean} return_val 如果desktop_id不存在或者添加分类错误，则返回FALSE，否则返回TRUE。
+    gboolean  kiran_menu_based_add_category_app(KiranMenuBased *self, const char *category, const char *desktop_id)
+
+    * 将desktop_id从category分类中删除。
+    * @param    {KiranMenuBased*} self KiranMenuSkeleton对象
+    * @param    {const char*} category 选择的分类
+    * @param    {const char*} desktop_id 删除的desktop_id
+    * @return   {gboolean} return_val 如果desktop_id不存在或者删除分类错误，则返回FALSE，否则返回TRUE。
+    gboolean  kiran_menu_based_del_category_app(KiranMenuBased *self, const char *category, const char *desktop_id)
+
+    * 获取category分类中的所有KiranApp。
+    * @param    {KiranMenuBased*} self KiranMenuSkeleton对象
+    * @param    {const char*} category 选择的分类
+    * @return   {GList*} return_val 链表元素类型为KiranApp*，调用者需要通过g_list_free_full(return_val, g_object_unref)进行释放。
+    GList*   kiran_menu_based_get_category_apps(KiranMenuBased *self, const char *category)
+
+    * 获取所有分类的KiranApp。
+    * @param    {KiranMenuBased*} self KiranMenuSkeleton对象
+    * @return   {GHashTable*} return_val GHashTable的key为分类字符串，value为GList*，GList中每个元素类型为KiranApp*，调用者需要通过g_hash_table_unref(return_val)进行释放。
+    GHashTable* kiran_menu_based_get_all_category_apps(KiranMenuBased *self)
+    __
+    * 获取使用频率最高的top_n个app，返回app的KiranApp对象。
+    * @param    {KiranMenuBased*} self KiranMenuSkeleton对象
+    * @param    {gint} top_n 见函数说明。
+    * @return   {GList*} return_val 链表元素类型为KiranApp*。如果top_n超过所有app的数量或者等于-1，则返回所有app的KiranApp。返回值通过g_list_free_full(return_val, g_object_unref)进行释放。
+    GList*   kiran_menu_based_get_nfrequent_apps(KiranMenuBased *self, gint top_n)
+
+    * 重置频繁使用的APP列表。该操作会将所有APP的分数清0
+    * @param    {KiranMenuBased*} self KiranMenuSkeleton对象
+    * @return   {void} 
+    void  kiran_menu_based_reset_frequent_apps(KiranMenuBased *self)
+    __
+    * 获取最新安装的top_n个app，返回这些app的KiranApp对象。
+    * @param    {KiranMenuBased*} self KiranMenuSkeleton对象
+    * @return   {GList*} return_val 链表元素类型为KiranApp*。如果top_n超过所有app的数量或者等于-1，则返回所有app的KiranApp。返回值通过g_list_free_full(return_val, g_object_unref)进行释放。
+    GList*   kiran_menu_based_get_nnew_apps(KiranMenuBased *self, gint top_n)
+    __
+    * 获取所有已注册且可在当前系统显示的desktop_id列表，该列表已通过.desktop文件的name字段进行排序。
+    * @param    {KiranMenuBased*} self KiranMenuSkeleton对象
+    * @return   {GList*} return_val 链表元素类型为KiranApp*。返回值通过g_list_free_full(return_val, g_object_unref)进行释放。
+    GList*   kiran_menu_based_get_all_sorted_apps(KiranMenuBased *self)
+    __
+    * "changed"信号，当系统已注册的App发生变化（新增/删除/修改）时会被触发。
+    void user_function(KiranMenuBased *self, gpointer *user_data)
+}
+
+
+class KiranMenuSkeleton {
+    * @class    KiranMenuSkeleton 开始菜单类，继承KiranMenuBased接口类。
+}
+
+class KiranMenuSystem {
+    * @class    KiranMenuSystem 该类维护所有系统已注册且在当前系统的菜单中可显示的APP。
+    __
+    KiranMenuSystem* kiran_menu_system_get_new()
+    __
+    GList *kiran_menu_system_get_apps(KiranMenuSystem *self)
+    KiranApp *kiran_menu_system_lookup_app(KiranMenuSystem *self, const char *desktop_id)
+    __
+    GList*   kiran_menu_system_get_nnew_apps(KiranMenuSystem *self, gint top_n)
+    gchar** kiran_menu_system_get_all_sorted_apps(KiranMenuSystem *self)
+}
+
+class KiranMenuUsage {
+    * @class    KiranMenuUsage 该类通过一些算法来维护和统计菜单中的APP的使用频率。
+    __
+    KiranMenuUsage* kiran_menu_usage_get_new()
+    __
+    GList*   kiran_menu_usage_get_nfrequent_apps(KiranMenuUsage *self, gint top_n)
+    gboolean  kiran_menu_usage_reset(KiranMenuUsage *self)
+}
+
+class KiranMenuCategory {
+    * @class    KiranMenuCategory 该类用于管理菜单中的APP的分类
+    __
+    KiranMenuCategory* kiran_menu_category_get_new()
+    __
+    gboolean  kiran_menu_category_add_app(KiranMenuCategory *self, const char *category, const KiranMenuApp *menu_app)
+    gboolean  kiran_menu_category_del_app(KiranMenuCategory *self, const char *category, const KiranMenuApp *menu_app)
+    GList*   kiran_menu_category_get_apps(KiranMenuCategory *self, const char *category)
+    GHashTable* kiran_menu_category_get_all(KiranMenuCategory *self)
+}
+
+class KiranMenuFavorite {
+    * @class    KiranMenuFavorite 该类用于管理菜单中用户收藏的APP
+    __
+    KiranMenFavorite* kiran_menu_favorite_get_new()
+    __
+    gboolean  kiran_menu_favorite_add_app(KiranMenuFavorite *self, const char *desktop_id)
+    gboolean  kiran_menu_favorite_del_app(KiranMenuFavorite *self, const char *desktop_id)
+    GList*    kiran_menu_favorite_get_favorite_apps(KiranMenuFavorite *self)
+}
+
+class KiranMenuSearch {
+    * @class    KiranMenuSearch 该类用于菜单搜索功能。
+    __
+    KiranMenSearch* kiran_menu_search_get_new()
+    __
+    GList*   kiran_menu_search_by_keyword(KiranMenuSearch *self, const char *keyword, GList* apps)
+}
+
+class KiranApp {
+    * @class    通过该类获取APP的一些基本信息。
+    __
+    const gchar *kiran_app_get_name(KiranApp *app)
+    const gchar *kiran_app_get_locale_name(KiranApp *app)
+    const gchar *kiran_app_get_desktop_id(KiranApp *app)
+    const gchar *kiran_app_get_categories(KiranApp *app)
+}
+
+class KiranMenuApp {
+    * @class    KiranMenuApp 获取与菜单相关APP的基本信息。
+    __
+    KiranMenuApp *kiran_app_get_new(const char *desktop_id)
+    __
+    gboolean kiran_app_info_add_category(KiranApp *app, const char *category)
+    gboolean kiran_app_info_del_category(KiranApp *app, const char *category)
+}
+
+
+
+@enduml
