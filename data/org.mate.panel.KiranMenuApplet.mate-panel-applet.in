@@ -1,7 +1,7 @@
 [Applet Factory]
 Id=KiranMenuAppletFactory
 InProcess=false
-Location=@INSTALL_PREFIX@/lib/mate-panel/kiran-menu-applet
+Location=@CMAKE_INSTALL_PREFIX@/lib/mate-panel/kiran-menu-applet
 Name=Kiran Start Menu Factory
 Description=Factory for Kiran Start Menu
 

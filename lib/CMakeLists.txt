@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.0)
+cmake_minimum_required(VERSION 3.0)
 
 
 file(GLOB_RECURSE CORE_H_FILES ./*.h)
@@ -6,7 +6,6 @@ file(GLOB_RECURSE CORE_C_FILES ./*.c)
 
 
 set (ALL_FILES ${CORE_H_FILES} ${CORE_C_FILES})
-
 
 add_library(${PROJECT_NAME} ${ALL_FILES})
 

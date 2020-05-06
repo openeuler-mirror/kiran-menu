@@ -4,3 +4,4 @@ build/
 menu.gresource
 /builddir
 /.vscode
+*~
