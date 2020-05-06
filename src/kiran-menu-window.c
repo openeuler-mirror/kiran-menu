@@ -15,6 +15,7 @@ struct _KiranMenuWindow {
     GtkWidget *window, *parent;
     GtkWidget *all_apps_box, *default_apps_box;
     GtkWidget *apps_view_stack;
+    GtkWidget *back_button, *all_apps_button;
     GtkBuilder *builder;
     GResource *resource;
     GDBusProxy *proxy;
@@ -52,6 +53,18 @@ static gboolean kiran_menu_window_load_styles(KiranMenuWindow *self)
         g_error_free(error);
         return;
     }
+}
+
+static void show_default_apps_page(KiranMenuWindow *self)
+{
+    gtk_stack_set_transition_type(GTK_STACK(self->apps_view_stack), GTK_STACK_TRANSITION_TYPE_SLIDE_RIGHT);
+    gtk_stack_set_visible_child_name(GTK_STACK(self->apps_view_stack), "default-apps-page");
+}
+
+static void show_all_apps_page(KiranMenuWindow *self)
+{
+    gtk_stack_set_transition_type(GTK_STACK(self->apps_view_stack), GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT);
+    gtk_stack_set_visible_child_name(GTK_STACK(self->apps_view_stack), "all-apps-page");
 }
 
 /**
@@ -191,6 +204,9 @@ void kiran_menu_window_init(KiranMenuWindow *self)
     top_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "top-box"));
     bottom_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "bottom-box"));
 
+    self->back_button = GTK_WIDGET(gtk_builder_get_object(self->builder, "back-button"));
+    self->all_apps_button = GTK_WIDGET(gtk_builder_get_object(self->builder, "all-apps-button"));
+
     gtk_orientable_set_orientation(GTK_ORIENTABLE(top_box), GTK_ORIENTATION_VERTICAL);
     gtk_container_add(GTK_CONTAINER(top_box), GTK_WIDGET(kiran_app_button_new("/kiran-menu/sidebar/home-dir", "Home Directory", "caja")));
     gtk_container_add(GTK_CONTAINER(top_box), GTK_WIDGET(kiran_app_button_new("/kiran-menu/sidebar/monitor", "System monitor", "mate-system-monitor")));
@@ -203,11 +219,15 @@ void kiran_menu_window_init(KiranMenuWindow *self)
     gtk_container_add(GTK_CONTAINER(bottom_box), GTK_WIDGET(kiran_power_button_new()));
     gtk_widget_set_name(self->window, "menu-window");
 
+    g_signal_connect_swapped(self->back_button, "clicked", G_CALLBACK(show_default_apps_page), self);
+    g_signal_connect_swapped(self->all_apps_button, "clicked", G_CALLBACK(show_all_apps_page), self);
+
 
     /* 加载应用程序数据 */
     kiran_menu_window_load_frequent_apps(self);
     kiran_menu_window_load_favorites(self);
     kiran_menu_window_load_applications(self);
+
 }
 
 void kiran_menu_window_finalize(GObject *obj)
