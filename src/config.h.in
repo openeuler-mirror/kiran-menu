@@ -1,0 +1,2 @@
+
+#define RESOURCE_PATH   "@CMAKE_INSTALL_PREFIX@/share/@CMAKE_PROJECT_NAME@/menu.gresource"
