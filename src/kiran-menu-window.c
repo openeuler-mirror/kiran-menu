@@ -2,15 +2,23 @@
 #include "kiran-search-entry.h"
 #include "kiran-app-button.h"
 #include "kiran-power-button.h"
+#include "kiran-category-item.h"
+#include "kiran-app-item.h"
+#include <kiran-menu-based.h>
 #include "config.h"
 
 struct _KiranMenuWindow {
     GObject obj;
 
     GtkWidget *window, *parent;
+    GtkWidget *all_apps_box, *default_apps_box;
+    GtkWidget *apps_view_stack;
     GtkBuilder *builder;
     GResource *resource;
     GDBusProxy *proxy;
+
+    KiranMenuBased *backend;
+    GHashTable *apps;
 };
 
 G_DEFINE_TYPE(KiranMenuWindow, kiran_menu_window, G_TYPE_OBJECT)
@@ -44,19 +52,64 @@ static gboolean kiran_menu_window_load_styles(KiranMenuWindow *self)
     }
 }
 
+void kiran_menu_window_load_applications(KiranMenuWindow *self)
+{
+    GHashTableIter iter;
+    gpointer key, value;
+
+    self->apps = kiran_menu_based_get_all_category_apps(self->backend);
+
+    if (!self->apps) {
+        g_error("The applications list is empty!!!\n");
+        return;
+    }
+
+    g_hash_table_iter_init(&iter, self->apps);
+    while (g_hash_table_iter_next (&iter, &key, &value))
+    {
+        GList *apps, *ptr;
+        gchar *category;
+        KiranCategoryItem *category_item;
+        KiranAppItem *app_item;
+
+        category = key;
+        apps = value;
+
+        category_item = kiran_category_item_new(category, TRUE);
+        //app_item = kiran_app_item_new()
+        gtk_container_add(GTK_CONTAINER(self->all_apps_box), GTK_WIDGET(category_item));
+        for (ptr = apps; ptr != NULL; ptr = ptr->next) {
+            KiranApp *app = ptr->data;
+
+            app_item = kiran_app_item_new(app);
+            gtk_container_add(GTK_CONTAINER(self->all_apps_box), GTK_WIDGET(app_item));
+        }
+    }
+}
+
 void kiran_menu_window_init(KiranMenuWindow *self)
 {
     GError *error = NULL;
     GtkWidget *search_box, *search_entry;
     GtkWidget *top_box, *bottom_box;
 
+    self->backend = kiran_menu_based_skeleton_new();
+
     self->resource = g_resource_load(RESOURCE_PATH, &error);
+    if (!self->resource) {
+        g_error("Failed to load resource '%s': %s\n", RESOURCE_PATH, error->message);
+        exit(1);
+    }
     g_resources_register(self->resource);
 
     kiran_menu_window_load_styles(self);
     self->builder = gtk_builder_new_from_resource("/kiran-menu/ui/menu");
     self->window = GTK_WIDGET(gtk_builder_get_object(self->builder, "menu-window"));
     gtk_window_set_decorated(GTK_WINDOW(self->window), FALSE);
+
+    self->all_apps_box= GTK_WIDGET(gtk_builder_get_object(self->builder, "all-apps-box"));
+    self->default_apps_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "default-apps-box"));
+    self->apps_view_stack = GTK_WIDGET(gtk_builder_get_object(self->builder, "apps-view-stack"));
 
     search_entry = kiran_search_entry_new();
     search_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "search-box"));
@@ -76,6 +129,8 @@ void kiran_menu_window_init(KiranMenuWindow *self)
 
     gtk_container_add(GTK_CONTAINER(bottom_box), GTK_WIDGET(kiran_power_button_new()));
     gtk_widget_set_name(self->window, "menu-window");
+
+    kiran_menu_window_load_applications(self);
 }
 
 void kiran_menu_window_finalize(GObject *obj)
@@ -85,6 +140,7 @@ void kiran_menu_window_finalize(GObject *obj)
     g_object_unref(self->window);
     g_object_unref(self->builder);
     g_resources_unregister(self->resource);
+    g_hash_table_unref(self->apps);
 }
 
 void kiran_menu_window_class_init(KiranMenuWindowClass *kclass)
