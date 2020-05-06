@@ -87,4 +87,12 @@ const gchar *kiran_app_get_file_name(KiranApp *self);
  */
 guint64 kiran_app_get_create_time(KiranApp *self);
 
+/**
+ * @description: 获取指定app的图标
+ * @param {KiranApp*} 要获取图标的app
+ * @return: 图标信息
+ * @author: songchuanfei
+ */
+GIcon *kiran_app_get_icon(KiranApp *self);
+
 G_END_DECLS

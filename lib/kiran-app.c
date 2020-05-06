@@ -212,3 +212,11 @@ static void kiran_app_class_init(KiranAppClass *klass)
             "desktop-id", "Application id", "The desktop file id", NULL,
             G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
 }
+
+GIcon *kiran_app_get_icon(KiranApp *self)
+{
+    KiranAppPrivate *priv = kiran_app_get_instance_private(self);
+
+    return g_app_info_get_icon(G_APP_INFO(priv->desktop_app));
+}
+}
