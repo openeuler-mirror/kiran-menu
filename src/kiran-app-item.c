@@ -34,6 +34,8 @@ void kiran_app_item_init(KiranAppItem *item)
     gtk_container_add(GTK_CONTAINER(item), item->grid);
 
     gtk_label_set_ellipsize(GTK_LABEL(item->label), PANGO_ELLIPSIZE_END);
+    gtk_widget_set_hexpand(item->label, TRUE);
+    gtk_widget_set_halign(item->label, GTK_ALIGN_START);
 
     gtk_widget_show_all(item->grid);
 }
