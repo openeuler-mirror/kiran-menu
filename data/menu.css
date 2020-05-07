@@ -114,20 +114,21 @@ button.kiran-category-selector:hover {
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-popover button{
+popover.kiran-power-menu button{
     color: white;
-    padding-left: 10px;
+    padding-left: 20px;
     padding-right: 10px;
     padding-top: 5px;
     padding-bottom: 5px;
+    min-width: 80px;
 }
 
-popover {
+popover.kiran-power-menu {
     padding-top: 5px;
     padding-bottom: 5px;
 }
 
-popover.background {
+popover.kiran-power-menu.background {
     background-color: #1f1f1f;
     border: 1px solid rgba(255, 255, 255, 0.5);
 }

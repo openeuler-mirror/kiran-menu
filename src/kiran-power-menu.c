@@ -49,6 +49,7 @@ static PowerAction actions[] = {
 void kiran_power_menu_init(KiranPowerMenu *self)
 {
     GError *error = NULL;
+    GtkStyleContext *context;
 
     self->session_manager_proxy = g_dbus_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
                                                 G_DBUS_PROXY_FLAGS_DO_NOT_LOAD_PROPERTIES | G_DBUS_PROXY_FLAGS_DO_NOT_CONNECT_SIGNALS,
@@ -95,6 +96,9 @@ void kiran_power_menu_init(KiranPowerMenu *self)
         g_signal_connect_swapped(button, "clicked", G_CALLBACK(callback), self);
     }
     gtk_container_add(GTK_CONTAINER(self), self->grid);
+
+    context = gtk_widget_get_style_context(GTK_WIDGET(self));
+    gtk_style_context_add_class(context, "kiran-power-menu");
     gtk_widget_show_all(self->grid);
 }
 
