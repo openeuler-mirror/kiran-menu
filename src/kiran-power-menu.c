@@ -40,10 +40,10 @@ typedef struct {
 
 static PowerAction actions[] = {
     {"Logout", G_STRUCT_OFFSET(KiranPowerMenuClass, logout)},
-    {"Shutdown", G_STRUCT_OFFSET(KiranPowerMenuClass, shutdown)},
-    {"Reboot", G_STRUCT_OFFSET(KiranPowerMenuClass, reboot)},
     {"Suspend", G_STRUCT_OFFSET(KiranPowerMenuClass, suspend)},
-    {"Hibernate", G_STRUCT_OFFSET(KiranPowerMenuClass, hibernate)}
+    {"Hibernate", G_STRUCT_OFFSET(KiranPowerMenuClass, hibernate)},
+    {"Shutdown", G_STRUCT_OFFSET(KiranPowerMenuClass, shutdown)},
+    {"Reboot", G_STRUCT_OFFSET(KiranPowerMenuClass, reboot)}
 };
 
 void kiran_power_menu_init(KiranPowerMenu *self)
