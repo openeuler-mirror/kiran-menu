@@ -1,4 +1,5 @@
 #include "kiran-search-entry.h"
+#include <glib/gi18n.h>
 
 struct _KiranSearchEntry
 {
@@ -78,7 +79,7 @@ KiranSearchEntry *kiran_search_entry_new(void)
                     16, 16, TRUE, NULL);
 
     return g_object_new(KIRAN_TYPE_SEARCH_ENTRY, 
-                    "placeholder-text", "Search for applications",
+                    "placeholder-text", _("Search for applications"),
                     "primary-icon-pixbuf", pixbuf,
                     NULL);
 }

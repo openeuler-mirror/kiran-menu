@@ -1,5 +1,6 @@
 #include "kiran-app-item.h"
 #include <gio/gdesktopappinfo.h>
+#include <glib/gi18n.h>
 
 struct _KiranAppItem
 {
@@ -73,11 +74,11 @@ static GtkWidget *create_context_menu(GtkWidget *attach)
     GtkWidget *menu, *menu_item;
 
     menu = gtk_menu_new();
-    menu_item = gtk_menu_item_new_with_label("Add to desktop");
+    menu_item = gtk_menu_item_new_with_label(_("Add to desktop"));
     g_signal_connect_swapped(menu_item, "activate", G_CALLBACK(add_to_desktop), attach);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
 
-    menu_item = gtk_menu_item_new_with_label("Add to favorites");
+    menu_item = gtk_menu_item_new_with_label(_("Add to favorites"));
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
     gtk_menu_attach_to_widget(GTK_MENU(menu), attach, (GtkMenuDetachFunc)destroy_menu);
     //g_signal_connect(menu, "deactivate", G_CALLBACK(gtk_menu_detach), NULL);

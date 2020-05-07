@@ -5,6 +5,7 @@
 #include "kiran-category-item.h"
 #include "kiran-app-item.h"
 #include <kiran-menu-based.h>
+#include <glib/gi18n.h>
 #include "config.h"
 
 #define FREQUENT_APPS_SHOW_MAX  4           //开始菜单中显示的最常使用应用数量
@@ -57,12 +58,14 @@ static gboolean kiran_menu_window_load_styles(KiranMenuWindow *self)
 
 static void show_default_apps_page(KiranMenuWindow *self)
 {
+    //更改动画切换方向，看起来更自然
     gtk_stack_set_transition_type(GTK_STACK(self->apps_view_stack), GTK_STACK_TRANSITION_TYPE_SLIDE_RIGHT);
     gtk_stack_set_visible_child_name(GTK_STACK(self->apps_view_stack), "default-apps-page");
 }
 
 static void show_all_apps_page(KiranMenuWindow *self)
 {
+    //更改动画切换方向，看起来更自然
     gtk_stack_set_transition_type(GTK_STACK(self->apps_view_stack), GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT);
     gtk_stack_set_visible_child_name(GTK_STACK(self->apps_view_stack), "all-apps-page");
 }
@@ -115,7 +118,7 @@ void kiran_menu_window_load_favorites(KiranMenuWindow *self)
     GList *fav_list, *ptr;
     KiranCategoryItem *category_item;
 
-    category_item = kiran_category_item_new("Favorites", FALSE);
+    category_item = kiran_category_item_new(_("Favorites"), FALSE);
     fav_list = kiran_menu_based_get_favorite_apps(self->backend);
     gtk_container_add(GTK_CONTAINER(self->default_apps_box), GTK_WIDGET(category_item));
     g_message("%d favorite apps found\n", g_list_length(fav_list));
@@ -141,7 +144,7 @@ void kiran_menu_window_load_frequent_apps(KiranMenuWindow *self)
     KiranCategoryItem *category_item;
 
 
-    category_item = kiran_category_item_new("Recently Used", FALSE);
+    category_item = kiran_category_item_new(_("Frequently Used"), FALSE);
     gtk_container_add(GTK_CONTAINER(self->default_apps_box), GTK_WIDGET(category_item));
 
     recently_apps = kiran_menu_based_get_nfrequent_apps(self->backend, FREQUENT_APPS_SHOW_MAX);
@@ -150,7 +153,7 @@ void kiran_menu_window_load_frequent_apps(KiranMenuWindow *self)
     if (!g_list_length(recently_apps)) {
         //最近使用列表为空
 
-        GtkWidget *label = gtk_label_new("No apps available");
+        GtkWidget *label = gtk_label_new(_("No apps available"));
 
         gtk_widget_set_name(label, "app-empty-prompt");
         gtk_widget_set_halign(label, GTK_ALIGN_START);
@@ -208,13 +211,13 @@ void kiran_menu_window_init(KiranMenuWindow *self)
     self->all_apps_button = GTK_WIDGET(gtk_builder_get_object(self->builder, "all-apps-button"));
 
     gtk_orientable_set_orientation(GTK_ORIENTABLE(top_box), GTK_ORIENTATION_VERTICAL);
-    gtk_container_add(GTK_CONTAINER(top_box), GTK_WIDGET(kiran_app_button_new("/kiran-menu/sidebar/home-dir", "Home Directory", "caja")));
-    gtk_container_add(GTK_CONTAINER(top_box), GTK_WIDGET(kiran_app_button_new("/kiran-menu/sidebar/monitor", "System monitor", "mate-system-monitor")));
-    gtk_container_add(GTK_CONTAINER(top_box), GTK_WIDGET(kiran_app_button_new("/kiran-menu/sidebar/help", "Open help", "yelp")));
+    gtk_container_add(GTK_CONTAINER(top_box), GTK_WIDGET(kiran_app_button_new("/kiran-menu/sidebar/home-dir", _("Home Directory"), "caja")));
+    gtk_container_add(GTK_CONTAINER(top_box), GTK_WIDGET(kiran_app_button_new("/kiran-menu/sidebar/monitor", _("System monitor"), "mate-system-monitor")));
+    gtk_container_add(GTK_CONTAINER(top_box), GTK_WIDGET(kiran_app_button_new("/kiran-menu/sidebar/help", _("Open help"), "yelp")));
 
     gtk_orientable_set_orientation(GTK_ORIENTABLE(bottom_box), GTK_ORIENTATION_VERTICAL);
-    gtk_container_add(GTK_CONTAINER(bottom_box), GTK_WIDGET(kiran_app_button_new("/kiran-menu/sidebar/avatar", "About me", "mate-about-me")));
-    gtk_container_add(GTK_CONTAINER(bottom_box), GTK_WIDGET(kiran_app_button_new("/kiran-menu/sidebar/settings", "Control center", "mate-control-center")));
+    gtk_container_add(GTK_CONTAINER(bottom_box), GTK_WIDGET(kiran_app_button_new("/kiran-menu/sidebar/avatar", _("About me"), "mate-about-me")));
+    gtk_container_add(GTK_CONTAINER(bottom_box), GTK_WIDGET(kiran_app_button_new("/kiran-menu/sidebar/settings", _("Control center"), "mate-control-center")));
 
     gtk_container_add(GTK_CONTAINER(bottom_box), GTK_WIDGET(kiran_power_button_new()));
     gtk_widget_set_name(self->window, "menu-window");

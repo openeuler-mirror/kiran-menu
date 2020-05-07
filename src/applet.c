@@ -1,6 +1,12 @@
 #include <mate-panel-applet.h>
 #include <gtk/gtk.h>
+#include <glib/gi18n.h>
+#include <locale.h>
 #include "kiran-menu-applet-button.h"
+#include "config.h"
+
+
+#define GETTEXT_PACKAGE "kiran-menu"
 
 static gboolean
 kiran_menu_applet_fill (MatePanelApplet *applet,
@@ -12,6 +18,11 @@ kiran_menu_applet_fill (MatePanelApplet *applet,
 
 	if (strcmp(iid, "KiranMenuApplet"))
 		return FALSE;
+
+	setlocale(LC_MESSAGES, "");
+	bindtextdomain(GETTEXT_PACKAGE, DATA_DIR "/locale");
+	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+	textdomain (GETTEXT_PACKAGE);
 
 	button = kiran_menu_applet_button_new(applet);
 	gtk_container_add(GTK_CONTAINER(applet), GTK_WIDGET(button));
