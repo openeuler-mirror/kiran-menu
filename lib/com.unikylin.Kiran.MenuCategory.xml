@@ -1,0 +1,31 @@
+<categories>
+    <category>
+        <name> network </name>
+        <logic>
+            <and>
+                <or>
+                    <desktop_category> NetWork </desktop_category>
+                    <desktop_id> mate-network-properties.desktop </desktop_id>
+                </or>
+                <not>
+                    <desktop_category> FileTransfer </desktop_category>
+                </not>
+            </and>
+        </logic>
+        <include>
+            <desktop_id> filezilla.desktop </desktop_id>
+        </include>
+        <exclude>
+            <desktop_id> mate-network-properties.desktop </desktop_id>
+        </exclude>
+    </category>
+    <category>
+        <name> graphics </name>
+        <logic>
+            <or>
+                <desktop_category> Graphics </desktop_category>
+                <desktop_category> Photography </desktop_category>
+            </or>
+        </logic>
+    </category>
+</categories>

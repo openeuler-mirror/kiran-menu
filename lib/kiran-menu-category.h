@@ -2,9 +2,9 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 17:30:32
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-04-09 23:40:53
+ * @LastEditTime : 2020-05-07 18:01:35
  * @Description  : 管理菜单中的APP的分类
- * @FilePath     : /kiran-menu-backend/lib/kiran-menu-category.h
+ * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-category.h
  */
 #pragma once
 
@@ -40,7 +40,7 @@ KiranMenuCategory *kiran_menu_category_get_new_with_apps(GList *apps);
  * @return:
  * @author: tangjie02
  */
-gboolean kiran_menu_category_load(KiranMenuCategory *self, GList *apps);
+void kiran_menu_category_load(KiranMenuCategory *self, GList *apps);
 
 /**
  * @description:
@@ -49,7 +49,7 @@ gboolean kiran_menu_category_load(KiranMenuCategory *self, GList *apps);
  * @author: tangjie02
  */
 gboolean kiran_menu_category_add_app(KiranMenuCategory *self,
-                                     const char *category,
+                                     const char *category_name,
                                      KiranMenuApp *menu_app);
 
 /**
@@ -59,7 +59,7 @@ gboolean kiran_menu_category_add_app(KiranMenuCategory *self,
  * @author: tangjie02
  */
 gboolean kiran_menu_category_del_app(KiranMenuCategory *self,
-                                     const char *category,
+                                     const char *category_name,
                                      KiranMenuApp *menu_app);
 
 /**
@@ -69,7 +69,7 @@ gboolean kiran_menu_category_del_app(KiranMenuCategory *self,
  * @author: tangjie02
  */
 GList *kiran_menu_category_get_apps(KiranMenuCategory *self,
-                                    const char *category);
+                                    const char *category_name);
 
 /**
  * @description: 获取所有分类

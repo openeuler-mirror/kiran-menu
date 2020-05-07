@@ -2,9 +2,9 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 19:59:56
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-04-10 01:13:22
+ * @LastEditTime : 2020-05-07 10:53:26
  * @Description  : 开始菜单类
- * @FilePath     : /kiran-menu-backend/lib/kiran-menu-skeleton.c
+ * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-skeleton.c
  */
 #include "lib/kiran-menu-skeleton.h"
 
@@ -96,7 +96,7 @@ static GList *kiran_menu_skeleton_get_favorite_apps(KiranMenuBased *self)
 }
 
 static gboolean kiran_menu_skeleton_add_category_app(KiranMenuBased *self,
-                                                     const char *category,
+                                                     const char *category_name,
                                                      const char *desktop_id)
 {
     g_return_val_if_fail(KIRAN_IS_MENU_SKELETON(self), FALSE);
@@ -104,11 +104,11 @@ static gboolean kiran_menu_skeleton_add_category_app(KiranMenuBased *self,
     KiranMenuSkeleton *skeleton = KIRAN_MENU_SKELETON(self);
     KiranMenuApp *menu_app =
         kiran_menu_system_lookup_app(skeleton->system, desktop_id);
-    return kiran_menu_category_add_app(skeleton->category, category, menu_app);
+    return kiran_menu_category_add_app(skeleton->category, category_name, menu_app);
 }
 
 gboolean kiran_menu_skeleton_del_category_app(KiranMenuBased *self,
-                                              const char *category,
+                                              const char *category_name,
                                               const char *desktop_id)
 {
     g_return_val_if_fail(KIRAN_IS_MENU_SKELETON(self), FALSE);
@@ -116,17 +116,17 @@ gboolean kiran_menu_skeleton_del_category_app(KiranMenuBased *self,
     KiranMenuSkeleton *skeleton = KIRAN_MENU_SKELETON(self);
     KiranMenuApp *menu_app =
         kiran_menu_system_lookup_app(skeleton->system, desktop_id);
-    return kiran_menu_category_del_app(skeleton->category, category, menu_app);
+    return kiran_menu_category_del_app(skeleton->category, category_name, menu_app);
 }
 
 GList *kiran_menu_skeleton_get_category_apps(KiranMenuBased *self,
-                                             const char *category)
+                                             const char *category_name)
 {
     g_return_val_if_fail(KIRAN_IS_MENU_SKELETON(self), NULL);
 
     KiranMenuSkeleton *skeleton = KIRAN_MENU_SKELETON(self);
     GList *desktop_ids =
-        kiran_menu_category_get_apps(skeleton->category, category);
+        kiran_menu_category_get_apps(skeleton->category, category_name);
 
     GList *apps = trans_ids_to_apps(skeleton, desktop_ids);
 

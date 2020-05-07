@@ -26,4 +26,8 @@ install(FILES "com.unikylin.Kiran.StartMenu.gschema.xml.in"
     RENAME "com.unikylin.Kiran.StartMenu.gschema.xml" 
 )
 
+install(FILES "com.unikylin.Kiran.MenuCategory.xml" 
+    DESTINATION  ${CMAKE_INSTALL_PREFIX}/share/kiran-menu/
+)
+
 install(CODE "execute_process(COMMAND glib-compile-schemas \"${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas/\")")

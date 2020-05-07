@@ -2,9 +2,9 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:23:14
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-04-10 01:16:20
+ * @LastEditTime : 2020-05-07 10:59:30
  * @Description  :
- * @FilePath     : /kiran-menu-backend/lib/start-menu/kiran-menu-based.h
+ * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-based.h
  */
 #pragma once
 
@@ -113,7 +113,7 @@ GList *kiran_menu_based_get_favorite_apps(KiranMenuBased *self);
  * @author: tangjie02
  */
 gboolean kiran_menu_based_add_category_app(KiranMenuBased *self,
-                                           const char *category,
+                                           const char *category_name,
                                            const char *desktop_id);
 
 /**
@@ -125,7 +125,7 @@ gboolean kiran_menu_based_add_category_app(KiranMenuBased *self,
  * @author: tangjie02
  */
 gboolean kiran_menu_based_del_category_app(KiranMenuBased *self,
-                                           const char *category,
+                                           const char *category_name,
                                            const char *desktop_id);
 
 /**
@@ -137,7 +137,7 @@ gboolean kiran_menu_based_del_category_app(KiranMenuBased *self,
  * @author: tangjie02
  */
 GList *kiran_menu_based_get_category_apps(KiranMenuBased *self,
-                                          const char *category);
+                                          const char *category_name);
 
 /**
  * @description: 获取所有分类的KiranApp.

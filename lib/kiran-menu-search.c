@@ -2,9 +2,9 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:01:52
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-04-10 00:08:58
+ * @LastEditTime : 2020-05-07 16:32:02
  * @Description  : 用于菜单搜索功能
- * @FilePath     : /kiran-menu-backend/lib/kiran-menu-search.c
+ * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-search.c
  */
 #include "lib/kiran-menu-search.h"
 
@@ -15,7 +15,7 @@ struct _KiranMenuSearch
     GObject parent;
 };
 
-G_DEFINE_TYPE(KiranMenuSearch, kiran_app_search, G_TYPE_OBJECT)
+G_DEFINE_TYPE(KiranMenuSearch, kiran_menu_search, G_TYPE_OBJECT)
 
 GList *kiran_menu_search_by_keyword(KiranMenuSearch *self, const char *keyword,
                                     GList *apps)
@@ -43,17 +43,17 @@ GList *kiran_menu_search_by_keyword(KiranMenuSearch *self, const char *keyword,
     return match_apps;
 }
 
-static void kiran_app_search_init(KiranMenuSearch *self) {}
+static void kiran_menu_search_init(KiranMenuSearch *self) {}
 
-static void kiran_app_search_dispose(GObject *object)
+static void kiran_menu_search_dispose(GObject *object)
 {
-    G_OBJECT_CLASS(kiran_app_search_parent_class)->dispose(object);
+    G_OBJECT_CLASS(kiran_menu_search_parent_class)->dispose(object);
 }
 
-static void kiran_app_search_class_init(KiranMenuSearchClass *klass)
+static void kiran_menu_search_class_init(KiranMenuSearchClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS(klass);
-    object_class->dispose = kiran_app_search_dispose;
+    object_class->dispose = kiran_menu_search_dispose;
 }
 
 KiranMenuSearch *kiran_menu_search_get_new()

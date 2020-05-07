@@ -2,11 +2,13 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 22:54:57
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-04-09 23:01:16
+ * @LastEditTime : 2020-05-07 17:30:25
  * @Description  :
- * @FilePath     : /kiran-menu-backend/lib/utils/helper.c
+ * @FilePath     : /kiran-menu-2.0/lib/helper.c
  */
 #include "lib/helper.h"
+
+#include <string.h>
 
 GList *list_remain_headn(GList *list, guint n, GDestroyNotify free_func)
 {
@@ -19,4 +21,32 @@ GList *list_remain_headn(GList *list, guint n, GDestroyNotify free_func)
         g_list_free_full(last, free_func);
     }
     return list;
+}
+
+gchar *str_trim(const gchar *str)
+{
+    gint len = strlen(str);
+    gchar *new_str = g_malloc0(len + 1);
+
+    if (!len)
+    {
+        return new_str;
+    }
+
+    gint start = 0;
+    gint end = len - 1;
+    while (g_ascii_isspace(str[start]) && start < len)
+    {
+        ++start;
+    }
+    while (g_ascii_isspace(str[end]) && end > 0)
+    {
+        --end;
+    }
+
+    for (gint i = start; i <= end; ++i)
+    {
+        new_str[i - start] = str[i];
+    }
+    return new_str;
 }

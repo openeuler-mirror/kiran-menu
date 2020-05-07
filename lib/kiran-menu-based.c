@@ -2,9 +2,9 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:23:21
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-04-10 01:18:27
+ * @LastEditTime : 2020-05-07 10:53:14
  * @Description  :
- * @FilePath     : /kiran-menu-backend/lib/kiran-menu-based.c
+ * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-based.c
  */
 
 #include "lib/kiran-menu-based.h"
@@ -67,7 +67,7 @@ GList *kiran_menu_based_get_favorite_apps(KiranMenuBased *self)
 }
 
 gboolean kiran_menu_based_add_category_app(KiranMenuBased *self,
-                                           const char *category,
+                                           const char *category_name,
                                            const char *desktop_id)
 {
     KiranMenuBasedInterface *iface;
@@ -76,11 +76,11 @@ gboolean kiran_menu_based_add_category_app(KiranMenuBased *self,
 
     iface = KIRAN_MENU_BASED_GET_IFACE(self);
     g_return_val_if_fail(iface->impl_add_category_app != NULL, FALSE);
-    return iface->impl_add_category_app(self, category, desktop_id);
+    return iface->impl_add_category_app(self, category_name, desktop_id);
 }
 
 gboolean kiran_menu_based_del_category_app(KiranMenuBased *self,
-                                           const char *category,
+                                           const char *category_name,
                                            const char *desktop_id)
 {
     KiranMenuBasedInterface *iface;
@@ -89,11 +89,11 @@ gboolean kiran_menu_based_del_category_app(KiranMenuBased *self,
 
     iface = KIRAN_MENU_BASED_GET_IFACE(self);
     g_return_val_if_fail(iface->impl_del_category_app != NULL, FALSE);
-    return iface->impl_del_category_app(self, category, desktop_id);
+    return iface->impl_del_category_app(self, category_name, desktop_id);
 }
 
 GList *kiran_menu_based_get_category_apps(KiranMenuBased *self,
-                                          const char *category)
+                                          const char *category_name)
 {
     KiranMenuBasedInterface *iface;
 
@@ -101,7 +101,7 @@ GList *kiran_menu_based_get_category_apps(KiranMenuBased *self,
 
     iface = KIRAN_MENU_BASED_GET_IFACE(self);
     g_return_val_if_fail(iface->impl_get_category_apps != NULL, NULL);
-    return iface->impl_get_category_apps(self, category);
+    return iface->impl_get_category_apps(self, category_name);
 }
 
 GHashTable *kiran_menu_based_get_all_category_apps(KiranMenuBased *self)
