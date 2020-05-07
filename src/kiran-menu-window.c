@@ -14,12 +14,15 @@ struct _KiranMenuWindow {
     GObject obj;
 
     GtkWidget *window, *parent;
-    GtkWidget *all_apps_box, *default_apps_box;
+    GtkWidget *all_apps_box, *default_apps_box, *search_results_box;
     GtkWidget *apps_view_stack;
     GtkWidget *back_button, *all_apps_button;
+    GtkWidget *search_entry;
     GtkBuilder *builder;
     GResource *resource;
     GDBusProxy *proxy;
+
+    const char *last_app_view;
 
     KiranMenuBased *backend;
     GHashTable *apps;
@@ -68,6 +71,82 @@ static void show_all_apps_page(KiranMenuWindow *self)
     //更改动画切换方向，看起来更自然
     gtk_stack_set_transition_type(GTK_STACK(self->apps_view_stack), GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT);
     gtk_stack_set_visible_child_name(GTK_STACK(self->apps_view_stack), "all-apps-page");
+}
+
+
+/**
+ * 应用搜索框停止搜索时回调函数
+ *
+ */
+static void search_stop_callback(KiranMenuWindow *self)
+{
+    //返回到搜索之前的页面
+    gtk_stack_set_transition_type(GTK_STACK(self->apps_view_stack), GTK_STACK_TRANSITION_TYPE_NONE);
+    gtk_stack_set_visible_child_name(GTK_STACK(self->apps_view_stack), self->last_app_view?self->last_app_view:"default-apps-page");
+}
+
+
+/**
+ * 应用搜索框内容变化时回调函数
+ *
+ */
+static void search_change_callback(KiranMenuWindow *self)
+{
+    GList *result_apps, *ptr;
+    const gchar *keyword, *visible_view;
+    KiranCategoryItem *category_item;
+
+    if (gtk_entry_get_text_length(GTK_ENTRY(self->search_entry)) == 0) {
+        //搜索内容为空，停止搜索，并返回上一个页面
+        search_stop_callback(self);
+        return;
+    }
+
+    //记录搜索前的页面，在搜索返回时使用
+    visible_view = gtk_stack_get_visible_child_name(GTK_STACK(self->apps_view_stack));
+    if (strcmp(visible_view, "search-results-page"))
+        self->last_app_view = visible_view;
+
+    //切换到搜索页面
+    gtk_stack_set_transition_type(GTK_STACK(self->apps_view_stack), GTK_STACK_TRANSITION_TYPE_NONE);
+    gtk_stack_set_visible_child_name(GTK_STACK(self->apps_view_stack), "search-results-page");
+
+    //清空之前的搜索结果
+    gtk_container_foreach(GTK_CONTAINER(self->search_results_box), (GtkCallback)gtk_widget_destroy, NULL);
+
+    keyword = gtk_entry_get_text(GTK_ENTRY(self->search_entry));
+    result_apps = kiran_menu_based_search_app(self->backend, keyword);
+
+    if (!g_list_length(result_apps)) {
+        GtkStyleContext *context;
+        GtkWidget *label = gtk_label_new(_("No Apps match the results!"));
+
+        context = gtk_widget_get_style_context(label);
+        gtk_style_context_add_class(context, "search-empty-prompt");
+
+        gtk_widget_set_halign(label, GTK_ALIGN_CENTER);
+        gtk_widget_set_valign(label, GTK_ALIGN_CENTER);
+        gtk_widget_set_hexpand(label, TRUE);
+        gtk_widget_set_vexpand(label, TRUE);
+
+        gtk_container_add(GTK_CONTAINER(self->search_results_box), label);
+        gtk_widget_show(label);
+        return;
+    }
+
+    category_item = kiran_category_item_new(_("Search Results"), FALSE);
+    gtk_container_add(GTK_CONTAINER(self->search_results_box), GTK_WIDGET(category_item));
+    for (ptr = result_apps; ptr != NULL; ptr = ptr->next)
+    {
+        KiranAppItem *app_item;
+        KiranApp *app = ptr->data;
+
+        app_item = kiran_app_item_new(app);
+        g_message("Found result app '%s'\n", kiran_app_get_name(app));
+        gtk_container_add(GTK_CONTAINER(self->search_results_box), GTK_WIDGET(app_item));
+    }
+    gtk_widget_show_all(GTK_WIDGET(self->search_results_box));
+    g_list_free_full(result_apps, g_object_unref);
 }
 
 /**
@@ -176,10 +255,11 @@ void kiran_menu_window_load_frequent_apps(KiranMenuWindow *self)
 void kiran_menu_window_init(KiranMenuWindow *self)
 {
     GError *error = NULL;
-    GtkWidget *search_box, *search_entry;
+    GtkWidget *search_box;
     GtkWidget *top_box, *bottom_box;
 
     self->backend = kiran_menu_based_skeleton_new();
+    self->last_app_view = NULL;
 
     self->resource = g_resource_load(RESOURCE_PATH, &error);
     if (!self->resource) {
@@ -198,11 +278,15 @@ void kiran_menu_window_init(KiranMenuWindow *self)
 
     self->all_apps_box= GTK_WIDGET(gtk_builder_get_object(self->builder, "all-apps-box"));
     self->default_apps_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "default-apps-box"));
+    self->search_results_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "search-results-box"));
     self->apps_view_stack = GTK_WIDGET(gtk_builder_get_object(self->builder, "apps-view-stack"));
 
-    search_entry = kiran_search_entry_new();
+    self->search_entry = GTK_WIDGET(kiran_search_entry_new());
     search_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "search-box"));
-    gtk_container_add(GTK_CONTAINER(search_box), GTK_WIDGET(search_entry));
+    gtk_container_add(GTK_CONTAINER(search_box), self->search_entry);
+
+    g_signal_connect_swapped(self->search_entry, "search-changed", G_CALLBACK(search_change_callback), self);
+    g_signal_connect_swapped(self->search_entry, "stop-search", G_CALLBACK(search_stop_callback), self);
 
     top_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "top-box"));
     bottom_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "bottom-box"));

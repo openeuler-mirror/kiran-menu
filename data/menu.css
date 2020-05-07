@@ -138,3 +138,8 @@ label#app-empty-prompt {
     padding-top: 5px;
     padding-bottom: 5px;
 }
+
+label.search-empty-prompt {
+    font-size: 18px;
+    color: #8b8b8b;
+}
