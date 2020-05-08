@@ -2,9 +2,9 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 22:54:02
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-04-09 23:32:37
+ * @LastEditTime : 2020-05-07 17:20:15
  * @Description  :
- * @FilePath     : /kiran-menu-backend/lib/utils/helper.h
+ * @FilePath     : /kiran-menu-2.0/lib/helper.h
  */
 
 #pragma once
@@ -42,3 +42,5 @@
     }
 
 GList *list_remain_headn(GList *list, guint n, GDestroyNotify free_func);
+
+gchar *str_trim(const gchar *str);

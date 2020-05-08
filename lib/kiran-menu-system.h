@@ -2,9 +2,9 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 17:21:54
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-04-09 22:22:05
+ * @LastEditTime : 2020-05-08 13:55:25
  * @Description  :
- * @FilePath     : /kiran-menu-backend/lib/kiran-menu-system.h
+ * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-system.h
  */
 #pragma once
 
@@ -49,6 +49,14 @@ GList *kiran_menu_system_get_nnew_apps(KiranMenuSystem *self, gint top_n);
  * @author: tangjie02
  */
 GList *kiran_menu_system_get_all_sorted_apps(KiranMenuSystem *self);
+
+/**
+ * @description: 
+ * @param {type} 
+ * @return: 
+ * @author: tangjie02
+ */
+void kiran_menu_system_flush(KiranMenuSystem *self);
 
 /**
  * @description:

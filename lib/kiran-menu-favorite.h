@@ -2,9 +2,9 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 15:37:28
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-04-08 17:04:18
+ * @LastEditTime : 2020-05-08 14:09:13
  * @Description  :
- * @FilePath     : /kiran-menu-backend/lib/kiran-menu-favorite.h
+ * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-favorite.h
  */
 #pragma once
 
@@ -44,14 +44,12 @@ gboolean kiran_menu_favorite_del_app(KiranMenuFavorite *self,
                                      const char *desktop_id);
 
 /**
- * @description: 如果收藏的APP不在valid_apps中, 则进行删除
- * @param {KiranMenuFavorite*} self KiranMenuFavorite对象
- * @param {const GHashTable*} valid_apps 合法的app, key应该为desktop_id.
- * @return: 如果清理失败则返回FALSE, 否则返回TRUE.
+ * @description: 
+ * @param {type} 
+ * @return: 
  * @author: tangjie02
  */
-gboolean kiran_menu_favorite_clear_deleted_app(KiranMenuFavorite *self,
-                                               const GHashTable *valid_apps);
+void kiran_menu_favorite_flush(KiranMenuFavorite *self, GList *apps);
 
 /**
  * @description: 获取收藏的APP列表

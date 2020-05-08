@@ -10,6 +10,14 @@ KiranMenuSystem o..> KiranMenuApp
 KiranMenuApp --|> KiranApp
 KiranApp --|> GObject
 
+KiranMenuCategory --> KiranCategory
+KiranMenuCategory ..> KiranCategoryReader
+KiranMenuCategory ..> KiranCategoryWriter
+KiranCategory --> KiranCategoryNode
+KiranCategoryReader --> KiranCategoryNode
+KiranCategoryWriter --> KiranCategoryNode
+
+
 note top of KiranMenuBased : "desktop_id即为'desktop file ID'，例如'org.foo.bar.desktop'。\n如未特殊说明，函数参数和返回值中的dekstop_id均应在当前系统的菜单中可显示(g_app_info_should_show函数返回TRUE)，否则为非法desktop_id。"
 
 interface KiranMenuBased {

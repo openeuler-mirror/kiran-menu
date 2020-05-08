@@ -2,9 +2,9 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 20:58:19
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-04-10 00:09:13
+ * @LastEditTime : 2020-05-07 16:31:40
  * @Description  : 用于菜单搜索功能
- * @FilePath     : /kiran-menu-backend/lib/kiran-menu-search.h
+ * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-search.h
  */
 #pragma once
 
@@ -12,8 +12,8 @@
 
 G_BEGIN_DECLS
 
-#define KIRAN_TYPE_MENU_SEARCH (kiran_app_search_get_type())
-G_DECLARE_FINAL_TYPE(KiranMenuSearch, kiran_app_search, KIRAN, MENU_SEARCH,
+#define KIRAN_TYPE_MENU_SEARCH (kiran_menu_search_get_type())
+G_DECLARE_FINAL_TYPE(KiranMenuSearch, kiran_menu_search, KIRAN, MENU_SEARCH,
                      GObject)
 
 KiranMenuSearch *kiran_menu_search_get_new();

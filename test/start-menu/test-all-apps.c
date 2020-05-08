@@ -1,3 +1,13 @@
+/*
+ * @Author       : tangjie02
+ * @Date         : 2020-05-07 17:36:28
+ * @LastEditors  : tangjie02
+ * @LastEditTime : 2020-05-08 15:28:13
+ * @Description  : 
+ * @FilePath     : /kiran-menu-2.0/test/start-menu/test-all-apps.c
+ */
+
+#include "lib/kiran-menu-skeleton.h"
 #include "test/start-menu/test-start-menu.h"
 
 #define CASES 10000
@@ -5,6 +15,7 @@
 void test_all_apps(gconstpointer data)
 {
     KiranMenuBased *menu_based = KIRAN_MENU_BASED((gpointer)data);
+
     gint64 start_clock = g_get_real_time();
     for (int i = 0; i <= CASES; ++i)
     {
