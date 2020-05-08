@@ -46,12 +46,18 @@ kiran-category-item > label {
     -gtk-dpi: 72;
 }
 
-entry {
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 3px;
+entry.kiran-search-entry {
+    margin-left: 10px;
+    margin-right: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 0px;
     background: rgba(255, 255, 255, 0.1);
     color: white;
     padding-left: 10px;
+}
+
+entry.kiran-search-entry:focus {
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 button {

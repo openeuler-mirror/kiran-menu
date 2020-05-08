@@ -12,6 +12,10 @@ G_DEFINE_TYPE(KiranSearchEntry, kiran_search_entry, GTK_TYPE_SEARCH_ENTRY)
 
 void kiran_search_entry_init(KiranSearchEntry *entry)
 {
+    GtkStyleContext *context;
+
+    context = gtk_widget_get_style_context(GTK_WIDGET(entry));
+    gtk_style_context_add_class(context, "kiran-search-entry");
     entry->primary_icon = NULL;
 }
 
