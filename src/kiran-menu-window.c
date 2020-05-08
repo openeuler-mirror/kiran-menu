@@ -272,13 +272,15 @@ void kiran_menu_window_load_applications(KiranMenuWindow *self)
         category = key;
         apps = value;
 
+        if (!g_list_length(apps))
+            continue;
 
-        category_item = kiran_category_item_new(category, TRUE);
-
+        //对于没有应用的分类，不做存储
         self->category_list = g_list_append(self->category_list, category);
-        g_hash_table_insert(self->category_items, g_strdup(category), category_item);
 
         //添加应用分类标签
+        category_item = kiran_category_item_new(category, TRUE);
+        g_hash_table_insert(self->category_items, g_strdup(category), category_item);
         gtk_container_add(GTK_CONTAINER(self->all_apps_box), GTK_WIDGET(category_item));
 
         //添加应用程序标签
