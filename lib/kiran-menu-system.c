@@ -2,9 +2,9 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 21:42:15
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-04-09 23:58:29
+ * @LastEditTime : 2020-05-08 14:16:37
  * @Description  :
- * @FilePath     : /kiran-menu-backend/lib/kiran-menu-system.c
+ * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-system.c
  */
 #include "lib/kiran-menu-system.h"
 
@@ -20,14 +20,6 @@ struct _KiranMenuSystem
 };
 
 G_DEFINE_TYPE(KiranMenuSystem, kiran_menu_system, G_TYPE_OBJECT)
-
-enum
-{
-    INSTALLED_CHANGED,
-    LAST_SIGNAL
-};
-
-static guint signals[LAST_SIGNAL] = {0};
 
 GList *kiran_menu_system_get_apps(KiranMenuSystem *self)
 {
@@ -117,10 +109,8 @@ GList *kiran_menu_system_get_all_sorted_apps(KiranMenuSystem *self)
     return g_list_sort_with_data(apps, sort_by_app_name, self);
 }
 
-static void installed_app_change(GAppInfoMonitor *gappinfomonitor,
-                                 gpointer user_data)
+void kiran_menu_system_flush(KiranMenuSystem *self)
 {
-    KiranMenuSystem *self = KIRAN_MENU_SYSTEM(user_data);
     g_clear_pointer(&self->apps, (GDestroyNotify)g_hash_table_unref);
 
     self->apps = g_hash_table_new_full(NULL, NULL, NULL, g_object_unref);
@@ -137,14 +127,11 @@ static void installed_app_change(GAppInfoMonitor *gappinfomonitor,
         }
     }
     g_list_free_full(registered_apps, g_object_unref);
-    g_signal_emit(self, signals[INSTALLED_CHANGED], 0, NULL);
 }
 
 static void kiran_menu_system_init(KiranMenuSystem *self)
 {
-    GAppInfoMonitor *monitor = g_app_info_monitor_get();
-    g_signal_connect(monitor, "changed", G_CALLBACK(installed_app_change), self);
-    installed_app_change(monitor, self);
+    kiran_menu_system_flush(self);
 }
 
 static void kiran_menu_system_dispose(GObject *object)
@@ -158,10 +145,6 @@ static void kiran_menu_system_class_init(KiranMenuSystemClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS(klass);
     object_class->dispose = kiran_menu_system_dispose;
-
-    signals[INSTALLED_CHANGED] =
-        g_signal_new("installed-changed", KIRAN_TYPE_MENU_SYSTEM,
-                     G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 }
 
 KiranMenuSystem *kiran_menu_system_get_new()

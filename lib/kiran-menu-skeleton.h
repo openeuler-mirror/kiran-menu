@@ -2,9 +2,9 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 21:00:34
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-04-10 00:58:46
+ * @LastEditTime : 2020-05-08 15:40:12
  * @Description  : 开始菜单类，继承KiranMenuBased接口类。
- * @FilePath     : /kiran-menu-backend/lib/kiran-menu-skeleton.h
+ * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-skeleton.h
  */
 #pragma once
 

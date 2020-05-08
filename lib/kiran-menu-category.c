@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 17:28:51
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-08 11:25:50
+ * @LastEditTime : 2020-05-08 15:15:55
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-category.c
  */
@@ -27,8 +27,14 @@ struct _KiranMenuCategory
 
 G_DEFINE_TYPE(KiranMenuCategory, kiran_menu_category, G_TYPE_OBJECT)
 
-void kiran_menu_category_load(KiranMenuCategory *self, GList *apps)
+void kiran_menu_category_flush(KiranMenuCategory *self, GList *apps)
 {
+    for (GList *l = self->categories; l != NULL; l = l->next)
+    {
+        KiranCategory *category = l->data;
+        kiran_category_clear_apps(category);
+    }
+
     for (GList *l = apps; l != NULL; l = l->next)
     {
         KiranApp *app = l->data;
@@ -48,6 +54,30 @@ void kiran_menu_category_load(KiranMenuCategory *self, GList *apps)
             {
                 match_result = TRUE;
             }
+        }
+    }
+}
+
+void kiran_menu_category_flush_app(KiranMenuCategory *self, KiranApp *app)
+{
+    for (GList *l = self->categories; l != NULL; l = l->next)
+    {
+        KiranCategory *category = l->data;
+        kiran_category_del_app(category, app);
+    }
+
+    gboolean match_result = FALSE;
+    for (GList *l = self->categories; l != NULL; l = l->next)
+    {
+        KiranCategory *category = l->data;
+        if (match_result && !kiran_category_get_repeat(category))
+        {
+            continue;
+        }
+
+        if (kiran_category_match_add_app(category, app))
+        {
+            match_result = TRUE;
         }
     }
 }
@@ -86,6 +116,7 @@ gboolean kiran_menu_category_add_app(KiranMenuCategory *self,
     {
         if (kiran_category_add_rule_include_app(category, KIRAN_APP(menu_app)))
         {
+            kiran_menu_category_flush_app(self, KIRAN_APP(menu_app));
             store_categories(self);
             return TRUE;
         }
@@ -106,6 +137,7 @@ gboolean kiran_menu_category_del_app(KiranMenuCategory *self,
     {
         if (kiran_category_add_rule_exclude_app(category, KIRAN_APP(menu_app)))
         {
+            kiran_menu_category_flush_app(self, KIRAN_APP(menu_app));
             store_categories(self);
             return TRUE;
         }
@@ -231,14 +263,4 @@ static void kiran_menu_category_class_init(KiranMenuCategoryClass *klass)
 KiranMenuCategory *kiran_menu_category_get_new()
 {
     return g_object_new(KIRAN_TYPE_MENU_CATEGORY, NULL);
-}
-
-KiranMenuCategory *kiran_menu_category_get_new_with_apps(GList *apps)
-{
-    KiranMenuCategory *menu_category = kiran_menu_category_get_new();
-    if (menu_category)
-    {
-        kiran_menu_category_load(menu_category, apps);
-    }
-    return menu_category;
 }

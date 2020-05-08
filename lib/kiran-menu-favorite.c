@@ -83,20 +83,28 @@ static gboolean deleted_app_callback(gpointer key, gpointer value,
                                      gpointer user_data)
 {
     gchar *desktop_id = (gchar *)key;
+    GQuark quark = g_quark_from_string(desktop_id);
     GHashTable *valid_apps = (GHashTable *)user_data;
-    return (g_hash_table_lookup(valid_apps, desktop_id) == NULL);
+    return (g_hash_table_lookup(valid_apps, GUINT_TO_POINTER(quark)) == NULL);
 }
 
-gboolean kiran_menu_favorite_clear_deleted_app(KiranMenuFavorite *self,
-                                               const GHashTable *valid_apps)
+void kiran_menu_favorite_flush(KiranMenuFavorite *self, GList *apps)
 {
-    guint remove_num = g_hash_table_foreach_remove(
-        self->favorite_apps, deleted_app_callback, (GHashTable *)valid_apps);
+    g_autoptr(GHashTable) app_table = g_hash_table_new(NULL, NULL);
+
+    for (GList *l = apps; l != NULL; l = l->next)
+    {
+        KiranApp *app = l->data;
+        const gchar *desktop_id = kiran_app_get_desktop_id(app);
+        GQuark quark = g_quark_from_string(desktop_id);
+        g_hash_table_insert(app_table, GUINT_TO_POINTER(quark), GUINT_TO_POINTER(TRUE));
+    }
+
+    guint remove_num = g_hash_table_foreach_remove(self->favorite_apps, deleted_app_callback, app_table);
     if (remove_num > 0)
     {
-        return write_favorite_to_settings(self);
+        write_favorite_to_settings(self);
     }
-    return TRUE;
 }
 
 GList *kiran_menu_favorite_get_favorite_apps(KiranMenuFavorite *self)

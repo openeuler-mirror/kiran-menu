@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 19:59:56
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-07 10:53:26
+ * @LastEditTime : 2020-05-08 15:37:20
  * @Description  : 开始菜单类
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-skeleton.c
  */
@@ -30,6 +30,14 @@ struct _KiranMenuSkeleton
 
     KiranMenuCategory *category;
 };
+
+enum
+{
+    INSTALLED_CHANGED,
+    LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL] = {0};
 
 static GList *trans_ids_to_apps(KiranMenuSkeleton *skeleton,
                                 GList *desktop_ids)
@@ -235,16 +243,32 @@ static void kiran_menu_skeleton_dispose(GObject *object)
     G_OBJECT_CLASS(kiran_menu_skeleton_parent_class)->dispose(object);
 }
 
+static void flush_menu_skeleton(GAppInfoMonitor *gappinfomonitor,
+                                gpointer user_data)
+{
+    KiranMenuSkeleton *self = KIRAN_MENU_SKELETON(user_data);
+
+    kiran_menu_system_flush(self->system);
+
+    GList *apps = kiran_menu_system_get_apps(self->system);
+    kiran_menu_favorite_flush(self->favorite, apps);
+    kiran_menu_category_flush(self->category, apps);
+    g_list_free_full(apps, g_object_unref);
+
+    g_signal_emit(self, signals[INSTALLED_CHANGED], 0, NULL);
+}
+
 static void kiran_menu_skeleton_init(KiranMenuSkeleton *self)
 {
     self->system = kiran_menu_system_get_new();
     self->usage = kiran_menu_usage_get_new();
     self->favorite = kiran_menu_favorite_get_new();
     self->search = kiran_menu_search_get_new();
+    self->category = kiran_menu_category_get_new();
 
-    GList *apps = kiran_menu_system_get_apps(self->system);
-    self->category = kiran_menu_category_get_new_with_apps(apps);
-    g_list_free_full(apps, g_object_unref);
+    GAppInfoMonitor *monitor = g_app_info_monitor_get();
+    g_signal_connect(monitor, "changed", G_CALLBACK(flush_menu_skeleton), self);
+    flush_menu_skeleton(monitor, self);
 }
 
 static void kiran_menu_skeleton_class_init(KiranMenuSkeletonClass *klass)
@@ -252,4 +276,7 @@ static void kiran_menu_skeleton_class_init(KiranMenuSkeletonClass *klass)
     GObjectClass *object_class = G_OBJECT_CLASS(klass);
 
     object_class->dispose = kiran_menu_skeleton_dispose;
+
+    signals[INSTALLED_CHANGED] = g_signal_new("installed-changed", KIRAN_TYPE_MENU_SKELETON,
+                                              G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 }

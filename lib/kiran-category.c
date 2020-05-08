@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-07 09:43:21
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-08 11:06:45
+ * @LastEditTime : 2020-05-08 15:14:07
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/kiran-category.c
  */
@@ -57,14 +57,20 @@ GList *kiran_category_get_apps(KiranCategory *self)
     return apps;
 }
 
-static void kiran_category_add_app(KiranCategory *self, KiranApp *app)
+void kiran_category_clear_apps(KiranCategory *self)
+{
+    g_hash_table_unref(self->category_apps);
+    self->category_apps = g_hash_table_new(NULL, NULL);
+}
+
+void kiran_category_add_app(KiranCategory *self, KiranApp *app)
 {
     const gchar *desktop_id = kiran_app_get_desktop_id(app);
     GQuark quark = g_quark_from_string(desktop_id);
     g_hash_table_insert(self->category_apps, GUINT_TO_POINTER(quark), GUINT_TO_POINTER(TRUE));
 }
 
-static void kiran_category_del_app(KiranCategory *self, KiranApp *app)
+void kiran_category_del_app(KiranCategory *self, KiranApp *app)
 {
     const gchar *desktop_id = kiran_app_get_desktop_id(app);
     GQuark quark = g_quark_from_string(desktop_id);
@@ -296,11 +302,6 @@ gboolean kiran_category_add_rule_include_app(KiranCategory *self, KiranApp *app)
         rule_change = TRUE;
     }
 
-    if (rule_change)
-    {
-        kiran_category_add_app(self, app);
-    }
-
     return rule_change;
 }
 
@@ -354,8 +355,6 @@ gboolean kiran_category_add_rule_exclude_app(KiranCategory *self, KiranApp *app)
         KiranCategoryNode *desktop_id_node = kiran_category_node_get_new(CATEGORY_NODE_TYPE_DESKTOP_ID);
         desktop_id_node->content = g_strdup(kiran_app_get_desktop_id(app));
         kiran_category_node_append_child(exclude_node, desktop_id_node);
-
-        kiran_category_del_app(self, app);
         return TRUE;
     }
     return FALSE;

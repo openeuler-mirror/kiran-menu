@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-07 09:43:27
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-08 11:26:51
+ * @LastEditTime : 2020-05-08 15:11:33
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/kiran-category.h
  */
@@ -28,6 +28,12 @@ const gchar *kiran_category_get_icon(KiranCategory *self);
 gboolean kiran_category_get_repeat(KiranCategory *self);
 
 GList *kiran_category_get_apps(KiranCategory *self);
+
+void kiran_category_clear_apps(KiranCategory *self);
+
+void kiran_category_add_app(KiranCategory *self, KiranApp *app);
+
+void kiran_category_del_app(KiranCategory *self, KiranApp *app);
 
 gboolean kiran_category_match_add_app(KiranCategory *self, KiranApp *app);
 

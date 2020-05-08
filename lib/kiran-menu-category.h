@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 17:30:32
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-07 18:01:35
+ * @LastEditTime : 2020-05-08 15:15:12
  * @Description  : 管理菜单中的APP的分类
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-category.h
  */
@@ -26,21 +26,21 @@ G_DECLARE_FINAL_TYPE(KiranMenuCategory, kiran_menu_category, KIRAN,
 KiranMenuCategory *kiran_menu_category_get_new();
 
 /**
- * @description: 创建KiranMenuCategory对象,
- * 并用apps进行初始化（调用kiran_menu_category_load函数）
- * @return:
- * @author: tangjie02
- */
-KiranMenuCategory *kiran_menu_category_get_new_with_apps(GList *apps);
-
-/**
  * @description: 通过app集合来初始化app分类
  * @param {KiranMenuCategory*} self KiranMenuCategory对象
  * @param {const GList*} apps 链表元素类型为KiranMenuApp*
  * @return:
  * @author: tangjie02
  */
-void kiran_menu_category_load(KiranMenuCategory *self, GList *apps);
+void kiran_menu_category_flush(KiranMenuCategory *self, GList *apps);
+
+/**
+ * @description: 
+ * @param {type} 
+ * @return: 
+ * @author: tangjie02
+ */
+void kiran_menu_category_flush_app(KiranMenuCategory *self, KiranApp *app);
 
 /**
  * @description:

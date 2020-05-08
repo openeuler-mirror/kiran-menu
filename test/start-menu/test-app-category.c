@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-07 16:33:02
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-08 11:43:18
+ * @LastEditTime : 2020-05-08 15:39:48
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/start-menu/test-app-category.c
  */
@@ -10,11 +10,13 @@
 #include <glib/gprintf.h>
 
 #include "lib/kiran-app.h"
+#include "lib/kiran-menu-skeleton.h"
 #include "test/start-menu/test-start-menu.h"
 
 void test_category_apps(gconstpointer data)
 {
     KiranMenuBased *menu_based = KIRAN_MENU_BASED((gpointer)data);
+
     gboolean call_success;
 
     GHashTable *all_category_apps = kiran_menu_based_get_all_category_apps(menu_based);
@@ -66,3 +68,13 @@ void test_category_apps(gconstpointer data)
         // }
     }
 }
+
+// void test_category_apps(gconstpointer data)
+// {
+//     KiranMenuBased *menu_based = KIRAN_MENU_BASED((gpointer)data);
+
+//     test_category_apps2(data);
+//     g_usleep(5000000);
+//     kiran_menu_skeleton_flush(KIRAN_MENU_SKELETON(menu_based));
+//     test_category_apps2(data);
+// }
