@@ -122,21 +122,22 @@ scrollbar button.up scrollbar button.down {
 }
 
 button.kiran-category-selector {
-   
-    min-height: 40px;
-    border-width: 1px;
+    min-height: 30px;
+    border-width: 3px;
     border-color: transparent;
     border-style: solid;
     padding-left: 10px;
+    font-weight: 14pt;
+    -gtk-dpi: 72;
 }
 
 button.kiran-category-selector:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 button.kiran-category-selector:focus {
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    background: rgba(255, 255, 255, 0.2);
+    border-right-color: #4cb5ff;
+    background: rgba(255, 255, 255, 0.3);
     font-weight: bold;
 }
 

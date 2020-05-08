@@ -148,6 +148,7 @@ static void show_category_overview(KiranMenuWindow *self, GtkButton *button)
 
         button = gtk_button_new_with_label((char*)ptr->data);
         gtk_button_set_alignment(GTK_BUTTON(button), 0.0, 0.5);
+        gtk_widget_set_hexpand(button, TRUE);
         g_object_set_data_full(G_OBJECT(button), "category-name", g_strdup(ptr->data), (GDestroyNotify)g_free);
 
         context = gtk_widget_get_style_context(button);
