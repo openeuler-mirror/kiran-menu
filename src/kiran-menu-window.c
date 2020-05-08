@@ -9,13 +9,16 @@
 #include "config.h"
 
 #define FREQUENT_APPS_SHOW_MAX  4           //开始菜单中显示的最常使用应用数量
+#define NEW_APPS_SHOW_MAX       4           //开始菜单中显示的新安装应用数量
 
 struct _KiranMenuWindow {
     GObject obj;
 
     GtkWidget *window, *parent;
     GtkWidget *all_apps_box, *default_apps_box, *search_results_box;
-    GtkWidget *apps_view_stack;
+    GtkWidget *apps_view_stack, *overview_stack;
+    GtkWidget *apps_overview_page, *category_overview_box;
+    GtkWidget *all_apps_viewport;
     GtkWidget *back_button, *all_apps_button;
     GtkWidget *search_entry;
     GtkBuilder *builder;
@@ -26,6 +29,9 @@ struct _KiranMenuWindow {
 
     KiranMenuBased *backend;
     GHashTable *apps;
+    GList *category_list;
+
+    GHashTable *category_items;
 };
 
 G_DEFINE_TYPE(KiranMenuWindow, kiran_menu_window, G_TYPE_OBJECT)
@@ -71,6 +77,93 @@ static void show_all_apps_page(KiranMenuWindow *self)
     //更改动画切换方向，看起来更自然
     gtk_stack_set_transition_type(GTK_STACK(self->apps_view_stack), GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT);
     gtk_stack_set_visible_child_name(GTK_STACK(self->apps_view_stack), "all-apps-page");
+}
+
+
+static void show_apps_overview(KiranMenuWindow *self)
+{
+    gtk_stack_set_transition_type(GTK_STACK(self->overview_stack), GTK_STACK_TRANSITION_TYPE_CROSSFADE);
+    gtk_stack_set_visible_child_name(GTK_STACK(self->overview_stack), "apps-overview-page");
+}
+
+
+/**
+ * 跳转到指定的应用分类
+ * 
+ */
+void kiran_menu_window_jump_to_category(KiranMenuWindow *self, const char *category_name)
+{
+    GtkAllocation item_allocation;
+    KiranCategoryItem *item;
+    GtkAdjustment *adjustment;
+
+    //切换到所有应用列表
+    show_apps_overview(self);
+    show_all_apps_page(self);
+
+    item = g_hash_table_lookup(self->category_items, category_name);
+    if (!item) {
+        g_warning("%s: Item for category '%s' not found\n", __func__, category_name);
+        return;
+    }
+
+    adjustment = gtk_viewport_get_vadjustment(GTK_VIEWPORT(self->all_apps_viewport));
+    gtk_widget_get_allocation(GTK_WIDGET(item), &item_allocation);
+    gtk_adjustment_set_value(adjustment, item_allocation.y);
+}
+
+
+/**
+ * 在分类选择视图中点击分类时的回调函数 
+ */
+static void category_selected_callback(KiranMenuWindow *self, GtkButton *button)
+{
+    char *category_name;
+
+    category_name = g_object_get_data(G_OBJECT(button), "category-name");
+
+    g_message("%s: jump to category '%s'\n", __func__, category_name);
+    kiran_menu_window_jump_to_category(self, category_name);
+}
+
+
+/**
+ * 显示分类选择视图
+ *
+ */
+static void show_category_overview(KiranMenuWindow *self, GtkButton *button)
+{
+    GList *ptr;
+    const char *current_category;
+
+    current_category = kiran_category_item_get_category_name(KIRAN_CATEGORY_ITEM(button));
+
+    //清空分类选择列表
+    gtk_container_foreach(GTK_CONTAINER(self->category_overview_box), (GtkCallback)gtk_widget_destroy, NULL);
+
+    for (ptr = self->category_list; ptr != NULL; ptr = ptr->next) {
+        GtkStyleContext *context;
+        GtkWidget *button;
+
+        button = gtk_button_new_with_label((char*)ptr->data);
+        gtk_button_set_alignment(GTK_BUTTON(button), 0.0, 0.5);
+        g_object_set_data_full(G_OBJECT(button), "category-name", g_strdup(ptr->data), (GDestroyNotify)g_free);
+
+        context = gtk_widget_get_style_context(button);
+        gtk_style_context_add_class(context, "kiran-category-selector");
+
+        gtk_container_add(GTK_CONTAINER(self->category_overview_box), button);
+        gtk_widget_show(button);
+
+        if (!strcmp((char*)ptr->data, current_category)) {
+            //将当前分类设置为默认激活状态
+            gtk_widget_grab_focus(button);
+            g_message("%s: found same category\n", __func__);
+        }
+        g_signal_connect_swapped(button, "clicked", G_CALLBACK(category_selected_callback), self);
+    }
+    gtk_stack_set_transition_type(GTK_STACK(self->overview_stack), GTK_STACK_TRANSITION_TYPE_CROSSFADE);
+    gtk_stack_set_visible_child_name(GTK_STACK(self->overview_stack), "category-overview-page");
 }
 
 
@@ -177,14 +270,23 @@ void kiran_menu_window_load_applications(KiranMenuWindow *self)
         category = key;
         apps = value;
 
+
         category_item = kiran_category_item_new(category, TRUE);
+
+        self->category_list = g_list_append(self->category_list, category);
+        g_hash_table_insert(self->category_items, g_strdup(category), category_item);
+
+        //添加应用分类标签
         gtk_container_add(GTK_CONTAINER(self->all_apps_box), GTK_WIDGET(category_item));
+
+        //添加应用程序标签
         for (ptr = apps; ptr != NULL; ptr = ptr->next) {
             KiranApp *app = ptr->data;
 
             app_item = kiran_app_item_new(app);
             gtk_container_add(GTK_CONTAINER(self->all_apps_box), GTK_WIDGET(app_item));
         }
+        g_signal_connect_swapped(category_item, "clicked", G_CALLBACK(show_category_overview), self);
     }
 }
 
@@ -260,6 +362,8 @@ void kiran_menu_window_init(KiranMenuWindow *self)
 
     self->backend = kiran_menu_based_skeleton_new();
     self->last_app_view = NULL;
+    self->category_list = NULL;
+    self->category_items = g_hash_table_new_full(g_str_hash, g_str_equal, (GDestroyNotify)g_free, (GDestroyNotify)g_object_unref);
 
     self->resource = g_resource_load(RESOURCE_PATH, &error);
     if (!self->resource) {
@@ -279,7 +383,12 @@ void kiran_menu_window_init(KiranMenuWindow *self)
     self->all_apps_box= GTK_WIDGET(gtk_builder_get_object(self->builder, "all-apps-box"));
     self->default_apps_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "default-apps-box"));
     self->search_results_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "search-results-box"));
+
+    self->category_overview_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "category-overview-box"));
+    self->all_apps_viewport = GTK_WIDGET(gtk_builder_get_object(self->builder, "all-apps-viewport"));
+
     self->apps_view_stack = GTK_WIDGET(gtk_builder_get_object(self->builder, "apps-view-stack"));
+    self->overview_stack = GTK_WIDGET(gtk_builder_get_object(self->builder, "overview-stack"));
 
     self->search_entry = GTK_WIDGET(kiran_search_entry_new());
     search_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "search-box"));
@@ -325,6 +434,8 @@ void kiran_menu_window_finalize(GObject *obj)
     g_object_unref(self->builder);
     g_resources_unregister(self->resource);
     g_hash_table_unref(self->apps);
+    g_list_free_full(self->category_list, g_free);
+    g_hash_table_destroy(self->category_items);
 }
 
 void kiran_menu_window_class_init(KiranMenuWindowClass *kclass)

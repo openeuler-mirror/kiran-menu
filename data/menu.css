@@ -101,17 +101,30 @@ scrollbar button.up scrollbar button.down {
     border: none;
 }
 
+#category-overview-box {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding-left: 10px;
+    padding-right: 20px;
+}
+
 button.kiran-category-selector {
    
     min-height: 40px;
     border-width: 1px;
     border-color: transparent;
     border-style: solid;
-    font-weight: bold;
+    padding-left: 10px;
 }
 
 button.kiran-category-selector:hover {
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+button.kiran-category-selector:focus {
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.2);
+    font-weight: bold;
 }
 
 popover.kiran-power-menu button{

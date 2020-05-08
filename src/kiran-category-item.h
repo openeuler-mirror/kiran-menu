@@ -15,5 +15,6 @@ typedef struct {
 GType kiran_category_item_get_type(void);
 
 KiranCategoryItem *kiran_category_item_new(const gchar *name, gboolean clickable);
+const char* kiran_category_item_get_category_name(KiranCategoryItem *item);
 
 #endif

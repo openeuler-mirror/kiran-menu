@@ -202,3 +202,8 @@ KiranCategoryItem *kiran_category_item_new(const gchar *name, gboolean clickable
 {
     return g_object_new(KIRAN_TYPE_CATEGORY_ITEM, "name", name, "clickable", clickable, NULL);
 }
+
+const char* kiran_category_item_get_category_name(KiranCategoryItem *item)
+{
+    return item->name;
+}
