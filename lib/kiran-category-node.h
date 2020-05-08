@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-30 17:29:00
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-07 14:13:36
+ * @LastEditTime : 2020-05-08 11:03:39
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/kiran-category-node.h
  */
@@ -24,7 +24,9 @@ typedef enum
     CATEGORY_NODE_TYPE_CATEGORY,
     CATEGORY_NODE_TYPE_NAME,
     CATEGORY_NODE_TYPE_ICON,
+    CATEGORY_NODE_TYPE_REPEAT,
     CATEGORY_NODE_TYPE_LOGIC,
+    CATEGORY_NODE_TYPE_ALL,
     CATEGORY_NODE_TYPE_AND,
     CATEGORY_NODE_TYPE_OR,
     CATEGORY_NODE_TYPE_NOT,

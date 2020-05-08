@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-30 17:28:47
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-07 17:59:23
+ * @LastEditTime : 2020-05-08 11:29:37
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/kiran-category-reader.c
  */
@@ -208,6 +208,17 @@ static void start_category_child_element(KiranCategoryReader *reader,
         }
         push_node(reader, CATEGORY_NODE_TYPE_ICON);
     }
+    else if (ELEMENT_IS("repeat"))
+    {
+        if (has_child_of_type(reader->last, CATEGORY_NODE_TYPE_REPEAT))
+        {
+            set_error(error, context,
+                      G_MARKUP_ERROR, G_MARKUP_ERROR_PARSE,
+                      "Multiple <repeat> elements in a <category> element is not allowed\n");
+            return;
+        }
+        push_node(reader, CATEGORY_NODE_TYPE_REPEAT);
+    }
     else if (ELEMENT_IS("logic"))
     {
         if (has_child_of_type(reader->last, CATEGORY_NODE_TYPE_LOGIC))
@@ -268,6 +279,10 @@ static void start_logic_child_element(KiranCategoryReader *reader,
     else if (ELEMENT_IS("desktop_category"))
     {
         push_node(reader, CATEGORY_NODE_TYPE_DESKTOP_CATEGORY);
+    }
+    else if (ELEMENT_IS("all"))
+    {
+        push_node(reader, CATEGORY_NODE_TYPE_ALL);
     }
     else if (ELEMENT_IS("and"))
     {
@@ -344,6 +359,7 @@ static void start_element_handler(GMarkupParseContext *context,
         start_category_child_element(reader, context, element_name, attribute_names, attribute_values, error);
     }
     else if (reader->last->type == CATEGORY_NODE_TYPE_LOGIC ||
+             reader->last->type == CATEGORY_NODE_TYPE_ALL ||
              reader->last->type == CATEGORY_NODE_TYPE_AND ||
              reader->last->type == CATEGORY_NODE_TYPE_OR ||
              reader->last->type == CATEGORY_NODE_TYPE_NOT)
@@ -377,6 +393,7 @@ static void end_element_handler(GMarkupParseContext *context,
     {
         case CATEGORY_NODE_TYPE_NAME:
         case CATEGORY_NODE_TYPE_ICON:
+        case CATEGORY_NODE_TYPE_REPEAT:
         case CATEGORY_NODE_TYPE_DESKTOP_ID:
         case CATEGORY_NODE_TYPE_DESKTOP_CATEGORY:
             if (reader->last->content == NULL)
@@ -438,12 +455,25 @@ static void text_handler(GMarkupParseContext *context,
         case CATEGORY_NODE_TYPE_DESKTOP_CATEGORY:
             reader->last->content = str_trim(text);
             break;
+        case CATEGORY_NODE_TYPE_REPEAT:
+            reader->last->content = str_trim(text);
+            if (g_strcmp0(reader->last->content, "true") != 0 &&
+                g_strcmp0(reader->last->content, "false") != 0)
+            {
+                set_error(error, context,
+                          G_MARKUP_ERROR, G_MARKUP_ERROR_INVALID_CONTENT,
+                          "the text in <repeat> must be true or false.",
+                          g_markup_parse_context_get_element(context));
+                g_clear_pointer(&(reader->last->content), g_free);
+            }
+            break;
 
         case CATEGORY_NODE_TYPE_ROOT:
         case CATEGORY_NODE_TYPE_CATEGORIES:
         case CATEGORY_NODE_TYPE_CATEGORY:
         case CATEGORY_NODE_TYPE_INCLUDE:
         case CATEGORY_NODE_TYPE_EXCLUDE:
+        case CATEGORY_NODE_TYPE_ALL:
         case CATEGORY_NODE_TYPE_AND:
         case CATEGORY_NODE_TYPE_OR:
         case CATEGORY_NODE_TYPE_NOT:

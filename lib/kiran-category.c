@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-07 09:43:21
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-07 17:34:20
+ * @LastEditTime : 2020-05-08 11:06:45
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/kiran-category.c
  */
@@ -15,6 +15,8 @@ struct _KiranCategory
 
     gchar *name;
     gchar *icon;
+
+    gboolean repeat;
 
     KiranCategoryNode *node;
 
@@ -31,6 +33,11 @@ const gchar *kiran_category_get_name(KiranCategory *self)
 const gchar *kiran_category_get_icon(KiranCategory *self)
 {
     return self->icon;
+}
+
+gboolean kiran_category_get_repeat(KiranCategory *self)
+{
+    return self->repeat;
 }
 
 GList *kiran_category_get_apps(KiranCategory *self)
@@ -111,6 +118,10 @@ static gboolean match_rule(KiranCategoryNode *node, KiranApp *app)
     else if (node->type == CATEGORY_NODE_TYPE_DESKTOP_ID)
     {
         return match_desktop_id(node, app);
+    }
+    else if (node->type == CATEGORY_NODE_TYPE_ALL)
+    {
+        return TRUE;
     }
     else
     {
@@ -355,6 +366,8 @@ static void kiran_category_init(KiranCategory *self)
     self->name = NULL;
     self->icon = NULL;
 
+    self->repeat = TRUE;
+
     self->node = NULL;
 
     self->category_apps = g_hash_table_new(NULL, NULL);
@@ -400,6 +413,17 @@ static gboolean _kiran_category_init(KiranCategory *self, KiranCategoryNode *nod
         else if (iter->type == CATEGORY_NODE_TYPE_ICON)
         {
             self->icon = g_strdup(iter->content);
+        }
+        else if (iter->type == CATEGORY_NODE_TYPE_REPEAT)
+        {
+            if (g_strcmp0(iter->content, "true") == 0)
+            {
+                self->repeat = TRUE;
+            }
+            else if (g_strcmp0(iter->content, "false") == 0)
+            {
+                self->repeat = FALSE;
+            }
         }
     }
 

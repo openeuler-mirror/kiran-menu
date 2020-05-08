@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-30 17:28:19
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-07 16:47:11
+ * @LastEditTime : 2020-05-08 11:06:01
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/kiran-category-writer.c
  */
@@ -53,6 +53,9 @@ static gboolean write_rule(KiranCategoryNode *node, gint recurse_level, GDataOut
     {
         switch (iter->type)
         {
+            case CATEGORY_NODE_TYPE_ALL:
+                PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<all> </all>\n");
+                break;
             case CATEGORY_NODE_TYPE_AND:
                 PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<and>\n");
                 write_rule(iter, recurse_level + 1, data_output, error);
@@ -107,6 +110,11 @@ static gboolean write_category(KiranCategoryNode *node, gint recurse_level, GDat
                 PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<icon> ");
                 PUT_STR_TO_CATEGORY_FILE(iter->content);
                 PUT_STR_TO_CATEGORY_FILE(" </icon>\n");
+                break;
+            case CATEGORY_NODE_TYPE_REPEAT:
+                PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<repeat> ");
+                PUT_STR_TO_CATEGORY_FILE(iter->content);
+                PUT_STR_TO_CATEGORY_FILE(" </repeat>\n");
                 break;
             case CATEGORY_NODE_TYPE_LOGIC:
                 PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<logic>\n");
