@@ -21,28 +21,33 @@ kiran-app-item:hover {
     border-style: solid;
 }
 
+.category-item-box {
+    margin-left: 12px;
+}
+
 kiran-category-item {
     background-color: transparent;
     border-width: 0px;
-    border-left-width: 3px;
+    /*
+    border-left-width: 5px;
     border-color: #4cb5ff;
     border-style: solid;
-
+    */
     min-height: 40px;
     color: white;
-
-    margin: 0px;
-    margin-left: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-left: 10px;
 }
 
 kiran-category-item:hover {
     background-color: rgba(255, 255, 255, 0.1);;
 }
 
-kiran-category-item > label {
-    margin-left: 20px;
-    font-size: 14pt;
-    font-weight: bold;
+kiran-category-item  label {
+    margin-left: 10px;
+    font-size: 15pt;
+    font-weight: normal;
     -gtk-dpi: 72;
 }
 

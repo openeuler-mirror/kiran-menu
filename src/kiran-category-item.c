@@ -3,7 +3,7 @@
 struct _KiranCategoryItem
 {
     GtkEventBox parent;
-    GtkWidget *label;
+    GtkWidget *label, *box, *image;
 
     gchar *name;
     gboolean clickable;
@@ -28,10 +28,10 @@ static guint signals[SIGNAL_MAX] = {0};
 
 void kiran_category_item_init(KiranCategoryItem *item)
 {
-    GtkWidget *label;
     GtkStyleContext *context;
     GValue value = G_VALUE_INIT;
     int min_width, min_height;
+    GtkBorder margin, padding;
     
     context = gtk_widget_get_style_context(GTK_WIDGET(item));
 
@@ -43,16 +43,33 @@ void kiran_category_item_init(KiranCategoryItem *item)
     min_height = g_value_get_int(&value);
     g_value_unset(&value);
 
+    gtk_style_context_get_margin(context, GTK_STATE_FLAG_NORMAL, &margin);
+    gtk_style_context_get_padding(context, GTK_STATE_FLAG_NORMAL, &padding);
+
     item->name = NULL;
     item->clickable = FALSE;
 
     item->label = gtk_label_new(NULL);
+    item->box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    item->image = gtk_image_new_from_resource("/kiran-menu/icon/group");
 
     gtk_widget_set_hexpand(item->label, TRUE);
     gtk_widget_set_halign(item->label, GTK_ALIGN_START);
     gtk_widget_set_size_request(GTK_WIDGET(item), min_width, min_height);
+    gtk_widget_set_margin_start(GTK_WIDGET(item), margin.left);
+    gtk_widget_set_margin_end(GTK_WIDGET(item), margin.right);
+    gtk_widget_set_margin_top(GTK_WIDGET(item), margin.top);
+    gtk_widget_set_margin_bottom(GTK_WIDGET(item), margin.bottom);
+
     gtk_label_set_ellipsize(GTK_LABEL(item->label), PANGO_ELLIPSIZE_END);
-    gtk_container_add(GTK_CONTAINER(item), item->label);
+
+    context = gtk_widget_get_style_context(item->box);
+    gtk_style_context_add_class(context, "category-item-box");
+
+    gtk_widget_set_valign(item->box, GTK_ALIGN_CENTER);
+    gtk_box_pack_start(GTK_CONTAINER(item->box), item->image, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_CONTAINER(item->box), item->label, TRUE, TRUE, 0);
+    gtk_container_add(GTK_CONTAINER(item), item->box);
 }
 
 void kiran_category_item_finalize(GObject *obj)
@@ -107,6 +124,7 @@ gboolean kiran_category_item_draw(GtkWidget *widget, cairo_t *cr)
 {
     GtkStyleContext *context;
     GtkAllocation allocation;
+    GdkRGBA color;
 
     context = gtk_widget_get_style_context(widget);
     gtk_widget_get_allocation(widget, &allocation);

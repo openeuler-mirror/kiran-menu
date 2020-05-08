@@ -13,5 +13,6 @@
     <file alias="menu.css">data/menu.css</file>
     <file alias="ui/menu">data/menu.ui.xml</file>
     <file alias="logo">images/logo.png</file>
+    <file alias="icon/group">images/group.png</file>
   </gresource>
 </gresources>
