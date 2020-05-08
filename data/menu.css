@@ -1,4 +1,6 @@
 @define-color placeholder_text_color #c8c8c8;
+
+
 kiran-app-item {
     background: transparent;
 
@@ -87,7 +89,7 @@ button#all-apps-button, button#back-button {
 
 window#menu-window {
     background-color: #1f1f1f;
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 scrollbar {
