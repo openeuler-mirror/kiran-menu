@@ -92,23 +92,32 @@ window#menu-window {
     border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-scrollbar {
+scrollbar.vertical {
     border-width: 1px;
     background-color: transparent;
+    min-width:5px;
 }
-scrollbar slider {
+scrollbar.vertical button {
+    min-height: 0px;
+    min-width: 0px; 
+}
+
+scrollbar.vertical slider {
     background-color: rgba(255, 255, 255, 0.2);
     border-width: 1px;
     border-radius: 5px;
+
+    min-width: 5px;
+    min-height: 40px;
 }
 
-scrollbar slider:active, scrollbar slider:hover {
+scrollbar.vertical slider:active, scrollbar.vertical slider:hover {
     background-color: rgba(255, 255, 255, 0.3);
     border-width: 1px;
     border-radius: 5px;
 }
 
-scrollbar button.up scrollbar button.down {
+scrollbar.vertical button.up scrollbar.vertical button.down {
     background: transparent;
     background-image: none;
     border: none;
