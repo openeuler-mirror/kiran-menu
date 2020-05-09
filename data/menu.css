@@ -62,6 +62,17 @@ kiran-category-item  label {
     -gtk-dpi: 72;
 }
 
+
+kiran-category-item:focus {
+    border-right-color: #4cb5ff;
+    background: rgba(255, 255, 255, 0.3);
+    font-weight: bold;
+}
+
+kiran-category-item:focus  label {
+    font-weight: bold;
+}
+
 entry.kiran-search-entry {
     margin-left: 10px;
     margin-right: 10px;
@@ -137,26 +148,6 @@ scrollbar.vertical button.up scrollbar.vertical button.down {
     margin-bottom: 20px;
     padding-left: 10px;
     padding-right: 20px;
-}
-
-button.kiran-category-selector {
-    min-height: 30px;
-    border-width: 3px;
-    border-color: transparent;
-    border-style: solid;
-    padding-left: 10px;
-    font-size: 14pt;
-    -gtk-dpi: 72;
-}
-
-button.kiran-category-selector:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-button.kiran-category-selector:focus {
-    border-right-color: #4cb5ff;
-    background: rgba(255, 255, 255, 0.3);
-    font-weight: bold;
 }
 
 popover.kiran-power-menu button{

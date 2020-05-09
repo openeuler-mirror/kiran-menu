@@ -117,11 +117,11 @@ void kiran_menu_window_jump_to_category(KiranMenuWindow *self, const char *categ
 /**
  * 在分类选择视图中点击分类时的回调函数 
  */
-static void category_selected_callback(KiranMenuWindow *self, GtkButton *button)
+static void category_selected_callback(KiranMenuWindow *self, KiranCategoryItem *item)
 {
     char *category_name;
 
-    category_name = g_object_get_data(G_OBJECT(button), "category-name");
+    category_name = kiran_category_item_get_category_name(item);
 
     g_message("%s: jump to category '%s'\n", __func__, category_name);
     kiran_menu_window_jump_to_category(self, category_name);
@@ -144,25 +144,21 @@ static void show_category_overview(KiranMenuWindow *self, GtkButton *button)
 
     for (ptr = self->category_list; ptr != NULL; ptr = ptr->next) {
         GtkStyleContext *context;
-        GtkWidget *button;
+        GtkWidget *category_item;
 
-        button = gtk_button_new_with_label((char*)ptr->data);
-        gtk_button_set_alignment(GTK_BUTTON(button), 0.0, 0.5);
-        gtk_widget_set_hexpand(button, TRUE);
-        g_object_set_data_full(G_OBJECT(button), "category-name", g_strdup(ptr->data), (GDestroyNotify)g_free);
 
-        context = gtk_widget_get_style_context(button);
-        gtk_style_context_add_class(context, "kiran-category-selector");
-
-        gtk_container_add(GTK_CONTAINER(self->category_overview_box), button);
-        gtk_widget_show(button);
+        category_item = GTK_WIDGET(kiran_category_item_new((char*)ptr->data, TRUE));
+        gtk_widget_set_can_focus(category_item, TRUE);
+        gtk_container_add(GTK_CONTAINER(self->category_overview_box), category_item);
+        gtk_widget_show_all(category_item);
 
         if (!strcmp((char*)ptr->data, current_category)) {
             //将当前分类设置为默认激活状态
-            gtk_widget_grab_focus(button);
+
+            gtk_widget_grab_focus(category_item);
             g_message("%s: found same category\n", __func__);
         }
-        g_signal_connect_swapped(button, "clicked", G_CALLBACK(category_selected_callback), self);
+        g_signal_connect_swapped(category_item, "clicked", G_CALLBACK(category_selected_callback), self);
     }
     gtk_stack_set_transition_type(GTK_STACK(self->overview_stack), GTK_STACK_TRANSITION_TYPE_CROSSFADE);
     gtk_stack_set_visible_child_name(GTK_STACK(self->overview_stack), "category-overview-page");
