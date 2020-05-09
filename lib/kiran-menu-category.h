@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 17:30:32
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-08 15:15:12
+ * @LastEditTime : 2020-05-09 09:51:05
  * @Description  : 管理菜单中的APP的分类
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-category.h
  */
@@ -77,7 +77,7 @@ GList *kiran_menu_category_get_apps(KiranMenuCategory *self,
  * @return:
  * @author: tangjie02
  */
-GList *kiran_menu_category_get_categorys(KiranMenuCategory *self);
+GList *kiran_menu_category_get_names(KiranMenuCategory *self);
 
 /**
  * @description: 获取所有分类和APP

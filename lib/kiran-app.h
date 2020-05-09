@@ -2,9 +2,9 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:33
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-04-10 00:43:04
+ * @LastEditTime : 2020-05-09 13:57:19
  * @Description  : 维护APP的一些基本信息
- * @FilePath     : /kiran-menu-backend/lib/start-menu/kiran-app.h
+ * @FilePath     : /kiran-menu-2.0/lib/kiran-app.h
  */
 
 #pragma once
@@ -62,6 +62,14 @@ const gchar *kiran_app_get_locale_comment(KiranApp *self);
  * @author: tangjie02
  */
 const gchar *kiran_app_get_desktop_id(KiranApp *self);
+
+/**
+ * @description:
+ * @param {KiranApp*}
+ * @return:
+ * @author: tangjie02
+ */
+const gchar *kiran_app_get_exec(KiranApp *self);
 
 /**
  * @description: 获取App的分类

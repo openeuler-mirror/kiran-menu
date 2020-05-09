@@ -2,11 +2,13 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-08 15:17:35
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-08 15:19:52
+ * @LastEditTime : 2020-05-09 15:56:12
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/start-menu/test-start-menu.c
  */
 #include "test/start-menu/test-start-menu.h"
+
+#include <gtk/gtk.h>
 
 #include "lib/kiran-menu-based.h"
 
@@ -16,11 +18,21 @@ void test_frequent_apps(gconstpointer data);
 void test_search_apps(gconstpointer data);
 void test_all_apps(gconstpointer data);
 
+void sig_hander(int signo)
+{
+}
+
 int main(int argc, char **argv)
 {
+    g_test_init(&argc, &argv, NULL);
+
+    signal(SIGTRAP, sig_hander);
+
+    gtk_init(&argc, &argv);
+
     KiranMenuBased *kiran_menu = kiran_menu_based_skeleton_new();
 
-    g_test_init(&argc, &argv, NULL);
+    //gtk_main();
 
     g_test_add_data_func("/test-start-menu/test-favorite-apps", kiran_menu,
                          test_favorite_apps);
