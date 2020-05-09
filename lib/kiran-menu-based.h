@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:23:14
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-07 10:59:30
+ * @LastEditTime : 2020-05-09 09:47:25
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-based.h
  */
@@ -37,6 +37,8 @@ struct _KiranMenuBasedInterface
 
     gboolean (*impl_del_category_app)(KiranMenuBased *self, const char *category,
                                       const char *desktop_id);
+
+    GList *(*impl_get_category_names)(KiranMenuBased *self);
 
     GList *(*impl_get_category_apps)(KiranMenuBased *self, const char *category);
 
@@ -127,6 +129,14 @@ gboolean kiran_menu_based_add_category_app(KiranMenuBased *self,
 gboolean kiran_menu_based_del_category_app(KiranMenuBased *self,
                                            const char *category_name,
                                            const char *desktop_id);
+
+/**
+ * @description: 获取所有分类的名字
+ * @param {KiranMenuBased*} self KiranMenuSkeleton对象
+ * @return: 链表元素类型为gchar*, 调用者需要通过g_list_free_full(return_val, g_free)进行释放.
+ * @author: tangjie02
+ */
+GList *kiran_menu_based_get_category_names(KiranMenuBased *self);
 
 /**
  * @description: 获取category分类中的所有KiranApp.

@@ -159,7 +159,7 @@ GList *kiran_menu_category_get_apps(KiranMenuCategory *self,
     return NULL;
 }
 
-GList *kiran_menu_category_get_categorys(KiranMenuCategory *self)
+GList *kiran_menu_category_get_names(KiranMenuCategory *self)
 {
     GList *category_names = NULL;
 

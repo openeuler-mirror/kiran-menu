@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:23:21
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-07 10:53:14
+ * @LastEditTime : 2020-05-09 09:47:40
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-based.c
  */
@@ -90,6 +90,17 @@ gboolean kiran_menu_based_del_category_app(KiranMenuBased *self,
     iface = KIRAN_MENU_BASED_GET_IFACE(self);
     g_return_val_if_fail(iface->impl_del_category_app != NULL, FALSE);
     return iface->impl_del_category_app(self, category_name, desktop_id);
+}
+
+GList *kiran_menu_based_get_category_names(KiranMenuBased *self)
+{
+    KiranMenuBasedInterface *iface;
+
+    g_return_val_if_fail(KIRAN_IS_MENU_BASED(self), FALSE);
+
+    iface = KIRAN_MENU_BASED_GET_IFACE(self);
+    g_return_val_if_fail(iface->impl_get_category_names != NULL, FALSE);
+    return iface->impl_get_category_names(self);
 }
 
 GList *kiran_menu_based_get_category_apps(KiranMenuBased *self,
