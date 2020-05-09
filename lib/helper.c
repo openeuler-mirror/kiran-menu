@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 22:54:57
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-07 17:30:25
+ * @LastEditTime : 2020-05-09 10:52:13
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/helper.c
  */
@@ -47,6 +47,17 @@ gchar *str_trim(const gchar *str)
     for (gint i = start; i <= end; ++i)
     {
         new_str[i - start] = str[i];
+    }
+    return new_str;
+}
+
+gchar *str_tolower(const gchar *str)
+{
+    gchar *new_str = g_strdup(str);
+    gint len = strlen(str);
+    for (gint i = 0; i < len; ++i)
+    {
+        new_str[i] = g_ascii_tolower(str[i]);
     }
     return new_str;
 }

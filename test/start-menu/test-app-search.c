@@ -1,3 +1,13 @@
+/*
+ * @Author       : tangjie02
+ * @Date         : 2020-05-09 10:40:16
+ * @LastEditors  : tangjie02
+ * @LastEditTime : 2020-05-09 10:56:50
+ * @Description  : 
+ * @FilePath     : /kiran-menu-2.0/test/start-menu/test-app-search.c
+ */
+#include <glib/gprintf.h>
+
 #include "test/start-menu/test-start-menu.h"
 
 #define CHECK_SEARCH_RESULT(keyword)                                            \
@@ -24,4 +34,10 @@ void test_search_apps(gconstpointer data)
         CHECK_SEARCH_RESULT(kiran_app_get_comment(first_app));
         CHECK_SEARCH_RESULT(kiran_app_get_locale_comment(first_app));
     }
+
+    // GList *tt = kiran_menu_based_search_app_ignore_case(menu_based, "fIre");
+    // for (GList *l = tt; l != NULL; l = l->next)
+    // {
+    //     g_print("id: %s\n", kiran_app_get_desktop_id(l->data));
+    // }
 }

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:23:14
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-09 09:47:25
+ * @LastEditTime : 2020-05-09 10:36:21
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-based.h
  */
@@ -22,7 +22,7 @@ struct _KiranMenuBasedInterface
 {
     GTypeInterface parent;
 
-    GList *(*impl_search_app)(KiranMenuBased *self, const char *keyword);
+    GList *(*impl_search_app)(KiranMenuBased *self, const char *keyword, gboolean ignore_case);
 
     gboolean (*impl_add_favorite_app)(KiranMenuBased *self,
                                       const char *desktop_id);
@@ -61,19 +61,24 @@ struct _KiranMenuBasedInterface
 KiranMenuBased *kiran_menu_based_skeleton_new();
 
 /**
- * @description: 通过关键词进行检索,
- * 会跟.desktop文件的name/localename/comment字段进行字符串匹配,
- * 如果关键词为其中任何一个字段的子串, 则匹配成功.
- * 最后返回所有匹配成功的KiranApp.
+ * @description: 通过关键词进行检索, 会跟.desktop文件的name/localename/comment字段进行字符串匹配,
+ * 如果关键词为其中任何一个字段的子串, 则匹配成功. 最后返回所有匹配成功的KiranApp.
  * @param {KiranMenuBased*} self KiranMenuSkeleton对象
  * @param {const char*} keyword 检索的关键词
- * @return:
- * 返回匹配成功链表, 链表元素类型为KiranApp*,
- * 如果没有匹配成功列表或者出现错误，则返回NULL,
+ * @return: 返回匹配成功链表, 链表元素类型为KiranApp*, 如果没有匹配成功列表或者出现错误，则返回NULL,
  * 调用者需要通过g_list_free_full(return_val, g_object_unref)进行释放.
  * @author: tangjie02
  */
 GList *kiran_menu_based_search_app(KiranMenuBased *self, const char *keyword);
+
+/**
+ * @description: 除了不区分大小写搜索，功能同kiran_menu_based_search_app。
+ * @param {KiranMenuBased*} self KiranMenuSkeleton对象
+ * @param {const char*} keyword 检索的关键词
+ * @return: 
+ * @author: tangjie02
+ */
+GList *kiran_menu_based_search_app_ignore_case(KiranMenuBased *self, const char *keyword);
 
 /**
  * @description: 将desktop_id加入收藏列表.

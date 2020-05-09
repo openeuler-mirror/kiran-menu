@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 20:58:19
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-07 16:31:40
+ * @LastEditTime : 2020-05-09 10:33:29
  * @Description  : 用于菜单搜索功能
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-search.h
  */
@@ -24,7 +24,9 @@ KiranMenuSearch *kiran_menu_search_get_new();
  * @return:
  * @author: tangjie02
  */
-GList *kiran_menu_search_by_keyword(KiranMenuSearch *self, const char *keyword,
+GList *kiran_menu_search_by_keyword(KiranMenuSearch *self,
+                                    const char *keyword,
+                                    gboolean ignore_case,
                                     GList *apps);
 
 G_END_DECLS

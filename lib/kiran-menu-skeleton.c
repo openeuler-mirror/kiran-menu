@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 19:59:56
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-09 09:49:29
+ * @LastEditTime : 2020-05-09 10:36:05
  * @Description  : 开始菜单类
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-skeleton.c
  */
@@ -58,14 +58,14 @@ static GList *trans_ids_to_apps(KiranMenuSkeleton *skeleton,
 }
 
 static GList *kiran_menu_skeleton_search_app(KiranMenuBased *self,
-                                             const char *keyword)
+                                             const char *keyword,
+                                             gboolean ignore_case)
 {
     g_return_val_if_fail(KIRAN_IS_MENU_SKELETON(self), NULL);
 
     KiranMenuSkeleton *skeleton = KIRAN_MENU_SKELETON(self);
     GList *apps = kiran_menu_system_get_apps(skeleton->system);
-    GList *match_apps =
-        kiran_menu_search_by_keyword(skeleton->search, keyword, apps);
+    GList *match_apps = kiran_menu_search_by_keyword(skeleton->search, keyword, ignore_case, apps);
     g_list_free_full(apps, g_object_unref);
     return match_apps;
 }

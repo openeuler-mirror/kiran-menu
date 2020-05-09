@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:23:21
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-09 09:47:40
+ * @LastEditTime : 2020-05-09 10:36:47
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-based.c
  */
@@ -28,7 +28,18 @@ GList *kiran_menu_based_search_app(KiranMenuBased *self, const char *keyword)
 
     iface = KIRAN_MENU_BASED_GET_IFACE(self);
     g_return_val_if_fail(iface->impl_search_app != NULL, NULL);
-    return iface->impl_search_app(self, keyword);
+    return iface->impl_search_app(self, keyword, FALSE);
+}
+
+GList *kiran_menu_based_search_app_ignore_case(KiranMenuBased *self, const char *keyword)
+{
+    KiranMenuBasedInterface *iface;
+
+    g_return_val_if_fail(KIRAN_IS_MENU_BASED(self), NULL);
+
+    iface = KIRAN_MENU_BASED_GET_IFACE(self);
+    g_return_val_if_fail(iface->impl_search_app != NULL, NULL);
+    return iface->impl_search_app(self, keyword, TRUE);
 }
 
 gboolean kiran_menu_based_add_favorite_app(KiranMenuBased *self,
