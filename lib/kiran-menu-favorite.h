@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 15:37:28
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-08 14:09:13
+ * @LastEditTime : 2020-05-09 16:16:44
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-favorite.h
  */
@@ -42,6 +42,15 @@ gboolean kiran_menu_favorite_add_app(KiranMenuFavorite *self,
  */
 gboolean kiran_menu_favorite_del_app(KiranMenuFavorite *self,
                                      const char *desktop_id);
+
+/**
+ * @description: 查找收藏APP
+ * @param {type} 
+ * @return: 
+ * @author: tangjie02
+ */
+gboolean kiran_menu_favorite_find_app(KiranMenuFavorite *self,
+                                      const char *desktop_id);
 
 /**
  * @description: 

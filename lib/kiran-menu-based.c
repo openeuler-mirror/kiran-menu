@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:23:21
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-09 10:36:47
+ * @LastEditTime : 2020-05-09 16:14:36
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-based.c
  */
@@ -64,6 +64,18 @@ gboolean kiran_menu_based_del_favorite_app(KiranMenuBased *self,
     iface = KIRAN_MENU_BASED_GET_IFACE(self);
     g_return_val_if_fail(iface->impl_del_favorite_app != NULL, FALSE);
     return iface->impl_del_favorite_app(self, desktop_id);
+}
+
+KiranApp *kiran_menu_based_lookup_favorite_app(KiranMenuBased *self,
+                                               const char *desktop_id)
+{
+    KiranMenuBasedInterface *iface;
+
+    g_return_val_if_fail(KIRAN_IS_MENU_BASED(self), FALSE);
+
+    iface = KIRAN_MENU_BASED_GET_IFACE(self);
+    g_return_val_if_fail(iface->impl_lookup_favorite_app != NULL, FALSE);
+    return iface->impl_lookup_favorite_app(self, desktop_id);
 }
 
 GList *kiran_menu_based_get_favorite_apps(KiranMenuBased *self)

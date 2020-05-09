@@ -2,13 +2,15 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:23:14
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-09 10:36:21
+ * @LastEditTime : 2020-05-09 16:22:27
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-based.h
  */
 #pragma once
 
 #include <gio/gio.h>
+
+#include "lib/kiran-app.h"
 
 G_BEGIN_DECLS
 
@@ -29,6 +31,9 @@ struct _KiranMenuBasedInterface
 
     gboolean (*impl_del_favorite_app)(KiranMenuBased *self,
                                       const char *desktop_id);
+
+    KiranApp *(*impl_lookup_favorite_app)(KiranMenuBased *self,
+                                          const char *desktop_id);
 
     GList *(*impl_get_favorite_apps)(KiranMenuBased *self);
 
@@ -101,6 +106,15 @@ gboolean kiran_menu_based_add_favorite_app(KiranMenuBased *self,
 gboolean kiran_menu_based_del_favorite_app(KiranMenuBased *self,
                                            const char *desktop_id);
 
+/**
+ * @description: 查询desktop_id是否在收藏列表中
+ * @param {KiranMenuBased*} self KiranMenuSkeleton对象
+ * @param {const char*} desktop_id 查询的desktop_id
+ * @return: 如果desktop_id不在收藏列表中，返回NULL，否则返回KiranApp*，需要通过g_object_unref(return_val)进行释放。
+ * @author: tangjie02
+ */
+KiranApp *kiran_menu_based_lookup_favorite_app(KiranMenuBased *self,
+                                               const char *desktop_id);
 /**
  * @description: 获取收藏列表.
  * @param {KiranMenuBased*} self KiranMenuSkeleton对象

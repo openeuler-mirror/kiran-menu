@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 19:59:56
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-09 10:36:05
+ * @LastEditTime : 2020-05-09 16:23:57
  * @Description  : 开始菜单类
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-skeleton.c
  */
@@ -86,6 +86,25 @@ static gboolean kiran_menu_skeleton_del_favorite_app(KiranMenuBased *self,
 
     KiranMenuSkeleton *skeleton = KIRAN_MENU_SKELETON(self);
     return kiran_menu_favorite_del_app(skeleton->favorite, desktop_id);
+}
+
+static KiranApp *kiran_menu_skeleton_lookup_favorite_app(KiranMenuBased *self,
+                                                         const char *desktop_id)
+{
+    g_return_val_if_fail(KIRAN_IS_MENU_SKELETON(self), FALSE);
+
+    KiranMenuSkeleton *skeleton = KIRAN_MENU_SKELETON(self);
+    gboolean exist = kiran_menu_favorite_find_app(skeleton->favorite, desktop_id);
+
+    if (exist)
+    {
+        KiranMenuApp *app = kiran_menu_system_lookup_app(skeleton->system, desktop_id);
+        if (app)
+        {
+            return g_object_ref(KIRAN_APP(app));
+        }
+    }
+    return NULL;
 }
 
 static GList *kiran_menu_skeleton_get_favorite_apps(KiranMenuBased *self)
@@ -227,6 +246,7 @@ static void kiran_menu_based_interface_init(KiranMenuBasedInterface *iface)
 
     iface->impl_add_favorite_app = kiran_menu_skeleton_add_favorite_app;
     iface->impl_del_favorite_app = kiran_menu_skeleton_del_favorite_app;
+    iface->impl_lookup_favorite_app = kiran_menu_skeleton_lookup_favorite_app;
     iface->impl_get_favorite_apps = kiran_menu_skeleton_get_favorite_apps;
 
     iface->impl_add_category_app = kiran_menu_skeleton_add_category_app;

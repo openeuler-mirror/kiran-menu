@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-07 16:33:02
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-08 15:39:48
+ * @LastEditTime : 2020-05-09 16:31:24
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/start-menu/test-app-category.c
  */
@@ -29,7 +29,8 @@ void test_category_apps(gconstpointer data)
 
     g_hash_table_iter_init(&iter, all_category_apps);
 
-    g_printf("\ncategory info:\n");
+    g_print("\n---------------------------------------------\n");
+    g_printf("category info:\n");
 
     while (g_hash_table_iter_next(&iter, (gpointer *)&category_name, (gpointer *)&category_apps))
     {

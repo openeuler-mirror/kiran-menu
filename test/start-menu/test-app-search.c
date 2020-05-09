@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-09 10:40:16
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-09 10:56:50
+ * @LastEditTime : 2020-05-09 16:32:06
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/start-menu/test-app-search.c
  */
@@ -22,6 +22,9 @@
 void test_search_apps(gconstpointer data)
 {
     KiranMenuBased *menu_based = KIRAN_MENU_BASED((gpointer)data);
+
+    g_print("\n---------------------------------------------\n");
+
     GList *all_apps = kiran_menu_based_get_all_sorted_apps(menu_based);
 
     if (all_apps != NULL)

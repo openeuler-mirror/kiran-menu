@@ -79,6 +79,16 @@ gboolean kiran_menu_favorite_del_app(KiranMenuFavorite *self,
     return FALSE;
 }
 
+gboolean kiran_menu_favorite_find_app(KiranMenuFavorite *self,
+                                      const char *desktop_id)
+{
+    g_return_val_if_fail(desktop_id != NULL, FALSE);
+
+    GQuark quark = g_quark_from_string(desktop_id);
+
+    return (g_list_find(self->favorite_apps, GUINT_TO_POINTER(quark)) != NULL);
+}
+
 static gboolean deleted_app_callback(gpointer key, gpointer value,
                                      gpointer user_data)
 {
