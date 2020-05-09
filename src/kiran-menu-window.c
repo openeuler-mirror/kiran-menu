@@ -511,6 +511,15 @@ KiranMenuWindow *kiran_menu_window_new(GtkWidget *parent)
     return window;
 }
 
+void kiran_menu_window_reset_layout(KiranMenuWindow *self)
+{
+    show_apps_overview(self);
+    show_default_apps_page(self);
+
+    gtk_entry_set_text(GTK_ENTRY(self->search_entry), "");
+    gtk_widget_grab_focus(self->search_entry);
+}
+
 GtkWidget *kiran_menu_window_get_window(KiranMenuWindow *window)
 {
     return window->window;

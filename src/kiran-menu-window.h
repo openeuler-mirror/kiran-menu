@@ -16,5 +16,6 @@ GType kiran_menu_window_get_type();
 
 KiranMenuWindow *kiran_menu_window_new(GtkWidget *parent);
 GtkWidget *kiran_menu_window_get_window(KiranMenuWindow *window);
+void kiran_menu_window_reset_layout(KiranMenuWindow *window);
 
 #endif

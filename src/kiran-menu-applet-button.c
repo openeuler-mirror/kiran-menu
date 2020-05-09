@@ -142,6 +142,8 @@ static void kiran_menu_applet_button_toggled(GtkToggleButton *button)
 	if (gtk_toggle_button_get_active(button))
 	{
 		gtk_widget_show_all(window);
+		//将开始菜单窗口视图重置回初始状态
+		kiran_menu_window_reset_layout(self->menu_window);
 
 		gdk_window_get_origin(gtk_widget_get_window(GTK_WIDGET(button)), &root_x,
 							  &root_y);
