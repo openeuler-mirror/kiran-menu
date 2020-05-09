@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 21:42:15
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-09 15:55:48
+ * @LastEditTime : 2020-05-09 16:26:08
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-system.c
  */
@@ -84,41 +84,26 @@ GList *kiran_menu_system_lookup_apps_with_window(KiranMenuSystem *self,
     return apps;
 }
 
-static gint sort_by_ctime(gconstpointer a, gconstpointer b,
-                          gpointer user_data)
-{
-    GQuark qa = g_quark_from_string((const gchar *)a);
-    GQuark qb = g_quark_from_string((const gchar *)b);
-    GHashTable *apps_ctime = user_data;
-
-    gpointer timea = g_hash_table_lookup(apps_ctime, GUINT_TO_POINTER(qa));
-    gpointer timeb = g_hash_table_lookup(apps_ctime, GUINT_TO_POINTER(qb));
-    return GPOINTER_TO_UINT(timeb) - GPOINTER_TO_UINT(timea);
-}
-
 GList *kiran_menu_system_get_nnew_apps(KiranMenuSystem *self, gint top_n)
 {
     GList *new_apps = NULL;
-    g_autoptr(GHashTable) apps_ctime = g_hash_table_new(NULL, NULL);
 
-    GHashTableIter iter;
-    gpointer *key = NULL;
-    KiranMenuApp *menu_app = NULL;
-
-    g_hash_table_iter_init(&iter, self->apps);
-    while (
-        g_hash_table_iter_next(&iter, (gpointer *)&key, (gpointer *)&menu_app))
+    for (GList *l = self->new_apps; l != NULL; l = l->next)
     {
-        GQuark quark = GPOINTER_TO_UINT(key);
+        GQuark quark = GPOINTER_TO_UINT(l->data);
+
         const char *desktop_id = g_quark_to_string(quark);
         new_apps = g_list_append(new_apps, g_strdup(desktop_id));
-
-        guint64 ctime = kiran_app_get_create_time(KIRAN_APP(menu_app));
-        g_hash_table_insert(apps_ctime, key, GUINT_TO_POINTER((ctime >> 32)));
     }
 
-    new_apps = g_list_sort_with_data(new_apps, sort_by_ctime, apps_ctime);
-    return list_remain_headn(new_apps, top_n, g_free);
+    if (top_n < 0)
+    {
+        return new_apps;
+    }
+    else
+    {
+        return list_remain_headn(new_apps, top_n, g_free);
+    }
 }
 
 gint sort_by_app_name(gconstpointer a, gconstpointer b, gpointer user_data)
