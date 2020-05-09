@@ -2,9 +2,9 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:38
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-04-10 00:55:21
+ * @LastEditTime : 2020-05-09 13:57:09
  * @Description  :
- * @FilePath     : /kiran-menu-backend/lib/start-menu/kiran-app.c
+ * @FilePath     : /kiran-menu-2.0/lib/kiran-app.c
  */
 
 #include "lib/kiran-app.h"
@@ -26,6 +26,8 @@ struct _KiranAppPrivate
 
     gchar *comment;
     gchar *locale_comment;
+
+    gchar *exec;
 
     GDesktopAppInfo *desktop_app;
 };
@@ -81,6 +83,15 @@ const gchar *kiran_app_get_desktop_id(KiranApp *self)
     KiranAppPrivate *priv = kiran_app_get_instance_private(self);
 
     return priv->desktop_id;
+}
+
+const gchar *kiran_app_get_exec(KiranApp *self)
+{
+    g_return_val_if_fail(self != NULL, NULL);
+
+    KiranAppPrivate *priv = kiran_app_get_instance_private(self);
+
+    return priv->exec;
 }
 
 const gchar *kiran_app_get_categories(KiranApp *self)
@@ -161,6 +172,8 @@ static void kiran_app_set_app_info(KiranApp *app, const char *desktop_id)
     priv->comment = GET_STRING("Comment");
     priv->locale_comment = GET_LOCALE_STRING("Comment");
 
+    priv->exec = GET_STRING("Exec");
+
 #undef GET_STRING
 #undef GET_LOCALE_STRING
 }
@@ -195,6 +208,8 @@ static void kiran_app_dispose(GObject *object)
 
     g_clear_pointer(&priv->comment, g_free);
     g_clear_pointer(&priv->locale_comment, g_free);
+
+    g_clear_pointer(&priv->exec, g_free);
 
     G_OBJECT_CLASS(kiran_app_parent_class)->dispose(object);
 }
