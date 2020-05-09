@@ -4,16 +4,18 @@
 
 struct _KiranAppItem
 {
-    GtkButton parent;
+    GtkEventBox parent;
 
     GtkWidget *grid;
     GtkWidget *icon, *label;
     GtkWidget *menu;
 
+    gboolean menu_shown;
+
     KiranApp *app;
 };
 
-G_DEFINE_TYPE(KiranAppItem, kiran_app_item, GTK_TYPE_BUTTON);
+G_DEFINE_TYPE(KiranAppItem, kiran_app_item, GTK_TYPE_EVENT_BOX);
 
 enum
 {
@@ -37,8 +39,12 @@ void kiran_app_item_init(KiranAppItem *item)
     gtk_label_set_ellipsize(GTK_LABEL(item->label), PANGO_ELLIPSIZE_END);
     gtk_widget_set_hexpand(item->label, TRUE);
     gtk_widget_set_halign(item->label, GTK_ALIGN_START);
+    gtk_widget_set_margin_start(item->icon, 25);
+    gtk_widget_set_margin_right(item->icon, 10);
 
     gtk_widget_show_all(item->grid);
+
+    gtk_widget_add_events(GTK_WIDGET(item), GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_PRESS_MASK | GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK);
 }
 
 static void destroy_menu(GtkWidget *widget, GtkMenu *menu)
@@ -69,11 +75,25 @@ static void add_to_desktop(KiranAppItem *item)
     g_free(command);
 }
 
+static void menu_detach_callback(KiranAppItem *item)
+{
+    g_message("%s: set item %p menu-shown to FALSE\n", __func__, item);
+
+    item->menu_shown = FALSE;
+    gtk_widget_set_state(GTK_WIDGET(item), GTK_STATE_FLAG_NORMAL);
+}
+
 static GtkWidget *create_context_menu(GtkWidget *attach)
 {
     GtkWidget *menu, *menu_item;
+    KiranAppItem *item = KIRAN_APP_ITEM(attach);
 
     menu = gtk_menu_new();
+
+    menu_item = gtk_menu_item_new_with_label(_("Launch"));
+    g_signal_connect_swapped(menu_item, "activate", G_CALLBACK(kiran_app_launch), item->app);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
+
     menu_item = gtk_menu_item_new_with_label(_("Add to desktop"));
     g_signal_connect_swapped(menu_item, "activate", G_CALLBACK(add_to_desktop), attach);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
@@ -81,33 +101,55 @@ static GtkWidget *create_context_menu(GtkWidget *attach)
     menu_item = gtk_menu_item_new_with_label(_("Add to favorites"));
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
     gtk_menu_attach_to_widget(GTK_MENU(menu), attach, (GtkMenuDetachFunc)destroy_menu);
-    //g_signal_connect(menu, "deactivate", G_CALLBACK(gtk_menu_detach), NULL);
+    g_signal_connect_swapped(menu, "deactivate", G_CALLBACK(menu_detach_callback), attach);
 
     gtk_widget_show_all(menu);
 
     return menu;
 }
 
-gboolean kiran_app_item_button_press(GtkWidget *widget, GdkEventButton *ev)
+gboolean kiran_app_item_button_release(GtkWidget *widget, GdkEventButton *ev)
 {
     KiranAppItem *item = KIRAN_APP_ITEM(widget);
     GdkEvent *event = (GdkEvent *)ev;
-
-    if (gdk_event_triggers_context_menu(event)) {
+ 
+    g_message("%s: got button release event\n", __func__);
+    if (ev->button == 3) {
         if (!item->menu)
             item->menu = create_context_menu(widget);
         
+        g_message("%s: set item %p menu-shown to TRUE\n", __func__, item);
+        item->menu_shown = TRUE;
         gtk_menu_popup_at_pointer(GTK_MENU(item->menu), event);
+ 
+        return TRUE;
     }
-    return GTK_WIDGET_CLASS(kiran_app_item_parent_class)->button_press_event(widget, ev);
+    return FALSE;
 }
 
-void kiran_app_item_button_clicked(GtkButton *button) {
-    KiranAppItem *item = KIRAN_APP_ITEM(button);
-    if (!kiran_app_launch (item->app)) {
-        g_error("Failed to launch application '%s'\n", kiran_app_get_name(item->app));
-    }
+gboolean kiran_app_item_enter_notify(GtkWidget *widget, GdkEventMotion *ev)
+{
+    KiranAppItem *item = KIRAN_APP_ITEM(widget);
+
+    gtk_widget_set_state_flags(widget, GTK_STATE_FLAG_PRELIGHT, FALSE);
+    gtk_widget_queue_draw(widget);
+    return FALSE;
 }
+
+gboolean kiran_app_item_leave_notify(GtkWidget *widget, GdkEventMotion *ev)
+{
+    KiranAppItem *item = KIRAN_APP_ITEM(widget);
+    GtkStateFlags flags = gtk_widget_get_state_flags(widget);
+
+    if (item->menu_shown) {
+        return TRUE;
+    }
+
+    gtk_widget_set_state_flags(widget, flags & ~GTK_STATE_FLAG_PRELIGHT, TRUE);
+    gtk_widget_queue_draw(widget);
+    return FALSE;
+}
+
 
 void kiran_app_item_finalize(GObject *obj)
 {
@@ -153,8 +195,9 @@ static gboolean kiran_app_item_update(KiranAppItem *item)
 void kiran_app_item_class_init(KiranAppItemClass *kclass)
 {
     G_OBJECT_CLASS(kclass)->finalize = kiran_app_item_finalize;
-    GTK_WIDGET_CLASS(kclass)->button_press_event = kiran_app_item_button_press;
-    GTK_BUTTON_CLASS(kclass)->clicked = kiran_app_item_button_clicked;
+    GTK_WIDGET_CLASS(kclass)->button_release_event = kiran_app_item_button_release;
+    GTK_WIDGET_CLASS(kclass)->leave_notify_event = kiran_app_item_leave_notify;
+    GTK_WIDGET_CLASS(kclass)->enter_notify_event = kiran_app_item_enter_notify;
 
     g_object_class_install_property(G_OBJECT_CLASS(kclass), PROPERTY_DESKTOP_FILE, param_specs[PROPERTY_DESKTOP_FILE]);
     gtk_widget_class_set_css_name(GTK_WIDGET_CLASS(kclass), "kiran-app-item");

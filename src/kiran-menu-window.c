@@ -283,13 +283,20 @@ void kiran_menu_window_load_applications(KiranMenuWindow *self)
         g_hash_table_insert(self->category_items, g_strdup(category), category_item);
         gtk_container_add(GTK_CONTAINER(self->all_apps_box), GTK_WIDGET(category_item));
 
+        GtkWidget *list_box = gtk_list_box_new();
+
         //添加应用程序标签
         for (ptr = apps; ptr != NULL; ptr = ptr->next) {
             KiranApp *app = ptr->data;
 
             app_item = kiran_app_item_new(app);
-            gtk_container_add(GTK_CONTAINER(self->all_apps_box), GTK_WIDGET(app_item));
+            gtk_list_box_insert(GTK_LIST_BOX(list_box), GTK_WIDGET(app_item), -1);
+
         }
+
+        gtk_container_add(GTK_CONTAINER(self->all_apps_box), list_box);
+        gtk_widget_show_all(list_box);
+
         g_signal_connect_swapped(category_item, "clicked", G_CALLBACK(show_category_overview), self);
     }
 }
@@ -301,12 +308,15 @@ void kiran_menu_window_load_applications(KiranMenuWindow *self)
 void kiran_menu_window_load_favorites(KiranMenuWindow *self)
 {
     GList *fav_list, *ptr;
+    GtkWidget *list_box;
     KiranCategoryItem *category_item;
 
     category_item = kiran_category_item_new(_("Favorites"), FALSE);
     fav_list = kiran_menu_based_get_favorite_apps(self->backend);
     gtk_container_add(GTK_CONTAINER(self->default_apps_box), GTK_WIDGET(category_item));
     g_message("%d favorite apps found\n", g_list_length(fav_list));
+
+    list_box = gtk_list_box_new();
     for (ptr = fav_list; ptr != NULL; ptr = ptr->next)
     {
         KiranAppItem *app_item;
@@ -314,10 +324,10 @@ void kiran_menu_window_load_favorites(KiranMenuWindow *self)
 
         app_item = kiran_app_item_new(app);
         g_message("Found favoriate app '%s'\n", kiran_app_get_name(app));
-        gtk_container_add(GTK_CONTAINER(self->default_apps_box), GTK_WIDGET(app_item));
+        gtk_list_box_insert(GTK_LIST_BOX(list_box), GTK_WIDGET(app_item), -1);
     }
     //g_list_free_full(fav_list, g_object_unref);
-
+    gtk_container_add(GTK_CONTAINER(self->default_apps_box), list_box);
     self->favorite_apps = fav_list;
 }
 

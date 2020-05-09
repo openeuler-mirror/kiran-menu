@@ -6,7 +6,7 @@
 
 typedef struct _KiranAppItem KiranAppItem;
 typedef struct {
-    GtkButtonClass parent_class;
+    GtkEventBoxClass parent_class;
 } KiranAppItemClass;
 
 #define KIRAN_TYPE_APP_ITEM    kiran_app_item_get_type()

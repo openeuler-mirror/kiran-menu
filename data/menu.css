@@ -1,11 +1,26 @@
 @define-color placeholder_text_color #c8c8c8;
 
+list {
+    background: transparent;
+}
+
+list row {
+    min-height: 40px;
+}
+
+list row:hover, list row:active, list row:focus, list row:selected {
+    background: transparent;
+}
+
+kiran-app-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #4cb5ff;
+    border-style: solid;
+}
 
 kiran-app-item {
     background: transparent;
 
-    padding-left: 36px;
-    min-height: 40px;
     font-family: "Noto Sans CJK SC";
     font-size: 14pt;
     border-width: 0px;
@@ -15,12 +30,6 @@ kiran-app-item {
 
     color: white;
     -gtk-dpi: 72;
-}
-
-kiran-app-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: #4cb5ff;
-    border-style: solid;
 }
 
 .category-item-box {
@@ -136,7 +145,7 @@ button.kiran-category-selector {
     border-color: transparent;
     border-style: solid;
     padding-left: 10px;
-    font-weight: 14pt;
+    font-size: 14pt;
     -gtk-dpi: 72;
 }
 
