@@ -63,7 +63,7 @@ struct _KiranMenuBasedInterface
  * @return:
  * @author: tangjie02
  */
-KiranMenuBased *kiran_menu_based_skeleton_new();
+KiranMenuBased *kiran_menu_based_skeleton_get();
 
 /**
  * @description: 通过关键词进行检索, 会跟.desktop文件的name/localename/comment字段进行字符串匹配,

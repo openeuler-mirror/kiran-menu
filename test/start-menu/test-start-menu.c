@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 
     gtk_init(&argc, &argv);
 
-    KiranMenuBased *kiran_menu = kiran_menu_based_skeleton_new();
+    KiranMenuBased *kiran_menu = kiran_menu_based_skeleton_get();
 
     //gtk_main();
 

@@ -15,9 +15,14 @@ G_DEFINE_INTERFACE(KiranMenuBased, kiran_menu_based, G_TYPE_OBJECT)
 
 static void kiran_menu_based_default_init(KiranMenuBasedInterface *g_iface) {}
 
-KiranMenuBased *kiran_menu_based_skeleton_new()
+KiranMenuBased *kiran_menu_based_skeleton_get()
 {
-    return g_object_new(KIRAN_TYPE_MENU_SKELETON, NULL);
+    static KiranMenuBased *instance = NULL;
+
+    if (!instance)
+        instance = g_object_new(KIRAN_TYPE_MENU_SKELETON, NULL);
+
+    return instance;
 }
 
 GList *kiran_menu_based_search_app(KiranMenuBased *self, const char *keyword)

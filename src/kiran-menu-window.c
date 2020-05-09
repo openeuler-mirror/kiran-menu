@@ -417,7 +417,7 @@ void kiran_menu_window_init(KiranMenuWindow *self)
     GtkWidget *search_box;
     GtkWidget *top_box, *bottom_box;
 
-    self->backend = kiran_menu_based_skeleton_new();
+    self->backend = kiran_menu_based_skeleton_get();
     self->last_app_view = NULL;
     self->category_list = NULL;
     self->category_items = g_hash_table_new_full(g_str_hash, g_str_equal, (GDestroyNotify)g_free, (GDestroyNotify)g_object_unref);
