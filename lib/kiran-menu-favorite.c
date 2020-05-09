@@ -7,7 +7,7 @@ struct _KiranMenuFavorite
 {
     GObject parent;
     GSettings *settings;
-    GHashTable *favorite_apps;
+    GList *favorite_apps;
 };
 
 G_DEFINE_TYPE(KiranMenuFavorite, kiran_menu_favorite, G_TYPE_OBJECT)
@@ -15,13 +15,11 @@ G_DEFINE_TYPE(KiranMenuFavorite, kiran_menu_favorite, G_TYPE_OBJECT)
 static gboolean write_favorite_to_settings(KiranMenuFavorite *self)
 {
     GArray *apps = g_array_new(FALSE, FALSE, sizeof(gchar *));
-    GHashTableIter iter;
-    gchar *desktop_id = NULL;
-    guint *value = NULL;
-    g_hash_table_iter_init(&iter, self->favorite_apps);
-    while (g_hash_table_iter_next(&iter, (gpointer *)&desktop_id,
-                                  (gpointer *)&value))
+
+    for (GList *l = self->favorite_apps; l != NULL; l = l->next)
     {
+        GQuark quark = GPOINTER_TO_UINT(l->data);
+        const gchar *desktop_id = g_quark_to_string(quark);
         gchar *dup_id = g_strdup(desktop_id);
         g_array_append_val(apps, dup_id);
     }
@@ -36,20 +34,15 @@ static gboolean write_favorite_to_settings(KiranMenuFavorite *self)
 
 static gboolean read_favorite_from_settings(KiranMenuFavorite *self)
 {
-    g_clear_pointer(&self->favorite_apps, g_hash_table_unref);
-    self->favorite_apps =
-        g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+    g_clear_pointer(&self->favorite_apps, g_list_free);
+    self->favorite_apps = NULL;
 
-    g_auto(GStrv) favorite_apps =
-        g_settings_get_strv(self->settings, "favorite-apps");
+    g_auto(GStrv) favorite_apps = g_settings_get_strv(self->settings, "favorite-apps");
 
     for (gint i = 0; favorite_apps[i] != NULL; ++i)
     {
-        if (!g_hash_table_insert(self->favorite_apps, g_strdup(favorite_apps[i]),
-                                 GUINT_TO_POINTER(TRUE)))
-        {
-            return FALSE;
-        }
+        GQuark quark = g_quark_from_string(favorite_apps[i]);
+        self->favorite_apps = g_list_append(self->favorite_apps, GUINT_TO_POINTER(quark));
     }
     return TRUE;
 }
@@ -57,10 +50,13 @@ static gboolean read_favorite_from_settings(KiranMenuFavorite *self)
 gboolean kiran_menu_favorite_add_app(KiranMenuFavorite *self,
                                      const char *desktop_id)
 {
-    if (g_hash_table_lookup(self->favorite_apps, desktop_id) == NULL)
+    g_return_val_if_fail(desktop_id != NULL, FALSE);
+
+    GQuark quark = g_quark_from_string(desktop_id);
+
+    if (g_list_find(self->favorite_apps, GUINT_TO_POINTER(quark)) == NULL)
     {
-        g_hash_table_insert(self->favorite_apps, g_strdup(desktop_id),
-                            GUINT_TO_POINTER(TRUE));
+        self->favorite_apps = g_list_append(self->favorite_apps, GUINT_TO_POINTER(quark));
         write_favorite_to_settings(self);
         return TRUE;
     }
@@ -70,9 +66,13 @@ gboolean kiran_menu_favorite_add_app(KiranMenuFavorite *self,
 gboolean kiran_menu_favorite_del_app(KiranMenuFavorite *self,
                                      const char *desktop_id)
 {
-    if (g_hash_table_lookup(self->favorite_apps, desktop_id) != NULL)
+    g_return_val_if_fail(desktop_id != NULL, FALSE);
+
+    GQuark quark = g_quark_from_string(desktop_id);
+
+    if (g_list_find(self->favorite_apps, GUINT_TO_POINTER(quark)) != NULL)
     {
-        g_hash_table_remove(self->favorite_apps, desktop_id);
+        self->favorite_apps = g_list_remove_all(self->favorite_apps, GUINT_TO_POINTER(quark));
         write_favorite_to_settings(self);
         return TRUE;
     }
@@ -100,8 +100,24 @@ void kiran_menu_favorite_flush(KiranMenuFavorite *self, GList *apps)
         g_hash_table_insert(app_table, GUINT_TO_POINTER(quark), GUINT_TO_POINTER(TRUE));
     }
 
-    guint remove_num = g_hash_table_foreach_remove(self->favorite_apps, deleted_app_callback, app_table);
-    if (remove_num > 0)
+    gboolean have_remove = FALSE;
+    GList *iter = self->favorite_apps;
+    while (iter)
+    {
+        if (g_hash_table_lookup(app_table, iter->data) == NULL)
+        {
+            GList *tmp = iter;
+            iter = iter->next;
+            self->favorite_apps = g_list_delete_link(self->favorite_apps, tmp);
+            have_remove = TRUE;
+        }
+        else
+        {
+            iter = iter->next;
+        }
+    }
+
+    if (have_remove > 0)
     {
         write_favorite_to_settings(self);
     }
@@ -110,13 +126,10 @@ void kiran_menu_favorite_flush(KiranMenuFavorite *self, GList *apps)
 GList *kiran_menu_favorite_get_favorite_apps(KiranMenuFavorite *self)
 {
     GList *apps = NULL;
-    GHashTableIter iter;
-    gchar *desktop_id = NULL;
-    guint *value = NULL;
-    g_hash_table_iter_init(&iter, self->favorite_apps);
-    while (g_hash_table_iter_next(&iter, (gpointer *)&desktop_id,
-                                  (gpointer *)&value))
+    for (GList *l = self->favorite_apps; l != NULL; l = l->next)
     {
+        GQuark quark = GPOINTER_TO_UINT(l->data);
+        const gchar *desktop_id = g_quark_to_string(quark);
         apps = g_list_append(apps, g_strdup(desktop_id));
     }
     return apps;
@@ -133,7 +146,7 @@ static void kiran_menu_favorite_dispose(GObject *object)
     KiranMenuFavorite *menu_favorite = KIRAN_MENU_FAVORITE(object);
 
     g_clear_pointer(&menu_favorite->settings, g_object_unref);
-    g_clear_pointer(&menu_favorite->favorite_apps, g_hash_table_unref);
+    g_clear_pointer(&menu_favorite->favorite_apps, g_list_free);
 
     G_OBJECT_CLASS(kiran_menu_favorite_parent_class)->dispose(object);
 }
