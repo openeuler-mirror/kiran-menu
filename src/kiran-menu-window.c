@@ -190,6 +190,7 @@ static void search_change_callback(KiranMenuWindow *self)
     GList *result_apps, *ptr;
     const gchar *keyword, *visible_view;
     KiranCategoryItem *category_item;
+    GtkWidget *list_box;
 
     if (gtk_entry_get_text_length(GTK_ENTRY(self->search_entry)) == 0) {
         //搜索内容为空，停止搜索，并返回上一个页面
@@ -210,9 +211,11 @@ static void search_change_callback(KiranMenuWindow *self)
     gtk_container_foreach(GTK_CONTAINER(self->search_results_box), (GtkCallback)gtk_widget_destroy, NULL);
 
     keyword = gtk_entry_get_text(GTK_ENTRY(self->search_entry));
-    result_apps = kiran_menu_based_search_app(self->backend, keyword);
+    result_apps = kiran_menu_based_search_app_ignore_case(self->backend, keyword);
 
     if (!g_list_length(result_apps)) {
+
+        //搜索结果为空
         GtkStyleContext *context;
         GtkWidget *label = gtk_label_new(_("No Apps match the results!"));
 
@@ -231,6 +234,8 @@ static void search_change_callback(KiranMenuWindow *self)
 
     category_item = kiran_category_item_new(_("Search Results"), FALSE);
     gtk_container_add(GTK_CONTAINER(self->search_results_box), GTK_WIDGET(category_item));
+
+    list_box = gtk_list_box_new();
     for (ptr = result_apps; ptr != NULL; ptr = ptr->next)
     {
         KiranAppItem *app_item;
@@ -238,8 +243,9 @@ static void search_change_callback(KiranMenuWindow *self)
 
         app_item = kiran_app_item_new(app);
         g_message("Found result app '%s'\n", kiran_app_get_name(app));
-        gtk_container_add(GTK_CONTAINER(self->search_results_box), GTK_WIDGET(app_item));
+        gtk_list_box_insert(GTK_LIST_BOX(list_box), GTK_WIDGET(app_item), -1);
     }
+    gtk_container_add(GTK_CONTAINER(self->search_results_box), list_box);
     gtk_widget_show_all(GTK_WIDGET(self->search_results_box));
     g_list_free_full(result_apps, g_object_unref);
 }
