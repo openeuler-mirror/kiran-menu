@@ -6,7 +6,7 @@ endif(COMMAND cmake_policy)
 
 pkg_search_module(GTK3 REQUIRED gtk+-3.0)
 
-set(DEP_LIBDIR ${GLIB_LIBDIR})
+set(DEP_LIBDIR ${GTK3_LIBDIR})
 
 
 set(TARGET_NAME test-start-menu)
@@ -24,10 +24,11 @@ target_include_directories(${TARGET_NAME} PRIVATE
     ${GTK3_INCLUDE_DIRS})
 
 target_compile_options(${TARGET_NAME} PRIVATE
-    -L${DEP_LIBDIR})
+    -L${DEP_LIBDIR}
+    -std=c99)
 
 target_link_libraries(${TARGET_NAME} PRIVATE
-    kiran-menu-backend
+    ${PROJECT_NAME}
     ${GTK3_LIBRIARIES})
 
 

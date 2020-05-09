@@ -15,6 +15,7 @@ install(TARGETS kiran-menu-applet DESTINATION "${CMAKE_INSTALL_PREFIX}/libexec/m
 
 pkg_search_module(MATEPANEL REQUIRED libmatepanelapplet-4.0)
 
+
 configure_file(config.h.in config.h)
 
 target_compile_options(kiran-menu-applet PUBLIC "-std=c99" "-L${PROJECT_BINARY_DIR}/lib")
@@ -24,4 +25,4 @@ target_include_directories(kiran-menu-applet PUBLIC "${PROJECT_SOURCE_DIR}/lib"
             "${PROJECT_BINARY_DIR}/src")
 
 target_link_libraries(kiran-menu-applet PUBLIC "${MATEPANEL_LIBRARIES}")
-target_link_libraries(kiran-menu-applet PRIVATE "${PROJECT_BINARY_DIR}/lib/lib${PROJECT_NAME}.a")
+target_link_libraries(kiran-menu-applet PRIVATE ${PROJECT_NAME})
