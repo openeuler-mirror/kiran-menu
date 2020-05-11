@@ -11,3 +11,11 @@ add_custom_target(menu.gresource ALL
 
 install(FILES ${PROJECT_BINARY_DIR}/data/menu.gresource DESTINATION "${CMAKE_INSTALL_PREFIX}/share/${CMAKE_PROJECT_NAME}"
     PERMISSIONS WORLD_READ OWNER_WRITE)
+
+install(FILES ${PROJECT_BINARY_DIR}/data/org.mate.panel.KiranMenuApplet.mate-panel-applet
+        DESTINATION "${CMAKE_INSTALL_PREFIX}/share/mate-panel/applets"
+        PERMISSIONS WORLD_READ OWNER_WRITE)
+    
+install(FILES ${PROJECT_BINARY_DIR}/data/org.mate.panel.applet.KiranMenuAppletFactory.service
+        DESTINATION "${CMAKE_INSTALL_PREFIX}/share/dbus-1/services"
+        PERMISSIONS WORLD_READ OWNER_WRITE)
