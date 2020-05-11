@@ -2,11 +2,13 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 20:35:20
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-04-10 01:14:43
+ * @LastEditTime : 2020-05-11 12:02:09
  * @Description  :
- * @FilePath     : /kiran-menu-backend/lib/kiran-menu-usage.c
+ * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-usage.c
  */
 #include "lib/kiran-menu-usage.h"
+
+#include <libwnck/libwnck.h>
 
 #include "lib/helper.h"
 #include "lib/kiran-menu-common.h"
@@ -14,13 +16,14 @@
 
 struct _KiranMenuUsage
 {
-    GObject parent;
+    KiranMenuUnit parent_instance;
     GSettings *settings;
     GHashTable *app_usages;
     gchar *focus_desktop_id;
+    //WnckWindow *watch_
 };
 
-G_DEFINE_TYPE(KiranMenuUsage, kiran_menu_usage, G_TYPE_OBJECT);
+G_DEFINE_TYPE(KiranMenuUsage, kiran_menu_usage, KIRAN_TYPE_MENU_UNIT);
 
 #define FOCUS_TIME_MIN_SECONDS 2
 #define FOCUS_TIME_MAX_SECONDS 1000
@@ -191,11 +194,29 @@ gboolean kiran_menu_usage_reset(KiranMenuUsage *self)
     return TRUE;
 }
 
+void active_window_changed(WnckScreen *screen,
+                           WnckWindow *previously_active_window,
+                           gpointer user_data)
+{
+    KiranMenuUsage *self = KIRAN_MENU_USAGE(user_data);
+}
+
 static void kiran_menu_usage_init(KiranMenuUsage *self)
 {
     self->settings = g_settings_new(KIRAN_MENU_SCHEMA);
     self->app_usages = g_hash_table_new_full(NULL, NULL, NULL, g_free);
     read_usages_from_settings(self);
+
+    WnckScreen *screen = wnck_screen_get_default();
+    if (screen)
+    {
+        wnck_screen_force_update(screen);
+        g_signal_connect(screen, "active-window-changed", G_CALLBACK(active_window_changed), self);
+    }
+    else
+    {
+        g_warning("the default screen is NULL. please run in GUI application.");
+    }
 }
 
 static void kiran_menu_usage_dispose(GObject *object)

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 17:28:51
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-08 15:15:55
+ * @LastEditTime : 2020-05-11 14:01:34
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-category.c
  */
@@ -16,7 +16,7 @@
 
 struct _KiranMenuCategory
 {
-    GObject parent;
+    KiranMenuUnit parent_instance;
 
     gchar *file_path;
 
@@ -25,10 +25,13 @@ struct _KiranMenuCategory
     KiranCategoryNode *root;
 };
 
-G_DEFINE_TYPE(KiranMenuCategory, kiran_menu_category, G_TYPE_OBJECT)
+G_DEFINE_TYPE(KiranMenuCategory, kiran_menu_category, KIRAN_TYPE_MENU_UNIT)
 
-void kiran_menu_category_flush(KiranMenuCategory *self, GList *apps)
+static void kiran_menu_category_flush(KiranMenuUnit *unit, gpointer user_data)
 {
+    KiranMenuCategory *self = KIRAN_MENU_CATEGORY(unit);
+    GList *apps = (GList *)user_data;
+
     for (GList *l = self->categories; l != NULL; l = l->next)
     {
         KiranCategory *category = l->data;
@@ -256,6 +259,9 @@ static void kiran_menu_category_dispose(GObject *object)
 
 static void kiran_menu_category_class_init(KiranMenuCategoryClass *klass)
 {
+    KiranMenuUnitClass *unit_class = KIRAN_MENU_UNIT_CLASS(klass);
+    unit_class->flush = kiran_menu_category_flush;
+
     GObjectClass *object_class = G_OBJECT_CLASS(klass);
     object_class->dispose = kiran_menu_category_dispose;
 }

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:01:52
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-09 10:56:20
+ * @LastEditTime : 2020-05-11 11:38:43
  * @Description  : 用于菜单搜索功能
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-search.c
  */
@@ -13,10 +13,10 @@
 
 struct _KiranMenuSearch
 {
-    GObject parent;
+    KiranMenuUnit parent_instance;
 };
 
-G_DEFINE_TYPE(KiranMenuSearch, kiran_menu_search, G_TYPE_OBJECT)
+G_DEFINE_TYPE(KiranMenuSearch, kiran_menu_search, KIRAN_TYPE_MENU_UNIT)
 
 static gboolean strstr_with_case(const gchar *a, const gchar *b, gboolean ignore_case)
 {

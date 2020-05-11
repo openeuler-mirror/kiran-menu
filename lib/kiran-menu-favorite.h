@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 15:37:28
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-09 16:16:44
+ * @LastEditTime : 2020-05-11 13:54:12
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-favorite.h
  */
@@ -10,11 +10,12 @@
 
 #include <gio/gio.h>
 
+#include "lib/kiran-menu-unit.h"
+
 G_BEGIN_DECLS
 
 #define KIRAN_TYPE_MENU_FAVORITE (kiran_menu_favorite_get_type())
-G_DECLARE_FINAL_TYPE(KiranMenuFavorite, kiran_menu_favorite, KIRAN,
-                     MENU_FAVORITE, GObject)
+G_DECLARE_FINAL_TYPE(KiranMenuFavorite, kiran_menu_favorite, KIRAN, MENU_FAVORITE, KiranMenuUnit)
 
 /**
  * @description:
@@ -51,14 +52,6 @@ gboolean kiran_menu_favorite_del_app(KiranMenuFavorite *self,
  */
 gboolean kiran_menu_favorite_find_app(KiranMenuFavorite *self,
                                       const char *desktop_id);
-
-/**
- * @description: 
- * @param {type} 
- * @return: 
- * @author: tangjie02
- */
-void kiran_menu_favorite_flush(KiranMenuFavorite *self, GList *apps);
 
 /**
  * @description: 获取收藏的APP列表

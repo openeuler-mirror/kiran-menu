@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 21:42:15
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-09 16:26:08
+ * @LastEditTime : 2020-05-11 13:58:49
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-system.c
  */
@@ -10,14 +10,13 @@
 
 #include <gio/gdesktopappinfo.h>
 #include <gio/gio.h>
-#include <libwnck/libwnck.h>
 
 #include "lib/helper.h"
 #include "lib/kiran-menu-common.h"
 
 struct _KiranMenuSystem
 {
-    GObject parent;
+    KiranMenuUnit parent_instance;
 
     GSettings *settings;
 
@@ -26,7 +25,7 @@ struct _KiranMenuSystem
     GList *new_apps;
 };
 
-G_DEFINE_TYPE(KiranMenuSystem, kiran_menu_system, G_TYPE_OBJECT)
+G_DEFINE_TYPE(KiranMenuSystem, kiran_menu_system, KIRAN_TYPE_MENU_UNIT)
 
 GList *kiran_menu_system_get_apps(KiranMenuSystem *self)
 {
@@ -49,16 +48,26 @@ KiranMenuApp *kiran_menu_system_lookup_app(KiranMenuSystem *self,
     return g_hash_table_lookup(self->apps, GUINT_TO_POINTER(quark));
 }
 
-GList *kiran_menu_system_lookup_apps_with_window(KiranMenuSystem *self,
-                                                 WnckWindow *window)
+KiranMenuApp *kiran_menu_system_lookup_apps_with_window(KiranMenuSystem *self,
+                                                        WnckWindow *window)
 {
     const gchar *instance_name = wnck_window_get_class_instance_name(window);
     const gchar *group_name = wnck_window_get_class_group_name(window);
 
-    GList *apps = NULL;
+    typedef enum
+    {
+        MATCH_NONE,
+        MATCH_ALL_ONCE,
+        MATCH_ALL_MULTIPLE,
+        MATCH_PART_ONCE,
+        MATCH_PART_MULTIPLE,
+    } WindowMatchType;
+
+    KiranMenuApp *match_menu_app = NULL;
     GHashTableIter iter;
     gpointer key = NULL;
     KiranMenuApp *app = NULL;
+    WindowMatchType match_type = MATCH_NONE;
     g_hash_table_iter_init(&iter, self->apps);
     while (g_hash_table_iter_next(&iter, (gpointer *)&key, (gpointer *)&app))
     {
@@ -75,13 +84,46 @@ GList *kiran_menu_system_lookup_apps_with_window(KiranMenuSystem *self,
             }
         }
 
-        if (g_strcmp0(exec_base_name, instance_name) == 0 ||
-            g_strcmp0(group_name, locale_name) == 0)
+        gboolean match_instance_name = (g_strcmp0(exec_base_name, instance_name) == 0);
+        gboolean match_group_name = (g_strcmp0(group_name, locale_name) == 0);
+
+        if (match_instance_name && match_group_name)
         {
-            apps = g_list_append(apps, g_object_ref(app));
+            if (match_type == MATCH_ALL_ONCE || match_type == MATCH_ALL_MULTIPLE)
+            {
+                match_type = MATCH_ALL_MULTIPLE;
+            }
+            else
+            {
+                match_menu_app = g_object_ref(app);
+                match_type = MATCH_ALL_ONCE;
+            }
+        }
+        else if ((match_instance_name || match_group_name) &&
+                 match_type != MATCH_ALL_ONCE &&
+                 match_type != MATCH_ALL_MULTIPLE)
+        {
+            if (match_type == MATCH_PART_ONCE || match_type == MATCH_PART_MULTIPLE)
+            {
+                match_type = MATCH_PART_MULTIPLE;
+            }
+            else
+            {
+                match_menu_app = g_object_ref(app);
+                match_type = MATCH_PART_ONCE;
+            }
         }
     }
-    return apps;
+    if (match_type == MATCH_ALL_MULTIPLE)
+    {
+        g_warning("Multiple App match the window in terms of instance name and group name.");
+    }
+    else if (match_type == MATCH_PART_MULTIPLE)
+    {
+        g_warning("Multiple App match the window in terms of instance name or group name.");
+    }
+
+    return match_menu_app;
 }
 
 GList *kiran_menu_system_get_nnew_apps(KiranMenuSystem *self, gint top_n)
@@ -136,8 +178,9 @@ GList *kiran_menu_system_get_all_sorted_apps(KiranMenuSystem *self)
     return g_list_sort_with_data(apps, sort_by_app_name, self);
 }
 
-void kiran_menu_system_flush(KiranMenuSystem *self)
+static void kiran_menu_system_flush(KiranMenuUnit *unit, gpointer user_data)
 {
+    KiranMenuSystem *self = KIRAN_MENU_SYSTEM(unit);
     GList *registered_apps = g_app_info_get_all();
 
     gboolean new_app_change = FALSE;
@@ -213,23 +256,13 @@ static void monitor_window_open(WnckScreen *screen,
 {
     KiranMenuSystem *self = KIRAN_MENU_SYSTEM(user_data);
 
-    gboolean new_app_change = FALSE;
+    KiranMenuApp *menu_app = kiran_menu_system_lookup_apps_with_window(self, window);
+    const gchar *desktop_id = kiran_app_get_desktop_id(KIRAN_APP(menu_app));
 
-    GList *match_apps = kiran_menu_system_lookup_apps_with_window(self, window);
-
-    for (GList *l = match_apps; l != NULL; l = l->next)
+    GQuark quark = g_quark_from_string(desktop_id);
+    if (g_list_find(self->new_apps, GUINT_TO_POINTER(quark)))
     {
-        KiranApp *app = l->data;
-        const gchar *desktop_id = kiran_app_get_desktop_id(app);
-        GQuark quark = g_quark_from_string(desktop_id);
-        if (g_list_find(self->new_apps, GUINT_TO_POINTER(quark)))
-        {
-            self->new_apps = g_list_remove(self->new_apps, GUINT_TO_POINTER(quark));
-            new_app_change = TRUE;
-        }
-    }
-    if (new_app_change)
-    {
+        self->new_apps = g_list_remove(self->new_apps, GUINT_TO_POINTER(quark));
         write_list_quark_to_as(self->settings, "new-apps", self->new_apps);
     }
 }
@@ -240,7 +273,7 @@ static void kiran_menu_system_init(KiranMenuSystem *self)
     self->apps = NULL;
     self->new_apps = NULL;
 
-    kiran_menu_system_flush(self);
+    kiran_menu_system_flush(KIRAN_MENU_UNIT(self), NULL);
 
     read_new_apps(self);
 
@@ -280,6 +313,9 @@ static void kiran_menu_system_dispose(GObject *object)
 
 static void kiran_menu_system_class_init(KiranMenuSystemClass *klass)
 {
+    KiranMenuUnitClass *unit_class = KIRAN_MENU_UNIT_CLASS(klass);
+    unit_class->flush = kiran_menu_system_flush;
+
     GObjectClass *object_class = G_OBJECT_CLASS(klass);
     object_class->dispose = kiran_menu_system_dispose;
 }

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 19:59:56
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-09 16:23:57
+ * @LastEditTime : 2020-05-11 13:47:57
  * @Description  : 开始菜单类
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-skeleton.c
  */
@@ -240,6 +240,25 @@ GList *kiran_menu_skeleton_get_all_sorted_apps(KiranMenuBased *self)
     return apps;
 }
 
+KiranMenuUnit *kiran_menu_skeleton_get_unit(KiranMenuSkeleton *self, KiranMenuUnitType unit_type)
+{
+    switch (unit_type)
+    {
+        case KIRAN_MENU_TYPE_CATEGORY:
+            return self->category;
+        case KIRAN_MENU_TYPE_FAVORITE:
+            return self->favorite;
+        case KIRAN_MENU_TYPE_SEARCH:
+            return self->search;
+        case KIRAN_MENU_TYPE_SYSTEM:
+            return self->system;
+        case KIRAN_MENU_TYPE_USAGE:
+            return self->usage;
+        default:
+            return NULL;
+    }
+}
+
 static void kiran_menu_based_interface_init(KiranMenuBasedInterface *iface)
 {
     iface->impl_search_app = kiran_menu_skeleton_search_app;
@@ -277,11 +296,11 @@ static void flush_menu_skeleton(GAppInfoMonitor *gappinfomonitor,
 {
     KiranMenuSkeleton *self = KIRAN_MENU_SKELETON(user_data);
 
-    kiran_menu_system_flush(self->system);
+    kiran_menu_unit_flush(KIRAN_MENU_UNIT(self->system), NULL);
 
     GList *apps = kiran_menu_system_get_apps(self->system);
-    kiran_menu_favorite_flush(self->favorite, apps);
-    kiran_menu_category_flush(self->category, apps);
+    kiran_menu_unit_flush(KIRAN_MENU_UNIT(self->favorite), apps);
+    kiran_menu_unit_flush(KIRAN_MENU_UNIT(self->category), apps);
     g_list_free_full(apps, g_object_unref);
 
     g_signal_emit(self, signals[INSTALLED_CHANGED], 0, NULL);
