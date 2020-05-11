@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 19:59:56
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-11 14:42:02
+ * @LastEditTime : 2020-05-11 19:09:08
  * @Description  : 开始菜单类
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-skeleton.c
  */
@@ -33,7 +33,12 @@ struct _KiranMenuSkeleton
 
 enum
 {
-    INSTALLED_CHANGED,
+    SIGNAL_APP_CHANGED,
+    SIGNAL_APP_INSTALLED,
+    SIGNAL_APP_UNINSTALLED,
+    SIGNAL_FAVORITE_APP_ADDED,
+    SIGNAL_FAVORITE_APP_DELETED,
+    SIGNAL_FREQUENT_USAGE_APP_CHANGED,
     LAST_SIGNAL
 };
 
@@ -76,7 +81,18 @@ static gboolean kiran_menu_skeleton_add_favorite_app(KiranMenuBased *self,
     g_return_val_if_fail(KIRAN_IS_MENU_SKELETON(self), FALSE);
 
     KiranMenuSkeleton *skeleton = KIRAN_MENU_SKELETON(self);
-    return kiran_menu_favorite_add_app(skeleton->favorite, desktop_id);
+    gboolean ret = kiran_menu_favorite_add_app(skeleton->favorite, desktop_id);
+    if (ret)
+    {
+        KiranMenuApp *menu_app = kiran_menu_system_lookup_app(skeleton->system, desktop_id);
+        if (menu_app)
+        {
+            menu_app = g_object_ref(menu_app);
+            g_signal_emit(self, signals[SIGNAL_FAVORITE_APP_ADDED], 0, KIRAN_APP(menu_app));
+            g_object_unref(menu_app);
+        }
+    }
+    return ret;
 }
 
 static gboolean kiran_menu_skeleton_del_favorite_app(KiranMenuBased *self,
@@ -85,7 +101,18 @@ static gboolean kiran_menu_skeleton_del_favorite_app(KiranMenuBased *self,
     g_return_val_if_fail(KIRAN_IS_MENU_SKELETON(self), FALSE);
 
     KiranMenuSkeleton *skeleton = KIRAN_MENU_SKELETON(self);
-    return kiran_menu_favorite_del_app(skeleton->favorite, desktop_id);
+    gboolean ret = kiran_menu_favorite_del_app(skeleton->favorite, desktop_id);
+    if (ret)
+    {
+        KiranMenuApp *menu_app = kiran_menu_system_lookup_app(skeleton->system, desktop_id);
+        if (menu_app)
+        {
+            menu_app = g_object_ref(menu_app);
+            g_signal_emit(self, signals[SIGNAL_FAVORITE_APP_DELETED], 0, KIRAN_APP(menu_app));
+            g_object_unref(menu_app);
+        }
+    }
+    return ret;
 }
 
 static KiranApp *kiran_menu_skeleton_lookup_favorite_app(KiranMenuBased *self,
@@ -303,7 +330,30 @@ static void flush_menu_skeleton(GAppInfoMonitor *gappinfomonitor,
     kiran_menu_unit_flush(KIRAN_MENU_UNIT(self->category), apps);
     g_list_free_full(apps, g_object_unref);
 
-    g_signal_emit(self, signals[INSTALLED_CHANGED], 0, NULL);
+    g_signal_emit(self, signals[SIGNAL_APP_CHANGED], 0, NULL);
+}
+
+static void app_installed(KiranMenuSystem *system,
+                          gpointer apps,
+                          gpointer user_data)
+{
+    KiranMenuSkeleton *self = KIRAN_MENU_SKELETON(user_data);
+    g_signal_emit(self, signals[SIGNAL_APP_INSTALLED], 0, apps);
+}
+
+static void app_uninstalled(KiranMenuSystem *system,
+                            gpointer apps,
+                            gpointer user_data)
+{
+    KiranMenuSkeleton *self = KIRAN_MENU_SKELETON(user_data);
+    g_signal_emit(self, signals[SIGNAL_APP_UNINSTALLED], 0, apps);
+}
+
+static void frequent_usage_app_changed(KiranMenuSystem *system,
+                                       gpointer user_data)
+{
+    KiranMenuSkeleton *self = KIRAN_MENU_SKELETON(user_data);
+    g_signal_emit(self, signals[SIGNAL_FREQUENT_USAGE_APP_CHANGED], 0);
 }
 
 static void kiran_menu_skeleton_init(KiranMenuSkeleton *self)
@@ -317,6 +367,11 @@ static void kiran_menu_skeleton_init(KiranMenuSkeleton *self)
     GAppInfoMonitor *monitor = g_app_info_monitor_get();
     g_signal_connect(monitor, "changed", G_CALLBACK(flush_menu_skeleton), self);
     flush_menu_skeleton(monitor, self);
+
+    g_signal_connect(self->system, "app-installed", G_CALLBACK(app_installed), self);
+    g_signal_connect(self->system, "app-uninstalled", G_CALLBACK(app_uninstalled), self);
+
+    g_signal_connect(self->usage, "app-changed", G_CALLBACK(frequent_usage_app_changed), self);
 }
 
 static void kiran_menu_skeleton_class_init(KiranMenuSkeletonClass *klass)
@@ -325,6 +380,67 @@ static void kiran_menu_skeleton_class_init(KiranMenuSkeletonClass *klass)
 
     object_class->dispose = kiran_menu_skeleton_dispose;
 
-    signals[INSTALLED_CHANGED] = g_signal_new("installed-changed", KIRAN_TYPE_MENU_SKELETON,
-                                              G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
+    signals[SIGNAL_APP_CHANGED] = g_signal_new("app-changed",
+                                               KIRAN_TYPE_MENU_SKELETON,
+                                               G_SIGNAL_RUN_LAST,
+                                               0,
+                                               NULL,
+                                               NULL,
+                                               NULL,
+                                               G_TYPE_NONE,
+                                               0);
+
+    signals[SIGNAL_APP_INSTALLED] = g_signal_new("app-installed",
+                                                 KIRAN_TYPE_MENU_SKELETON,
+                                                 G_SIGNAL_RUN_LAST,
+                                                 0,
+                                                 NULL,
+                                                 NULL,
+                                                 NULL,
+                                                 G_TYPE_NONE,
+                                                 1,
+                                                 G_TYPE_POINTER);
+
+    signals[SIGNAL_APP_UNINSTALLED] = g_signal_new("app-uninstalled",
+                                                   KIRAN_TYPE_MENU_SKELETON,
+                                                   G_SIGNAL_RUN_LAST,
+                                                   0,
+                                                   NULL,
+                                                   NULL,
+                                                   NULL,
+                                                   G_TYPE_NONE,
+                                                   1,
+                                                   G_TYPE_POINTER);
+
+    signals[SIGNAL_FAVORITE_APP_ADDED] = g_signal_new("favorite-app-added",
+                                                      KIRAN_TYPE_MENU_SKELETON,
+                                                      G_SIGNAL_RUN_LAST,
+                                                      0,
+                                                      NULL,
+                                                      NULL,
+                                                      NULL,
+                                                      G_TYPE_NONE,
+                                                      1,
+                                                      G_TYPE_POINTER);
+
+    signals[SIGNAL_FAVORITE_APP_DELETED] = g_signal_new("favorite-app-deleted",
+                                                        KIRAN_TYPE_MENU_SKELETON,
+                                                        G_SIGNAL_RUN_LAST,
+                                                        0,
+                                                        NULL,
+                                                        NULL,
+                                                        NULL,
+                                                        G_TYPE_NONE,
+                                                        1,
+                                                        G_TYPE_POINTER);
+
+    signals[SIGNAL_FREQUENT_USAGE_APP_CHANGED] = g_signal_new("frequent-usage-app-changed",
+                                                              KIRAN_TYPE_MENU_SKELETON,
+                                                              G_SIGNAL_RUN_LAST,
+                                                              0,
+                                                              NULL,
+                                                              NULL,
+                                                              NULL,
+                                                              G_TYPE_NONE,
+                                                              0);
 }

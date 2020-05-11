@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 20:35:20
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-11 15:55:19
+ * @LastEditTime : 2020-05-11 17:59:39
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-usage.c
  */
@@ -34,6 +34,14 @@ struct _KiranMenuUsage
 };
 
 G_DEFINE_TYPE(KiranMenuUsage, kiran_menu_usage, KIRAN_TYPE_MENU_UNIT);
+
+enum
+{
+    SIGNAL_APP_CHANGED,
+    LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL] = {0};
 
 #define FOCUS_TIME_MIN_SECONDS 2
 #define FOCUS_TIME_MAX_SECONDS 1000
@@ -155,6 +163,8 @@ static void increment_usage_for_app_at_time(KiranMenuUsage *self,
     }
 
     ensure_queued_save(self);
+
+    g_signal_emit(self, signals[SIGNAL_APP_CHANGED], 0);
 }
 
 static int sort_apps_by_usage(gconstpointer a, gconstpointer b, gpointer data)
@@ -335,6 +345,16 @@ static void kiran_menu_usage_dispose(GObject *object)
 static void kiran_menu_usage_class_init(KiranMenuUsageClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+
+    signals[SIGNAL_APP_CHANGED] = g_signal_new("app-changed",
+                                               KIRAN_TYPE_MENU_USAGE,
+                                               G_SIGNAL_RUN_LAST,
+                                               0,
+                                               NULL,
+                                               NULL,
+                                               NULL,
+                                               G_TYPE_NONE,
+                                               0);
 
     gobject_class->dispose = kiran_menu_usage_dispose;
 }

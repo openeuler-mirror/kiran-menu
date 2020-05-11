@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 21:42:15
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-11 14:25:32
+ * @LastEditTime : 2020-05-11 19:01:52
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-system.c
  */
@@ -26,6 +26,15 @@ struct _KiranMenuSystem
 };
 
 G_DEFINE_TYPE(KiranMenuSystem, kiran_menu_system, KIRAN_TYPE_MENU_UNIT)
+
+enum
+{
+    SIGNAL_APP_INSTALLED,
+    SIGNAL_APP_UNINSTALLED,
+    LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL] = {0};
 
 GList *kiran_menu_system_get_apps(KiranMenuSystem *self)
 {
@@ -187,24 +196,27 @@ static void kiran_menu_system_flush(KiranMenuUnit *unit, gpointer user_data)
 
     gboolean new_app_change = FALSE;
 
-    // new installed apps
+    GList *new_installed_apps = NULL;
+    GList *new_uninstalled_apps = NULL;
+
+    GHashTableIter iter;
+    gpointer key;
+    gpointer value;
+    KiranMenuApp *app;
+
+    gboolean first_flush = TRUE;
+
+    g_autoptr(GHashTable) old_apps = g_hash_table_new(NULL, NULL);
+
+    // copy the keys of the->apps to old_apps.
     if (self->apps)
     {
-        for (GList *l = registered_apps; l != NULL; l = l->next)
+        g_hash_table_iter_init(&iter, self->apps);
+        while (g_hash_table_iter_next(&iter, (gpointer *)&key, (gpointer *)&app))
         {
-            GAppInfo *app_info = l->data;
-            if (g_app_info_should_show(app_info))
-            {
-                const gchar *desktop_id = g_app_info_get_id(app_info);
-                GQuark quark = g_quark_from_string(desktop_id);
-                if (g_hash_table_lookup(self->apps, GUINT_TO_POINTER(quark)) == NULL &&
-                    g_list_find(self->new_apps, GUINT_TO_POINTER(quark)) == NULL)
-                {
-                    self->new_apps = g_list_append(self->new_apps, GUINT_TO_POINTER(quark));
-                    new_app_change = TRUE;
-                }
-            }
+            g_hash_table_insert(old_apps, key, GUINT_TO_POINTER(TRUE));
         }
+        first_flush = FALSE;
     }
 
     // update system apps
@@ -218,11 +230,49 @@ static void kiran_menu_system_flush(KiranMenuUnit *unit, gpointer user_data)
         {
             const gchar *desktop_id = g_app_info_get_id(app_info);
             GQuark quark = g_quark_from_string(desktop_id);
-            g_hash_table_insert(self->apps, GUINT_TO_POINTER(quark),
-                                kiran_menu_app_get_new(desktop_id));
+            g_hash_table_insert(self->apps, GUINT_TO_POINTER(quark), kiran_menu_app_get_new(desktop_id));
         }
     }
-    g_list_free_full(registered_apps, g_object_unref);
+
+    // new installed apps
+    if (!first_flush)
+    {
+        for (GList *l = registered_apps; l != NULL; l = l->next)
+        {
+            GAppInfo *app_info = l->data;
+            if (!g_app_info_should_show(app_info))
+            {
+                continue;
+            }
+
+            const gchar *desktop_id = g_app_info_get_id(app_info);
+            GQuark quark = g_quark_from_string(desktop_id);
+            if (g_hash_table_lookup(old_apps, GUINT_TO_POINTER(quark)) == NULL)
+            {
+                app = kiran_menu_system_lookup_app(self, desktop_id);
+                new_installed_apps = g_list_append(new_installed_apps, g_object_ref(app));
+                if (g_list_find(self->new_apps, GUINT_TO_POINTER(quark)) == NULL)
+                {
+                    self->new_apps = g_list_append(self->new_apps, GUINT_TO_POINTER(quark));
+                    new_app_change = TRUE;
+                }
+            }
+        }
+    }
+
+    // new uninstalled apps
+    {
+        g_hash_table_iter_init(&iter, old_apps);
+        while (g_hash_table_iter_next(&iter, (gpointer *)&key, (gpointer *)&value))
+        {
+            if (g_hash_table_lookup(self->apps, key) == NULL)
+            {
+                GQuark quark = GPOINTER_TO_UINT(key);
+                const gchar *desktop_id = g_quark_to_string(quark);
+                new_uninstalled_apps = g_list_append(new_uninstalled_apps, g_strdup(desktop_id));
+            }
+        }
+    }
 
     // uninstalled apps
     for (GList *l = self->new_apps; l != NULL;)
@@ -243,6 +293,20 @@ static void kiran_menu_system_flush(KiranMenuUnit *unit, gpointer user_data)
     if (new_app_change)
     {
         write_list_quark_to_as(self->settings, "new-apps", self->new_apps);
+    }
+
+    g_list_free_full(registered_apps, g_object_unref);
+
+    if (new_installed_apps)
+    {
+        g_signal_emit(self, signals[SIGNAL_APP_INSTALLED], 0, new_installed_apps);
+        g_list_free_full(new_installed_apps, g_object_unref);
+    }
+
+    if (new_uninstalled_apps)
+    {
+        g_signal_emit(self, signals[SIGNAL_APP_UNINSTALLED], 0, new_uninstalled_apps);
+        g_list_free_full(new_uninstalled_apps, g_free);
     }
 }
 
@@ -317,6 +381,28 @@ static void kiran_menu_system_class_init(KiranMenuSystemClass *klass)
 {
     KiranMenuUnitClass *unit_class = KIRAN_MENU_UNIT_CLASS(klass);
     unit_class->flush = kiran_menu_system_flush;
+
+    signals[SIGNAL_APP_INSTALLED] = g_signal_new("app-installed",
+                                                 KIRAN_TYPE_MENU_SYSTEM,
+                                                 G_SIGNAL_RUN_LAST,
+                                                 0,
+                                                 NULL,
+                                                 NULL,
+                                                 NULL,
+                                                 G_TYPE_NONE,
+                                                 1,
+                                                 G_TYPE_POINTER);
+
+    signals[SIGNAL_APP_UNINSTALLED] = g_signal_new("app-uninstalled",
+                                                   KIRAN_TYPE_MENU_SYSTEM,
+                                                   G_SIGNAL_RUN_LAST,
+                                                   0,
+                                                   NULL,
+                                                   NULL,
+                                                   NULL,
+                                                   G_TYPE_NONE,
+                                                   1,
+                                                   G_TYPE_POINTER);
 
     GObjectClass *object_class = G_OBJECT_CLASS(klass);
     object_class->dispose = kiran_menu_system_dispose;
