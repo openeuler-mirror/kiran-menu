@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:23:14
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-09 16:22:27
+ * @LastEditTime : 2020-05-11 14:15:26
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-based.h
  */
@@ -63,7 +63,7 @@ struct _KiranMenuBasedInterface
  * @return:
  * @author: tangjie02
  */
-KiranMenuBased *kiran_menu_based_skeleton_new();
+KiranMenuBased *kiran_menu_based_skeleton_get();
 
 /**
  * @description: 通过关键词进行检索, 会跟.desktop文件的name/localename/comment字段进行字符串匹配,

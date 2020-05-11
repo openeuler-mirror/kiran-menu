@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 21:42:15
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-11 13:58:49
+ * @LastEditTime : 2020-05-11 14:25:32
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-system.c
  */
@@ -51,6 +51,8 @@ KiranMenuApp *kiran_menu_system_lookup_app(KiranMenuSystem *self,
 KiranMenuApp *kiran_menu_system_lookup_apps_with_window(KiranMenuSystem *self,
                                                         WnckWindow *window)
 {
+    RETURN_VAL_IF_FALSE(window != NULL, NULL);
+
     const gchar *instance_name = wnck_window_get_class_instance_name(window);
     const gchar *group_name = wnck_window_get_class_group_name(window);
 

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-08 15:17:35
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-09 15:56:12
+ * @LastEditTime : 2020-05-11 15:09:03
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/start-menu/test-start-menu.c
  */
@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 
     gtk_init(&argc, &argv);
 
-    KiranMenuBased *kiran_menu = kiran_menu_based_skeleton_new();
+    KiranMenuBased *kiran_menu = kiran_menu_based_skeleton_get();
 
     //gtk_main();
 
@@ -40,8 +40,8 @@ int main(int argc, char **argv)
     g_test_add_data_func("/test-start-menu/test-category-apps", kiran_menu,
                          test_category_apps);
 
-    // g_test_add_data_func("/test-start-menu/test-frequent-apps", kiran_menu,
-    //                      test_frequent_apps);
+    g_test_add_data_func("/test-start-menu/test-frequent-apps", kiran_menu,
+                         test_frequent_apps);
 
     g_test_add_data_func("/test-start-menu/test-search-apps", kiran_menu,
                          test_search_apps);

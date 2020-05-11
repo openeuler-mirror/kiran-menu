@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 19:59:56
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-11 13:47:57
+ * @LastEditTime : 2020-05-11 14:42:02
  * @Description  : 开始菜单类
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-skeleton.c
  */
@@ -245,15 +245,15 @@ KiranMenuUnit *kiran_menu_skeleton_get_unit(KiranMenuSkeleton *self, KiranMenuUn
     switch (unit_type)
     {
         case KIRAN_MENU_TYPE_CATEGORY:
-            return self->category;
+            return KIRAN_MENU_UNIT(self->category);
         case KIRAN_MENU_TYPE_FAVORITE:
-            return self->favorite;
+            return KIRAN_MENU_UNIT(self->favorite);
         case KIRAN_MENU_TYPE_SEARCH:
-            return self->search;
+            return KIRAN_MENU_UNIT(self->search);
         case KIRAN_MENU_TYPE_SYSTEM:
-            return self->system;
+            return KIRAN_MENU_UNIT(self->system);
         case KIRAN_MENU_TYPE_USAGE:
-            return self->usage;
+            return KIRAN_MENU_UNIT(self->usage);
         default:
             return NULL;
     }

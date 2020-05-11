@@ -90,7 +90,7 @@ static void show_apps_overview(KiranMenuWindow *self)
 
 /**
  * 跳转到指定的应用分类
- * 
+ *
  */
 void kiran_menu_window_jump_to_category(KiranMenuWindow *self, const char *category_name)
 {
@@ -115,7 +115,7 @@ void kiran_menu_window_jump_to_category(KiranMenuWindow *self, const char *categ
 
 
 /**
- * 在分类选择视图中点击分类时的回调函数 
+ * 在分类选择视图中点击分类时的回调函数
  */
 static void category_selected_callback(KiranMenuWindow *self, GtkButton *button)
 {
@@ -407,7 +407,7 @@ void kiran_menu_window_init(KiranMenuWindow *self)
     GtkWidget *search_box;
     GtkWidget *top_box, *bottom_box;
 
-    self->backend = kiran_menu_based_skeleton_new();
+    self->backend = kiran_menu_based_skeleton_get();
     self->last_app_view = NULL;
     self->category_list = NULL;
     self->category_items = g_hash_table_new_full(g_str_hash, g_str_equal, (GDestroyNotify)g_free, (GDestroyNotify)g_object_unref);
@@ -495,7 +495,7 @@ void kiran_menu_window_class_init(KiranMenuWindowClass *kclass)
 KiranMenuWindow *kiran_menu_window_new(GtkWidget *parent)
 {
     KiranMenuWindow *window;
-    
+
     window = g_object_new(KIRAN_TYPE_MENU_WINDOW, NULL);
     window->parent = parent;
     return window;

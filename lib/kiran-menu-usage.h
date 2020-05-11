@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 19:44:16
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-11 11:36:01
+ * @LastEditTime : 2020-05-11 14:08:18
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-usage.h
  */
@@ -26,14 +26,6 @@ G_DECLARE_FINAL_TYPE(KiranMenuUsage, kiran_menu_usage, KIRAN, MENU_USAGE, KiranM
  */
 KiranMenuUsage *kiran_menu_usage_get_new();
 
-/**
- * @description:
- * @param {type}
- * @return:
- * @author: tangjie02
- */
-gboolean kiran_menu_usage_focus_app(KiranMenuUsage *self,
-                                    const char *desktop_id);
 /**
  * @description:
  * @param {type}
