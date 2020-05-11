@@ -95,4 +95,20 @@ const gchar *kiran_app_get_file_name(KiranApp *self);
  */
 guint64 kiran_app_get_create_time(KiranApp *self);
 
+/**
+ * @description: 获取指定app的图标
+ * @param {KiranApp*} 要获取图标的app
+ * @return: 图标信息
+ * @author: songchuanfei
+ */
+GIcon *kiran_app_get_icon(KiranApp *self);
+
+/**
+ * @description: 启动指定的app
+ * @param {KiranApp*} 要启动的app
+ * @return: 启动是否成功，成功返回TRUE，失败返回FALSE
+ * @author: songchuanfei
+ */
+gboolean kiran_app_launch(KiranApp *self);
+
 G_END_DECLS

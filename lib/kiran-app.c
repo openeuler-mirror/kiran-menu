@@ -40,6 +40,14 @@ enum
     PROP_DESKTOP_ID,
 };
 
+enum {
+    SIGNAL_LAUNCHED = 0,
+    SIGANL_LAUNCH_FAILED,
+    SIGNAL_INVALID
+};
+
+static guint signals[SIGNAL_INVALID];
+
 const gchar *kiran_app_get_name(KiranApp *self)
 {
     g_return_val_if_fail(self != NULL, NULL);
@@ -226,4 +234,24 @@ static void kiran_app_class_init(KiranAppClass *klass)
         g_param_spec_string(
             "desktop-id", "Application id", "The desktop file id", NULL,
             G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
+
+    //signals[SIGNAL_LAUNCHED] = g_signal_new("launched", G_OBJECT_CLASS_TYPE(klass), 0, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
+}
+
+GIcon *kiran_app_get_icon(KiranApp *self)
+{
+    KiranAppPrivate *priv = kiran_app_get_instance_private(self);
+
+    return g_app_info_get_icon(G_APP_INFO(priv->desktop_app));
+}
+
+gboolean kiran_app_launch(KiranApp *self)
+{
+    GError *error = NULL;
+    gboolean res;
+
+    KiranAppPrivate *priv = kiran_app_get_instance_private(self);
+
+    res = g_app_info_launch(G_APP_INFO(priv->desktop_app), NULL, NULL, NULL);
+    return res;
 }

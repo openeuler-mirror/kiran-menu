@@ -1,33 +1,30 @@
 <categories>
     <category>
-        <name> 办公 </name>
+        <name> Office </name>
         <logic>
             <desktop_category> office </desktop_category>
         </logic>
     </category>
     <category>
-        <name> 开发 </name>
+        <name> Development </name>
         <logic>
             <desktop_category> development </desktop_category>
         </logic>
     </category>
     <category>
-        <name> 网络 </name>
+        <name> Network</name>
         <logic>
             <or>
                 <desktop_category> network </desktop_category>
                 <desktop_id> com.ubuntu1904.firefox.desktop </desktop_id>
+            <desktop_category> communication </desktop_category>
+            <desktop_category> IRCClient </desktop_category>
+            <desktop_category> InstantMessaging </desktop_category>
             </or>
         </logic>
     </category>
     <category>
-        <name> 社交通讯 </name>
-        <logic>
-            <desktop_category> communication </desktop_category>
-        </logic>
-    </category>
-    <category>
-        <name> 图形 </name>
+        <name> Graphics </name>
         <logic>
             <or>
                 <desktop_category> graphics </desktop_category>
@@ -36,7 +33,7 @@
         </logic>
     </category>
     <category>
-        <name> 影音 </name>
+        <name> Multimedia </name>
         <logic>
             <or>
                 <desktop_category> audiovideo </desktop_category>
@@ -46,19 +43,19 @@
         </logic>
     </category>
     <category>
-        <name> 工具 </name>
+        <name> Utilities </name>
         <logic>
             <desktop_category> utility </desktop_category>
         </logic>
     </category>
     <category>
-        <name> 设置 </name>
+        <name> Settings </name>
         <logic>
             <desktop_category> settings </desktop_category>
         </logic>
     </category>
     <category>
-        <name> 其他 </name>
+        <name> Others </name>
         <repeat> false </repeat>
         <logic>
             <all></all>

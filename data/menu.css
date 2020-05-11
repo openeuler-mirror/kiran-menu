@@ -1,0 +1,182 @@
+@define-color placeholder_text_color #c8c8c8;
+
+
+kiran-app-item {
+    background: transparent;
+
+    padding-left: 36px;
+    min-height: 40px;
+    font-family: "Noto Sans CJK SC";
+    font-size: 14pt;
+    border-width: 0px;
+    border-right-width: 3px;
+    border-style: solid;
+    border-color: transparent;
+
+    color: white;
+    -gtk-dpi: 72;
+}
+
+kiran-app-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #4cb5ff;
+    border-style: solid;
+}
+
+.category-item-box {
+    margin-left: 12px;
+}
+
+kiran-category-item {
+    background-color: transparent;
+    border-width: 0px;
+    /*
+    border-left-width: 5px;
+    border-color: #4cb5ff;
+    border-style: solid;
+    */
+    min-height: 40px;
+    color: white;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-left: 10px;
+}
+
+kiran-category-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);;
+}
+
+kiran-category-item  label {
+    margin-left: 10px;
+    font-size: 15pt;
+    font-weight: normal;
+    -gtk-dpi: 72;
+}
+
+entry.kiran-search-entry {
+    margin-left: 10px;
+    margin-right: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 0px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    padding-left: 10px;
+}
+
+entry.kiran-search-entry:focus {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+button {
+    background: transparent;
+    border: none;
+    color: white;
+}
+
+button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+}
+
+separator {
+    color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+button#all-apps-button, button#back-button {
+    background: #4cb5ff;
+}
+
+window#menu-window {
+    background-color: #1f1f1f;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+scrollbar.vertical {
+    border-width: 1px;
+    background-color: transparent;
+    min-width:5px;
+}
+scrollbar.vertical button {
+    min-height: 0px;
+    min-width: 0px; 
+}
+
+scrollbar.vertical slider {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-width: 1px;
+    border-radius: 5px;
+
+    min-width: 5px;
+    min-height: 40px;
+}
+
+scrollbar.vertical slider:active, scrollbar.vertical slider:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-width: 1px;
+    border-radius: 5px;
+}
+
+scrollbar.vertical button.up scrollbar.vertical button.down {
+    background: transparent;
+    background-image: none;
+    border: none;
+}
+
+#category-overview-box {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding-left: 10px;
+    padding-right: 20px;
+}
+
+button.kiran-category-selector {
+    min-height: 30px;
+    border-width: 3px;
+    border-color: transparent;
+    border-style: solid;
+    padding-left: 10px;
+    font-weight: 14pt;
+    -gtk-dpi: 72;
+}
+
+button.kiran-category-selector:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+button.kiran-category-selector:focus {
+    border-right-color: #4cb5ff;
+    background: rgba(255, 255, 255, 0.3);
+    font-weight: bold;
+}
+
+popover.kiran-power-menu button{
+    color: white;
+    padding-left: 20px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    min-width: 80px;
+}
+
+popover.kiran-power-menu {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+popover.kiran-power-menu.background {
+    background-color: #1f1f1f;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+label#app-empty-prompt {
+    color: #ffffff;
+    padding-left: 36px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+label.search-empty-prompt {
+    font-size: 18px;
+    color: #8b8b8b;
+}
