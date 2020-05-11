@@ -15,7 +15,8 @@ struct _KiranMenuWindow {
     GObject obj;
 
     GtkWidget *window, *parent;
-    GtkWidget *all_apps_box, *default_apps_box, *search_results_box;
+    GtkWidget *all_apps_box, *new_apps_box, *frequent_apps_box, *favorite_apps_box;
+    GtkWidget *search_results_box;
     GtkWidget *apps_view_stack, *overview_stack;
     GtkWidget *apps_overview_page, *category_overview_box;
     GtkWidget *all_apps_viewport;
@@ -34,9 +35,23 @@ struct _KiranMenuWindow {
     GList *favorite_apps;
 
     GHashTable *category_items;
+    GAppInfoMonitor *monitor;
 };
 
 G_DEFINE_TYPE(KiranMenuWindow, kiran_menu_window, G_TYPE_OBJECT)
+
+/**
+ * 删除container的所有子控件
+ */
+static void gtk_container_clear(GtkContainer *container)
+{
+    GList *children;
+
+    children = gtk_container_get_children(container);
+    g_list_foreach(children, (GFunc)gtk_widget_destroy, NULL);
+
+    g_list_free(children);
+}
 
 static gboolean kiran_menu_window_load_styles(KiranMenuWindow *self)
 {
@@ -265,39 +280,34 @@ void kiran_menu_window_load_applications(KiranMenuWindow *self)
 {
     GHashTableIter iter;
     gpointer key, value;
+    GList *node;
 
-    self->apps = kiran_menu_based_get_all_category_apps(self->backend);
+    /**
+     * 清空原来的应用程序数据
+     */
+    gtk_container_clear(GTK_CONTAINER(self->all_apps_box));
+    g_list_free_full(self->category_list, g_free);
+    g_hash_table_remove_all(self->category_items);
 
-    if (!self->apps) {
-        g_error("The applications list is empty!!!\n");
-        return;
-    }
+    self->category_list = kiran_menu_based_get_category_names(self->backend);
 
-    g_hash_table_iter_init(&iter, self->apps);
-    while (g_hash_table_iter_next (&iter, &key, &value))
+    for (node = self->category_list; node != NULL; node = node->next)
     {
         GList *apps, *ptr;
-        gchar *category;
         KiranCategoryItem *category_item;
         KiranAppItem *app_item;
+        GtkWidget *list_box;
+        gchar *category_name = node->data;
 
-        category = key;
-        apps = value;
-
-        if (!g_list_length(apps))
-            continue;
-
-        //对于没有应用的分类，不做存储
-        self->category_list = g_list_append(self->category_list, category);
+        apps = kiran_menu_based_get_category_apps(self->backend, category_name);
 
         //添加应用分类标签
-        category_item = kiran_category_item_new(category, TRUE);
-        g_hash_table_insert(self->category_items, g_strdup(category), category_item);
+        category_item = kiran_category_item_new(category_name, TRUE);
+        g_hash_table_insert(self->category_items, g_strdup(category_name), category_item);
         gtk_container_add(GTK_CONTAINER(self->all_apps_box), GTK_WIDGET(category_item));
 
-        GtkWidget *list_box = gtk_list_box_new();
-
         //添加应用程序标签
+        list_box = gtk_list_box_new();
         for (ptr = apps; ptr != NULL; ptr = ptr->next) {
             KiranApp *app = ptr->data;
 
@@ -322,9 +332,11 @@ void kiran_menu_window_load_favorites(KiranMenuWindow *self)
     GtkWidget *list_box;
     KiranCategoryItem *category_item;
 
+    gtk_container_clear(GTK_CONTAINER(self->favorite_apps_box));
+
     category_item = kiran_category_item_new(_("Favorites"), FALSE);
     fav_list = kiran_menu_based_get_favorite_apps(self->backend);
-    gtk_container_add(GTK_CONTAINER(self->default_apps_box), GTK_WIDGET(category_item));
+    gtk_container_add(GTK_CONTAINER(self->favorite_apps_box), GTK_WIDGET(category_item));
     g_message("%d favorite apps found\n", g_list_length(fav_list));
 
     list_box = gtk_list_box_new();
@@ -337,7 +349,7 @@ void kiran_menu_window_load_favorites(KiranMenuWindow *self)
         gtk_list_box_insert(GTK_LIST_BOX(list_box), GTK_WIDGET(app_item), -1);
     }
     //g_list_free_full(fav_list, g_object_unref);
-    gtk_container_add(GTK_CONTAINER(self->default_apps_box), list_box);
+    gtk_container_add(GTK_CONTAINER(self->favorite_apps_box), list_box);
     self->favorite_apps = fav_list;
 }
 
@@ -349,10 +361,12 @@ void kiran_menu_window_load_frequent_apps(KiranMenuWindow *self)
 {
     GList *recently_apps, *ptr;
     KiranCategoryItem *category_item;
+    GtkWidget *list_box;
 
+    gtk_container_clear(GTK_CONTAINER(self->frequent_apps_box));
 
     category_item = kiran_category_item_new(_("Frequently Used"), FALSE);
-    gtk_container_add(GTK_CONTAINER(self->default_apps_box), GTK_WIDGET(category_item));
+    gtk_container_add(GTK_CONTAINER(self->frequent_apps_box), GTK_WIDGET(category_item));
 
     recently_apps = kiran_menu_based_get_nfrequent_apps(self->backend, FREQUENT_APPS_SHOW_MAX);
     g_message("%d recently apps found\n", g_list_length(recently_apps));
@@ -364,19 +378,21 @@ void kiran_menu_window_load_frequent_apps(KiranMenuWindow *self)
 
         gtk_widget_set_name(label, "app-empty-prompt");
         gtk_widget_set_halign(label, GTK_ALIGN_START);
-        gtk_container_add(GTK_CONTAINER(self->default_apps_box), label);
+        gtk_container_add(GTK_CONTAINER(self->frequent_apps_box), label);
         return;
     }
+
+    list_box = gtk_list_box_new();
     for (ptr = recently_apps; ptr != NULL; ptr = ptr->next)
     {
         KiranAppItem *app_item;
         KiranApp *app = ptr->data;
 
-        app_item = kiran_app_item_new(app);
-        g_message("Found recently app '%s'\n", kiran_app_get_name(app));
-        gtk_container_add(GTK_CONTAINER(self->default_apps_box), GTK_WIDGET(app_item));
+        app_item = kiran_menu_window_create_app_item(self, app);
+        g_message("Found frequent app '%s'\n", kiran_app_get_name(app));
+        gtk_list_box_insert(GTK_LIST_BOX(list_box), GTK_WIDGET(app_item), -1);
     }
-
+    gtk_container_add(GTK_CONTAINER(self->frequent_apps_box), list_box);
     g_list_free_full(recently_apps, g_object_unref);
 }
 
@@ -387,16 +403,16 @@ void kiran_menu_window_load_frequent_apps(KiranMenuWindow *self)
 void kiran_menu_window_load_new_apps(KiranMenuWindow *self)
 {
     GList *new_apps, *ptr;
+    KiranCategoryItem *category_item;
+    GtkWidget *list_box;
 
-  KiranCategoryItem *category_item;
-
-
+    gtk_container_clear(GTK_CONTAINER(self->new_apps_box));
     category_item = kiran_category_item_new(_("New Installed"), FALSE);
-    gtk_container_add(GTK_CONTAINER(self->all_apps_box), GTK_WIDGET(category_item));
+    gtk_container_add(GTK_CONTAINER(self->new_apps_box), GTK_WIDGET(category_item));
 
-    new_apps = kiran_menu_based_get_nnew_apps(self->backend, NEW_APPS_SHOW_MAX);
+    new_apps = kiran_menu_based_get_nnew_apps(self->backend, -1);
 
-    g_message("%d recently apps found\n", g_list_length(new_apps));
+    g_message("%d new apps found\n", g_list_length(new_apps));
 
     if (!g_list_length(new_apps)) {
         //最近使用列表为空
@@ -405,19 +421,21 @@ void kiran_menu_window_load_new_apps(KiranMenuWindow *self)
 
         gtk_widget_set_name(label, "app-empty-prompt");
         gtk_widget_set_halign(label, GTK_ALIGN_START);
-        gtk_container_add(GTK_CONTAINER(self->all_apps_box), label);
+        gtk_container_add(GTK_CONTAINER(self->new_apps_box), label);
         return;
     }
+
+    list_box = gtk_list_box_new();
     for (ptr = new_apps; ptr != NULL; ptr = ptr->next)
     {
         KiranAppItem *app_item;
         KiranApp *app = ptr->data;
 
-        app_item = kiran_app_item_new(app);
+        app_item = kiran_menu_window_create_app_item(self, app);
         g_message("Found new app '%s'\n", kiran_app_get_name(app));
-        gtk_container_add(GTK_CONTAINER(self->all_apps_box), GTK_WIDGET(app_item));
+        gtk_list_box_insert(GTK_LIST_BOX(list_box), GTK_WIDGET(app_item), -1);
     }
-
+    gtk_container_add(GTK_CONTAINER(self->new_apps_box), list_box);
     g_list_free_full(new_apps, g_object_unref);
 }
 
@@ -462,12 +480,24 @@ gboolean button_press_event_callback(GtkWidget *widget, GdkEventButton *event, g
     return FALSE;
 }
 
+/**
+ * 加载应用程序数据，包括常用应用、收藏应用、新安装应用和所有应用列表
+ */
+static void kiran_menu_window_reload_app_data(KiranMenuWindow *self)
+{
+    kiran_menu_window_load_frequent_apps(self);
+    kiran_menu_window_load_favorites(self);
+    kiran_menu_window_load_new_apps(self);
+    kiran_menu_window_load_applications(self);
+}
+
 void kiran_menu_window_init(KiranMenuWindow *self)
 {
     GError *error = NULL;
     GtkWidget *search_box;
     GtkWidget *top_box, *bottom_box;
 
+    self->monitor = g_app_info_monitor_get();
     self->backend = kiran_menu_based_skeleton_get();
     self->last_app_view = NULL;
     self->category_list = NULL;
@@ -489,7 +519,9 @@ void kiran_menu_window_init(KiranMenuWindow *self)
     gtk_window_set_decorated(GTK_WINDOW(self->window), FALSE);
 
     self->all_apps_box= GTK_WIDGET(gtk_builder_get_object(self->builder, "all-apps-box"));
-    self->default_apps_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "default-apps-box"));
+    self->frequent_apps_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "frequent-apps-box"));
+    self->favorite_apps_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "favorite-apps-box"));
+    self->new_apps_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "new-apps-box"));
     self->search_results_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "search-results-box"));
     self->sidebar_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "sidebar-box"));
 
@@ -529,11 +561,8 @@ void kiran_menu_window_init(KiranMenuWindow *self)
     g_signal_connect(self->window, "button-press-event", G_CALLBACK(button_press_event_callback), self);
 
     /* 加载应用程序数据 */
-    kiran_menu_window_load_frequent_apps(self);
-    kiran_menu_window_load_favorites(self);
-    kiran_menu_window_load_new_apps(self);
-    kiran_menu_window_load_applications(self);
-
+    kiran_menu_window_reload_app_data(self);
+    g_signal_connect_swapped(self->monitor, "changed", G_CALLBACK(kiran_menu_window_reload_app_data), self);
 }
 
 void kiran_menu_window_finalize(GObject *obj)
@@ -547,6 +576,7 @@ void kiran_menu_window_finalize(GObject *obj)
     g_list_free_full(self->category_list, g_free);
     g_hash_table_destroy(self->category_items);
     g_list_free_full(self->favorite_apps, g_object_unref);
+    g_object_unref(self->monitor);
 }
 
 void kiran_menu_window_class_init(KiranMenuWindowClass *kclass)
