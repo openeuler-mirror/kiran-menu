@@ -141,7 +141,7 @@ static void kiran_menu_applet_button_toggled(GtkToggleButton *button)
 	orient = mate_panel_applet_get_orient(self->applet);
 	if (gtk_toggle_button_get_active(button))
 	{
-		gtk_widget_show_all(window);
+		gtk_widget_show(window);
 
 		//将开始菜单窗口总保持在上层
 		gtk_window_set_keep_above(GTK_WINDOW(window), TRUE);

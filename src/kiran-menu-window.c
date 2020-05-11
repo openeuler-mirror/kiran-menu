@@ -136,6 +136,7 @@ void kiran_menu_window_add_app_button(KiranMenuWindow *self,
 
     g_signal_connect_swapped(app_btn, "app-launched", G_CALLBACK(gtk_widget_hide), self->window);
     gtk_container_add(GTK_CONTAINER(self->sidebar_box), GTK_WIDGET(app_btn));
+    gtk_widget_show(GTK_WIDGET(app_btn));
 }
 
 
@@ -317,7 +318,7 @@ void kiran_menu_window_load_applications(KiranMenuWindow *self)
 
         gtk_container_add(GTK_CONTAINER(self->all_apps_box), list_box);
         gtk_widget_show_all(list_box);
-
+        gtk_widget_show_all(self->all_apps_box);
         g_signal_connect_swapped(category_item, "clicked", G_CALLBACK(show_category_overview), self);
     }
 }
@@ -350,6 +351,7 @@ void kiran_menu_window_load_favorites(KiranMenuWindow *self)
     }
     //g_list_free_full(fav_list, g_object_unref);
     gtk_container_add(GTK_CONTAINER(self->favorite_apps_box), list_box);
+    gtk_widget_show_all(self->favorite_apps_box);
     self->favorite_apps = fav_list;
 }
 
@@ -369,7 +371,7 @@ void kiran_menu_window_load_frequent_apps(KiranMenuWindow *self)
     gtk_container_add(GTK_CONTAINER(self->frequent_apps_box), GTK_WIDGET(category_item));
 
     recently_apps = kiran_menu_based_get_nfrequent_apps(self->backend, FREQUENT_APPS_SHOW_MAX);
-    g_message("%d recently apps found\n", g_list_length(recently_apps));
+    g_message("%d frequent apps found\n", g_list_length(recently_apps));
 
     if (!g_list_length(recently_apps)) {
         //最近使用列表为空
@@ -379,6 +381,7 @@ void kiran_menu_window_load_frequent_apps(KiranMenuWindow *self)
         gtk_widget_set_name(label, "app-empty-prompt");
         gtk_widget_set_halign(label, GTK_ALIGN_START);
         gtk_container_add(GTK_CONTAINER(self->frequent_apps_box), label);
+        gtk_widget_show_all(self->frequent_apps_box);
         return;
     }
 
@@ -393,6 +396,7 @@ void kiran_menu_window_load_frequent_apps(KiranMenuWindow *self)
         gtk_list_box_insert(GTK_LIST_BOX(list_box), GTK_WIDGET(app_item), -1);
     }
     gtk_container_add(GTK_CONTAINER(self->frequent_apps_box), list_box);
+    gtk_widget_show_all(self->frequent_apps_box);
     g_list_free_full(recently_apps, g_object_unref);
 }
 
@@ -405,10 +409,12 @@ void kiran_menu_window_load_new_apps(KiranMenuWindow *self)
     GList *new_apps, *ptr;
     KiranCategoryItem *category_item;
     GtkWidget *list_box;
+    int index;
 
     gtk_container_clear(GTK_CONTAINER(self->new_apps_box));
     category_item = kiran_category_item_new(_("New Installed"), FALSE);
     gtk_container_add(GTK_CONTAINER(self->new_apps_box), GTK_WIDGET(category_item));
+    gtk_widget_show_all(GTK_WIDGET(category_item));
 
     new_apps = kiran_menu_based_get_nnew_apps(self->backend, -1);
 
@@ -422,6 +428,7 @@ void kiran_menu_window_load_new_apps(KiranMenuWindow *self)
         gtk_widget_set_name(label, "app-empty-prompt");
         gtk_widget_set_halign(label, GTK_ALIGN_START);
         gtk_container_add(GTK_CONTAINER(self->new_apps_box), label);
+        gtk_widget_show(label);
         return;
     }
 
@@ -436,6 +443,7 @@ void kiran_menu_window_load_new_apps(KiranMenuWindow *self)
         gtk_list_box_insert(GTK_LIST_BOX(list_box), GTK_WIDGET(app_item), -1);
     }
     gtk_container_add(GTK_CONTAINER(self->new_apps_box), list_box);
+    gtk_widget_show_all(list_box);
     g_list_free_full(new_apps, g_object_unref);
 }
 
@@ -534,6 +542,7 @@ void kiran_menu_window_init(KiranMenuWindow *self)
     self->search_entry = GTK_WIDGET(kiran_search_entry_new());
     search_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "search-box"));
     gtk_container_add(GTK_CONTAINER(search_box), self->search_entry);
+    gtk_widget_show(self->search_entry);
 
     g_signal_connect_swapped(self->search_entry, "search-changed", G_CALLBACK(search_change_callback), self);
     g_signal_connect_swapped(self->search_entry, "stop-search", G_CALLBACK(search_stop_callback), self);
@@ -552,6 +561,7 @@ void kiran_menu_window_init(KiranMenuWindow *self)
     kiran_menu_window_add_app_button(self, "/kiran-menu/sidebar/avatar", _("About me"), "mate-about-me");
     kiran_menu_window_add_app_button(self, "/kiran-menu/sidebar/settings", _("Control center"), "mate-control-center");
     gtk_container_add(GTK_CONTAINER(self->sidebar_box), GTK_WIDGET(kiran_power_button_new()));
+    gtk_widget_show_all(self->sidebar_box);
 
     g_signal_connect_swapped(self->back_button, "clicked", G_CALLBACK(show_default_apps_page), self);
     g_signal_connect_swapped(self->all_apps_button, "clicked", G_CALLBACK(show_all_apps_page), self);
