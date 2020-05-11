@@ -21,6 +21,7 @@ struct _KiranMenuWindow {
     GtkWidget *all_apps_viewport;
     GtkWidget *back_button, *all_apps_button;
     GtkWidget *search_entry;
+    GtkWidget *sidebar_box;
     GtkBuilder *builder;
     GResource *resource;
     GDBusProxy *proxy;
@@ -47,23 +48,6 @@ static gboolean kiran_menu_window_load_styles(KiranMenuWindow *self)
                                               GTK_STYLE_PROVIDER_PRIORITY_USER);
 
     return TRUE;
-}
-
- void request_for_lock_screen() {
-    GPid pid;
-    gboolean ret;
-    GError *error = NULL;
-    const char *argv[3] = {"mate-screensaver-command", "--lock", NULL};
-
-    ret = g_spawn_async(NULL, argv, NULL,
-            G_SPAWN_CLOEXEC_PIPES | G_SPAWN_STDOUT_TO_DEV_NULL | G_SPAWN_SEARCH_PATH,
-            NULL, NULL, &pid, &error);
-
-    if (!ret) {
-        g_error("Failed to lock screen: '%s'\n", error->message);
-        g_error_free(error);
-        return;
-    }
 }
 
 static void show_default_apps_page(KiranMenuWindow *self)
@@ -112,6 +96,33 @@ void kiran_menu_window_jump_to_category(KiranMenuWindow *self, const char *categ
     gtk_widget_get_allocation(GTK_WIDGET(item), &item_allocation);
     gtk_adjustment_set_value(adjustment, item_allocation.y);
 }
+
+
+/**
+ * 为给定的app创建应用程序列表项目对象
+ */
+KiranAppItem *kiran_menu_window_create_app_item(KiranMenuWindow *self, KiranApp *app)
+{
+    KiranAppItem *app_item = kiran_app_item_new(app);
+
+    g_signal_connect_swapped(app_item, "app-launched", G_CALLBACK(gtk_widget_hide), self->window);
+    return app_item;
+}
+
+/**
+ * 为开始菜单侧边栏创建应用快捷按钮
+ */
+void kiran_menu_window_add_app_button(KiranMenuWindow *self,
+        const char *icon_resource,
+        const char *tooltip_text,
+        const char *app_cmdline)
+{
+    KiranAppButton *app_btn = kiran_app_button_new(icon_resource, tooltip_text, app_cmdline);
+
+    g_signal_connect_swapped(app_btn, "app-launched", G_CALLBACK(gtk_widget_hide), self->window);
+    gtk_container_add(GTK_CONTAINER(self->sidebar_box), GTK_WIDGET(app_btn));
+}
+
 
 
 /**
@@ -176,7 +187,6 @@ static void search_stop_callback(KiranMenuWindow *self)
     gtk_stack_set_visible_child_name(GTK_STACK(self->apps_view_stack), self->last_app_view?self->last_app_view:"default-apps-page");
 }
 
-
 /**
  * 应用搜索框内容变化时回调函数
  *
@@ -237,7 +247,7 @@ static void search_change_callback(KiranMenuWindow *self)
         KiranAppItem *app_item;
         KiranApp *app = ptr->data;
 
-        app_item = kiran_app_item_new(app);
+        app_item = kiran_menu_window_create_app_item(self, app);
         g_message("Found result app '%s'\n", kiran_app_get_name(app));
         gtk_list_box_insert(GTK_LIST_BOX(list_box), GTK_WIDGET(app_item), -1);
     }
@@ -291,9 +301,8 @@ void kiran_menu_window_load_applications(KiranMenuWindow *self)
         for (ptr = apps; ptr != NULL; ptr = ptr->next) {
             KiranApp *app = ptr->data;
 
-            app_item = kiran_app_item_new(app);
+            app_item = kiran_menu_window_create_app_item(self, app);
             gtk_list_box_insert(GTK_LIST_BOX(list_box), GTK_WIDGET(app_item), -1);
-
         }
 
         gtk_container_add(GTK_CONTAINER(self->all_apps_box), list_box);
@@ -324,8 +333,7 @@ void kiran_menu_window_load_favorites(KiranMenuWindow *self)
         KiranAppItem *app_item;
         KiranApp *app = ptr->data;
 
-        app_item = kiran_app_item_new(app);
-        g_message("Found favoriate app '%s'\n", kiran_app_get_name(app));
+        app_item = kiran_menu_window_create_app_item(self, app);
         gtk_list_box_insert(GTK_LIST_BOX(list_box), GTK_WIDGET(app_item), -1);
     }
     //g_list_free_full(fav_list, g_object_unref);
@@ -413,6 +421,47 @@ void kiran_menu_window_load_new_apps(KiranMenuWindow *self)
     g_list_free_full(new_apps, g_object_unref);
 }
 
+gboolean grab_pointer(GtkWidget *widget, GdkEvent *event, gpointer userdata)
+{
+    GdkEventMask mask = GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK;
+    KiranMenuWindow *self = userdata;
+
+    gdk_pointer_grab(gdk_event_get_window(event), TRUE, mask, NULL, NULL, GDK_CURRENT_TIME);
+
+    gtk_widget_grab_focus(self->search_entry);
+    return FALSE;
+}
+
+gboolean ungrab_pointer(GtkWidget *widget, GdkEvent *event, gpointer userdata)
+{
+    KiranMenuWindow *self = userdata;
+
+    gdk_pointer_ungrab(GDK_CURRENT_TIME);
+    return FALSE;
+}
+
+gboolean button_press_event_callback(GtkWidget *widget, GdkEventButton *event, gpointer userdata)
+{
+    int root_x, root_y;
+    int width, height;
+    GdkWindow *window;
+
+    g_message("got button press event\n");
+
+    window = gtk_widget_get_window(widget);
+    gdk_window_get_root_origin(window, &root_x, &root_y);
+    width = gdk_window_get_width(window);
+    height = gdk_window_get_height(window);
+
+    g_message("window (%d, %d) -> (%d, %d), event (%d, %d)\n", root_x, root_y, root_x + width, root_y + height, (int)event->x_root, (int)event->y_root);
+
+    if (((int)event->x_root < root_x || (int)event->x_root > root_x + width) ||
+        ((int)event->y_root < root_y || (int)event->y_root > root_y + height))
+        gtk_widget_hide(widget);
+
+    return FALSE;
+}
+
 void kiran_menu_window_init(KiranMenuWindow *self)
 {
     GError *error = NULL;
@@ -442,6 +491,7 @@ void kiran_menu_window_init(KiranMenuWindow *self)
     self->all_apps_box= GTK_WIDGET(gtk_builder_get_object(self->builder, "all-apps-box"));
     self->default_apps_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "default-apps-box"));
     self->search_results_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "search-results-box"));
+    self->sidebar_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "sidebar-box"));
 
     self->category_overview_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "category-overview-box"));
     self->all_apps_viewport = GTK_WIDGET(gtk_builder_get_object(self->builder, "all-apps-viewport"));
@@ -462,21 +512,21 @@ void kiran_menu_window_init(KiranMenuWindow *self)
     self->back_button = GTK_WIDGET(gtk_builder_get_object(self->builder, "back-button"));
     self->all_apps_button = GTK_WIDGET(gtk_builder_get_object(self->builder, "all-apps-button"));
 
-    gtk_orientable_set_orientation(GTK_ORIENTABLE(top_box), GTK_ORIENTATION_VERTICAL);
-    gtk_container_add(GTK_CONTAINER(top_box), GTK_WIDGET(kiran_app_button_new("/kiran-menu/sidebar/home-dir", _("Home Directory"), "caja")));
-    gtk_container_add(GTK_CONTAINER(top_box), GTK_WIDGET(kiran_app_button_new("/kiran-menu/sidebar/monitor", _("System monitor"), "mate-system-monitor")));
-    gtk_container_add(GTK_CONTAINER(top_box), GTK_WIDGET(kiran_app_button_new("/kiran-menu/sidebar/help", _("Open help"), "yelp")));
-
-    gtk_orientable_set_orientation(GTK_ORIENTABLE(bottom_box), GTK_ORIENTATION_VERTICAL);
-    gtk_container_add(GTK_CONTAINER(bottom_box), GTK_WIDGET(kiran_app_button_new("/kiran-menu/sidebar/avatar", _("About me"), "mate-about-me")));
-    gtk_container_add(GTK_CONTAINER(bottom_box), GTK_WIDGET(kiran_app_button_new("/kiran-menu/sidebar/settings", _("Control center"), "mate-control-center")));
-
-    gtk_container_add(GTK_CONTAINER(bottom_box), GTK_WIDGET(kiran_power_button_new()));
-    gtk_widget_set_name(self->window, "menu-window");
+    gtk_orientable_set_orientation(GTK_ORIENTABLE(self->sidebar_box), GTK_ORIENTATION_VERTICAL);
+    kiran_menu_window_add_app_button(self, "/kiran-menu/sidebar/home-dir", _("Home Directory"), "caja");
+    kiran_menu_window_add_app_button(self, "/kiran-menu/sidebar/monitor", _("System monitor"), "mate-system-monitor");
+    kiran_menu_window_add_app_button(self, "/kiran-menu/sidebar/help", _("Open help"), "yelp");
+    gtk_container_add(GTK_CONTAINER(self->sidebar_box), gtk_separator_new(GTK_ORIENTATION_HORIZONTAL));
+    kiran_menu_window_add_app_button(self, "/kiran-menu/sidebar/avatar", _("About me"), "mate-about-me");
+    kiran_menu_window_add_app_button(self, "/kiran-menu/sidebar/settings", _("Control center"), "mate-control-center");
+    gtk_container_add(GTK_CONTAINER(self->sidebar_box), GTK_WIDGET(kiran_power_button_new()));
 
     g_signal_connect_swapped(self->back_button, "clicked", G_CALLBACK(show_default_apps_page), self);
     g_signal_connect_swapped(self->all_apps_button, "clicked", G_CALLBACK(show_all_apps_page), self);
 
+    g_signal_connect(self->window, "map-event", G_CALLBACK(grab_pointer), self);
+    g_signal_connect(self->window, "unmap-event", G_CALLBACK(ungrab_pointer), self);
+    g_signal_connect(self->window, "button-press-event", G_CALLBACK(button_press_event_callback), self);
 
     /* 加载应用程序数据 */
     kiran_menu_window_load_frequent_apps(self);

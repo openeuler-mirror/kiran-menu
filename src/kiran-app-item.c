@@ -26,7 +26,13 @@ enum
     PROPERTY_MAX
 };
 
+enum {
+    SIGNAL_APP_LAUNCHED = 0,        //应用已启动信号
+    SIGNAL_MAX
+};
+
 static GParamSpec *param_specs[PROPERTY_MAX] = {0};
+static guint signals[SIGNAL_MAX];
 
 void kiran_app_item_init(KiranAppItem *item)
 {
@@ -103,6 +109,14 @@ static void kiran_app_item_remove_from_favorite_callback(KiranAppItem *self)
         g_critical("Failed to remove app '%s' from favorite list\n", kiran_app_get_desktop_id(self->app));
 }
 
+static void kiran_app_item_launch_app_callback(KiranAppItem *self)
+{
+
+    g_message("%s: app '%s' launched\n", __func__, kiran_app_get_desktop_id(self->app));
+    if (kiran_app_launch(self->app))
+        g_signal_emit(self, signals[SIGNAL_APP_LAUNCHED], 0);
+}
+
 /**
  * 创建应用程序右键菜单
  */
@@ -114,7 +128,7 @@ GtkWidget *create_context_menu(GtkWidget *attach)
     menu = gtk_menu_new();
 
     menu_item = gtk_menu_item_new_with_label(_("Launch"));
-    g_signal_connect_swapped(menu_item, "activate", G_CALLBACK(kiran_app_launch), item->app);
+    g_signal_connect_swapped(menu_item, "activate", G_CALLBACK(kiran_app_item_launch_app_callback), item);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
 
     menu_item = gtk_menu_item_new_with_label(_("Add to desktop"));
@@ -152,6 +166,8 @@ gboolean kiran_app_item_button_release(GtkWidget *widget, GdkEventButton *ev)
         gtk_menu_popup_at_pointer(GTK_MENU(item->menu), event);
  
         return TRUE;
+    } else {
+        kiran_app_item_launch_app_callback(item);
     }
     return FALSE;
 }
@@ -270,6 +286,9 @@ void kiran_app_item_class_init(KiranAppItemClass *kclass)
     param_specs[PROPERTY_IS_FAVORITE] = g_param_spec_boolean("is-favorite",
             "is-favorite", "In favorite apps list",
             FALSE, G_PARAM_STATIC_STRINGS | G_PARAM_WRITABLE);
+
+    signals[SIGNAL_APP_LAUNCHED] = g_signal_new("app-launched", G_TYPE_FROM_CLASS(kclass),
+            G_SIGNAL_RUN_FIRST, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 
     g_object_class_install_property(G_OBJECT_CLASS(kclass), PROPERTY_IS_FAVORITE, param_specs[PROPERTY_IS_FAVORITE]);
     gtk_widget_class_set_css_name(GTK_WIDGET_CLASS(kclass), "kiran-app-item");

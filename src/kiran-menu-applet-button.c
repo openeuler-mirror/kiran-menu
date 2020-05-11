@@ -142,6 +142,9 @@ static void kiran_menu_applet_button_toggled(GtkToggleButton *button)
 	if (gtk_toggle_button_get_active(button))
 	{
 		gtk_widget_show_all(window);
+
+		//将开始菜单窗口总保持在上层
+		gtk_window_set_keep_above(GTK_WINDOW(window), TRUE);
 		//将开始菜单窗口视图重置回初始状态
 		kiran_menu_window_reset_layout(self->menu_window);
 
@@ -185,6 +188,11 @@ static void menu_window_active_callback(GtkWindow *window, GParamSpec *spec, Gtk
 		gtk_toggle_button_set_active(button, FALSE);
 }
 
+void kiran_menu_applet_button_untoggle(KiranMenuAppletButton *self)
+{
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(self), FALSE);
+}
+
 void kiran_menu_applet_button_init(KiranMenuAppletButton *self)
 {
 	GtkIconTheme *icon_theme;
@@ -200,7 +208,11 @@ void kiran_menu_applet_button_init(KiranMenuAppletButton *self)
 		GTK_ICON_LOOKUP_FORCE_SIZE | GTK_ICON_LOOKUP_FORCE_SVG, NULL);
 
 	self->menu_window = kiran_menu_window_new(GTK_WIDGET(self));
-	g_signal_connect(kiran_menu_window_get_window(self->menu_window), "notify::is-active", G_CALLBACK(menu_window_active_callback), self);
+
+	/**
+	 * 当窗口隐藏时更新插件按钮状态
+	 */
+	g_signal_connect_swapped(kiran_menu_window_get_window(self->menu_window), "hide", G_CALLBACK(kiran_menu_applet_button_untoggle), self);
 	//gtk_window_set_default_size(GTK_WINDOW(self->menu_window), 300, 600);
 }
 
