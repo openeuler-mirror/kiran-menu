@@ -22,7 +22,7 @@ G_DEFINE_TYPE(KiranAppItem, kiran_app_item, GTK_TYPE_EVENT_BOX);
 
 enum
 {
-    PROPERTY_IS_FAVORITE = 0,
+    PROPERTY_IS_FAVORITE = 1,
     PROPERTY_MAX
 };
 
@@ -31,11 +31,16 @@ enum {
     SIGNAL_MAX
 };
 
-static GParamSpec *param_specs[PROPERTY_MAX] = {0};
+static GParamSpec *property_pspecs[PROPERTY_MAX] = {0};
 static guint signals[SIGNAL_MAX];
 
 void kiran_app_item_init(KiranAppItem *item)
 {
+    GtkStyleContext *context;
+    GValue value = G_VALUE_INIT;
+    GtkBorder padding;
+
+    context = gtk_widget_get_style_context(GTK_WIDGET(item));
     item->grid = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
     item->icon = gtk_image_new();
     item->label = gtk_label_new("app name");
@@ -48,8 +53,12 @@ void kiran_app_item_init(KiranAppItem *item)
     gtk_label_set_ellipsize(GTK_LABEL(item->label), PANGO_ELLIPSIZE_END);
     gtk_widget_set_hexpand(item->label, TRUE);
     gtk_widget_set_halign(item->label, GTK_ALIGN_START);
-    gtk_widget_set_margin_start(item->icon, 25);
-    gtk_widget_set_margin_right(item->icon, 10);
+
+    g_value_init(&value, G_TYPE_INT);
+    gtk_style_context_get_style_property(context, "icon-spacing", &value);
+    gtk_style_context_get_padding(context, GTK_STATE_FLAG_NORMAL, &padding);
+    gtk_widget_set_margin_right(item->icon, g_value_get_int(&value));
+    gtk_widget_set_margin_start(item->icon, padding.left);
 
     gtk_widget_show_all(item->grid);
 
@@ -283,14 +292,23 @@ void kiran_app_item_class_init(KiranAppItemClass *kclass)
     GTK_WIDGET_CLASS(kclass)->leave_notify_event = kiran_app_item_leave_notify;
     GTK_WIDGET_CLASS(kclass)->enter_notify_event = kiran_app_item_enter_notify;
 
-    param_specs[PROPERTY_IS_FAVORITE] = g_param_spec_boolean("is-favorite",
+    property_pspecs[PROPERTY_IS_FAVORITE] = g_param_spec_boolean("is-favorite",
             "is-favorite", "In favorite apps list",
             FALSE, G_PARAM_STATIC_STRINGS | G_PARAM_WRITABLE);
+
+    GParamSpec *style_pspec = g_param_spec_int("icon-spacing",
+            "icon-spacing", "Right margin of icon image", 0, 100, 0, G_PARAM_WRITABLE | G_PARAM_STATIC_STRINGS);
 
     signals[SIGNAL_APP_LAUNCHED] = g_signal_new("app-launched", G_TYPE_FROM_CLASS(kclass),
             G_SIGNAL_RUN_FIRST, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 
-    g_object_class_install_property(G_OBJECT_CLASS(kclass), PROPERTY_IS_FAVORITE, param_specs[PROPERTY_IS_FAVORITE]);
+    g_object_class_install_property(G_OBJECT_CLASS(kclass), PROPERTY_IS_FAVORITE, property_pspecs[PROPERTY_IS_FAVORITE]);
+    gtk_widget_class_install_style_property(GTK_WIDGET_CLASS(kclass),
+            g_param_spec_int("icon-spacing",
+                             "icon-spacing",
+                            "Right margin of icon image",
+                            0, 100, 0,
+                            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
     gtk_widget_class_set_css_name(GTK_WIDGET_CLASS(kclass), "kiran-app-item");
 }
 

@@ -28,6 +28,9 @@ kiran-app-item {
     border-style: solid;
     border-color: transparent;
 
+    padding-left: 25px;
+    -KiranAppItem-icon-spacing: 12px;
+
     color: white;
     -gtk-dpi: 72;
 }
