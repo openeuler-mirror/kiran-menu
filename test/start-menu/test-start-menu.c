@@ -27,9 +27,8 @@ static void installed_changed(KiranMenuBased *based, gpointer user_data)
     g_print("recv installed-changed signal.\n");
 }
 
-static void app_installed(KiranMenuBased *based, gpointer user_data)
+static void app_installed(KiranMenuBased *based, GList *apps, gpointer user_data)
 {
-    GList *apps = (GList *)user_data;
     for (GList *l = apps; l != NULL; l = l->next)
     {
         KiranApp *app = l->data;
@@ -45,6 +44,11 @@ static void app_uninstalled(KiranMenuBased *based, gpointer user_data)
         gchar *desktop_id = (gchar *)(l->data);
         g_print("recv app %s uninstalled signal.\n", desktop_id);
     }
+}
+
+static void new_app_changed(KiranMenuBased *based, gpointer user_data)
+{
+    g_print("recv new app changed signal.\n");
 }
 
 static void favorite_app_added(KiranMenuBased *based, gpointer user_data)
@@ -77,6 +81,7 @@ int main(int argc, char **argv)
     g_signal_connect(kiran_menu, "app-changed", G_CALLBACK(installed_changed), NULL);
     g_signal_connect(kiran_menu, "app-installed", G_CALLBACK(app_installed), NULL);
     g_signal_connect(kiran_menu, "app-uninstalled", G_CALLBACK(app_uninstalled), NULL);
+    g_signal_connect(kiran_menu, "new-app-changed", G_CALLBACK(new_app_changed), NULL);
     g_signal_connect(kiran_menu, "favorite-app-added", G_CALLBACK(favorite_app_added), NULL);
     g_signal_connect(kiran_menu, "favorite-app-deleted", G_CALLBACK(favorite_app_deleted), NULL);
     g_signal_connect(kiran_menu, "frequent-usage-app-changed", G_CALLBACK(frequent_usage_app_changed), NULL);

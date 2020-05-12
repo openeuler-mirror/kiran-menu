@@ -31,6 +31,7 @@ enum
 {
     SIGNAL_APP_INSTALLED,
     SIGNAL_APP_UNINSTALLED,
+    SIGNAL_NEW_APP_CHANGED,
     LAST_SIGNAL
 };
 
@@ -189,6 +190,18 @@ GList *kiran_menu_system_get_all_sorted_apps(KiranMenuSystem *self)
     return g_list_sort_with_data(apps, sort_by_app_name, self);
 }
 
+static void read_new_apps(KiranMenuSystem *self)
+{
+    g_clear_pointer(&self->new_apps, g_list_free);
+    self->new_apps = read_as_to_list_quark(self->settings, "new-apps");
+}
+
+static void write_new_apps(KiranMenuSystem *self)
+{
+    write_list_quark_to_as(self->settings, "new-apps", self->new_apps);
+    g_signal_emit(self, signals[SIGNAL_NEW_APP_CHANGED], 0);
+}
+
 static void kiran_menu_system_flush(KiranMenuUnit *unit, gpointer user_data)
 {
     KiranMenuSystem *self = KIRAN_MENU_SYSTEM(unit);
@@ -292,7 +305,7 @@ static void kiran_menu_system_flush(KiranMenuUnit *unit, gpointer user_data)
 
     if (new_app_change)
     {
-        write_list_quark_to_as(self->settings, "new-apps", self->new_apps);
+        write_new_apps(self);
     }
 
     g_list_free_full(registered_apps, g_object_unref);
@@ -310,12 +323,6 @@ static void kiran_menu_system_flush(KiranMenuUnit *unit, gpointer user_data)
     }
 }
 
-static void read_new_apps(KiranMenuSystem *self)
-{
-    g_clear_pointer(&self->new_apps, g_list_free);
-    self->new_apps = read_as_to_list_quark(self->settings, "new-apps");
-}
-
 static void monitor_window_open(WnckScreen *screen,
                                 WnckWindow *window,
                                 gpointer user_data)
@@ -329,7 +336,7 @@ static void monitor_window_open(WnckScreen *screen,
     if (g_list_find(self->new_apps, GUINT_TO_POINTER(quark)))
     {
         self->new_apps = g_list_remove(self->new_apps, GUINT_TO_POINTER(quark));
-        write_list_quark_to_as(self->settings, "new-apps", self->new_apps);
+        write_new_apps(self);
     }
 }
 
@@ -403,6 +410,16 @@ static void kiran_menu_system_class_init(KiranMenuSystemClass *klass)
                                                    G_TYPE_NONE,
                                                    1,
                                                    G_TYPE_POINTER);
+
+    signals[SIGNAL_NEW_APP_CHANGED] = g_signal_new("new-app-changed",
+                                                   KIRAN_TYPE_MENU_SYSTEM,
+                                                   G_SIGNAL_RUN_LAST,
+                                                   0,
+                                                   NULL,
+                                                   NULL,
+                                                   NULL,
+                                                   G_TYPE_NONE,
+                                                   0);
 
     GObjectClass *object_class = G_OBJECT_CLASS(klass);
     object_class->dispose = kiran_menu_system_dispose;

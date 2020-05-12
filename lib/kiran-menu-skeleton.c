@@ -36,6 +36,7 @@ enum
     SIGNAL_APP_CHANGED,
     SIGNAL_APP_INSTALLED,
     SIGNAL_APP_UNINSTALLED,
+    SIGNAL_NEW_APP_CHANGED,
     SIGNAL_FAVORITE_APP_ADDED,
     SIGNAL_FAVORITE_APP_DELETED,
     SIGNAL_FREQUENT_USAGE_APP_CHANGED,
@@ -349,6 +350,13 @@ static void app_uninstalled(KiranMenuSystem *system,
     g_signal_emit(self, signals[SIGNAL_APP_UNINSTALLED], 0, apps);
 }
 
+static void new_app_changed(KiranMenuSystem *system,
+                            gpointer user_data)
+{
+    KiranMenuSkeleton *self = KIRAN_MENU_SKELETON(user_data);
+    g_signal_emit(self, signals[SIGNAL_NEW_APP_CHANGED], 0);
+}
+
 static void frequent_usage_app_changed(KiranMenuSystem *system,
                                        gpointer user_data)
 {
@@ -370,6 +378,7 @@ static void kiran_menu_skeleton_init(KiranMenuSkeleton *self)
 
     g_signal_connect(self->system, "app-installed", G_CALLBACK(app_installed), self);
     g_signal_connect(self->system, "app-uninstalled", G_CALLBACK(app_uninstalled), self);
+    g_signal_connect(self->system, "new-app-changed", G_CALLBACK(new_app_changed), self);
 
     g_signal_connect(self->usage, "app-changed", G_CALLBACK(frequent_usage_app_changed), self);
 }
@@ -411,6 +420,16 @@ static void kiran_menu_skeleton_class_init(KiranMenuSkeletonClass *klass)
                                                    G_TYPE_NONE,
                                                    1,
                                                    G_TYPE_POINTER);
+
+    signals[SIGNAL_NEW_APP_CHANGED] = g_signal_new("new-app-changed",
+                                                   KIRAN_TYPE_MENU_SKELETON,
+                                                   G_SIGNAL_RUN_LAST,
+                                                   0,
+                                                   NULL,
+                                                   NULL,
+                                                   NULL,
+                                                   G_TYPE_NONE,
+                                                   0);
 
     signals[SIGNAL_FAVORITE_APP_ADDED] = g_signal_new("favorite-app-added",
                                                       KIRAN_TYPE_MENU_SKELETON,
