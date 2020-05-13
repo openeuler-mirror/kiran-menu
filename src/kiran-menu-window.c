@@ -89,7 +89,7 @@ static void show_apps_overview(KiranMenuWindow *self)
 
 /**
  * 跳转到指定的应用分类
- * 
+ *
  */
 void kiran_menu_window_jump_to_category(KiranMenuWindow *self, const char *category_name)
 {
@@ -645,7 +645,7 @@ void kiran_menu_window_class_init(KiranMenuWindowClass *kclass)
 KiranMenuWindow *kiran_menu_window_new(GtkWidget *parent)
 {
     KiranMenuWindow *window;
-    
+
     window = g_object_new(KIRAN_TYPE_MENU_WINDOW, NULL);
     window->parent = parent;
     return window;

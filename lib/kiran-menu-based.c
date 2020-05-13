@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:23:21
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-09 16:14:36
+ * @LastEditTime : 2020-05-11 14:12:56
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-based.c
  */
@@ -20,8 +20,9 @@ KiranMenuBased *kiran_menu_based_skeleton_get()
     static KiranMenuBased *instance = NULL;
 
     if (!instance)
+    {
         instance = g_object_new(KIRAN_TYPE_MENU_SKELETON, NULL);
-
+    }
     return instance;
 }
 

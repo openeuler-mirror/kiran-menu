@@ -5,12 +5,12 @@
 
 struct _KiranMenuFavorite
 {
-    GObject parent;
+    KiranMenuUnit parent_instance;
     GSettings *settings;
     GList *favorite_apps;
 };
 
-G_DEFINE_TYPE(KiranMenuFavorite, kiran_menu_favorite, G_TYPE_OBJECT)
+G_DEFINE_TYPE(KiranMenuFavorite, kiran_menu_favorite, KIRAN_TYPE_MENU_UNIT)
 
 static gboolean write_favorite_to_settings(KiranMenuFavorite *self)
 {
@@ -98,8 +98,10 @@ static gboolean deleted_app_callback(gpointer key, gpointer value,
     return (g_hash_table_lookup(valid_apps, GUINT_TO_POINTER(quark)) == NULL);
 }
 
-void kiran_menu_favorite_flush(KiranMenuFavorite *self, GList *apps)
+void kiran_menu_favorite_flush(KiranMenuUnit *unit, gpointer user_data)
 {
+    KiranMenuFavorite *self = KIRAN_MENU_FAVORITE(unit);
+    GList *apps = (GList *)user_data;
     g_autoptr(GHashTable) app_table = g_hash_table_new(NULL, NULL);
 
     for (GList *l = apps; l != NULL; l = l->next)
@@ -163,6 +165,9 @@ static void kiran_menu_favorite_dispose(GObject *object)
 
 static void kiran_menu_favorite_class_init(KiranMenuFavoriteClass *klass)
 {
+    KiranMenuUnitClass *unit_class = KIRAN_MENU_UNIT_CLASS(klass);
+    unit_class->flush = kiran_menu_favorite_flush;
+
     GObjectClass *object_class = G_OBJECT_CLASS(klass);
     object_class->dispose = kiran_menu_favorite_dispose;
 }

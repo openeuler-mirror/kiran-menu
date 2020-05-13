@@ -28,7 +28,7 @@ target_compile_options(${TARGET_NAME} PRIVATE
     -std=c99)
 
 target_link_libraries(${TARGET_NAME} PRIVATE
-    ${PROJECT_NAME}
+    kiran-menu-backend
     ${GTK3_LIBRIARIES})
 
 

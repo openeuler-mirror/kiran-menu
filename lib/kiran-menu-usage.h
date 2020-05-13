@@ -2,19 +2,21 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 19:44:16
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-04-09 22:17:33
+ * @LastEditTime : 2020-05-11 14:08:18
  * @Description  :
- * @FilePath     : /kiran-menu-backend/lib/kiran-menu-usage.h
+ * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-usage.h
  */
 #pragma once
 
 #include <gio/gio.h>
 
+#include "lib/kiran-menu-unit.h"
+
 G_BEGIN_DECLS
 
 #define KIRAN_TYPE_MENU_USAGE (kiran_menu_usage_get_type())
-G_DECLARE_FINAL_TYPE(KiranMenuUsage, kiran_menu_usage, KIRAN, MENU_USAGE,
-                     GObject)
+
+G_DECLARE_FINAL_TYPE(KiranMenuUsage, kiran_menu_usage, KIRAN, MENU_USAGE, KiranMenuUnit)
 
 /**
  * @description:
@@ -24,14 +26,6 @@ G_DECLARE_FINAL_TYPE(KiranMenuUsage, kiran_menu_usage, KIRAN, MENU_USAGE,
  */
 KiranMenuUsage *kiran_menu_usage_get_new();
 
-/**
- * @description:
- * @param {type}
- * @return:
- * @author: tangjie02
- */
-gboolean kiran_menu_usage_focus_app(KiranMenuUsage *self,
-                                    const char *desktop_id);
 /**
  * @description:
  * @param {type}

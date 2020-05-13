@@ -26,4 +26,4 @@ target_include_directories(kiran-menu-applet PUBLIC "${PROJECT_SOURCE_DIR}/lib"
             "${PROJECT_BINARY_DIR}/src")
 
 target_link_libraries(kiran-menu-applet PUBLIC "${MATEPANEL_LIBRARIES}")
-target_link_libraries(kiran-menu-applet PRIVATE ${PROJECT_NAME})
+target_link_libraries(kiran-menu-applet PRIVATE kiran-menu-backend)
