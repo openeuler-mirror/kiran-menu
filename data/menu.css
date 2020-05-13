@@ -27,6 +27,7 @@ kiran-app-item {
     border-right-width: 3px;
     border-style: solid;
     border-color: transparent;
+    min-height: 40px;
 
     padding-left: 25px;
     -KiranAppItem-icon-spacing: 12px;
@@ -200,4 +201,13 @@ menuitem:hover {
 
 menuitem:active {
     background: rgba(255, 255, 255, 0.3);
+}
+
+
+button.kiran-expand-button {
+    padding: 0px;
+    padding-left: 26px;
+    min-height: 38px;
+    border-width: 0px;
+    -GtkButton-image-spacing: 15;
 }

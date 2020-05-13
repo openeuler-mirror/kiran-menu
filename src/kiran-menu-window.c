@@ -400,6 +400,34 @@ void kiran_menu_window_load_frequent_apps(KiranMenuWindow *self)
     g_list_free_full(recently_apps, g_object_unref);
 }
 
+static GtkToggleButton *create_expand_button(void)
+{
+    GtkWidget *button;
+    GtkStyleContext *context;
+
+    button = gtk_toggle_button_new_with_label(_("Expand"));
+    gtk_button_set_image_position(GTK_BUTTON(button), GTK_POS_RIGHT);
+    gtk_button_set_image(GTK_BUTTON(button), gtk_image_new_from_resource("/kiran-menu/icon/expand"));
+    gtk_button_set_alignment(GTK_BUTTON(button), 0.0, 0.5);
+
+    context = gtk_widget_get_style_context(button);
+    gtk_style_context_add_class(context, "kiran-expand-button");
+
+    return button;
+}
+
+static void toggle_more_new_apps(GtkToggleButton *button, gpointer userdata)
+{
+    GtkWidget *more_box = userdata;
+    GtkWidget *image;
+    gboolean active = gtk_toggle_button_get_active(button);
+
+    image = gtk_button_get_image(GTK_BUTTON(button));
+    gtk_button_set_label(GTK_BUTTON(button), active?_("Shrink"):_("Expand"));
+    gtk_image_set_from_resource(GTK_IMAGE(image), active?"/kiran-menu/icon/shrink":"/kiran-menu/icon/expand");
+    gtk_widget_set_visible(more_box, active);
+}
+
 /**
  *
  * 加载新安装应用列表
@@ -408,7 +436,7 @@ void kiran_menu_window_load_new_apps(KiranMenuWindow *self)
 {
     GList *new_apps, *ptr;
     KiranCategoryItem *category_item;
-    GtkWidget *list_box;
+    GtkWidget *list_box, *more_box = NULL, *expand_button;
     int index;
 
     gtk_container_clear(GTK_CONTAINER(self->new_apps_box));
@@ -433,17 +461,37 @@ void kiran_menu_window_load_new_apps(KiranMenuWindow *self)
     }
 
     list_box = gtk_list_box_new();
-    for (ptr = new_apps; ptr != NULL; ptr = ptr->next)
+    for (ptr = new_apps, index = 0; ptr != NULL; ptr = ptr->next, index++)
     {
         KiranAppItem *app_item;
         KiranApp *app = ptr->data;
 
         app_item = kiran_menu_window_create_app_item(self, app);
         g_message("Found new app '%s'\n", kiran_app_get_name(app));
-        gtk_list_box_insert(GTK_LIST_BOX(list_box), GTK_WIDGET(app_item), -1);
+        if (index < NEW_APPS_SHOW_MAX)
+            gtk_list_box_insert(GTK_LIST_BOX(list_box), GTK_WIDGET(app_item), -1);
+        else {
+            if (!more_box)
+                more_box = gtk_list_box_new();
+
+            gtk_list_box_insert(GTK_LIST_BOX(more_box), GTK_WIDGET(app_item), -1);
+        }
     }
     gtk_container_add(GTK_CONTAINER(self->new_apps_box), list_box);
     gtk_widget_show_all(list_box);
+
+    if (more_box) {
+        expand_button = create_expand_button();
+
+        g_signal_connect(expand_button, "toggled", G_CALLBACK(toggle_more_new_apps), more_box);
+
+        gtk_container_add(GTK_CONTAINER(self->new_apps_box), more_box);
+        gtk_container_add(GTK_CONTAINER(self->new_apps_box), expand_button);
+        gtk_widget_show_all(expand_button);
+        gtk_widget_show_all(more_box);
+        gtk_widget_set_visible(more_box, FALSE);
+    }
+
     g_list_free_full(new_apps, g_object_unref);
 }
 
