@@ -46,14 +46,14 @@ kiran-category-item:hover {
 kiran-category-item  label {
     margin-left: 10px;
     font-size: 15pt;
-    font-weight: normal;
+    font-weight: bold;
     -gtk-dpi: 72;
 }
 
 
 kiran-category-item:focus {
     border-right-color: #4cb5ff;
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
     font-weight: bold;
 }
 

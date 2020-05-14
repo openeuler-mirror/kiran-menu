@@ -99,6 +99,8 @@ void kiran_app_item_init(KiranAppItem *item)
     gtk_widget_show_all(item->grid);
 
     gtk_widget_add_events(GTK_WIDGET(item), GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_PRESS_MASK | GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK);
+    gtk_widget_set_can_focus(GTK_WIDGET(item), TRUE);
+    gtk_widget_set_has_window(GTK_WIDGET(item), TRUE);
 
     g_signal_connect_swapped(icon_theme, "changed", G_CALLBACK(kiran_app_item_update), item);
 }
@@ -197,11 +199,46 @@ gboolean kiran_app_item_button_release(GtkWidget *widget, GdkEventButton *ev)
     return FALSE;
 }
 
+gboolean kiran_app_item_key_release(GtkWidget *widget, GdkEventKey *ev)
+{
+    KiranAppItem *item = KIRAN_APP_ITEM(widget);
+
+    switch(ev->keyval) {
+    case GDK_KEY_Menu:
+        if (item->menu)
+            gtk_widget_destroy(item->menu);
+        item->menu = create_context_menu(widget);
+
+        g_message("%s: set item %p menu-shown to TRUE\n", __func__, item);
+        item->menu_shown = TRUE;
+
+        do {
+            GdkWindow *window;
+            GtkAllocation allocation;
+
+            window = gtk_widget_get_window(widget);
+            gtk_widget_get_allocation(widget, &allocation);
+
+            allocation.x = 0;
+            allocation.y = 0;
+            gtk_menu_popup_at_rect(GTK_MENU(item->menu), window, &allocation, GDK_GRAVITY_CENTER, GDK_GRAVITY_NORTH_WEST, (GdkEvent *)ev);
+        } while (0);
+        break;
+    case GDK_KEY_Return:
+        kiran_app_item_launch_app_callback(item);
+        break;
+    default:
+        break;
+    }
+    return FALSE;
+}
+
 gboolean kiran_app_item_enter_notify(GtkWidget *widget, GdkEventCrossing *ev)
 {
     KiranAppItem *item = KIRAN_APP_ITEM(widget);
 
     gtk_widget_set_state_flags(widget, GTK_STATE_FLAG_PRELIGHT, FALSE);
+    gtk_widget_grab_focus(widget);
     gtk_widget_queue_draw(widget);
     return FALSE;
 }
@@ -235,6 +272,7 @@ void kiran_app_item_class_init(KiranAppItemClass *kclass)
 {
     G_OBJECT_CLASS(kclass)->finalize = kiran_app_item_finalize;
     GTK_WIDGET_CLASS(kclass)->button_release_event = kiran_app_item_button_release;
+    GTK_WIDGET_CLASS(kclass)->key_release_event = kiran_app_item_key_release;
     GTK_WIDGET_CLASS(kclass)->leave_notify_event = kiran_app_item_leave_notify;
     GTK_WIDGET_CLASS(kclass)->enter_notify_event = kiran_app_item_enter_notify;
 

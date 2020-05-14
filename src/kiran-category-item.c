@@ -87,6 +87,7 @@ gboolean kiran_category_item_enter_notify(GtkWidget *widget, GdkEventCrossing *e
     if (self->clickable)
     {
         gtk_widget_set_state_flags(widget, GTK_STATE_FLAG_PRELIGHT, FALSE);
+        gtk_widget_grab_focus(widget);
         gtk_widget_queue_draw(widget);
     }
 
@@ -120,6 +121,15 @@ gboolean kiran_category_item_button_release(GtkWidget *widget, GdkEventButton *e
     return FALSE;
 }
 
+gboolean kiran_category_item_key_release(GtkWidget *widget, GdkEventKey *event)
+{
+    if (event->keyval != GDK_KEY_Return)
+        return FALSE;
+
+    g_signal_emit_by_name(widget, "clicked");
+    return FALSE;
+}
+
 gboolean kiran_category_item_draw(GtkWidget *widget, cairo_t *cr)
 {
     GtkStyleContext *context;
@@ -148,12 +158,14 @@ void kiran_category_item_set_property(GObject *obj, guint prop_id, const GValue 
         item->clickable = g_value_get_boolean(value);
         if (item->clickable) {
             g_message("item clickable, add events\n");
+            gtk_widget_set_can_focus(GTK_WIDGET(item), TRUE);
             gtk_widget_add_events(GTK_WIDGET(item),
-                                  GDK_BUTTON_RELEASE_MASK | GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK);
+                                  GDK_BUTTON_RELEASE_MASK | GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK | GDK_KEY_RELEASE_MASK);
         }
         else
         {
             g_message("item not clickable, reset events\n");
+            gtk_widget_set_can_focus(GTK_WIDGET(item), FALSE);
             gtk_widget_set_events(GTK_WIDGET(item), 0);
         }
         break;
@@ -211,6 +223,7 @@ void kiran_category_item_class_init(KiranCategoryItemClass *kclass)
     GTK_WIDGET_CLASS(kclass)->enter_notify_event = kiran_category_item_enter_notify;
     GTK_WIDGET_CLASS(kclass)->leave_notify_event = kiran_category_item_leave_notify;
     GTK_WIDGET_CLASS(kclass)->button_release_event = kiran_category_item_button_release;
+    GTK_WIDGET_CLASS(kclass)->key_release_event = kiran_category_item_key_release;
     g_object_class_install_properties(G_OBJECT_CLASS(kclass), PROP_MAX, pspecs);
 
     gtk_widget_class_set_css_name(GTK_WIDGET_CLASS(kclass), "kiran-category-item");
