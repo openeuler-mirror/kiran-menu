@@ -540,6 +540,19 @@ static void window_active_change_callback(KiranMenuWindow *self)
         g_message("menu window is inactive\n");
 }
 
+static gboolean key_press_event_callback(GtkWidget *widget, GdkEventKey *event, gpointer userdata)
+{
+    KiranMenuWindow *self = userdata;
+
+    if (event->keyval == GDK_KEY_Escape) {
+        //按下ESC时隐藏开始菜单窗口
+        gtk_widget_hide(widget);
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
 void kiran_menu_window_init(KiranMenuWindow *self)
 {
     GError *error = NULL;
@@ -611,6 +624,7 @@ void kiran_menu_window_init(KiranMenuWindow *self)
     g_signal_connect(self->window, "map-event", G_CALLBACK(window_map_handler), self);
     g_signal_connect(self->window, "unmap-event", G_CALLBACK(window_unmap_handler), self);
     g_signal_connect(self->window, "button-press-event", G_CALLBACK(button_press_event_callback), self);
+    g_signal_connect(self->window, "key-press-event", G_CALLBACK(key_press_event_callback), self);
 
     g_signal_connect_swapped(self->window, "notify::is-active", G_CALLBACK(window_active_change_callback), self);
 
