@@ -21,7 +21,7 @@ struct _KiranMenuWindow {
     GtkWidget *search_results_box;
     GtkWidget *apps_view_stack, *overview_stack;
     GtkWidget *apps_overview_page, *category_overview_box;
-    GtkWidget *all_apps_viewport;
+    GtkWidget *all_apps_viewport, *default_apps_viewport;
     GtkWidget *back_button, *all_apps_button;
     GtkWidget *search_entry;
     GtkWidget *sidebar_box;
@@ -69,16 +69,29 @@ static gboolean kiran_menu_window_load_styles(KiranMenuWindow *self)
 
 static void show_default_apps_page(KiranMenuWindow *self)
 {
+    GtkAdjustment *adjustment;
+
     //更改动画切换方向，看起来更自然
     gtk_stack_set_transition_type(GTK_STACK(self->apps_view_stack), GTK_STACK_TRANSITION_TYPE_SLIDE_RIGHT);
     gtk_stack_set_visible_child_name(GTK_STACK(self->apps_view_stack), "default-apps-page");
+
+    adjustment = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(self->default_apps_viewport));
+    gtk_adjustment_set_value(adjustment, 0);
+    gtk_widget_grab_focus(self->search_entry);
 }
 
 static void show_all_apps_page(KiranMenuWindow *self)
 {
+    GtkAdjustment *adjustment;
+
     //更改动画切换方向，看起来更自然
     gtk_stack_set_transition_type(GTK_STACK(self->apps_view_stack), GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT);
     gtk_stack_set_visible_child_name(GTK_STACK(self->apps_view_stack), "all-apps-page");
+
+    //滚动到页面最上方
+    adjustment = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(self->all_apps_viewport));
+    gtk_adjustment_set_value(adjustment, 0);
+    gtk_widget_grab_focus(self->search_entry);
 }
 
 
@@ -86,6 +99,7 @@ static void show_apps_overview(KiranMenuWindow *self)
 {
     gtk_stack_set_transition_type(GTK_STACK(self->overview_stack), GTK_STACK_TRANSITION_TYPE_CROSSFADE);
     gtk_stack_set_visible_child_name(GTK_STACK(self->overview_stack), "apps-overview-page");
+    gtk_widget_grab_focus(self->search_entry);
 }
 
 
@@ -112,6 +126,9 @@ void kiran_menu_window_jump_to_category(KiranMenuWindow *self, const char *categ
     adjustment = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(self->all_apps_viewport));
     gtk_widget_get_allocation(GTK_WIDGET(item), &item_allocation);
     gtk_adjustment_set_value(adjustment, item_allocation.y);
+
+    //获取焦点
+    gtk_widget_grab_focus(GTK_WIDGET(item));
 }
 
 void grab_pointer(KiranMenuWindow *self)
@@ -589,6 +606,7 @@ void kiran_menu_window_init(KiranMenuWindow *self)
 
     self->category_overview_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "category-overview-box"));
     self->all_apps_viewport = GTK_WIDGET(gtk_builder_get_object(self->builder, "all-apps-viewport"));
+    self->default_apps_viewport = GTK_WIDGET(gtk_builder_get_object(self->builder, "default-apps-viewport"));
 
     self->apps_view_stack = GTK_WIDGET(gtk_builder_get_object(self->builder, "apps-view-stack"));
     self->overview_stack = GTK_WIDGET(gtk_builder_get_object(self->builder, "overview-stack"));
@@ -600,9 +618,6 @@ void kiran_menu_window_init(KiranMenuWindow *self)
 
     g_signal_connect_swapped(self->search_entry, "search-changed", G_CALLBACK(search_change_callback), self);
     g_signal_connect_swapped(self->search_entry, "stop-search", G_CALLBACK(search_stop_callback), self);
-
-    top_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "top-box"));
-    bottom_box = GTK_WIDGET(gtk_builder_get_object(self->builder, "bottom-box"));
 
     self->back_button = GTK_WIDGET(gtk_builder_get_object(self->builder, "back-button"));
     self->all_apps_button = GTK_WIDGET(gtk_builder_get_object(self->builder, "all-apps-button"));
