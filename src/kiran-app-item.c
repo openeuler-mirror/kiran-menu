@@ -25,12 +25,44 @@ enum {
 
 static guint signals[SIGNAL_MAX];
 
+
+gboolean kiran_app_item_update(KiranAppItem *item)
+{
+    GIcon *icon;
+    const char *data;
+
+    if (!item->app)
+        return FALSE;
+
+    if (!KIRAN_IS_APP(item->app)) {
+        g_warning("%s: object %p is not an KiranApp object\n", __func__, item->app);
+        return FALSE;
+    }
+
+    icon = kiran_app_get_icon(KIRAN_APP(item->app));
+    if (icon) {
+        gtk_image_set_pixel_size(GTK_IMAGE(item->icon), 24);
+        gtk_image_set_from_gicon(GTK_IMAGE(item->icon), icon, GTK_ICON_SIZE_LARGE_TOOLBAR);
+    } else {
+        //use fallback icon
+        gtk_image_set_from_icon_name(GTK_IMAGE(item->icon), "application-x-executable.png", GTK_ICON_SIZE_LARGE_TOOLBAR);
+    }
+
+    data = kiran_app_get_locale_name(KIRAN_APP(item->app));
+    gtk_label_set_text(GTK_LABEL(item->label), data);
+    gtk_widget_set_tooltip_text(GTK_WIDGET(item), kiran_app_get_locale_comment(KIRAN_APP(item->app)));
+
+    return TRUE;
+}
+
 void kiran_app_item_init(KiranAppItem *item)
 {
     GtkStyleContext *context;
     GValue value = G_VALUE_INIT;
     GtkBorder padding;
+    GtkIconTheme *icon_theme;
 
+    icon_theme = gtk_icon_theme_get_default();
     context = gtk_widget_get_style_context(GTK_WIDGET(item));
     item->grid = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
     item->icon = gtk_image_new();
@@ -54,6 +86,8 @@ void kiran_app_item_init(KiranAppItem *item)
     gtk_widget_show_all(item->grid);
 
     gtk_widget_add_events(GTK_WIDGET(item), GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_PRESS_MASK | GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK);
+
+    g_signal_connect_swapped(icon_theme, "changed", G_CALLBACK(kiran_app_item_update), item);
 }
 
 static void destroy_menu(GtkWidget *widget, GtkMenu *menu)
@@ -182,31 +216,6 @@ void kiran_app_item_finalize(GObject *obj)
         g_object_unref(item->app);
 
     G_OBJECT_CLASS(kiran_app_item_parent_class)->finalize(obj);
-}
-
-static gboolean kiran_app_item_update(KiranAppItem *item)
-{
-    GIcon *icon;
-    const char *data;
-
-    if (!item->app)
-        return FALSE;
-    
-
-    icon = kiran_app_get_icon(KIRAN_APP(item->app));
-    if (icon) {
-        gtk_image_set_pixel_size(GTK_IMAGE(item->icon), 24);
-        gtk_image_set_from_gicon(GTK_IMAGE(item->icon), icon, GTK_ICON_SIZE_LARGE_TOOLBAR);
-    } else {
-        //use fallback icon
-        gtk_image_set_from_icon_name(GTK_IMAGE(item->icon), "application-x-executable.png", GTK_ICON_SIZE_LARGE_TOOLBAR);
-    }
-
-    data = kiran_app_get_locale_name(KIRAN_APP(item->app));
-    gtk_label_set_text(GTK_LABEL(item->label), data);
-    gtk_widget_set_tooltip_text(GTK_WIDGET(item), kiran_app_get_locale_comment(KIRAN_APP(item->app)));
-
-    return TRUE;
 }
 
 void kiran_app_item_class_init(KiranAppItemClass *kclass)
