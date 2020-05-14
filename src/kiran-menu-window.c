@@ -4,7 +4,9 @@
 #include "kiran-power-button.h"
 #include "kiran-category-item.h"
 #include "kiran-app-item.h"
+#include "kiran-expand-button.h"
 #include <kiran-menu-based.h>
+#include <kiran-menu-skeleton.h>
 #include <glib/gi18n.h>
 #include "config.h"
 
@@ -107,7 +109,7 @@ void kiran_menu_window_jump_to_category(KiranMenuWindow *self, const char *categ
         return;
     }
 
-    adjustment = gtk_viewport_get_vadjustment(GTK_VIEWPORT(self->all_apps_viewport));
+    adjustment = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(self->all_apps_viewport));
     gtk_widget_get_allocation(GTK_WIDGET(item), &item_allocation);
     gtk_adjustment_set_value(adjustment, item_allocation.y);
 }
@@ -146,7 +148,7 @@ void kiran_menu_window_add_app_button(KiranMenuWindow *self,
  */
 static void category_selected_callback(KiranMenuWindow *self, KiranCategoryItem *item)
 {
-    char *category_name;
+    const char *category_name;
 
     category_name = kiran_category_item_get_category_name(item);
 
@@ -400,31 +402,11 @@ void kiran_menu_window_load_frequent_apps(KiranMenuWindow *self)
     g_list_free_full(recently_apps, g_object_unref);
 }
 
-static GtkToggleButton *create_expand_button(void)
-{
-    GtkWidget *button;
-    GtkStyleContext *context;
-
-    button = gtk_toggle_button_new_with_label(_("Expand"));
-    gtk_button_set_image_position(GTK_BUTTON(button), GTK_POS_RIGHT);
-    gtk_button_set_image(GTK_BUTTON(button), gtk_image_new_from_resource("/kiran-menu/icon/expand"));
-    gtk_button_set_alignment(GTK_BUTTON(button), 0.0, 0.5);
-
-    context = gtk_widget_get_style_context(button);
-    gtk_style_context_add_class(context, "kiran-expand-button");
-
-    return button;
-}
-
 static void toggle_more_new_apps(GtkToggleButton *button, gpointer userdata)
 {
     GtkWidget *more_box = userdata;
-    GtkWidget *image;
     gboolean active = gtk_toggle_button_get_active(button);
 
-    image = gtk_button_get_image(GTK_BUTTON(button));
-    gtk_button_set_label(GTK_BUTTON(button), active?_("Shrink"):_("Expand"));
-    gtk_image_set_from_resource(GTK_IMAGE(image), active?"/kiran-menu/icon/shrink":"/kiran-menu/icon/expand");
     gtk_widget_set_visible(more_box, active);
 }
 
@@ -481,7 +463,7 @@ void kiran_menu_window_load_new_apps(KiranMenuWindow *self)
     gtk_widget_show_all(list_box);
 
     if (more_box) {
-        expand_button = create_expand_button();
+        expand_button = kiran_expand_button_new(FALSE);
 
         g_signal_connect(expand_button, "toggled", G_CALLBACK(toggle_more_new_apps), more_box);
 
@@ -500,7 +482,9 @@ gboolean grab_pointer(GtkWidget *widget, GdkEvent *event, gpointer userdata)
     GdkEventMask mask = GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK;
     KiranMenuWindow *self = userdata;
 
+    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
     gdk_pointer_grab(gdk_event_get_window(event), TRUE, mask, NULL, NULL, GDK_CURRENT_TIME);
+    G_GNUC_END_IGNORE_DEPRECATIONS
 
     gtk_widget_grab_focus(self->search_entry);
     return FALSE;
@@ -510,7 +494,9 @@ gboolean ungrab_pointer(GtkWidget *widget, GdkEvent *event, gpointer userdata)
 {
     KiranMenuWindow *self = userdata;
 
+    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
     gdk_pointer_ungrab(GDK_CURRENT_TIME);
+    G_GNUC_END_IGNORE_DEPRECATIONS
     return FALSE;
 }
 

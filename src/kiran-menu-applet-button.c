@@ -179,15 +179,6 @@ static void kiran_menu_applet_button_toggled(GtkToggleButton *button)
 	}
 }
 
-static void menu_window_active_callback(GtkWindow *window, GParamSpec *spec, GtkToggleButton *button)
-{
-	g_message("window active changed %d, visible %d\n",
-			gtk_window_is_active(window),
-			gtk_widget_is_visible(window));
-	if (!gtk_window_is_active(window) && gtk_widget_is_visible(window))
-		gtk_toggle_button_set_active(button, FALSE);
-}
-
 void kiran_menu_applet_button_untoggle(KiranMenuAppletButton *self)
 {
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(self), FALSE);

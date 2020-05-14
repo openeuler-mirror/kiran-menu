@@ -82,7 +82,7 @@ void kiran_power_menu_init(KiranPowerMenu *self)
     self->grid = gtk_grid_new();
     for (int i = 0; i < G_N_ELEMENTS(actions); i++)
     {
-        GtkWidget *button;
+        GtkWidget *button, *label;
         gpointer *ptr, callback;
 
         KiranPowerMenuClass *kclass = G_TYPE_INSTANCE_GET_CLASS(self, KIRAN_TYPE_POWER_MENU, KiranPowerMenuClass);
@@ -90,9 +90,13 @@ void kiran_power_menu_init(KiranPowerMenu *self)
         ptr = G_STRUCT_MEMBER_P(kclass, actions[i].callback_offset);
         callback = *ptr;
 
-        button = gtk_button_new_with_label(_(actions[i].label));
+        label = gtk_label_new(_(actions[i].label));
+        button = gtk_button_new();
+
+        gtk_label_set_xalign(GTK_LABEL(label), 0.0);
+        gtk_label_set_yalign(GTK_LABEL(label), 0.5);
+        gtk_container_add(GTK_CONTAINER(button), label);
         gtk_grid_attach(GTK_GRID(self->grid), button, 0, i, 1, 1);
-        gtk_button_set_alignment(GTK_BUTTON(button), 0.0, 0.5);
         g_signal_connect_swapped(button, "clicked", G_CALLBACK(callback), self);
     }
     gtk_container_add(GTK_CONTAINER(self), self->grid);

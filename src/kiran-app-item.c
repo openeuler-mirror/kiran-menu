@@ -57,7 +57,7 @@ void kiran_app_item_init(KiranAppItem *item)
     g_value_init(&value, G_TYPE_INT);
     gtk_style_context_get_style_property(context, "icon-spacing", &value);
     gtk_style_context_get_padding(context, GTK_STATE_FLAG_NORMAL, &padding);
-    gtk_widget_set_margin_right(item->icon, g_value_get_int(&value));
+    gtk_widget_set_margin_end(item->icon, g_value_get_int(&value));
     gtk_widget_set_margin_start(item->icon, padding.left);
 
     gtk_widget_show_all(item->grid);
@@ -73,10 +73,13 @@ static void destroy_menu(GtkWidget *widget, GtkMenu *menu)
 
 static void menu_detach_callback(KiranAppItem *item)
 {
+    GtkStateFlags flags;
+
     g_message("%s: set item %p menu-shown to FALSE\n", __func__, item);
 
     item->menu_shown = FALSE;
-    gtk_widget_set_state(GTK_WIDGET(item), GTK_STATE_FLAG_NORMAL);
+    flags = gtk_widget_get_state_flags(GTK_WIDGET(item));
+    gtk_widget_set_state_flags(GTK_WIDGET(item), flags & ~GTK_STATE_FLAG_PRELIGHT, TRUE);
 }
 
 GtkWidget *create_context_menu(GtkWidget *attach);
@@ -181,7 +184,7 @@ gboolean kiran_app_item_button_release(GtkWidget *widget, GdkEventButton *ev)
     return FALSE;
 }
 
-gboolean kiran_app_item_enter_notify(GtkWidget *widget, GdkEventMotion *ev)
+gboolean kiran_app_item_enter_notify(GtkWidget *widget, GdkEventCrossing *ev)
 {
     KiranAppItem *item = KIRAN_APP_ITEM(widget);
 
@@ -190,7 +193,7 @@ gboolean kiran_app_item_enter_notify(GtkWidget *widget, GdkEventMotion *ev)
     return FALSE;
 }
 
-gboolean kiran_app_item_leave_notify(GtkWidget *widget, GdkEventMotion *ev)
+gboolean kiran_app_item_leave_notify(GtkWidget *widget, GdkEventCrossing *ev)
 {
     KiranAppItem *item = KIRAN_APP_ITEM(widget);
     GtkStateFlags flags = gtk_widget_get_state_flags(widget);

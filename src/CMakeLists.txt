@@ -10,6 +10,7 @@ add_executable(kiran-menu-applet applet.c
             kiran-category-item.c
             kiran-app-item.c
             kiran-app-wrapper.c
+            kiran-expand-button.c
 )
 
 install(TARGETS kiran-menu-applet DESTINATION "${CMAKE_INSTALL_PREFIX}/libexec/mate-panel/")

@@ -67,8 +67,8 @@ void kiran_category_item_init(KiranCategoryItem *item)
     gtk_style_context_add_class(context, "category-item-box");
 
     gtk_widget_set_valign(item->box, GTK_ALIGN_CENTER);
-    gtk_box_pack_start(GTK_CONTAINER(item->box), item->image, FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_CONTAINER(item->box), item->label, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(item->box), item->image, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(item->box), item->label, TRUE, TRUE, 0);
     gtk_container_add(GTK_CONTAINER(item), item->box);
 }
 
