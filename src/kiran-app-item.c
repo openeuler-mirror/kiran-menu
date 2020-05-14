@@ -61,6 +61,7 @@ void kiran_app_item_init(KiranAppItem *item)
     GValue value = G_VALUE_INIT;
     GtkBorder padding;
     GtkIconTheme *icon_theme;
+    int min_width, min_height, icon_spacing;
 
     icon_theme = gtk_icon_theme_get_default();
     context = gtk_widget_get_style_context(GTK_WIDGET(item));
@@ -77,11 +78,23 @@ void kiran_app_item_init(KiranAppItem *item)
     gtk_widget_set_hexpand(item->label, TRUE);
     gtk_widget_set_halign(item->label, GTK_ALIGN_START);
 
+
+    gtk_style_context_get_padding(context, GTK_STATE_FLAG_NORMAL, &padding);
     g_value_init(&value, G_TYPE_INT);
     gtk_style_context_get_style_property(context, "icon-spacing", &value);
-    gtk_style_context_get_padding(context, GTK_STATE_FLAG_NORMAL, &padding);
-    gtk_widget_set_margin_end(item->icon, g_value_get_int(&value));
+    icon_spacing = g_value_get_int(&value);
+
+    g_value_unset(&value);
+    gtk_style_context_get_property(context, "min-width", GTK_STATE_FLAG_NORMAL, &value);
+    min_width = g_value_get_int(&value);
+
+    g_value_unset(&value);
+    gtk_style_context_get_property(context, "min-height", GTK_STATE_FLAG_NORMAL, &value);
+    min_height = g_value_get_int(&value);
+
+    gtk_widget_set_margin_end(item->icon, icon_spacing);
     gtk_widget_set_margin_start(item->icon, padding.left);
+    gtk_widget_set_size_request(GTK_WIDGET(item), min_width, min_height);
 
     gtk_widget_show_all(item->grid);
 

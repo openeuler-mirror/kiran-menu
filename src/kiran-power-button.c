@@ -12,11 +12,16 @@ G_DEFINE_TYPE(KiranPowerButton, kiran_power_button, GTK_TYPE_BUTTON)
 
 void kiran_power_button_init(KiranPowerButton *self)
 {
+    GtkStyleContext *context;
+
     self->power_menu = kiran_power_menu_new();
     self->icon = gtk_image_new_from_resource("/kiran-menu/sidebar/power");
 
     gtk_popover_set_relative_to(GTK_POPOVER(self->power_menu), GTK_WIDGET(self));
     gtk_container_add(GTK_CONTAINER(self), self->icon);
+
+    context = gtk_widget_get_style_context(GTK_WIDGET(self));
+    gtk_style_context_add_class(context, "kiran-app-button");
 }
 
 void kiran_power_button_finalize(GObject*obj)

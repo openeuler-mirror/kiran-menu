@@ -214,7 +214,6 @@ static void search_change_callback(KiranMenuWindow *self)
     GList *result_apps, *ptr;
     const gchar *keyword, *visible_view;
     KiranCategoryItem *category_item;
-    GtkWidget *list_box;
 
     if (gtk_entry_get_text_length(GTK_ENTRY(self->search_entry)) == 0) {
         //搜索内容为空，停止搜索，并返回上一个页面
@@ -259,7 +258,6 @@ static void search_change_callback(KiranMenuWindow *self)
     category_item = kiran_category_item_new(_("Search Results"), FALSE);
     gtk_container_add(GTK_CONTAINER(self->search_results_box), GTK_WIDGET(category_item));
 
-    list_box = gtk_list_box_new();
     for (ptr = result_apps; ptr != NULL; ptr = ptr->next)
     {
         KiranAppItem *app_item;
@@ -267,9 +265,8 @@ static void search_change_callback(KiranMenuWindow *self)
 
         app_item = kiran_menu_window_create_app_item(self, app);
         g_message("Found result app '%s'\n", kiran_app_get_name(app));
-        gtk_list_box_insert(GTK_LIST_BOX(list_box), GTK_WIDGET(app_item), -1);
+        gtk_container_add(GTK_CONTAINER(self->search_results_box), GTK_WIDGET(app_item));
     }
-    gtk_container_add(GTK_CONTAINER(self->search_results_box), list_box);
     gtk_widget_show_all(GTK_WIDGET(self->search_results_box));
     g_list_free_full(result_apps, g_object_unref);
 }
@@ -315,11 +312,8 @@ void kiran_menu_window_load_applications(KiranMenuWindow *self)
             KiranApp *app = ptr->data;
 
             app_item = kiran_menu_window_create_app_item(self, app);
-            gtk_list_box_insert(GTK_LIST_BOX(list_box), GTK_WIDGET(app_item), -1);
+            gtk_container_add(GTK_CONTAINER(self->all_apps_box), GTK_WIDGET(app_item));
         }
-
-        gtk_container_add(GTK_CONTAINER(self->all_apps_box), list_box);
-        gtk_widget_show_all(list_box);
         gtk_widget_show_all(self->all_apps_box);
         g_signal_connect_swapped(category_item, "clicked", G_CALLBACK(show_category_overview), self);
     }
@@ -342,17 +336,15 @@ void kiran_menu_window_load_favorites(KiranMenuWindow *self)
     gtk_container_add(GTK_CONTAINER(self->favorite_apps_box), GTK_WIDGET(category_item));
     g_message("%d favorite apps found\n", g_list_length(fav_list));
 
-    list_box = gtk_list_box_new();
     for (ptr = fav_list; ptr != NULL; ptr = ptr->next)
     {
         KiranAppItem *app_item;
         KiranApp *app = ptr->data;
 
         app_item = kiran_menu_window_create_app_item(self, app);
-        gtk_list_box_insert(GTK_LIST_BOX(list_box), GTK_WIDGET(app_item), -1);
+        gtk_container_add(GTK_CONTAINER(self->favorite_apps_box), GTK_WIDGET(app_item));
     }
     //g_list_free_full(fav_list, g_object_unref);
-    gtk_container_add(GTK_CONTAINER(self->favorite_apps_box), list_box);
     gtk_widget_show_all(self->favorite_apps_box);
     self->favorite_apps = fav_list;
 }
@@ -365,7 +357,6 @@ void kiran_menu_window_load_frequent_apps(KiranMenuWindow *self)
 {
     GList *recently_apps, *ptr;
     KiranCategoryItem *category_item;
-    GtkWidget *list_box;
 
     gtk_container_clear(GTK_CONTAINER(self->frequent_apps_box));
 
@@ -387,7 +378,6 @@ void kiran_menu_window_load_frequent_apps(KiranMenuWindow *self)
         return;
     }
 
-    list_box = gtk_list_box_new();
     for (ptr = recently_apps; ptr != NULL; ptr = ptr->next)
     {
         KiranAppItem *app_item;
@@ -395,9 +385,8 @@ void kiran_menu_window_load_frequent_apps(KiranMenuWindow *self)
 
         app_item = kiran_menu_window_create_app_item(self, app);
         g_message("Found frequent app '%s'\n", kiran_app_get_name(app));
-        gtk_list_box_insert(GTK_LIST_BOX(list_box), GTK_WIDGET(app_item), -1);
+        gtk_container_add(GTK_CONTAINER(self->frequent_apps_box), GTK_WIDGET(app_item));
     }
-    gtk_container_add(GTK_CONTAINER(self->frequent_apps_box), list_box);
     gtk_widget_show_all(self->frequent_apps_box);
     g_list_free_full(recently_apps, g_object_unref);
 }
@@ -418,7 +407,7 @@ void kiran_menu_window_load_new_apps(KiranMenuWindow *self)
 {
     GList *new_apps, *ptr;
     KiranCategoryItem *category_item;
-    GtkWidget *list_box, *more_box = NULL, *expand_button;
+    GtkWidget *more_box = NULL, *expand_button;
     int index;
 
     gtk_container_clear(GTK_CONTAINER(self->new_apps_box));
@@ -442,7 +431,6 @@ void kiran_menu_window_load_new_apps(KiranMenuWindow *self)
         return;
     }
 
-    list_box = gtk_list_box_new();
     for (ptr = new_apps, index = 0; ptr != NULL; ptr = ptr->next, index++)
     {
         KiranAppItem *app_item;
@@ -451,17 +439,14 @@ void kiran_menu_window_load_new_apps(KiranMenuWindow *self)
         app_item = kiran_menu_window_create_app_item(self, app);
         g_message("Found new app '%s'\n", kiran_app_get_name(app));
         if (index < NEW_APPS_SHOW_MAX)
-            gtk_list_box_insert(GTK_LIST_BOX(list_box), GTK_WIDGET(app_item), -1);
+            gtk_container_add(GTK_CONTAINER(self->new_apps_box), GTK_WIDGET(app_item));
         else {
             if (!more_box)
-                more_box = gtk_list_box_new();
+                more_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
-            gtk_list_box_insert(GTK_LIST_BOX(more_box), GTK_WIDGET(app_item), -1);
+            gtk_container_add(GTK_CONTAINER(more_box), GTK_WIDGET(app_item));
         }
     }
-    gtk_container_add(GTK_CONTAINER(self->new_apps_box), list_box);
-    gtk_widget_show_all(list_box);
-
     if (more_box) {
         expand_button = kiran_expand_button_new(FALSE);
 

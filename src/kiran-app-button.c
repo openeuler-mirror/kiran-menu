@@ -20,8 +20,13 @@ static guint signals[SIGNAL_MAX];
 
 void kiran_app_button_init(KiranAppButton *self)
 {
+    GtkStyleContext *context;
+
+    context = gtk_widget_get_style_context(GTK_WIDGET(self));
     self->icon = gtk_image_new();
     gtk_container_add(GTK_CONTAINER(self), self->icon);
+
+    gtk_style_context_add_class(context, "kiran-app-button");
 }
 
 void kiran_app_button_finalize(GObject *obj)

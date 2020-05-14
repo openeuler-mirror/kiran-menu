@@ -1,18 +1,7 @@
 @define-color placeholder_text_color #c8c8c8;
 
-list {
-    background: transparent;
-}
+kiran-app-item:focused {
 
-list row {
-    min-height: 40px;
-}
-
-list row:hover, list row:active, list row:focus, list row:selected {
-    background: transparent;
-}
-
-kiran-app-item:hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: #4cb5ff;
     border-style: solid;
@@ -43,11 +32,6 @@ kiran-app-item {
 kiran-category-item {
     background-color: transparent;
     border-width: 0px;
-    /*
-    border-left-width: 5px;
-    border-color: #4cb5ff;
-    border-style: solid;
-    */
     min-height: 40px;
     color: white;
     margin-top: 10px;
@@ -77,6 +61,28 @@ kiran-category-item:focus  label {
     font-weight: bold;
 }
 
+button.kiran-app-button {
+    border-width: 1px;
+    border-style: solid;
+    border-color: transparent;
+    background: transparent;
+}
+
+button.kiran-app-button:focus {
+    border-color: rgba(255, 255, 255, 0.5);
+    border-style: dotted;
+}
+
+button.kiran-app-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+button.switch-button, button.switch-button:hover, button.switch-button:focus {
+    border: none;
+    color: white;
+    background: transparent;
+}
+
 entry.kiran-search-entry {
     margin-left: 10px;
     margin-right: 10px;
@@ -89,17 +95,6 @@ entry.kiran-search-entry {
 
 entry.kiran-search-entry:focus {
     border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-button {
-    background: transparent;
-    border: none;
-    color: white;
-}
-
-button:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
 }
 
 separator {
@@ -124,6 +119,8 @@ scrollbar.vertical {
 scrollbar.vertical button {
     min-height: 0px;
     min-width: 0px; 
+    background: transparent;
+    border: none;
 }
 
 scrollbar.vertical slider {
