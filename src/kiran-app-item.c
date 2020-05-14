@@ -13,25 +13,16 @@ struct _KiranAppItem
     GtkWidget *menu;
 
     gboolean menu_shown;
-    gboolean is_favorite;
-
     KiranApp *app;
 };
 
 G_DEFINE_TYPE(KiranAppItem, kiran_app_item, GTK_TYPE_EVENT_BOX);
-
-enum
-{
-    PROPERTY_IS_FAVORITE = 1,
-    PROPERTY_MAX
-};
 
 enum {
     SIGNAL_APP_LAUNCHED = 0,        //应用已启动信号
     SIGNAL_MAX
 };
 
-static GParamSpec *property_pspecs[PROPERTY_MAX] = {0};
 static guint signals[SIGNAL_MAX];
 
 void kiran_app_item_init(KiranAppItem *item)
@@ -82,45 +73,19 @@ static void menu_detach_callback(KiranAppItem *item)
     gtk_widget_set_state_flags(GTK_WIDGET(item), flags & ~GTK_STATE_FLAG_PRELIGHT, TRUE);
 }
 
-GtkWidget *create_context_menu(GtkWidget *attach);
-/**
- * "添加到收藏夹"回调函数
- */
-static void kiran_app_item_add_to_favorite_callback(KiranAppItem *self)
-{
-    if (kiran_app_add_to_favorite(self->app) && !self->is_favorite) {
-        //重新生成右键菜单
-        gtk_menu_detach(GTK_MENU(self->menu));
-        self->is_favorite = TRUE;
-        self->menu = create_context_menu(GTK_WIDGET(self));
-    } else
-        g_critical("Failed to add app '%s' to favorite list\n", kiran_app_get_desktop_id(self->app));
-}
-
 /**
  * "添加到桌面"回调函数
  */
 static void kiran_app_item_add_to_desktop_callback(KiranAppItem *item)
 {
-    if (!kiran_app_add_to_favorite(item->app))
+    g_message("%s: add '%s' onto desktop\n", __func__, kiran_app_get_desktop_id(item->app));
+    if (!kiran_app_add_to_desktop(item->app))
         g_critical("Failed to add app '%s' to desktop\n", kiran_app_get_desktop_id(item->app));
 }
 
-
 /**
- * "从收藏夹中移除"回调函数
+ * app"启动"回调函数
  */
-static void kiran_app_item_remove_from_favorite_callback(KiranAppItem *self)
-{
-    if (kiran_app_remove_from_favorite(self->app) && self->is_favorite) {
-        //重新生成右键菜单
-        gtk_menu_detach(GTK_MENU(self->menu));
-        self->is_favorite = FALSE;
-        self->menu = create_context_menu(GTK_WIDGET(self));
-    } else
-        g_critical("Failed to remove app '%s' from favorite list\n", kiran_app_get_desktop_id(self->app));
-}
-
 static void kiran_app_item_launch_app_callback(KiranAppItem *self)
 {
 
@@ -147,12 +112,12 @@ GtkWidget *create_context_menu(GtkWidget *attach)
     g_signal_connect_swapped(menu_item, "activate", G_CALLBACK(kiran_app_item_add_to_desktop_callback), item);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
 
-    if (!item->is_favorite) {
+    if (!kiran_app_is_favorite(item->app)) {
         menu_item = gtk_menu_item_new_with_label(_("Add to favorites"));
-        g_signal_connect_swapped(menu_item, "activate", G_CALLBACK(kiran_app_item_add_to_favorite_callback), item);
+        g_signal_connect_swapped(menu_item, "activate", G_CALLBACK(kiran_app_add_to_favorite), item->app);
     } else {
         menu_item = gtk_menu_item_new_with_label(_("Remove from favorites"));
-        g_signal_connect_swapped(menu_item, "activate", G_CALLBACK(kiran_app_item_remove_from_favorite_callback), item);
+        g_signal_connect_swapped(menu_item, "activate", G_CALLBACK(kiran_app_remove_from_favorite), item->app);
     }
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), menu_item);
     gtk_menu_attach_to_widget(GTK_MENU(menu), attach, (GtkMenuDetachFunc)destroy_menu);
@@ -170,8 +135,9 @@ gboolean kiran_app_item_button_release(GtkWidget *widget, GdkEventButton *ev)
  
     g_message("%s: got button release event\n", __func__);
     if (ev->button == 3) {
-        if (!item->menu)
-            item->menu = create_context_menu(widget);
+        if (item->menu)
+            gtk_widget_destroy(item->menu);
+        item->menu = create_context_menu(widget);
         
         g_message("%s: set item %p menu-shown to TRUE\n", __func__, item);
         item->menu_shown = TRUE;
@@ -226,19 +192,13 @@ static gboolean kiran_app_item_update(KiranAppItem *item)
     if (!item->app)
         return FALSE;
     
-    //FIXME should call kiran_app_XXX()
-#if 1
-    icon = kiran_app_get_icon(KIRAN_APP(item->app));
-#else
-    data = "firefox";
-#endif
 
+    icon = kiran_app_get_icon(KIRAN_APP(item->app));
     if (icon) {
-        if (G_IS_FILE_ICON(icon))
-            g_message("got file icon '%s'\n", g_icon_to_string(icon));
         gtk_image_set_pixel_size(GTK_IMAGE(item->icon), 24);
         gtk_image_set_from_gicon(GTK_IMAGE(item->icon), icon, GTK_ICON_SIZE_LARGE_TOOLBAR);
     } else {
+        //use fallback icon
         gtk_image_set_from_icon_name(GTK_IMAGE(item->icon), "application-x-executable.png", GTK_ICON_SIZE_LARGE_TOOLBAR);
     }
 
@@ -246,58 +206,15 @@ static gboolean kiran_app_item_update(KiranAppItem *item)
     gtk_label_set_text(GTK_LABEL(item->label), data);
     gtk_widget_set_tooltip_text(GTK_WIDGET(item), kiran_app_get_locale_comment(KIRAN_APP(item->app)));
 
-    item->is_favorite = kiran_app_is_favorite(item->app);
-
     return TRUE;
-}
-
-void kiran_app_item_set_property(GObject *object, guint property_id,
-        const GValue *value, GParamSpec *pspec)
-{
-    KiranAppItem *item = KIRAN_APP_ITEM(object);
-
-    switch (property_id) {
-    case PROPERTY_IS_FAVORITE:
-        do {
-            gboolean data = g_value_get_boolean(value);
-
-            if (data != item->is_favorite)
-                item->is_favorite = data;
-        } while (0);
-        break;
-    default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
-        break;
-    }
-}
-
-void kiran_app_item_get_property(GObject *object, guint property_id,
-        GValue *value, GParamSpec *pspec)
-{
-    KiranAppItem *item = KIRAN_APP_ITEM(object);
-
-    switch (property_id) {
-    case PROPERTY_IS_FAVORITE:
-        g_value_set_boolean(value, item->is_favorite);
-        break;
-    default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
-        break;
-    }
 }
 
 void kiran_app_item_class_init(KiranAppItemClass *kclass)
 {
     G_OBJECT_CLASS(kclass)->finalize = kiran_app_item_finalize;
-    G_OBJECT_CLASS(kclass)->set_property = kiran_app_item_set_property;
-    G_OBJECT_CLASS(kclass)->get_property = kiran_app_item_get_property;
     GTK_WIDGET_CLASS(kclass)->button_release_event = kiran_app_item_button_release;
     GTK_WIDGET_CLASS(kclass)->leave_notify_event = kiran_app_item_leave_notify;
     GTK_WIDGET_CLASS(kclass)->enter_notify_event = kiran_app_item_enter_notify;
-
-    property_pspecs[PROPERTY_IS_FAVORITE] = g_param_spec_boolean("is-favorite",
-            "is-favorite", "In favorite apps list",
-            FALSE, G_PARAM_STATIC_STRINGS | G_PARAM_WRITABLE);
 
     GParamSpec *style_pspec = g_param_spec_int("icon-spacing",
             "icon-spacing", "Right margin of icon image", 0, 100, 0, G_PARAM_WRITABLE | G_PARAM_STATIC_STRINGS);
@@ -305,7 +222,6 @@ void kiran_app_item_class_init(KiranAppItemClass *kclass)
     signals[SIGNAL_APP_LAUNCHED] = g_signal_new("app-launched", G_TYPE_FROM_CLASS(kclass),
             G_SIGNAL_RUN_FIRST, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 
-    g_object_class_install_property(G_OBJECT_CLASS(kclass), PROPERTY_IS_FAVORITE, property_pspecs[PROPERTY_IS_FAVORITE]);
     gtk_widget_class_install_style_property(GTK_WIDGET_CLASS(kclass),
             g_param_spec_int("icon-spacing",
                              "icon-spacing",
