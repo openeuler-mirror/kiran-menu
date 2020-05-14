@@ -114,7 +114,25 @@ void kiran_menu_window_jump_to_category(KiranMenuWindow *self, const char *categ
     gtk_adjustment_set_value(adjustment, item_allocation.y);
 }
 
+void grab_pointer(KiranMenuWindow *self)
+{
+    GdkEventMask mask = GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK;
 
+    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+    gdk_pointer_grab(gtk_widget_get_window(self->window), TRUE, mask, NULL, NULL, GDK_CURRENT_TIME);
+    gdk_keyboard_grab(gtk_widget_get_window(self->window), TRUE, GDK_CURRENT_TIME);
+    G_GNUC_END_IGNORE_DEPRECATIONS
+
+}
+
+void ungrab_pointer(KiranMenuWindow *self)
+{
+
+    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+    gdk_pointer_ungrab(GDK_CURRENT_TIME);
+    gdk_keyboard_ungrab(GDK_CURRENT_TIME);
+    G_GNUC_END_IGNORE_DEPRECATIONS
+}
 /**
  * 为给定的app创建应用程序列表项目对象
  */
@@ -326,7 +344,6 @@ void kiran_menu_window_load_applications(KiranMenuWindow *self)
 void kiran_menu_window_load_favorites(KiranMenuWindow *self)
 {
     GList *fav_list, *ptr;
-    GtkWidget *list_box;
     KiranCategoryItem *category_item;
 
     gtk_container_clear(GTK_CONTAINER(self->favorite_apps_box));
@@ -336,6 +353,7 @@ void kiran_menu_window_load_favorites(KiranMenuWindow *self)
     gtk_container_add(GTK_CONTAINER(self->favorite_apps_box), GTK_WIDGET(category_item));
     g_message("%d favorite apps found\n", g_list_length(fav_list));
 
+    //list_box = gtk_list_box_new();
     for (ptr = fav_list; ptr != NULL; ptr = ptr->next)
     {
         KiranAppItem *app_item;
@@ -462,29 +480,6 @@ void kiran_menu_window_load_new_apps(KiranMenuWindow *self)
     g_list_free_full(new_apps, g_object_unref);
 }
 
-gboolean grab_pointer(GtkWidget *widget, GdkEvent *event, gpointer userdata)
-{
-    GdkEventMask mask = GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK;
-    KiranMenuWindow *self = userdata;
-
-    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-    gdk_pointer_grab(gdk_event_get_window(event), TRUE, mask, NULL, NULL, GDK_CURRENT_TIME);
-    G_GNUC_END_IGNORE_DEPRECATIONS
-
-    gtk_widget_grab_focus(self->search_entry);
-    return FALSE;
-}
-
-gboolean ungrab_pointer(GtkWidget *widget, GdkEvent *event, gpointer userdata)
-{
-    KiranMenuWindow *self = userdata;
-
-    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-    gdk_pointer_ungrab(GDK_CURRENT_TIME);
-    G_GNUC_END_IGNORE_DEPRECATIONS
-    return FALSE;
-}
-
 gboolean button_press_event_callback(GtkWidget *widget, GdkEventButton *event, gpointer userdata)
 {
     int root_x, root_y;
@@ -516,6 +511,33 @@ static void kiran_menu_window_reload_app_data(KiranMenuWindow *self)
     kiran_menu_window_load_favorites(self);
     kiran_menu_window_load_new_apps(self);
     kiran_menu_window_load_applications(self);
+}
+
+static void window_map_handler(GtkWidget *widget, GdkEvent *event, gpointer userdata)
+{
+    KiranMenuWindow *self = userdata;
+
+    //将开始菜单窗口总保持在上层
+    gtk_window_set_keep_above(GTK_WINDOW(widget), TRUE);
+    grab_pointer(userdata);
+
+    gtk_widget_grab_focus(self->search_entry);
+}
+
+static void window_unmap_handler(GtkWidget *widget, GdkEvent *event, gpointer userdata)
+{
+    gtk_window_set_keep_above(GTK_WINDOW(widget), FALSE);
+    ungrab_pointer(userdata);
+}
+
+static void window_active_change_callback(KiranMenuWindow *self)
+{
+    if (gtk_window_is_active(GTK_WINDOW(self->window))) {
+        //开始菜单窗口位于最前方时，抓取焦点
+        g_message("menu window is active\n");
+        grab_pointer(self);
+    } else
+        g_message("menu window is inactive\n");
 }
 
 void kiran_menu_window_init(KiranMenuWindow *self)
@@ -585,9 +607,12 @@ void kiran_menu_window_init(KiranMenuWindow *self)
     g_signal_connect_swapped(self->back_button, "clicked", G_CALLBACK(show_default_apps_page), self);
     g_signal_connect_swapped(self->all_apps_button, "clicked", G_CALLBACK(show_all_apps_page), self);
 
-    g_signal_connect(self->window, "map-event", G_CALLBACK(grab_pointer), self);
-    g_signal_connect(self->window, "unmap-event", G_CALLBACK(ungrab_pointer), self);
+    gtk_widget_add_events(self->window, GDK_KEY_RELEASE_MASK);
+    g_signal_connect(self->window, "map-event", G_CALLBACK(window_map_handler), self);
+    g_signal_connect(self->window, "unmap-event", G_CALLBACK(window_unmap_handler), self);
     g_signal_connect(self->window, "button-press-event", G_CALLBACK(button_press_event_callback), self);
+
+    g_signal_connect_swapped(self->window, "notify::is-active", G_CALLBACK(window_active_change_callback), self);
 
     /* 加载应用程序数据 */
     kiran_menu_window_reload_app_data(self);
