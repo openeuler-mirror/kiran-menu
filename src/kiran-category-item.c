@@ -85,11 +85,7 @@ gboolean kiran_category_item_enter_notify(GtkWidget *widget, GdkEventCrossing *e
     KiranCategoryItem *self = KIRAN_CATEGORY_ITEM(widget);
 
     if (self->clickable)
-    {
-        gtk_widget_set_state_flags(widget, GTK_STATE_FLAG_PRELIGHT, FALSE);
         gtk_widget_grab_focus(widget);
-        gtk_widget_queue_draw(widget);
-    }
 
     return FALSE;
 }
@@ -99,7 +95,7 @@ gboolean kiran_category_item_leave_notify(GtkWidget *widget, GdkEventCrossing *e
     GtkStateFlags flags;
 
     flags = gtk_widget_get_state_flags(widget);
-    gtk_widget_set_state_flags(widget, flags & ~GTK_STATE_FLAG_PRELIGHT, TRUE);
+    gtk_widget_set_state_flags(widget, flags & ~GTK_STATE_FLAG_FOCUSED, TRUE);
     gtk_widget_queue_draw(widget);
 
     return FALSE;
