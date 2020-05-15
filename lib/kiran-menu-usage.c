@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 20:35:20
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-11 17:59:39
+ * @LastEditTime : 2020-05-15 09:01:03
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-usage.c
  */
@@ -75,7 +75,8 @@ static UsageData *get_usage_for_app(KiranMenuUsage *self,
     GQuark quark = g_quark_from_string(desktop_id);
 
     usage = g_hash_table_lookup(self->app_usages, GUINT_TO_POINTER(quark));
-    if (usage) return usage;
+    if (usage)
+        return usage;
 
     usage = g_new0(UsageData, 1);
     g_hash_table_insert(self->app_usages, GUINT_TO_POINTER(quark), usage);
@@ -180,7 +181,8 @@ static int sort_apps_by_usage(gconstpointer a, gconstpointer b, gpointer data)
 
     gdouble a_score = (usage_a == NULL) ? 0 : usage_a->score;
     gdouble b_score = (usage_b == NULL) ? 0 : usage_b->score;
-    if (ABS(a_score - b_score) < EPS) return 0;
+    if (ABS(a_score - b_score) < EPS)
+        return 0;
     return a_score > b_score ? -1 : 1;
 }
 
@@ -217,6 +219,7 @@ gboolean kiran_menu_usage_reset(KiranMenuUsage *self)
     g_clear_pointer(&self->app_usages, g_hash_table_unref);
     g_clear_pointer(&self->focus_desktop_id, g_free);
     write_usages_to_settings(self);
+    g_signal_emit(self, signals[SIGNAL_APP_CHANGED], 0);
     return TRUE;
 }
 

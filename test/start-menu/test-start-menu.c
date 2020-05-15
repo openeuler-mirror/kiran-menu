@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-08 15:17:35
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-11 19:10:24
+ * @LastEditTime : 2020-05-14 18:59:05
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/start-menu/test-start-menu.c
  */
@@ -51,16 +51,22 @@ static void new_app_changed(KiranMenuBased *based, gpointer user_data)
     g_print("recv new app changed signal.\n");
 }
 
-static void favorite_app_added(KiranMenuBased *based, gpointer user_data)
+static void favorite_app_added(KiranMenuBased *based, GList *apps, gpointer user_data)
 {
-    KiranApp *app = KIRAN_APP(user_data);
-    g_print("recv favorite app %s added signal.\n", kiran_app_get_desktop_id(app));
+    for (GList *l = apps; l != NULL; l = l->next)
+    {
+        KiranApp *app = l->data;
+        g_print("recv favorite app %s added signal.\n", kiran_app_get_desktop_id(app));
+    }
 }
 
-static void favorite_app_deleted(KiranMenuBased *based, gpointer user_data)
+static void favorite_app_deleted(KiranMenuBased *based, GList *apps, gpointer user_data)
 {
-    KiranApp *app = KIRAN_APP(user_data);
-    g_print("recv favorite app %s deleted signal.\n", kiran_app_get_desktop_id(app));
+    for (GList *l = apps; l != NULL; l = l->next)
+    {
+        KiranApp *app = l->data;
+        g_print("recv favorite app %s deleted signal.\n", kiran_app_get_desktop_id(app));
+    }
 }
 
 static void frequent_usage_app_changed(KiranMenuBased *based, gpointer user_data)

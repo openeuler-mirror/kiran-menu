@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 19:59:56
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-11 19:09:08
+ * @LastEditTime : 2020-05-14 18:55:10
  * @Description  : 开始菜单类
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-skeleton.c
  */
@@ -82,18 +82,7 @@ static gboolean kiran_menu_skeleton_add_favorite_app(KiranMenuBased *self,
     g_return_val_if_fail(KIRAN_IS_MENU_SKELETON(self), FALSE);
 
     KiranMenuSkeleton *skeleton = KIRAN_MENU_SKELETON(self);
-    gboolean ret = kiran_menu_favorite_add_app(skeleton->favorite, desktop_id);
-    if (ret)
-    {
-        KiranMenuApp *menu_app = kiran_menu_system_lookup_app(skeleton->system, desktop_id);
-        if (menu_app)
-        {
-            menu_app = g_object_ref(menu_app);
-            g_signal_emit(self, signals[SIGNAL_FAVORITE_APP_ADDED], 0, KIRAN_APP(menu_app));
-            g_object_unref(menu_app);
-        }
-    }
-    return ret;
+    return kiran_menu_favorite_add_app(skeleton->favorite, desktop_id);
 }
 
 static gboolean kiran_menu_skeleton_del_favorite_app(KiranMenuBased *self,
@@ -102,18 +91,7 @@ static gboolean kiran_menu_skeleton_del_favorite_app(KiranMenuBased *self,
     g_return_val_if_fail(KIRAN_IS_MENU_SKELETON(self), FALSE);
 
     KiranMenuSkeleton *skeleton = KIRAN_MENU_SKELETON(self);
-    gboolean ret = kiran_menu_favorite_del_app(skeleton->favorite, desktop_id);
-    if (ret)
-    {
-        KiranMenuApp *menu_app = kiran_menu_system_lookup_app(skeleton->system, desktop_id);
-        if (menu_app)
-        {
-            menu_app = g_object_ref(menu_app);
-            g_signal_emit(self, signals[SIGNAL_FAVORITE_APP_DELETED], 0, KIRAN_APP(menu_app));
-            g_object_unref(menu_app);
-        }
-    }
-    return ret;
+    return kiran_menu_favorite_del_app(skeleton->favorite, desktop_id);
 }
 
 static KiranApp *kiran_menu_skeleton_lookup_favorite_app(KiranMenuBased *self,
@@ -272,18 +250,18 @@ KiranMenuUnit *kiran_menu_skeleton_get_unit(KiranMenuSkeleton *self, KiranMenuUn
 {
     switch (unit_type)
     {
-        case KIRAN_MENU_TYPE_CATEGORY:
-            return KIRAN_MENU_UNIT(self->category);
-        case KIRAN_MENU_TYPE_FAVORITE:
-            return KIRAN_MENU_UNIT(self->favorite);
-        case KIRAN_MENU_TYPE_SEARCH:
-            return KIRAN_MENU_UNIT(self->search);
-        case KIRAN_MENU_TYPE_SYSTEM:
-            return KIRAN_MENU_UNIT(self->system);
-        case KIRAN_MENU_TYPE_USAGE:
-            return KIRAN_MENU_UNIT(self->usage);
-        default:
-            return NULL;
+    case KIRAN_MENU_TYPE_CATEGORY:
+        return KIRAN_MENU_UNIT(self->category);
+    case KIRAN_MENU_TYPE_FAVORITE:
+        return KIRAN_MENU_UNIT(self->favorite);
+    case KIRAN_MENU_TYPE_SEARCH:
+        return KIRAN_MENU_UNIT(self->search);
+    case KIRAN_MENU_TYPE_SYSTEM:
+        return KIRAN_MENU_UNIT(self->system);
+    case KIRAN_MENU_TYPE_USAGE:
+        return KIRAN_MENU_UNIT(self->usage);
+    default:
+        return NULL;
     }
 }
 
@@ -364,6 +342,26 @@ static void frequent_usage_app_changed(KiranMenuSystem *system,
     g_signal_emit(self, signals[SIGNAL_FREQUENT_USAGE_APP_CHANGED], 0);
 }
 
+static void favorite_app_added(KiranMenuSystem *system,
+                               gpointer desktop_ids,
+                               gpointer user_data)
+{
+    KiranMenuSkeleton *self = KIRAN_MENU_SKELETON(user_data);
+    GList *apps = trans_ids_to_apps(self, desktop_ids);
+    g_signal_emit(self, signals[SIGNAL_FAVORITE_APP_ADDED], 0, apps);
+    g_list_free_full(apps, g_object_unref);
+}
+
+static void favorite_app_deleted(KiranMenuSystem *system,
+                                 gpointer desktop_ids,
+                                 gpointer user_data)
+{
+    KiranMenuSkeleton *self = KIRAN_MENU_SKELETON(user_data);
+    GList *apps = trans_ids_to_apps(self, desktop_ids);
+    g_signal_emit(self, signals[SIGNAL_FAVORITE_APP_DELETED], 0, apps);
+    g_list_free_full(apps, g_object_unref);
+}
+
 static void kiran_menu_skeleton_init(KiranMenuSkeleton *self)
 {
     self->system = kiran_menu_system_get_new();
@@ -381,6 +379,9 @@ static void kiran_menu_skeleton_init(KiranMenuSkeleton *self)
     g_signal_connect(self->system, "new-app-changed", G_CALLBACK(new_app_changed), self);
 
     g_signal_connect(self->usage, "app-changed", G_CALLBACK(frequent_usage_app_changed), self);
+
+    g_signal_connect(self->favorite, "app-added", G_CALLBACK(favorite_app_added), self);
+    g_signal_connect(self->favorite, "app-deleted", G_CALLBACK(favorite_app_deleted), self);
 }
 
 static void kiran_menu_skeleton_class_init(KiranMenuSkeletonClass *klass)
