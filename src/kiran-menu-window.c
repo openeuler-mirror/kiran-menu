@@ -307,6 +307,39 @@ static void search_change_callback(KiranMenuWindow *self)
 }
 
 /**
+ * 当列表项获取到焦点时，检查列表项在所在的滚动框中是否全部可见，如果没有全部可见，通过移动滚动条
+ * 来保证列表项可见
+ */
+gboolean item_focus_in_callback(GtkWidget *widget, GdkEventFocus *ev, gpointer userdata)
+{
+    GtkAllocation allocation;
+    GtkAdjustment *adjustment;
+    GdkWindow *bin_win, *view_win;
+    int bin_height, view_height;
+    int adjust_value, delta;
+
+    GtkViewport *viewport = userdata;
+
+    gtk_widget_get_allocation(widget, &allocation);
+
+    adjustment = gtk_scrollable_get_vadjustment(GTK_SCROLLABLE(viewport));
+    bin_win = gtk_viewport_get_bin_window(GTK_VIEWPORT(viewport));
+    view_win = gtk_viewport_get_view_window(GTK_VIEWPORT(viewport));
+
+    adjust_value = (int)gtk_adjustment_get_value(adjustment);
+    bin_height = gdk_window_get_height(bin_win);
+    view_height = gdk_window_get_height(view_win);
+
+    delta = (allocation.y + allocation.height) - (adjust_value + view_height);
+    if (delta > 0) {
+        //控件绘制区域在滚动区域内并非全部可见，需要滚动
+        gtk_adjustment_set_value(adjustment, adjust_value + delta);
+    }
+
+    return FALSE;
+}
+
+/**
  *
  * 加载应用程序和分类列表
  *
@@ -340,6 +373,8 @@ void kiran_menu_window_load_applications(KiranMenuWindow *self)
         category_item = kiran_category_item_new(category_name, TRUE);
         g_hash_table_insert(self->category_items, g_strdup(category_name), category_item);
         gtk_container_add(GTK_CONTAINER(self->all_apps_box), GTK_WIDGET(category_item));
+        g_signal_connect(category_item, "focus-in-event",
+                G_CALLBACK(item_focus_in_callback), self->all_apps_viewport);
 
         //添加应用程序标签
         list_box = gtk_list_box_new();
@@ -348,6 +383,9 @@ void kiran_menu_window_load_applications(KiranMenuWindow *self)
 
             app_item = kiran_menu_window_create_app_item(self, app);
             gtk_container_add(GTK_CONTAINER(self->all_apps_box), GTK_WIDGET(app_item));
+
+            g_signal_connect(app_item, "focus-in-event",
+                    G_CALLBACK(item_focus_in_callback), self->all_apps_viewport);
         }
         gtk_widget_show_all(self->all_apps_box);
         g_signal_connect_swapped(category_item, "clicked", G_CALLBACK(show_category_overview), self);
@@ -378,6 +416,8 @@ void kiran_menu_window_load_favorites(KiranMenuWindow *self)
 
         app_item = kiran_menu_window_create_app_item(self, app);
         gtk_container_add(GTK_CONTAINER(self->favorite_apps_box), GTK_WIDGET(app_item));
+        g_signal_connect(app_item, "focus-in-event",
+                G_CALLBACK(item_focus_in_callback), self->default_apps_viewport);
     }
     //g_list_free_full(fav_list, g_object_unref);
     gtk_widget_show_all(self->favorite_apps_box);
@@ -421,6 +461,8 @@ void kiran_menu_window_load_frequent_apps(KiranMenuWindow *self)
         app_item = kiran_menu_window_create_app_item(self, app);
         g_message("Found frequent app '%s'\n", kiran_app_get_name(app));
         gtk_container_add(GTK_CONTAINER(self->frequent_apps_box), GTK_WIDGET(app_item));
+        g_signal_connect(app_item, "focus-in-event",
+                G_CALLBACK(item_focus_in_callback), self->default_apps_viewport);
     }
     gtk_widget_show_all(self->frequent_apps_box);
     g_list_free_full(recently_apps, g_object_unref);
@@ -473,6 +515,9 @@ void kiran_menu_window_load_new_apps(KiranMenuWindow *self)
 
         app_item = kiran_menu_window_create_app_item(self, app);
         g_message("Found new app '%s'\n", kiran_app_get_name(app));
+
+        g_signal_connect(app_item, "focus-in-event",
+                G_CALLBACK(item_focus_in_callback), self->all_apps_viewport);
         if (index < NEW_APPS_SHOW_MAX)
             gtk_container_add(GTK_CONTAINER(self->new_apps_box), GTK_WIDGET(app_item));
         else {
