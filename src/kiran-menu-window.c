@@ -562,8 +562,16 @@ static gboolean key_press_event_callback(GtkWidget *widget, GdkEventKey *event, 
     KiranMenuWindow *self = userdata;
 
     if (event->keyval == GDK_KEY_Escape) {
-        //按下ESC时隐藏开始菜单窗口
-        gtk_widget_hide(widget);
+
+        const char *page_name = gtk_stack_get_visible_child_name(GTK_STACK(self->overview_stack));
+        if (!strcmp(page_name, "category-overview-page")) {
+            //从分类跳转视图返回到所有应用视图
+            show_apps_overview(self);
+            show_all_apps_page(self);
+        } else {
+            //按下ESC时隐藏开始菜单窗口
+            gtk_widget_hide(widget);
+        }
         return TRUE;
     }
 
