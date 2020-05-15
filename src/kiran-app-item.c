@@ -246,10 +246,11 @@ gboolean kiran_app_item_leave_notify(GtkWidget *widget, GdkEventCrossing *ev)
     KiranAppItem *item = KIRAN_APP_ITEM(widget);
     GtkStateFlags flags = gtk_widget_get_state_flags(widget);
 
-    if (item->menu_shown) {
+    if (item->menu_shown)
         return TRUE;
-    }
 
+    if (gtk_widget_has_focus(widget))
+        return FALSE;
     gtk_widget_set_state_flags(widget, flags & ~GTK_STATE_FLAG_FOCUSED, TRUE);
     gtk_widget_queue_draw(widget);
     return FALSE;
