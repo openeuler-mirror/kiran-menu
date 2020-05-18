@@ -14,6 +14,9 @@ struct _KiranAppItem
 
     gboolean menu_shown;
     KiranApp *app;
+    GtkIconTheme *icon_theme;
+
+    guint theme_change_handler;
 };
 
 G_DEFINE_TYPE(KiranAppItem, kiran_app_item, GTK_TYPE_EVENT_BOX);
@@ -31,13 +34,8 @@ gboolean kiran_app_item_update(KiranAppItem *item)
     GIcon *icon;
     const char *data;
 
-    if (!item->app)
+    if (!item->app || !G_IS_OBJECT(item->app))
         return FALSE;
-
-    if (!KIRAN_IS_APP(item->app)) {
-        g_warning("%s: object %p is not an KiranApp object\n", __func__, item->app);
-        return FALSE;
-    }
 
     icon = kiran_app_get_icon(KIRAN_APP(item->app));
     if (icon) {
@@ -60,10 +58,9 @@ void kiran_app_item_init(KiranAppItem *item)
     GtkStyleContext *context;
     GValue value = G_VALUE_INIT;
     GtkBorder padding;
-    GtkIconTheme *icon_theme;
     int min_width, min_height, icon_spacing;
 
-    icon_theme = gtk_icon_theme_get_default();
+    item->icon_theme = gtk_icon_theme_get_default();
     context = gtk_widget_get_style_context(GTK_WIDGET(item));
     item->grid = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
     item->icon = gtk_image_new();
@@ -102,7 +99,7 @@ void kiran_app_item_init(KiranAppItem *item)
     gtk_widget_set_can_focus(GTK_WIDGET(item), TRUE);
     gtk_widget_set_has_window(GTK_WIDGET(item), TRUE);
 
-    g_signal_connect_swapped(icon_theme, "changed", G_CALLBACK(kiran_app_item_update), item);
+    item->theme_change_handler =  g_signal_connect_swapped(item->icon_theme, "changed", G_CALLBACK(kiran_app_item_update), item);
 }
 
 static void destroy_menu(GtkWidget *widget, GtkMenu *menu)
@@ -261,8 +258,12 @@ void kiran_app_item_finalize(GObject *obj)
 {
     KiranAppItem *item = KIRAN_APP_ITEM(obj);
 
-    if (item->app)
+    g_signal_handler_disconnect(item->icon_theme, item->theme_change_handler);
+
+    if (item->app) {
+        //g_message("%s: Remove ref pointer for app %p\n", __func__, item->app);
         g_object_unref(item->app);
+    }
 
     G_OBJECT_CLASS(kiran_app_item_parent_class)->finalize(obj);
 }
