@@ -65,7 +65,7 @@ void kiran_power_menu_init(KiranPowerMenu *self)
         g_error_free(error);
     }
 
-    self->login_manager_proxy = g_dbus_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
+    self->login_manager_proxy = g_dbus_proxy_new_for_bus_sync(G_BUS_TYPE_SYSTEM,
                                                 G_DBUS_PROXY_FLAGS_DO_NOT_LOAD_PROPERTIES | G_DBUS_PROXY_FLAGS_DO_NOT_CONNECT_SIGNALS,
                                                 NULL,
                                                 LOGIN_MANAGER_DBUS,
@@ -156,7 +156,8 @@ void kiran_power_menu_suspend(KiranPowerMenu *self)
     GError *error = NULL;
 
     g_assert(self->login_manager_proxy != NULL);
-    g_dbus_proxy_call_sync(self->login_manager_proxy, "Suspend", g_variant_new_boolean(FALSE), G_DBUS_CALL_FLAGS_NONE, 300, NULL, &error);
+    g_dbus_proxy_call_sync(self->login_manager_proxy, "Suspend",
+            g_variant_new("(b)", FALSE), G_DBUS_CALL_FLAGS_NONE, 300, NULL, &error);
 
     if (error)
     {
@@ -172,7 +173,8 @@ void kiran_power_menu_hibernate(KiranPowerMenu *self)
 
     g_assert(self->login_manager_proxy != NULL);
 
-    g_dbus_proxy_call_sync(self->login_manager_proxy, "Hibernate", g_variant_new_boolean(FALSE), G_DBUS_CALL_FLAGS_NONE, 300, NULL, &error);
+    g_dbus_proxy_call_sync(self->login_manager_proxy, "Hibernate",
+            g_variant_new("(b)", FALSE), G_DBUS_CALL_FLAGS_NONE, 300, NULL, &error);
 
     if (error)
     {
@@ -189,7 +191,7 @@ void kiran_power_menu_logout(KiranPowerMenu *self)
     g_assert(self->session_manager_proxy != NULL);
 
     g_dbus_proxy_call_sync(self->session_manager_proxy, "Logout",
-                           g_variant_new_uint32(LOGOUT_MODE_INTERACTIVE),
+                           g_variant_new("(u)", LOGOUT_MODE_INTERACTIVE),
                            G_DBUS_CALL_FLAGS_NONE,
                            300,
                            NULL,
