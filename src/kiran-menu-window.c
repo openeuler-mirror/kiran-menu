@@ -613,7 +613,14 @@ static gboolean key_press_event_callback(GtkWidget *widget, GdkEventKey *event, 
             //从分类跳转视图返回到所有应用视图
             show_apps_overview(self);
             show_all_apps_page(self);
-        } else {
+            return TRUE;
+        }
+
+        page_name = gtk_stack_get_visible_child_name(GTK_STACK(self->apps_view_stack));
+        if (!strcmp(page_name, "search-results-page"))
+            //当前处于搜索页面，按下ESC键应当取消搜索
+            return FALSE;
+        else {
             //按下ESC时隐藏开始菜单窗口
             gtk_widget_hide(widget);
         }
