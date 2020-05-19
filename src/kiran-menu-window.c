@@ -658,6 +658,7 @@ void kiran_menu_window_init(KiranMenuWindow *self)
     GError *error = NULL;
     GtkWidget *search_box;
     GtkWidget *top_box, *bottom_box;
+    KiranMenuSkeleton *skeleton;
 
     self->monitor = g_app_info_monitor_get();
     self->backend = kiran_menu_based_skeleton_get();
@@ -729,7 +730,14 @@ void kiran_menu_window_init(KiranMenuWindow *self)
 
     /* 加载应用程序数据 */
     kiran_menu_window_reload_app_data(self);
-    g_signal_connect_swapped(self->monitor, "changed", G_CALLBACK(kiran_menu_window_reload_app_data), self);
+
+    skeleton = KIRAN_MENU_SKELETON(self->backend);
+
+    g_signal_connect_swapped(skeleton, "new-app-changed", G_CALLBACK(kiran_menu_window_load_new_apps), self);
+    g_signal_connect_swapped(skeleton, "favorite-app-deleted", G_CALLBACK(kiran_menu_window_load_favorites), self);
+    g_signal_connect_swapped(skeleton, "favorite-app-added", G_CALLBACK(kiran_menu_window_load_favorites), self);
+    g_signal_connect_swapped(skeleton, "frequent-usage-app-changed", G_CALLBACK(kiran_menu_window_load_frequent_apps), self);
+    g_signal_connect_swapped(skeleton, "app-changed", G_CALLBACK(kiran_menu_window_reload_app_data), self);
 }
 
 void kiran_menu_window_finalize(GObject *obj)
