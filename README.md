@@ -2,7 +2,7 @@
 
 ## 编译安装
 ```
-# yum install mate-panel-devel meson gcc
+# yum install mate-panel-devel cmake gcc gettext libwnck3-devel glib2
 # mkdir build
 # cd build && cmake -DCMAKE_INSTALL_PREFIX=/usr ..
 # make
@@ -15,6 +15,11 @@
 ```
 
 ## 运行
+1. 安装运行依赖
 
-1. 右击面板，选择"添加到面板"
-2. 在对话框中找到 "Kiran Start Menu", 点击 "添加" 按钮即可
+```
+# yum install mate-screensaver accountsservice mate-session-manager
+```
+
+2. 右击面板，选择"添加到面板"
+3. 在对话框中找到 "Kiran Start Menu", 点击 "添加" 按钮即可
