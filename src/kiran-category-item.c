@@ -1,4 +1,5 @@
 #include "kiran-category-item.h"
+#include <glib/gi18n.h>
 
 struct _KiranCategoryItem
 {
@@ -153,14 +154,12 @@ void kiran_category_item_set_property(GObject *obj, guint prop_id, const GValue 
     case PROP_CLICKABLE:
         item->clickable = g_value_get_boolean(value);
         if (item->clickable) {
-            g_message("item clickable, add events\n");
             gtk_widget_set_can_focus(GTK_WIDGET(item), TRUE);
             gtk_widget_add_events(GTK_WIDGET(item),
                                   GDK_BUTTON_RELEASE_MASK | GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK | GDK_KEY_RELEASE_MASK);
         }
         else
         {
-            g_message("item not clickable, reset events\n");
             gtk_widget_set_can_focus(GTK_WIDGET(item), FALSE);
             gtk_widget_set_events(GTK_WIDGET(item), 0);
         }
@@ -169,7 +168,7 @@ void kiran_category_item_set_property(GObject *obj, guint prop_id, const GValue 
         if (item->name)
             g_free(item->name);
         item->name = g_value_dup_string(value);
-        gtk_label_set_text(GTK_LABEL(item->label), item->name);
+        gtk_label_set_text(GTK_LABEL(item->label), _(item->name));
         break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);

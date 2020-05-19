@@ -9,5 +9,6 @@ find_package(PkgConfig)
 add_subdirectory(lib)
 add_subdirectory(src)
 add_subdirectory(data)
+add_subdirectory(po)
 add_subdirectory(test/start-menu)
 

@@ -5,3 +5,4 @@ menu.gresource
 /builddir
 /.vscode
 *~
+po/*.mo
