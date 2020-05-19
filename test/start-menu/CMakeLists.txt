@@ -29,7 +29,7 @@ target_compile_options(${TARGET_NAME} PRIVATE
 
 target_link_libraries(${TARGET_NAME} PRIVATE
     kiran-menu-backend
-    ${GTK3_LIBRIARIES})
+    ${GTK3_LIBRARIES})
 
 
 add_test(menu_test ${TARGET_NAME})
