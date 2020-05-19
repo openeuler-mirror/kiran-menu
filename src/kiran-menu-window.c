@@ -630,6 +630,29 @@ static gboolean key_press_event_callback(GtkWidget *widget, GdkEventKey *event, 
     return FALSE;
 }
 
+gboolean leave_notify_callback(GtkWidget *widget, GdkEventCrossing *ev, gpointer userdata)
+{
+    GtkAllocation allocation;
+    GdkWindow *window;
+    int root_x, root_y;
+    KiranMenuWindow *self = userdata;
+
+    window = gtk_widget_get_window(widget);
+    gtk_widget_get_allocation(widget, &allocation);
+    gdk_window_get_origin(window, &root_x, &root_y);
+
+    g_message("window (%d, %d)->(%d, %d), event (%d, %d)\n",
+            root_x, root_y, root_x + allocation.width, root_y + allocation.height,
+            (int)ev->x_root, (int)ev->y_root);
+
+    if (((int)ev->x_root > root_x && (int)ev->x_root < root_x + allocation.width) &&
+        ((int)ev->y_root > root_y && (int)ev->y_root < root_y + allocation.height))
+        return FALSE;
+
+    gtk_widget_grab_focus(self->search_entry);
+    return FALSE;
+}
+
 void kiran_menu_window_init(KiranMenuWindow *self)
 {
     GError *error = NULL;
@@ -700,6 +723,7 @@ void kiran_menu_window_init(KiranMenuWindow *self)
     g_signal_connect(self->window, "unmap-event", G_CALLBACK(window_unmap_handler), self);
     g_signal_connect(self->window, "button-press-event", G_CALLBACK(button_press_event_callback), self);
     g_signal_connect(self->window, "key-press-event", G_CALLBACK(key_press_event_callback), self);
+    g_signal_connect(self->window, "leave-notify-event", G_CALLBACK(leave_notify_callback), self);
 
     g_signal_connect_swapped(self->window, "notify::is-active", G_CALLBACK(window_active_change_callback), self);
 
