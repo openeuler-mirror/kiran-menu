@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 20:35:20
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-15 09:01:03
+ * @LastEditTime : 2020-05-20 16:12:55
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-usage.c
  */
@@ -253,6 +253,12 @@ void active_window_changed(WnckScreen *screen,
         usage_data = get_usage_for_app(self, self->focus_desktop_id);
         usage_data->last_seen = cur_system_time;
     }
+    else
+    {
+        g_debug("not found matching app for changed window: %s\n",
+                active_window ? wnck_window_get_name(active_window) : "null window name");
+    }
+
     self->watch_start_time = cur_system_time;
 }
 

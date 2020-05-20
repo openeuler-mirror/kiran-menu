@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:38
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-09 13:57:09
+ * @LastEditTime : 2020-05-20 17:28:41
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-app.c
  */
@@ -40,13 +40,14 @@ enum
     PROP_DESKTOP_ID,
 };
 
-enum {
+enum
+{
     SIGNAL_LAUNCHED = 0,
     SIGANL_LAUNCH_FAILED,
-    SIGNAL_INVALID
+    SIGNAL_LAST
 };
 
-static guint signals[SIGNAL_INVALID];
+static guint signals[SIGNAL_LAST];
 
 const gchar *kiran_app_get_name(KiranApp *self)
 {
@@ -143,7 +144,9 @@ guint64 kiran_app_get_create_time(KiranApp *self)
     return 0;
 }
 
-static void kiran_app_init(KiranApp *self) {}
+static void kiran_app_init(KiranApp *self)
+{
+}
 
 static void kiran_app_get_property(GObject *gobject, guint prop_id,
                                    GValue *value, GParamSpec *pspec)
@@ -154,12 +157,12 @@ static void kiran_app_get_property(GObject *gobject, guint prop_id,
 
     switch (prop_id)
     {
-        case PROP_DESKTOP_ID:
-            g_value_set_string(value, priv->desktop_id);
-            break;
-        default:
-            G_OBJECT_WARN_INVALID_PROPERTY_ID(gobject, prop_id, pspec);
-            break;
+    case PROP_DESKTOP_ID:
+        g_value_set_string(value, priv->desktop_id);
+        break;
+    default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID(gobject, prop_id, pspec);
+        break;
     }
 }
 
@@ -193,12 +196,12 @@ static void kiran_app_set_property(GObject *gobject, guint prop_id,
 
     switch (prop_id)
     {
-        case PROP_DESKTOP_ID:
-            kiran_app_set_app_info(app, g_value_get_string(value));
-            break;
-        default:
-            G_OBJECT_WARN_INVALID_PROPERTY_ID(gobject, prop_id, pspec);
-            break;
+    case PROP_DESKTOP_ID:
+        kiran_app_set_app_info(app, g_value_get_string(value));
+        break;
+    default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID(gobject, prop_id, pspec);
+        break;
     }
 }
 
@@ -235,7 +238,15 @@ static void kiran_app_class_init(KiranAppClass *klass)
             "desktop-id", "Application id", "The desktop file id", NULL,
             G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
 
-    //signals[SIGNAL_LAUNCHED] = g_signal_new("launched", G_OBJECT_CLASS_TYPE(klass), 0, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
+    signals[SIGNAL_LAUNCHED] = g_signal_new("launched",
+                                            KIRAN_TYPE_APP,
+                                            G_SIGNAL_RUN_LAST,
+                                            0,
+                                            NULL,
+                                            NULL,
+                                            NULL,
+                                            G_TYPE_NONE,
+                                            0);
 }
 
 GIcon *kiran_app_get_icon(KiranApp *self)
@@ -247,11 +258,18 @@ GIcon *kiran_app_get_icon(KiranApp *self)
 
 gboolean kiran_app_launch(KiranApp *self)
 {
-    GError *error = NULL;
-    gboolean res;
-
+    gboolean res = FALSE;
+    g_autoptr(GError) error = NULL;
     KiranAppPrivate *priv = kiran_app_get_instance_private(self);
 
-    res = g_app_info_launch(G_APP_INFO(priv->desktop_app), NULL, NULL, NULL);
+    res = g_app_info_launch(G_APP_INFO(priv->desktop_app), NULL, NULL, &error);
+    if (res)
+    {
+        g_signal_emit(self, signals[SIGNAL_LAUNCHED], 0);
+    }
+    else
+    {
+        g_warning("Failed to launch: %s", error->message);
+    }
     return res;
 }

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 21:42:15
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-11 19:01:52
+ * @LastEditTime : 2020-05-20 20:00:30
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-menu-system.c
  */
@@ -58,6 +58,35 @@ KiranMenuApp *kiran_menu_system_lookup_app(KiranMenuSystem *self,
     return g_hash_table_lookup(self->apps, GUINT_TO_POINTER(quark));
 }
 
+static gchar *get_exec_name(const gchar *exec_str)
+{
+    RETURN_VAL_IF_FALSE(exec_str != NULL, NULL);
+
+    g_auto(GStrv) exec_split = g_strsplit(exec_str, " ", -1);
+
+    if (!exec_split || !(exec_split[0]))
+    {
+        return NULL;
+    }
+
+    gchar *exec_name = NULL;
+
+    exec_name = g_path_get_basename(exec_split[0]);
+    if (g_strcmp0(exec_name, "flatpak") == 0)
+    {
+        g_free(exec_name);
+        for (gint i = 0; exec_split[i] != NULL; ++i)
+        {
+            if (g_str_has_prefix(exec_split[i], "--command="))
+            {
+                g_auto(GStrv) command_split = g_strsplit(exec_split[i], "=", -1);
+                exec_name = g_path_get_basename(command_split[1]);
+            }
+        }
+    }
+    return exec_name;
+}
+
 KiranMenuApp *kiran_menu_system_lookup_apps_with_window(KiranMenuSystem *self,
                                                         WnckWindow *window)
 {
@@ -85,18 +114,9 @@ KiranMenuApp *kiran_menu_system_lookup_apps_with_window(KiranMenuSystem *self,
     {
         const gchar *exec = kiran_app_get_exec(KIRAN_APP(app));
         const gchar *locale_name = kiran_app_get_locale_name(KIRAN_APP(app));
-        g_autofree gchar *exec_base_name = NULL;
+        g_autofree gchar *exec_name = get_exec_name(exec);
 
-        if (exec)
-        {
-            g_auto(GStrv) exec_split = g_strsplit(exec, " ", -1);
-            if (exec_split && exec_split[0])
-            {
-                exec_base_name = g_path_get_basename(exec_split[0]);
-            }
-        }
-
-        gboolean match_instance_name = (g_strcmp0(exec_base_name, instance_name) == 0);
+        gboolean match_instance_name = (g_strcmp0(exec_name, instance_name) == 0);
         gboolean match_group_name = (g_strcmp0(group_name, locale_name) == 0);
 
         if (match_instance_name && match_group_name)
@@ -202,6 +222,26 @@ static void write_new_apps(KiranMenuSystem *self)
     g_signal_emit(self, signals[SIGNAL_NEW_APP_CHANGED], 0);
 }
 
+static void remove_from_new_apps(KiranMenuSystem *self, KiranApp *app)
+{
+    g_return_if_fail(app != NULL);
+
+    const gchar *desktop_id = kiran_app_get_desktop_id(app);
+
+    GQuark quark = g_quark_from_string(desktop_id);
+    if (g_list_find(self->new_apps, GUINT_TO_POINTER(quark)))
+    {
+        self->new_apps = g_list_remove(self->new_apps, GUINT_TO_POINTER(quark));
+        write_new_apps(self);
+    }
+}
+
+static void app_launched(KiranApp *app, gpointer user_data)
+{
+    KiranMenuSystem *self = KIRAN_MENU_SYSTEM(user_data);
+    remove_from_new_apps(self, app);
+}
+
 static void kiran_menu_system_flush(KiranMenuUnit *unit, gpointer user_data)
 {
     KiranMenuSystem *self = KIRAN_MENU_SYSTEM(unit);
@@ -243,7 +283,9 @@ static void kiran_menu_system_flush(KiranMenuUnit *unit, gpointer user_data)
         {
             const gchar *desktop_id = g_app_info_get_id(app_info);
             GQuark quark = g_quark_from_string(desktop_id);
-            g_hash_table_insert(self->apps, GUINT_TO_POINTER(quark), kiran_menu_app_get_new(desktop_id));
+            KiranMenuApp *menu_app = kiran_menu_app_get_new(desktop_id);
+            g_hash_table_insert(self->apps, GUINT_TO_POINTER(quark), menu_app);
+            g_signal_connect(KIRAN_APP(menu_app), "launched", G_CALLBACK(app_launched), self);
         }
     }
 
@@ -330,14 +372,14 @@ static void monitor_window_open(WnckScreen *screen,
     KiranMenuSystem *self = KIRAN_MENU_SYSTEM(user_data);
 
     KiranMenuApp *menu_app = kiran_menu_system_lookup_apps_with_window(self, window);
-    const gchar *desktop_id = kiran_app_get_desktop_id(KIRAN_APP(menu_app));
 
-    GQuark quark = g_quark_from_string(desktop_id);
-    if (g_list_find(self->new_apps, GUINT_TO_POINTER(quark)))
+    if (!menu_app)
     {
-        self->new_apps = g_list_remove(self->new_apps, GUINT_TO_POINTER(quark));
-        write_new_apps(self);
+        g_debug("not found matching app for open window: %s\n", wnck_window_get_name(window));
+        return;
     }
+
+    remove_from_new_apps(self, KIRAN_APP(menu_app));
 }
 
 static void kiran_menu_system_init(KiranMenuSystem *self)
