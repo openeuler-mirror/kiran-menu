@@ -10,6 +10,8 @@ struct _KiranMenuAppletButton
 	MatePanelApplet *applet;
 	gboolean icon_size_fixed;
 	guint icon_size;
+
+	GtkIconTheme *icon_theme;
 };
 
 G_DEFINE_TYPE(KiranMenuAppletButton, kiran_menu_applet_button,
@@ -184,6 +186,15 @@ void kiran_menu_applet_button_untoggle(KiranMenuAppletButton *self)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(self), FALSE);
 }
 
+static void kiran_menu_applet_button_update(KiranMenuAppletButton *self)
+{
+	self->icon = gtk_icon_theme_load_icon(
+		self->icon_theme, "start-here", 96,
+		GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
+
+	gtk_widget_queue_draw(GTK_WIDGET(self));
+}
+
 void kiran_menu_applet_button_init(KiranMenuAppletButton *self)
 {
 	GtkIconTheme *icon_theme;
@@ -192,11 +203,11 @@ void kiran_menu_applet_button_init(KiranMenuAppletButton *self)
 	self->icon_size_fixed = FALSE;
 	self->icon_size = 16;
 
-	icon_theme = gtk_icon_theme_get_default();
+	self->icon_theme = gtk_icon_theme_get_default();
 
 	self->icon = gtk_icon_theme_load_icon(
-		icon_theme, "start-here", 96,
-		GTK_ICON_LOOKUP_FORCE_SIZE | GTK_ICON_LOOKUP_FORCE_SVG, NULL);
+		self->icon_theme, "start-here", 96,
+		GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
 
 	self->menu_window = kiran_menu_window_new(GTK_WIDGET(self));
 
@@ -204,15 +215,18 @@ void kiran_menu_applet_button_init(KiranMenuAppletButton *self)
 	 * 当窗口隐藏时更新插件按钮状态
 	 */
 	g_signal_connect_swapped(kiran_menu_window_get_window(self->menu_window), "hide", G_CALLBACK(kiran_menu_applet_button_untoggle), self);
-	//gtk_window_set_default_size(GTK_WINDOW(self->menu_window), 300, 600);
+	g_signal_connect_swapped(self->icon_theme, "changed", G_CALLBACK(kiran_menu_applet_button_update), self);
 }
 
 void kiran_menu_applet_button_finalize(GObject *obj)
 {
 	KiranMenuAppletButton *self = KIRAN_MENU_APPLET_BUTTON(obj);
 
+	g_signal_handlers_disconnect_by_func(self->icon_theme, gtk_widget_queue_draw, self);
+
 	g_object_unref(self->icon);
 	g_object_unref(self->menu_window);
+
 }
 
 void kiran_menu_applet_button_class_init(KiranMenuAppletButtonClass *kclass)
