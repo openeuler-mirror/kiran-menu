@@ -521,6 +521,7 @@ void kiran_menu_window_load_new_apps(KiranMenuWindow *self)
             gtk_container_add(GTK_CONTAINER(more_box), GTK_WIDGET(app_item));
         }
     }
+    gtk_widget_show_all(self->new_apps_box);
     if (more_box) {
         expand_button = kiran_expand_button_new(FALSE);
 

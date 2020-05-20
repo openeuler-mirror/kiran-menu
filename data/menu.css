@@ -92,6 +92,24 @@ button.switch-button:focus
     outline-offset: -3px;
 }
 
+button.toggle.kiran-expand-button {
+    border: none;
+    min-height: 40px;
+    background: transparent;
+    color: white;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    box-shadow: none;
+}
+
+button.toggle.kiran-expand-button:hover {
+    border: none;
+    min-height: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    padding-top: 0px;
+    padding-bottom: 0px;
+    box-shadow: none;
+}
 
 entry.kiran-search-entry {
     margin-left: 10px;
