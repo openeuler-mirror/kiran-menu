@@ -24,11 +24,12 @@ target_include_directories(${TARGET_NAME} PRIVATE
     ${GTK3_INCLUDE_DIRS})
 
 target_compile_options(${TARGET_NAME} PRIVATE
-    -L${DEP_LIBDIR})
+    -L${DEP_LIBDIR}
+    -std=c99)
 
 target_link_libraries(${TARGET_NAME} PRIVATE
     kiran-menu-backend
-    ${GTK3_LIBRIARIES})
+    ${GTK3_LIBRARIES})
 
 
 add_test(menu_test ${TARGET_NAME})

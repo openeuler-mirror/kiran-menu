@@ -1,4 +1,5 @@
 #include "kiran-category-item.h"
+#include <glib/gi18n.h>
 
 struct _KiranCategoryItem
 {
@@ -67,8 +68,8 @@ void kiran_category_item_init(KiranCategoryItem *item)
     gtk_style_context_add_class(context, "category-item-box");
 
     gtk_widget_set_valign(item->box, GTK_ALIGN_CENTER);
-    gtk_box_pack_start(GTK_CONTAINER(item->box), item->image, FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_CONTAINER(item->box), item->label, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(item->box), item->image, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(item->box), item->label, TRUE, TRUE, 0);
     gtk_container_add(GTK_CONTAINER(item), item->box);
 }
 
@@ -85,10 +86,7 @@ gboolean kiran_category_item_enter_notify(GtkWidget *widget, GdkEventCrossing *e
     KiranCategoryItem *self = KIRAN_CATEGORY_ITEM(widget);
 
     if (self->clickable)
-    {
-        gtk_widget_set_state_flags(widget, GTK_STATE_FLAG_PRELIGHT, FALSE);
-        gtk_widget_queue_draw(widget);
-    }
+        gtk_widget_grab_focus(widget);
 
     return FALSE;
 }
@@ -98,7 +96,7 @@ gboolean kiran_category_item_leave_notify(GtkWidget *widget, GdkEventCrossing *e
     GtkStateFlags flags;
 
     flags = gtk_widget_get_state_flags(widget);
-    gtk_widget_set_state_flags(widget, flags & ~GTK_STATE_FLAG_PRELIGHT, TRUE);
+    gtk_widget_set_state_flags(widget, flags & ~GTK_STATE_FLAG_FOCUSED, TRUE);
     gtk_widget_queue_draw(widget);
 
     return FALSE;
@@ -117,6 +115,15 @@ gboolean kiran_category_item_button_release(GtkWidget *widget, GdkEventButton *e
     g_message("emit category clicked signal\n");
     g_signal_emit_by_name(widget, "clicked");
 
+    return FALSE;
+}
+
+gboolean kiran_category_item_key_release(GtkWidget *widget, GdkEventKey *event)
+{
+    if (event->keyval != GDK_KEY_Return)
+        return FALSE;
+
+    g_signal_emit_by_name(widget, "clicked");
     return FALSE;
 }
 
@@ -147,13 +154,13 @@ void kiran_category_item_set_property(GObject *obj, guint prop_id, const GValue 
     case PROP_CLICKABLE:
         item->clickable = g_value_get_boolean(value);
         if (item->clickable) {
-            g_message("item clickable, add events\n");
+            gtk_widget_set_can_focus(GTK_WIDGET(item), TRUE);
             gtk_widget_add_events(GTK_WIDGET(item),
-                                  GDK_BUTTON_RELEASE_MASK | GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK);
+                                  GDK_BUTTON_RELEASE_MASK | GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK | GDK_KEY_RELEASE_MASK);
         }
         else
         {
-            g_message("item not clickable, reset events\n");
+            gtk_widget_set_can_focus(GTK_WIDGET(item), FALSE);
             gtk_widget_set_events(GTK_WIDGET(item), 0);
         }
         break;
@@ -161,7 +168,7 @@ void kiran_category_item_set_property(GObject *obj, guint prop_id, const GValue 
         if (item->name)
             g_free(item->name);
         item->name = g_value_dup_string(value);
-        gtk_label_set_text(GTK_LABEL(item->label), item->name);
+        gtk_label_set_text(GTK_LABEL(item->label), _(item->name));
         break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, prop_id, pspec);
@@ -211,6 +218,7 @@ void kiran_category_item_class_init(KiranCategoryItemClass *kclass)
     GTK_WIDGET_CLASS(kclass)->enter_notify_event = kiran_category_item_enter_notify;
     GTK_WIDGET_CLASS(kclass)->leave_notify_event = kiran_category_item_leave_notify;
     GTK_WIDGET_CLASS(kclass)->button_release_event = kiran_category_item_button_release;
+    GTK_WIDGET_CLASS(kclass)->key_release_event = kiran_category_item_key_release;
     g_object_class_install_properties(G_OBJECT_CLASS(kclass), PROP_MAX, pspecs);
 
     gtk_widget_class_set_css_name(GTK_WIDGET_CLASS(kclass), "kiran-category-item");

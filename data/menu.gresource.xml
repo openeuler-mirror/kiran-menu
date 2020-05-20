@@ -14,5 +14,7 @@
     <file alias="ui/menu">data/menu.ui.xml</file>
     <file alias="logo">images/logo.png</file>
     <file alias="icon/group">images/group.png</file>
+    <file alias="icon/expand">images/expand.png</file>
+    <file alias="icon/shrink">images/shrink.png</file>
   </gresource>
 </gresources>

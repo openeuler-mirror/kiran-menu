@@ -6,7 +6,7 @@
 #include "config.h"
 
 
-#define GETTEXT_PACKAGE "kiran-menu"
+#define GETTEXT_PACKAGE PACKAGE_NAME
 
 static gboolean
 kiran_menu_applet_fill (MatePanelApplet *applet,

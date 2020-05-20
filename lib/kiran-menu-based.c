@@ -18,6 +18,7 @@ static void kiran_menu_based_default_init(KiranMenuBasedInterface *g_iface) {}
 KiranMenuBased *kiran_menu_based_skeleton_get()
 {
     static KiranMenuBased *instance = NULL;
+
     if (!instance)
     {
         instance = g_object_new(KIRAN_TYPE_MENU_SKELETON, NULL);

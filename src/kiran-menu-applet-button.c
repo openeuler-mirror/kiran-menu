@@ -1,6 +1,8 @@
 #include "kiran-menu-applet-button.h"
 #include "kiran-menu-window.h"
 
+#define BUTTON_MARGIN 6
+
 struct _KiranMenuAppletButton
 {
 	GtkToggleButton parent;
@@ -10,67 +12,39 @@ struct _KiranMenuAppletButton
 	MatePanelApplet *applet;
 	gboolean icon_size_fixed;
 	guint icon_size;
+
+	GtkIconTheme *icon_theme;
 };
 
 G_DEFINE_TYPE(KiranMenuAppletButton, kiran_menu_applet_button,
 			  GTK_TYPE_TOGGLE_BUTTON)
 
-static GtkSizeRequestMode kiran_menu_applet_button_get_size_request_mode(
-	GtkWidget *widget)
-{
-	KiranMenuAppletButton *button;
-
-	button = KIRAN_MENU_APPLET_BUTTON(widget);
-	g_assert(button->applet != NULL);
-
-	switch (mate_panel_applet_get_orient(button->applet))
-	{
-	case MATE_PANEL_APPLET_ORIENT_DOWN:
-	case MATE_PANEL_APPLET_ORIENT_UP:
-		return GTK_SIZE_REQUEST_WIDTH_FOR_HEIGHT;
-	default:
-		return GTK_SIZE_REQUEST_HEIGHT_FOR_WIDTH;
-	}
-}
-
 static void kiran_menu_applet_button_get_preferred_height(GtkWidget *widget,
 														  int *min_height,
 														  int *natural_height)
 {
-	KiranMenuAppletButton *button;
+	KiranMenuAppletButton *button = KIRAN_MENU_APPLET_BUTTON(widget);;
+	int size = mate_panel_applet_get_size(button->applet);
+	MatePanelAppletOrient orient =mate_panel_applet_get_orient(button->applet);
 
-	button = KIRAN_MENU_APPLET_BUTTON(widget);
-	g_assert(button->applet != NULL);
-
-	*min_height = *natural_height = mate_panel_applet_get_size(button->applet);
-}
-
-static void kiran_menu_applet_button_get_preferred_width_for_height(GtkWidget *widget,
-																	int height,
-																	int *min_width,
-																	int *natural_width)
-{
-	*natural_width = *min_width = height;
+	if (orient == MATE_PANEL_APPLET_ORIENT_DOWN || orient == MATE_PANEL_APPLET_ORIENT_UP)
+		*min_height = *natural_height = size;
+	else
+		*min_height = *natural_height = size + 2 * BUTTON_MARGIN;
 }
 
 static void kiran_menu_applet_button_get_preferred_width(GtkWidget *widget,
 														 int *min_width,
 														 int *natural_width)
 {
-	KiranMenuAppletButton *button;
+	KiranMenuAppletButton *button = KIRAN_MENU_APPLET_BUTTON(widget);;
+	int size = mate_panel_applet_get_size(button->applet);
+	MatePanelAppletOrient orient =mate_panel_applet_get_orient(button->applet);
 
-	button = KIRAN_MENU_APPLET_BUTTON(widget);
-	g_assert(button->applet != NULL);
-
-	*min_width = *natural_width = mate_panel_applet_get_size(button->applet);
-}
-
-static void kiran_menu_applet_button_get_preferred_height_for_width(GtkWidget *widget,
-																	int width,
-																	int *min_height,
-																	int *natural_height)
-{
-	*natural_height = *min_height = width;
+	if (orient == MATE_PANEL_APPLET_ORIENT_DOWN || orient == MATE_PANEL_APPLET_ORIENT_UP)
+		*min_width = *natural_width = size + 2 * BUTTON_MARGIN;
+	else
+		*min_width = *natural_width = size;
 }
 
 static void kiran_menu_applet_button_size_allocate(GtkWidget *widget,
@@ -86,10 +60,10 @@ static void kiran_menu_applet_button_size_allocate(GtkWidget *widget,
 	if (orient == MATE_PANEL_APPLET_ORIENT_UP ||
 		orient == MATE_PANEL_APPLET_ORIENT_DOWN)
 	{
-		button->icon_size = allocation->height - 8;
+		button->icon_size = allocation->height - 2 * BUTTON_MARGIN;
 	}
 	else
-		button->icon_size = allocation->width - 8;
+		button->icon_size = allocation->width - 2 * BUTTON_MARGIN;
 
 	g_printerr("icon size %d, allocation %d x %d\n", button->icon_size,
 			   allocation->width, allocation->height);
@@ -104,6 +78,7 @@ static gboolean kiran_menu_applet_button_draw(GtkWidget *widget, cairo_t *cr)
 	KiranMenuAppletButton *button;
 	GtkAllocation allocation;
 	GtkStyleContext *context;
+	int pixbuf_width, pixbuf_height;
 
 	button = KIRAN_MENU_APPLET_BUTTON(widget);
 	context = gtk_widget_get_style_context(widget);
@@ -112,6 +87,9 @@ static gboolean kiran_menu_applet_button_draw(GtkWidget *widget, cairo_t *cr)
 										  button->icon_size, GDK_INTERP_BILINEAR);
 
 	g_assert(real_pixbuf != NULL);
+
+	pixbuf_width = gdk_pixbuf_get_width(real_pixbuf);
+	pixbuf_height = gdk_pixbuf_get_height(real_pixbuf);
 	gtk_widget_get_allocation(GTK_WIDGET(button), &allocation);
 
 	gtk_style_context_set_state(context, gtk_widget_get_state_flags(widget));
@@ -119,8 +97,8 @@ static gboolean kiran_menu_applet_button_draw(GtkWidget *widget, cairo_t *cr)
 
 	cairo_save(cr);
 	gdk_cairo_set_source_pixbuf(cr, real_pixbuf,
-								(allocation.width - button->icon_size) / 2.0,
-								(allocation.height - button->icon_size) / 2.0);
+								(allocation.width - pixbuf_width) / 2.0,
+								(allocation.height - pixbuf_height) / 2.0);
 	cairo_paint(cr);
 	cairo_restore(cr);
 
@@ -141,7 +119,12 @@ static void kiran_menu_applet_button_toggled(GtkToggleButton *button)
 	orient = mate_panel_applet_get_orient(self->applet);
 	if (gtk_toggle_button_get_active(button))
 	{
-		gtk_widget_show_all(window);
+		gtk_widget_show(window);
+
+		//将开始菜单窗口总保持在上层
+		gtk_window_set_keep_above(GTK_WINDOW(window), TRUE);
+		//将开始菜单窗口视图重置回初始状态
+		kiran_menu_window_reset_layout(self->menu_window);
 
 		gdk_window_get_origin(gtk_widget_get_window(GTK_WIDGET(button)), &root_x,
 							  &root_y);
@@ -174,13 +157,18 @@ static void kiran_menu_applet_button_toggled(GtkToggleButton *button)
 	}
 }
 
-static void menu_window_active_callback(GtkWindow *window, GParamSpec *spec, GtkToggleButton *button)
+void kiran_menu_applet_button_untoggle(KiranMenuAppletButton *self)
 {
-	g_message("window active changed %d, visible %d\n",
-			gtk_window_is_active(window),
-			gtk_widget_is_visible(window));
-	if (!gtk_window_is_active(window) && gtk_widget_is_visible(window))
-		gtk_toggle_button_set_active(button, FALSE);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(self), FALSE);
+}
+
+static void kiran_menu_applet_button_update(KiranMenuAppletButton *self)
+{
+	self->icon = gtk_icon_theme_load_icon(
+		self->icon_theme, "start-here", 96,
+		GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
+
+	gtk_widget_queue_draw(GTK_WIDGET(self));
 }
 
 void kiran_menu_applet_button_init(KiranMenuAppletButton *self)
@@ -191,38 +179,40 @@ void kiran_menu_applet_button_init(KiranMenuAppletButton *self)
 	self->icon_size_fixed = FALSE;
 	self->icon_size = 16;
 
-	icon_theme = gtk_icon_theme_get_default();
+	self->icon_theme = gtk_icon_theme_get_default();
 
 	self->icon = gtk_icon_theme_load_icon(
-		icon_theme, "start-here", 96,
-		GTK_ICON_LOOKUP_FORCE_SIZE | GTK_ICON_LOOKUP_FORCE_SVG, NULL);
+		self->icon_theme, "start-here", 96,
+		GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
 
 	self->menu_window = kiran_menu_window_new(GTK_WIDGET(self));
-	g_signal_connect(kiran_menu_window_get_window(self->menu_window), "notify::is-active", G_CALLBACK(menu_window_active_callback), self);
-	//gtk_window_set_default_size(GTK_WINDOW(self->menu_window), 300, 600);
+
+	/**
+	 * 当窗口隐藏时更新插件按钮状态
+	 */
+	g_signal_connect_swapped(kiran_menu_window_get_window(self->menu_window), "hide", G_CALLBACK(kiran_menu_applet_button_untoggle), self);
+	g_signal_connect_swapped(self->icon_theme, "changed", G_CALLBACK(kiran_menu_applet_button_update), self);
 }
 
 void kiran_menu_applet_button_finalize(GObject *obj)
 {
 	KiranMenuAppletButton *self = KIRAN_MENU_APPLET_BUTTON(obj);
 
+	g_signal_handlers_disconnect_by_func(self->icon_theme, gtk_widget_queue_draw, self);
+
 	g_object_unref(self->icon);
 	g_object_unref(self->menu_window);
+
 }
 
 void kiran_menu_applet_button_class_init(KiranMenuAppletButtonClass *kclass)
 {
 	G_OBJECT_CLASS(kclass)->finalize = kiran_menu_applet_button_finalize;
-	GTK_WIDGET_CLASS(kclass)->get_request_mode =
-		kiran_menu_applet_button_get_size_request_mode;
+
 	GTK_WIDGET_CLASS(kclass)->get_preferred_height =
 		kiran_menu_applet_button_get_preferred_height;
 	GTK_WIDGET_CLASS(kclass)->get_preferred_width =
 		kiran_menu_applet_button_get_preferred_width;
-	GTK_WIDGET_CLASS(kclass)->get_preferred_height_for_width =
-		kiran_menu_applet_button_get_preferred_height_for_width;
-	GTK_WIDGET_CLASS(kclass)->get_preferred_width_for_height =
-		kiran_menu_applet_button_get_preferred_width_for_height;
 	GTK_WIDGET_CLASS(kclass)->size_allocate =
 		kiran_menu_applet_button_size_allocate;
 	GTK_WIDGET_CLASS(kclass)->draw = kiran_menu_applet_button_draw;
@@ -237,5 +227,8 @@ KiranMenuAppletButton *kiran_menu_applet_button_new(MatePanelApplet *applet)
 	button = g_object_new(KIRAN_TYPE_MENU_APPLET_BUTTON, NULL);
 
 	button->applet = applet;
+	g_signal_connect_swapped(applet, "change-size", G_CALLBACK(gtk_widget_queue_resize), button);
+	g_signal_connect_swapped(applet, "change-orient", G_CALLBACK(gtk_widget_queue_resize), button);
+
 	return button;
 }

@@ -46,6 +46,20 @@ static PowerAction actions[] = {
     {"Reboot", G_STRUCT_OFFSET(KiranPowerMenuClass, reboot)}
 };
 
+enum {
+    SIGNAL_ACTION_TRIGGERED=1,
+    SIGNAL_MAX
+};
+
+static guint signals[SIGNAL_MAX];
+
+
+static gboolean on_item_clicked(KiranPowerMenu *self)
+{
+    g_signal_emit(self, signals[SIGNAL_ACTION_TRIGGERED], 0);
+    return FALSE;
+}
+
 void kiran_power_menu_init(KiranPowerMenu *self)
 {
     GError *error = NULL;
@@ -65,7 +79,7 @@ void kiran_power_menu_init(KiranPowerMenu *self)
         g_error_free(error);
     }
 
-    self->login_manager_proxy = g_dbus_proxy_new_for_bus_sync(G_BUS_TYPE_SESSION,
+    self->login_manager_proxy = g_dbus_proxy_new_for_bus_sync(G_BUS_TYPE_SYSTEM,
                                                 G_DBUS_PROXY_FLAGS_DO_NOT_LOAD_PROPERTIES | G_DBUS_PROXY_FLAGS_DO_NOT_CONNECT_SIGNALS,
                                                 NULL,
                                                 LOGIN_MANAGER_DBUS,
@@ -82,7 +96,7 @@ void kiran_power_menu_init(KiranPowerMenu *self)
     self->grid = gtk_grid_new();
     for (int i = 0; i < G_N_ELEMENTS(actions); i++)
     {
-        GtkWidget *button;
+        GtkWidget *button, *label;
         gpointer *ptr, callback;
 
         KiranPowerMenuClass *kclass = G_TYPE_INSTANCE_GET_CLASS(self, KIRAN_TYPE_POWER_MENU, KiranPowerMenuClass);
@@ -90,10 +104,15 @@ void kiran_power_menu_init(KiranPowerMenu *self)
         ptr = G_STRUCT_MEMBER_P(kclass, actions[i].callback_offset);
         callback = *ptr;
 
-        button = gtk_button_new_with_label(_(actions[i].label));
+        label = gtk_label_new(_(actions[i].label));
+        button = gtk_button_new();
+
+        gtk_label_set_xalign(GTK_LABEL(label), 0.0);
+        gtk_label_set_yalign(GTK_LABEL(label), 0.5);
+        gtk_container_add(GTK_CONTAINER(button), label);
         gtk_grid_attach(GTK_GRID(self->grid), button, 0, i, 1, 1);
-        gtk_button_set_alignment(GTK_BUTTON(button), 0.0, 0.5);
         g_signal_connect_swapped(button, "clicked", G_CALLBACK(callback), self);
+        g_signal_connect_swapped(button, "clicked", G_CALLBACK(on_item_clicked), self);
     }
     gtk_container_add(GTK_CONTAINER(self), self->grid);
 
@@ -152,7 +171,8 @@ void kiran_power_menu_suspend(KiranPowerMenu *self)
     GError *error = NULL;
 
     g_assert(self->login_manager_proxy != NULL);
-    g_dbus_proxy_call_sync(self->login_manager_proxy, "Suspend", g_variant_new_boolean(FALSE), G_DBUS_CALL_FLAGS_NONE, 300, NULL, &error);
+    g_dbus_proxy_call_sync(self->login_manager_proxy, "Suspend",
+            g_variant_new("(b)", FALSE), G_DBUS_CALL_FLAGS_NONE, 300, NULL, &error);
 
     if (error)
     {
@@ -168,7 +188,8 @@ void kiran_power_menu_hibernate(KiranPowerMenu *self)
 
     g_assert(self->login_manager_proxy != NULL);
 
-    g_dbus_proxy_call_sync(self->login_manager_proxy, "Hibernate", g_variant_new_boolean(FALSE), G_DBUS_CALL_FLAGS_NONE, 300, NULL, &error);
+    g_dbus_proxy_call_sync(self->login_manager_proxy, "Hibernate",
+            g_variant_new("(b)", FALSE), G_DBUS_CALL_FLAGS_NONE, 300, NULL, &error);
 
     if (error)
     {
@@ -185,7 +206,7 @@ void kiran_power_menu_logout(KiranPowerMenu *self)
     g_assert(self->session_manager_proxy != NULL);
 
     g_dbus_proxy_call_sync(self->session_manager_proxy, "Logout",
-                           g_variant_new_uint32(LOGOUT_MODE_INTERACTIVE),
+                           g_variant_new("(u)", LOGOUT_MODE_INTERACTIVE),
                            G_DBUS_CALL_FLAGS_NONE,
                            300,
                            NULL,
@@ -208,6 +229,9 @@ void kiran_power_menu_class_init(KiranPowerMenuClass *kclass)
     kclass->hibernate = kiran_power_menu_hibernate;
 
     G_OBJECT_CLASS(kclass)->finalize = kiran_power_menu_finalize;
+
+    signals[SIGNAL_ACTION_TRIGGERED] = g_signal_new("action-triggered", G_TYPE_FROM_CLASS(kclass),
+            0, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 }
 
 KiranPowerMenu *kiran_power_menu_new(void)

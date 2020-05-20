@@ -1,5 +1,11 @@
 #include "kiran-app-button.h"
 
+
+enum {
+    SIGNAL_APP_LAUNCHED=0,
+    SIGNAL_MAX
+};
+
 struct _KiranAppButton {
     GtkButton parent;
 
@@ -9,10 +15,21 @@ struct _KiranAppButton {
 
 G_DEFINE_TYPE(KiranAppButton, kiran_app_button, GTK_TYPE_BUTTON)
 
+
+static guint signals[SIGNAL_MAX];
+
 void kiran_app_button_init(KiranAppButton *self)
 {
+    GtkStyleContext *context;
+
+    context = gtk_widget_get_style_context(GTK_WIDGET(self));
     self->icon = gtk_image_new();
     gtk_container_add(GTK_CONTAINER(self), self->icon);
+
+    gtk_widget_set_hexpand(GTK_WIDGET(self), TRUE);
+    gtk_widget_set_halign(GTK_WIDGET(self), GTK_ALIGN_FILL);
+
+    gtk_style_context_add_class(context, "kiran-app-button");
 }
 
 void kiran_app_button_finalize(GObject *obj)
@@ -41,6 +58,7 @@ void kiran_app_button_clicked(GtkButton *button)
         g_error_free(error);
     } else
     {
+        g_signal_emit(app_btn, signals[SIGNAL_APP_LAUNCHED], 0);
         g_debug("child %d spawned\n", pid);
     }
 #endif
@@ -51,6 +69,8 @@ void kiran_app_button_clicked(GtkButton *button)
 
 void kiran_app_button_class_init(KiranAppButtonClass *kclass)
 {
+    signals[SIGNAL_APP_LAUNCHED] = g_signal_new("app-launched", G_TYPE_FROM_CLASS(kclass),
+            G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
     GTK_BUTTON_CLASS(kclass)->clicked = kiran_app_button_clicked;
 }
 
