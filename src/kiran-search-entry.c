@@ -6,9 +6,20 @@ struct _KiranSearchEntry
     GtkSearchEntry parent;
 
     gchar *primary_icon;
+    gboolean has_preedit;
 };
 
 G_DEFINE_TYPE(KiranSearchEntry, kiran_search_entry, GTK_TYPE_SEARCH_ENTRY)
+
+static void on_preedit_changed(GtkEntry *entry,
+               gchar    *preedit,
+               gpointer  user_data)
+{
+    KiranSearchEntry *self = KIRAN_SEARCH_ENTRY(entry);
+
+    self->has_preedit = (strlen(preedit) != 0);
+}
+
 
 void kiran_search_entry_init(KiranSearchEntry *entry)
 {
@@ -17,11 +28,14 @@ void kiran_search_entry_init(KiranSearchEntry *entry)
     context = gtk_widget_get_style_context(GTK_WIDGET(entry));
     gtk_style_context_add_class(context, "kiran-search-entry");
     entry->primary_icon = NULL;
+    entry->has_preedit = FALSE;
+
+    g_signal_connect(entry, "preedit-changed", G_CALLBACK(on_preedit_changed), NULL);
 }
 
 void kiran_search_entry_finalize(GObject *obj)
 {
-    KiranSearchEntry *self = kiran_search_entry(obj);
+    KiranSearchEntry *self = KIRAN_SEARCH_ENTRY(obj);
 
     g_free(self->primary_icon);
     G_OBJECT_CLASS(kiran_search_entry_parent_class)->finalize(obj);
@@ -31,7 +45,7 @@ gboolean kiran_search_entry_draw(GtkWidget *widget, cairo_t *cr)
 {
     GtkStyleContext *context;
     PangoLayout *pango_layout;
-    GtkEntry *entry = GTK_ENTRY(widget);
+    KiranSearchEntry *self = KIRAN_SEARCH_ENTRY(widget);
     GdkRGBA placeholder_color;
     GtkStateFlags flags;
 
@@ -41,8 +55,8 @@ gboolean kiran_search_entry_draw(GtkWidget *widget, cairo_t *cr)
     if (flags & GTK_STATE_FLAG_FOCUSED)
     {
         //当前已获取到焦点，这个时候gtk本身不会绘制placeholder文本
-        const char *placeholder_text = gtk_entry_get_placeholder_text(entry);
-        if (!gtk_entry_get_text_length(entry) && placeholder_text)
+        const char *placeholder_text = gtk_entry_get_placeholder_text(GTK_ENTRY(self));
+        if (!gtk_entry_get_text_length(GTK_ENTRY(self)) && !self->has_preedit && placeholder_text)
         {
             //编辑框内无内容
             int x, y;
