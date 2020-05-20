@@ -2,11 +2,11 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-09 09:31:02
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-09 16:35:56
+ * @LastEditTime : 2020-05-20 20:09:22
  * @Description  : 
- * @FilePath     : /kiran-menu-2.0/test/start-menu/test-app-favorite.c
+ * @FilePath     : /kiran-menu-2.0/test/test-app-favorite.c
  */
-#include "test/start-menu/test-start-menu.h"
+#include "test/test-start-menu.h"
 
 void test_favorite_apps(gconstpointer data)
 {

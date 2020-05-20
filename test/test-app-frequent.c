@@ -2,11 +2,11 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-11 15:06:43
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-11 15:13:40
+ * @LastEditTime : 2020-05-20 20:09:43
  * @Description  : 
- * @FilePath     : /kiran-menu-2.0/test/start-menu/test-app-frequent.c
+ * @FilePath     : /kiran-menu-2.0/test/test-app-frequent.c
  */
-#include "test/start-menu/test-start-menu.h"
+#include "test/test-start-menu.h"
 
 #define CHECK_GET_BOUNDARY(n)                                             \
     {                                                                     \
