@@ -9,27 +9,49 @@ pkg_search_module(GTK3 REQUIRED gtk+-3.0)
 set(DEP_LIBDIR ${GTK3_LIBDIR})
 
 
-set(TARGET_NAME test-start-menu)
+set(TEST_MENU_UNIT test-menu-unit)
 
-file(GLOB_RECURSE MENU_TEST_H_FILES ./*.h)
-file(GLOB_RECURSE MENU_TEST_C_FILES ./*.c)
+add_executable(${TEST_MENU_UNIT}
+    "test-all-apps.c"
+    "test-app-category.c"
+    "test-app-favorite.c"
+    "test-app-frequent.c"
+    "test-app-search.c"
+    "test-menu-unit.c")
 
-set (ALL_FILES ${MENU_TEST_H_FILES} ${MENU_TEST_C_FILES})
+target_include_directories(${TEST_MENU_UNIT} PRIVATE
+    ${PROJECT_SOURCE_DIR})
 
-
-add_executable(${TARGET_NAME} ${ALL_FILES})
-
-target_include_directories(${TARGET_NAME} PRIVATE
+target_include_directories(${TEST_MENU_UNIT} PRIVATE
     ${PROJECT_SOURCE_DIR}
     ${GTK3_INCLUDE_DIRS})
 
-target_compile_options(${TARGET_NAME} PRIVATE
+target_compile_options(${TEST_MENU_UNIT} PRIVATE
     -L${DEP_LIBDIR}
     -std=c99)
 
-target_link_libraries(${TARGET_NAME} PRIVATE
+target_link_libraries(${TEST_MENU_UNIT} PRIVATE
     kiran-menu-backend
     ${GTK3_LIBRARIES})
 
 
-add_test(menu_test ${TARGET_NAME})
+set(TEST_MENU_SIGNAL test-menu-signal)
+
+add_executable(${TEST_MENU_SIGNAL}
+    "test-menu-signal.c")
+
+target_include_directories(${TEST_MENU_SIGNAL} PRIVATE
+    ${PROJECT_SOURCE_DIR}
+    ${GTK3_INCLUDE_DIRS})
+
+target_compile_options(${TEST_MENU_SIGNAL} PRIVATE
+    -L${DEP_LIBDIR}
+    -std=c99)
+
+target_link_libraries(${TEST_MENU_SIGNAL} PRIVATE
+    kiran-menu-backend
+    ${GTK3_LIBRARIES})
+
+
+add_test(menu_test ${TEST_MENU_UNIT})
+add_test(menu_test ${TEST_MENU_SIGNAL})

@@ -8,7 +8,7 @@
  */
 
 #include "lib/kiran-menu-skeleton.h"
-#include "test/test-start-menu.h"
+#include "test/test-menu-common.h"
 
 #define CASES 10000
 

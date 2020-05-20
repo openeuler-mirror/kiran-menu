@@ -6,7 +6,7 @@
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-app-favorite.c
  */
-#include "test/test-start-menu.h"
+#include "test/test-menu-common.h"
 
 void test_favorite_apps(gconstpointer data)
 {

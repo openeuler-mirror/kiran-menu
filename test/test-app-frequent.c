@@ -6,7 +6,7 @@
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-app-frequent.c
  */
-#include "test/test-start-menu.h"
+#include "test/test-menu-common.h"
 
 #define CHECK_GET_BOUNDARY(n)                                             \
     {                                                                     \

@@ -2,11 +2,11 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-08 15:17:35
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-20 20:09:58
+ * @LastEditTime : 2020-05-20 20:25:57
  * @Description  : 
- * @FilePath     : /kiran-menu-2.0/test/test-start-menu.c
+ * @FilePath     : /kiran-menu-2.0/test/test-menu-unit.c
  */
-#include "test/test-start-menu.h"
+#include "test/test-menu-common.h"
 
 #include <gtk/gtk.h>
 
@@ -83,16 +83,6 @@ int main(int argc, char **argv)
     gtk_init(&argc, &argv);
 
     KiranMenuBased *kiran_menu = kiran_menu_based_skeleton_get();
-
-    g_signal_connect(kiran_menu, "app-changed", G_CALLBACK(installed_changed), NULL);
-    g_signal_connect(kiran_menu, "app-installed", G_CALLBACK(app_installed), NULL);
-    g_signal_connect(kiran_menu, "app-uninstalled", G_CALLBACK(app_uninstalled), NULL);
-    g_signal_connect(kiran_menu, "new-app-changed", G_CALLBACK(new_app_changed), NULL);
-    g_signal_connect(kiran_menu, "favorite-app-added", G_CALLBACK(favorite_app_added), NULL);
-    g_signal_connect(kiran_menu, "favorite-app-deleted", G_CALLBACK(favorite_app_deleted), NULL);
-    g_signal_connect(kiran_menu, "frequent-usage-app-changed", G_CALLBACK(frequent_usage_app_changed), NULL);
-
-    gtk_main();
 
     g_test_add_data_func("/test-start-menu/test-favorite-apps", kiran_menu,
                          test_favorite_apps);
