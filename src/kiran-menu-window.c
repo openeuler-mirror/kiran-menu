@@ -408,7 +408,16 @@ void kiran_menu_window_load_favorites(KiranMenuWindow *self)
     gtk_container_add(GTK_CONTAINER(self->favorite_apps_box), GTK_WIDGET(category_item));
     g_message("%d favorite apps found\n", g_list_length(fav_list));
 
-    //list_box = gtk_list_box_new();
+    if (!g_list_length(fav_list)) {
+        GtkWidget *label = gtk_label_new(_("No apps available"));
+
+        gtk_widget_set_name(label, "app-empty-prompt");
+        gtk_widget_set_halign(label, GTK_ALIGN_START);
+        gtk_container_add(GTK_CONTAINER(self->favorite_apps_box), label);
+        gtk_widget_show_all(self->favorite_apps_box);
+        return;
+    }
+
     for (ptr = fav_list; ptr != NULL; ptr = ptr->next)
     {
         KiranAppItem *app_item;
@@ -435,24 +444,16 @@ void kiran_menu_window_load_frequent_apps(KiranMenuWindow *self)
 
     gtk_container_clear(GTK_CONTAINER(self->frequent_apps_box));
 
-    category_item = kiran_category_item_new(_("Frequently Used"), FALSE);
-    gtk_container_add(GTK_CONTAINER(self->frequent_apps_box), GTK_WIDGET(category_item));
-
     recently_apps = kiran_menu_based_get_nfrequent_apps(self->backend, FREQUENT_APPS_SHOW_MAX);
     g_message("%d frequent apps found\n", g_list_length(recently_apps));
 
     if (!g_list_length(recently_apps)) {
         //最近使用列表为空
-
-        GtkWidget *label = gtk_label_new(_("No apps available"));
-
-        gtk_widget_set_name(label, "app-empty-prompt");
-        gtk_widget_set_halign(label, GTK_ALIGN_START);
-        gtk_container_add(GTK_CONTAINER(self->frequent_apps_box), label);
-        gtk_widget_show_all(self->frequent_apps_box);
         return;
     }
 
+    category_item = kiran_category_item_new(_("Frequently Used"), FALSE);
+    gtk_container_add(GTK_CONTAINER(self->frequent_apps_box), GTK_WIDGET(category_item));
     for (ptr = recently_apps; ptr != NULL; ptr = ptr->next)
     {
         KiranAppItem *app_item;
@@ -488,25 +489,18 @@ void kiran_menu_window_load_new_apps(KiranMenuWindow *self)
     int index;
 
     gtk_container_clear(GTK_CONTAINER(self->new_apps_box));
-    category_item = kiran_category_item_new(_("New Installed"), FALSE);
-    gtk_container_add(GTK_CONTAINER(self->new_apps_box), GTK_WIDGET(category_item));
-    gtk_widget_show_all(GTK_WIDGET(category_item));
 
     new_apps = kiran_menu_based_get_nnew_apps(self->backend, -1);
-
     g_message("%d new apps found\n", g_list_length(new_apps));
 
     if (!g_list_length(new_apps)) {
-        //最近使用列表为空
-
-        GtkWidget *label = gtk_label_new(_("No apps available"));
-
-        gtk_widget_set_name(label, "app-empty-prompt");
-        gtk_widget_set_halign(label, GTK_ALIGN_START);
-        gtk_container_add(GTK_CONTAINER(self->new_apps_box), label);
-        gtk_widget_show(label);
+        //最近使用列表为空，不再显示“新安装”分类标签
         return;
     }
+
+    category_item = kiran_category_item_new(_("New Installed"), FALSE);
+    gtk_container_add(GTK_CONTAINER(self->new_apps_box), GTK_WIDGET(category_item));
+    gtk_widget_show_all(GTK_WIDGET(category_item));
 
     for (ptr = new_apps, index = 0; ptr != NULL; ptr = ptr->next, index++)
     {
@@ -527,6 +521,7 @@ void kiran_menu_window_load_new_apps(KiranMenuWindow *self)
             gtk_container_add(GTK_CONTAINER(more_box), GTK_WIDGET(app_item));
         }
     }
+    gtk_widget_show_all(self->new_apps_box);
     if (more_box) {
         expand_button = kiran_expand_button_new(FALSE);
 
