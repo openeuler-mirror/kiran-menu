@@ -26,6 +26,9 @@ void kiran_app_button_init(KiranAppButton *self)
     self->icon = gtk_image_new();
     gtk_container_add(GTK_CONTAINER(self), self->icon);
 
+    gtk_widget_set_hexpand(GTK_WIDGET(self), TRUE);
+    gtk_widget_set_halign(GTK_WIDGET(self), GTK_ALIGN_FILL);
+
     gtk_style_context_add_class(context, "kiran-app-button");
 }
 

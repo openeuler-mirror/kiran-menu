@@ -24,20 +24,17 @@
             <property name="width_request">62</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_bottom">10</property>
             <property name="hexpand">False</property>
             <property name="vexpand">True</property>
             <property name="orientation">vertical</property>
             <child>
               <object class="GtkGrid" id="sidebar-box">
-                <property name="width_request">32</property>
+                <property name="width_request">20</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="halign">center</property>
                 <property name="valign">end</property>
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
-                <property name="row_spacing">12</property>
                 <child>
                   <placeholder/>
                 </child>

@@ -656,7 +656,7 @@ gboolean leave_notify_callback(GtkWidget *widget, GdkEventCrossing *ev, gpointer
 void kiran_menu_window_init(KiranMenuWindow *self)
 {
     GError *error = NULL;
-    GtkWidget *search_box;
+    GtkWidget *search_box, *separator;
     GtkWidget *top_box, *bottom_box;
     KiranMenuSkeleton *skeleton;
 
@@ -706,11 +706,13 @@ void kiran_menu_window_init(KiranMenuWindow *self)
     self->back_button = GTK_WIDGET(gtk_builder_get_object(self->builder, "back-button"));
     self->all_apps_button = GTK_WIDGET(gtk_builder_get_object(self->builder, "all-apps-button"));
 
+    separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+    gtk_widget_set_name(separator, "sidebar-separator");
     gtk_orientable_set_orientation(GTK_ORIENTABLE(self->sidebar_box), GTK_ORIENTATION_VERTICAL);
     kiran_menu_window_add_app_button(self, "/kiran-menu/sidebar/home-dir", _("Home Directory"), "caja");
     kiran_menu_window_add_app_button(self, "/kiran-menu/sidebar/monitor", _("System monitor"), "mate-system-monitor");
     kiran_menu_window_add_app_button(self, "/kiran-menu/sidebar/help", _("Open help"), "yelp");
-    gtk_container_add(GTK_CONTAINER(self->sidebar_box), gtk_separator_new(GTK_ORIENTATION_HORIZONTAL));
+    gtk_container_add(GTK_CONTAINER(self->sidebar_box), separator);
     kiran_menu_window_add_app_button(self, "/kiran-menu/sidebar/avatar", _("About me"), "mate-about-me");
     kiran_menu_window_add_app_button(self, "/kiran-menu/sidebar/settings", _("Control center"), "mate-control-center");
     gtk_container_add(GTK_CONTAINER(self->sidebar_box), GTK_WIDGET(kiran_power_button_new()));

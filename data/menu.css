@@ -57,6 +57,8 @@ button.kiran-app-button {
     border-style: solid;
     border-color: transparent;
     background: transparent;
+
+    min-height: 30px;
 }
 
 button:focus {
@@ -113,6 +115,13 @@ entry.kiran-search-entry selection {
 separator {
     color: rgba(255, 255, 255, 0.2);
     background-color: rgba(255, 255, 255, 0.2);
+}
+
+separator#sidebar-separator {
+    margin-left: 12px;
+    margin-right: 12px;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 window#menu-window {
