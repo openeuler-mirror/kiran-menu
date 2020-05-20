@@ -46,6 +46,20 @@ static PowerAction actions[] = {
     {"Reboot", G_STRUCT_OFFSET(KiranPowerMenuClass, reboot)}
 };
 
+enum {
+    SIGNAL_ACTION_TRIGGERED=1,
+    SIGNAL_MAX
+};
+
+static guint signals[SIGNAL_MAX];
+
+
+static gboolean on_item_clicked(KiranPowerMenu *self)
+{
+    g_signal_emit(self, signals[SIGNAL_ACTION_TRIGGERED], 0);
+    return FALSE;
+}
+
 void kiran_power_menu_init(KiranPowerMenu *self)
 {
     GError *error = NULL;
@@ -98,6 +112,7 @@ void kiran_power_menu_init(KiranPowerMenu *self)
         gtk_container_add(GTK_CONTAINER(button), label);
         gtk_grid_attach(GTK_GRID(self->grid), button, 0, i, 1, 1);
         g_signal_connect_swapped(button, "clicked", G_CALLBACK(callback), self);
+        g_signal_connect_swapped(button, "clicked", G_CALLBACK(on_item_clicked), self);
     }
     gtk_container_add(GTK_CONTAINER(self), self->grid);
 
@@ -214,6 +229,9 @@ void kiran_power_menu_class_init(KiranPowerMenuClass *kclass)
     kclass->hibernate = kiran_power_menu_hibernate;
 
     G_OBJECT_CLASS(kclass)->finalize = kiran_power_menu_finalize;
+
+    signals[SIGNAL_ACTION_TRIGGERED] = g_signal_new("action-triggered", G_TYPE_FROM_CLASS(kclass),
+            0, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 }
 
 KiranPowerMenu *kiran_power_menu_new(void)
