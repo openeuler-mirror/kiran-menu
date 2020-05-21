@@ -4,7 +4,6 @@ kiran-app-item {
     background: transparent;
 
     font-family: "Noto Sans CJK SC";
-    font-size: 14pt;
     border-width: 0px;
     border-right-width: 3px;
     border-style: solid;
@@ -15,7 +14,6 @@ kiran-app-item {
     -KiranAppItem-icon-spacing: 12px;
 
     color: white;
-    -gtk-dpi: 72;
 }
 
 .category-item-box {
@@ -40,9 +38,7 @@ kiran-category-item:hover {
 
 kiran-category-item  label {
     margin-left: 10px;
-    font-size: 15pt;
     font-weight: bold;
-    -gtk-dpi: 72;
 }
 
 kiran-app-item:focus, kiran-category-item:focus {
