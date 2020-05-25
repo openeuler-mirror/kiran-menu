@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:38
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-25 09:28:24
+ * @LastEditTime : 2020-05-25 09:57:19
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-app.c
  */
@@ -467,7 +467,6 @@ static gboolean kiran_app_launch_flatpak(KiranApp *self,
 
     GPid pid;
     GList *iter;
-    char *sn_id = NULL;
 
     if (!expand_application_parameters(self, &argc, &argv, error))
         goto out;
@@ -489,8 +488,6 @@ static gboolean kiran_app_launch_flatpak(KiranApp *self,
         pid_envvar = NULL;
     }
 
-    sn_id = NULL;
-
     if (!g_spawn_async(priv->path,
                        argv,
                        envp,
@@ -500,15 +497,9 @@ static gboolean kiran_app_launch_flatpak(KiranApp *self,
                        &pid,
                        error))
     {
-        if (sn_id)
-            g_signal_emit(self, signals[SIGANL_LAUNCH_FAILED], 0);
-
-        g_free(sn_id);
-
         goto out;
     }
 
-    g_free(sn_id);
     g_strfreev(argv);
     argv = NULL;
 
@@ -542,6 +533,7 @@ gboolean kiran_app_launch(KiranApp *self)
     }
     else
     {
+        g_signal_emit(self, signals[SIGANL_LAUNCH_FAILED], 0);
         g_warning("Failed to launch: %s", error->message);
     }
     return res;
