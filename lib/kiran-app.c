@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:38
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-20 17:28:41
+ * @LastEditTime : 2020-05-25 09:28:24
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/kiran-app.c
  */
@@ -12,6 +12,7 @@
 #include <gio/gdesktopappinfo.h>
 
 #include "lib/kiran-menu-app.h"
+#include "lib/helper.h"
 
 typedef struct _KiranAppPrivate KiranAppPrivate;
 
@@ -21,6 +22,8 @@ struct _KiranAppPrivate
 
     gchar *desktop_id;
 
+    gchar *file_name;
+
     gchar *name;
     gchar *locale_name;
 
@@ -28,6 +31,12 @@ struct _KiranAppPrivate
     gchar *locale_comment;
 
     gchar *exec;
+
+    gchar *icon_name;
+
+    gchar *path;
+
+    KiranAppKind kind;
 
     GDesktopAppInfo *desktop_app;
 };
@@ -166,12 +175,45 @@ static void kiran_app_get_property(GObject *gobject, guint prop_id,
     }
 }
 
+static KiranAppKind _kiran_app_get_kind(KiranApp *self)
+{
+    KiranAppPrivate *priv = kiran_app_get_instance_private(self);
+
+    RETURN_VAL_IF_FALSE(priv != NULL, KIRAN_APP_KIND_UNKNOWN);
+    RETURN_VAL_IF_FALSE(priv->exec != NULL, KIRAN_APP_KIND_UNKNOWN);
+
+    g_auto(GStrv) exec_split = g_strsplit(priv->exec, " ", -1);
+
+    if (!exec_split || !(exec_split[0]))
+    {
+        return KIRAN_APP_KIND_UNKNOWN;
+    }
+
+    g_autofree gchar *exec_name = NULL;
+
+    exec_name = g_path_get_basename(exec_split[0]);
+    if (g_strcmp0(exec_name, "flatpak") == 0)
+    {
+        return KIRAN_APP_KIND_FLATPAK;
+    }
+
+    g_autofree gchar *x_flatpak = g_desktop_app_info_get_string(priv->desktop_app, "X-Flatpak");
+    if (x_flatpak)
+    {
+        return KIRAN_APP_KIND_FLATPAK;
+    }
+
+    return KIRAN_APP_KIND_DESKTOP;
+}
+
 static void kiran_app_set_app_info(KiranApp *app, const char *desktop_id)
 {
     KiranAppPrivate *priv = kiran_app_get_instance_private(app);
 
     priv->desktop_id = g_strdup(desktop_id);
     priv->desktop_app = g_desktop_app_info_new(desktop_id);
+
+    priv->file_name = g_strdup(g_desktop_app_info_get_filename(priv->desktop_app));
 
 #define GET_STRING(key) g_desktop_app_info_get_string(priv->desktop_app, key)
 #define GET_LOCALE_STRING(key) \
@@ -184,6 +226,18 @@ static void kiran_app_set_app_info(KiranApp *app, const char *desktop_id)
     priv->locale_comment = GET_LOCALE_STRING("Comment");
 
     priv->exec = GET_STRING("Exec");
+
+    priv->icon_name = GET_STRING("Icon");
+
+    priv->path = GET_STRING("Path");
+
+    if (priv->path && priv->path[0] == '\0')
+    {
+        g_free(priv->path);
+        priv->path = NULL;
+    }
+
+    priv->kind = _kiran_app_get_kind(app);
 
 #undef GET_STRING
 #undef GET_LOCALE_STRING
@@ -214,6 +268,8 @@ static void kiran_app_dispose(GObject *object)
     g_clear_pointer(&priv->desktop_id, g_free);
     g_clear_object(&priv->desktop_app);
 
+    g_clear_pointer(&priv->file_name, g_free);
+
     g_clear_pointer(&priv->name, g_free);
     g_clear_pointer(&priv->locale_name, g_free);
 
@@ -221,6 +277,10 @@ static void kiran_app_dispose(GObject *object)
     g_clear_pointer(&priv->locale_comment, g_free);
 
     g_clear_pointer(&priv->exec, g_free);
+
+    g_clear_pointer(&priv->icon_name, g_free);
+
+    g_clear_pointer(&priv->path, g_free);
 
     G_OBJECT_CLASS(kiran_app_parent_class)->dispose(object);
 }
@@ -247,6 +307,16 @@ static void kiran_app_class_init(KiranAppClass *klass)
                                             NULL,
                                             G_TYPE_NONE,
                                             0);
+
+    signals[SIGANL_LAUNCH_FAILED] = g_signal_new("launch-failed",
+                                                 KIRAN_TYPE_APP,
+                                                 G_SIGNAL_RUN_LAST,
+                                                 0,
+                                                 NULL,
+                                                 NULL,
+                                                 NULL,
+                                                 G_TYPE_NONE,
+                                                 0);
 }
 
 GIcon *kiran_app_get_icon(KiranApp *self)
@@ -256,13 +326,216 @@ GIcon *kiran_app_get_icon(KiranApp *self)
     return g_app_info_get_icon(G_APP_INFO(priv->desktop_app));
 }
 
+KiranAppKind kiran_app_get_kind(KiranApp *self)
+{
+    KiranAppPrivate *priv = kiran_app_get_instance_private(self);
+
+    return priv->kind;
+}
+
+typedef struct
+{
+    GSpawnChildSetupFunc user_setup;
+    gpointer user_setup_data;
+
+    char *pid_envvar;
+} ChildSetupData;
+
+static void expand_macro(KiranApp *self,
+                         char macro,
+                         GString *exec)
+{
+    KiranAppPrivate *priv = kiran_app_get_instance_private(self);
+
+    char *expanded = NULL;
+
+    g_return_if_fail(exec != NULL);
+
+    switch (macro)
+    {
+    case 'i':
+        if (priv->icon_name)
+        {
+            g_string_append(exec, "--icon ");
+            expanded = g_shell_quote(priv->icon_name);
+            g_string_append(exec, expanded);
+            g_free(expanded);
+        }
+        break;
+
+    case 'c':
+        if (priv->locale_name)
+        {
+            expanded = g_shell_quote(priv->locale_name);
+            g_string_append(exec, expanded);
+            g_free(expanded);
+        }
+        break;
+
+    case 'k':
+        if (priv->file_name)
+        {
+            expanded = g_shell_quote(priv->file_name);
+            g_string_append(exec, expanded);
+            g_free(expanded);
+        }
+        break;
+
+    case '%':
+        g_string_append_c(exec, '%');
+        break;
+    }
+}
+
+static gboolean expand_application_parameters(KiranApp *self,
+                                              int *argc,
+                                              char ***argv,
+                                              GError **error)
+{
+    KiranAppPrivate *priv = kiran_app_get_instance_private(self);
+
+    const char *p = priv->exec;
+    GString *expanded_exec;
+    gboolean res;
+
+    if (priv->exec == NULL)
+    {
+        g_set_error_literal(error,
+                            G_IO_ERROR,
+                            G_IO_ERROR_FAILED,
+                            "Desktop file didn’t specify Exec field");
+        return FALSE;
+    }
+
+    expanded_exec = g_string_new(NULL);
+
+    while (*p)
+    {
+        if (p[0] == '%' && p[1] != '\0')
+        {
+            expand_macro(self, p[1], expanded_exec);
+            p++;
+        }
+        else
+            g_string_append_c(expanded_exec, *p);
+
+        p++;
+    }
+    res = g_shell_parse_argv(expanded_exec->str, argc, argv, error);
+    g_string_free(expanded_exec, TRUE);
+    return res;
+}
+
+static void child_setup(gpointer user_data)
+{
+    gchar *pid_envvar = (gchar *)user_data;
+
+    if (pid_envvar)
+    {
+        pid_t pid = getpid();
+        char buf[20];
+        int i;
+
+        /* Write the pid into the space already reserved for it in the
+       * environment array. We can't use sprintf because it might
+       * malloc, so we do it by hand. It's simplest to write the pid
+       * out backwards first, then copy it over.
+       */
+        for (i = 0; pid; i++, pid /= 10)
+            buf[i] = (pid % 10) + '0';
+        for (i--; i >= 0; i--)
+            *(pid_envvar++) = buf[i];
+        *pid_envvar = '\0';
+    }
+}
+
+static gboolean kiran_app_launch_flatpak(KiranApp *self,
+                                         GError **error)
+{
+    g_return_val_if_fail(self != NULL, FALSE);
+
+    KiranAppPrivate *priv = kiran_app_get_instance_private(self);
+
+    gboolean completed = FALSE;
+
+    char **argv, **envp;
+    int argc;
+    gchar *pid_envvar;
+
+    argv = NULL;
+    envp = g_get_environ();
+
+    GPid pid;
+    GList *iter;
+    char *sn_id = NULL;
+
+    if (!expand_application_parameters(self, &argc, &argv, error))
+        goto out;
+
+    if (priv->file_name)
+    {
+        envp = g_environ_setenv(envp,
+                                "GIO_LAUNCHED_DESKTOP_FILE",
+                                priv->file_name,
+                                TRUE);
+        envp = g_environ_setenv(envp,
+                                "GIO_LAUNCHED_DESKTOP_FILE_PID",
+                                "XXXXXXXXXXXXXXXXXXXX", /* filled in child_setup */
+                                TRUE);
+        pid_envvar = (char *)g_environ_getenv(envp, "GIO_LAUNCHED_DESKTOP_FILE_PID");
+    }
+    else
+    {
+        pid_envvar = NULL;
+    }
+
+    sn_id = NULL;
+
+    if (!g_spawn_async(priv->path,
+                       argv,
+                       envp,
+                       G_SPAWN_SEARCH_PATH,
+                       child_setup,
+                       pid_envvar,
+                       &pid,
+                       error))
+    {
+        if (sn_id)
+            g_signal_emit(self, signals[SIGANL_LAUNCH_FAILED], 0);
+
+        g_free(sn_id);
+
+        goto out;
+    }
+
+    g_free(sn_id);
+    g_strfreev(argv);
+    argv = NULL;
+
+    completed = TRUE;
+
+out:
+    g_strfreev(argv);
+    g_strfreev(envp);
+
+    return completed;
+}
+
 gboolean kiran_app_launch(KiranApp *self)
 {
     gboolean res = FALSE;
     g_autoptr(GError) error = NULL;
     KiranAppPrivate *priv = kiran_app_get_instance_private(self);
 
-    res = g_app_info_launch(G_APP_INFO(priv->desktop_app), NULL, NULL, &error);
+    if (priv->kind == KIRAN_APP_KIND_FLATPAK)
+    {
+        res = kiran_app_launch_flatpak(self, &error);
+    }
+    else
+    {
+        res = g_app_info_launch(G_APP_INFO(priv->desktop_app), NULL, NULL, &error);
+    }
+
     if (res)
     {
         g_signal_emit(self, signals[SIGNAL_LAUNCHED], 0);
