@@ -647,12 +647,45 @@ gboolean leave_notify_callback(GtkWidget *widget, GdkEventCrossing *ev, gpointer
     return FALSE;
 }
 
+/**
+ * 重新调整开始菜单窗口大小，保证其最小大小不超过可显示的屏幕区域大小
+ *
+ */
+static void auto_resize_window(GtkWidget *window)
+{
+    GdkMonitor *monitor;
+    GdkDisplay *display;
+    GdkRectangle rect;
+    int requested_width, requested_height;
+
+    display = gdk_display_get_default();
+    if (gtk_widget_get_realized(window)) {
+        monitor = gdk_display_get_monitor_at_window(display, gtk_widget_get_window(window));
+    } else {
+        monitor = gdk_display_get_primary_monitor(display);
+    }
+    
+    gtk_widget_get_size_request(window, &requested_width, &requested_height);
+
+    //获取实际可用的显示区域大小，避免覆盖panel
+    gdk_monitor_get_workarea(monitor, &rect);
+
+    if (requested_width > rect.width)
+        requested_width = rect.width;
+
+    if (requested_height > rect.height)
+        requested_height = rect.height;
+
+    gtk_widget_set_size_request(window, requested_width, requested_height);
+}
+
 void kiran_menu_window_init(KiranMenuWindow *self)
 {
     GError *error = NULL;
     GtkWidget *search_box, *separator, *power_btn;
     GtkWidget *top_box, *bottom_box;
     KiranMenuSkeleton *skeleton;
+    GdkScreen *screen;
 
     self->monitor = g_app_info_monitor_get();
     self->backend = kiran_menu_based_skeleton_get();
@@ -739,6 +772,13 @@ void kiran_menu_window_init(KiranMenuWindow *self)
     g_signal_connect_swapped(skeleton, "favorite-app-added", G_CALLBACK(kiran_menu_window_load_favorites), self);
     g_signal_connect_swapped(skeleton, "frequent-usage-app-changed", G_CALLBACK(kiran_menu_window_load_frequent_apps), self);
     g_signal_connect_swapped(skeleton, "app-changed", G_CALLBACK(kiran_menu_window_reload_app_data), self);
+
+    //屏幕大小或分辨率变化时自动调整开始菜单窗口大小
+    screen = gdk_screen_get_default();
+    auto_resize_window(self->window);
+    g_signal_connect_swapped(screen, "size-changed", G_CALLBACK(auto_resize_window), self->window);
+    g_signal_connect_swapped(screen, "monitors-changed", G_CALLBACK(auto_resize_window), self->window);
+
 }
 
 void kiran_menu_window_finalize(GObject *obj)
