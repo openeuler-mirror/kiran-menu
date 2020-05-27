@@ -355,6 +355,7 @@ void kiran_menu_window_load_applications(KiranMenuWindow *self)
     gtk_container_clear(GTK_CONTAINER(self->all_apps_box));
     g_list_free_full(self->category_list, g_free);
     g_hash_table_remove_all(self->category_items);
+    self->category_list = NULL;
 
     category_list = kiran_menu_based_get_category_names(self->backend);
 
@@ -379,7 +380,6 @@ void kiran_menu_window_load_applications(KiranMenuWindow *self)
                 G_CALLBACK(item_focus_in_callback), self->all_apps_viewport);
 
         //添加应用程序标签
-        list_box = gtk_list_box_new();
         for (ptr = apps; ptr != NULL; ptr = ptr->next) {
             KiranApp *app = ptr->data;
 
@@ -388,8 +388,8 @@ void kiran_menu_window_load_applications(KiranMenuWindow *self)
 
             g_signal_connect(app_item, "focus-in-event",
                     G_CALLBACK(item_focus_in_callback), self->all_apps_viewport);
+            gtk_widget_show_all(GTK_WIDGET(app_item));
         }
-        gtk_widget_show_all(self->all_apps_box);
         g_signal_connect_swapped(category_item, "clicked", G_CALLBACK(show_category_overview), self);
 
 	//只记录包含应用的分类名称
