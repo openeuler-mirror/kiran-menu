@@ -347,7 +347,7 @@ void kiran_menu_window_load_applications(KiranMenuWindow *self)
 {
     GHashTableIter iter;
     gpointer key, value;
-    GList *node;
+    GList *node, *category_list;
 
     /**
      * 清空原来的应用程序数据
@@ -356,9 +356,9 @@ void kiran_menu_window_load_applications(KiranMenuWindow *self)
     g_list_free_full(self->category_list, g_free);
     g_hash_table_remove_all(self->category_items);
 
-    self->category_list = kiran_menu_based_get_category_names(self->backend);
+    category_list = kiran_menu_based_get_category_names(self->backend);
 
-    for (node = self->category_list; node != NULL; node = node->next)
+    for (node = category_list; node != NULL; node = node->next)
     {
         GList *apps, *ptr;
         KiranCategoryItem *category_item;
@@ -367,6 +367,9 @@ void kiran_menu_window_load_applications(KiranMenuWindow *self)
         gchar *category_name = node->data;
 
         apps = kiran_menu_based_get_category_apps(self->backend, category_name);
+
+	if (!g_list_length(apps))		//空的分类不再显示
+		continue;
 
         //添加应用分类标签
         category_item = kiran_category_item_new(category_name, TRUE);
@@ -388,7 +391,12 @@ void kiran_menu_window_load_applications(KiranMenuWindow *self)
         }
         gtk_widget_show_all(self->all_apps_box);
         g_signal_connect_swapped(category_item, "clicked", G_CALLBACK(show_category_overview), self);
+
+	//只记录包含应用的分类名称
+	self->category_list = g_list_append(self->category_list, g_strdup(category_name));
     }
+
+    g_list_free_full(category_list, g_free);
 }
 
 /**
