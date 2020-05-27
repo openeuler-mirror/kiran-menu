@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:33
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-09 13:57:19
+ * @LastEditTime : 2020-05-25 09:26:25
  * @Description  : 维护APP的一些基本信息
  * @FilePath     : /kiran-menu-2.0/lib/kiran-app.h
  */
@@ -22,6 +22,13 @@ struct _KiranAppClass
 
     gpointer padding[12];
 };
+
+typedef enum
+{
+    KIRAN_APP_KIND_FLATPAK,
+    KIRAN_APP_KIND_DESKTOP,
+    KIRAN_APP_KIND_UNKNOWN,
+} KiranAppKind;
 
 /**
  * @description: 获取App的名字
@@ -102,6 +109,14 @@ guint64 kiran_app_get_create_time(KiranApp *self);
  * @author: songchuanfei
  */
 GIcon *kiran_app_get_icon(KiranApp *self);
+
+/**
+ * @description: 获取指定app的类型
+ * @param {KiranApp*} 要获取图标的app
+ * @return: app类型
+ * @author: tangjie02
+ */
+KiranAppKind kiran_app_get_kind(KiranApp *self);
 
 /**
  * @description: 启动指定的app

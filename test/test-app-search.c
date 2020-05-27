@@ -2,13 +2,13 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-09 10:40:16
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-05-09 16:32:06
+ * @LastEditTime : 2020-05-20 20:14:42
  * @Description  : 
- * @FilePath     : /kiran-menu-2.0/test/start-menu/test-app-search.c
+ * @FilePath     : /kiran-menu-2.0/test/test-app-search.c
  */
 #include <glib/gprintf.h>
 
-#include "test/start-menu/test-start-menu.h"
+#include "test/test-menu-common.h"
 
 #define CHECK_SEARCH_RESULT(keyword)                                            \
     {                                                                           \
