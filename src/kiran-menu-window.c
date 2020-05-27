@@ -32,7 +32,6 @@ struct _KiranMenuWindow {
     const char *last_app_view;
 
     KiranMenuBased *backend;
-    GHashTable *apps;
     GList *category_list;
     GList *favorite_apps;
 
@@ -674,6 +673,7 @@ void kiran_menu_window_init(KiranMenuWindow *self)
     kiran_menu_window_load_styles(self);
     self->builder = gtk_builder_new_from_resource("/kiran-menu/ui/menu");
     self->window = GTK_WIDGET(gtk_builder_get_object(self->builder, "menu-window"));
+    self->window = g_object_ref(self->window);
     gtk_window_set_decorated(GTK_WINDOW(self->window), FALSE);
 
     self->all_apps_box= GTK_WIDGET(gtk_builder_get_object(self->builder, "all-apps-box"));
@@ -748,7 +748,6 @@ void kiran_menu_window_finalize(GObject *obj)
     g_object_unref(self->window);
     g_object_unref(self->builder);
     g_resources_unregister(self->resource);
-    g_hash_table_unref(self->apps);
     g_list_free_full(self->category_list, g_free);
     g_hash_table_destroy(self->category_items);
     g_list_free_full(self->favorite_apps, g_object_unref);
