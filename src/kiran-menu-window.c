@@ -376,6 +376,7 @@ void kiran_menu_window_load_applications(KiranMenuWindow *self)
         category_item = kiran_category_item_new(category_name, TRUE);
         g_hash_table_insert(self->category_items, g_strdup(category_name), g_object_ref(category_item));
         gtk_container_add(GTK_CONTAINER(self->all_apps_box), GTK_WIDGET(category_item));
+	gtk_widget_show_all(GTK_WIDGET(category_item));
         g_signal_connect(category_item, "focus-in-event",
                 G_CALLBACK(item_focus_in_callback), self->all_apps_viewport);
 
