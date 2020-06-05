@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 17:28:51
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-04 16:39:11
+ * @LastEditTime : 2020-06-05 10:00:34
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/menu-category.cpp
  */
@@ -17,15 +17,15 @@ namespace Kiran
 {
 MenuCategory::MenuCategory()
 {
-    this->file_path = "/usr/share/kiran-menu/com.unikylin.Kiran.MenuCategory.xml";
+    this->file_path_ = "/usr/share/kiran-menu/com.unikylin.Kiran.MenuCategory.xml";
 
     std::unique_ptr<CategoryReader> reader(new CategoryReader());
 
-    this->root = reader->create_from_xml(this->file_path);
+    this->root_ = reader->create_from_xml(this->file_path_);
 
-    if (this->root && this->root->get_children())
+    if (this->root_ && this->root_->get_children())
     {
-        auto iter = this->root->get_children()->get_children();
+        auto iter = this->root_->get_children()->get_children();
         for (; iter; iter = iter->get_next())
         {
             if (iter->get_type() != CategoryNodeType::CATEGORY_NODE_TYPE_CATEGORY)
@@ -42,7 +42,7 @@ MenuCategory::MenuCategory()
                     g_warning("Multiple category exist same name: %s\n", name.c_str());
                     continue;
                 }
-                this->categories.push_back(category);
+                this->categories_.push_back(category);
             }
         }
     }
@@ -54,9 +54,9 @@ MenuCategory::~MenuCategory()
 
 void MenuCategory::flush(const AppVec &apps)
 {
-    for (int i = 0; i < this->categories.size(); ++i)
+    for (int i = 0; i < this->categories_.size(); ++i)
     {
-        auto &category = this->categories[i];
+        auto &category = this->categories_[i];
         category->clear_apps();
     }
 
@@ -64,11 +64,11 @@ void MenuCategory::flush(const AppVec &apps)
     {
         auto &app = apps[i];
 
-        gboolean match_result = FALSE;
+        bool match_result = false;
 
-        for (int j = 0; j < this->categories.size(); ++j)
+        for (int j = 0; j < this->categories_.size(); ++j)
         {
-            auto &category = this->categories[j];
+            auto &category = this->categories_[j];
 
             if (match_result && !category->get_repeat())
             {
@@ -77,7 +77,7 @@ void MenuCategory::flush(const AppVec &apps)
 
             if (category->match_add_app(app))
             {
-                match_result = TRUE;
+                match_result = true;
             }
         }
     }
@@ -85,17 +85,17 @@ void MenuCategory::flush(const AppVec &apps)
 
 void MenuCategory::flush_app(std::shared_ptr<App> app)
 {
-    for (int i = 0; i < this->categories.size(); ++i)
+    for (int i = 0; i < this->categories_.size(); ++i)
     {
-        auto &category = this->categories[i];
+        auto &category = this->categories_[i];
         category->del_app(app);
     }
 
-    gboolean match_result = FALSE;
+    bool match_result = false;
 
-    for (int i = 0; i < this->categories.size(); ++i)
+    for (int i = 0; i < this->categories_.size(); ++i)
     {
-        auto &category = this->categories[i];
+        auto &category = this->categories_[i];
 
         if (match_result && !category->get_repeat())
         {
@@ -104,12 +104,12 @@ void MenuCategory::flush_app(std::shared_ptr<App> app)
 
         if (category->match_add_app(app))
         {
-            match_result = TRUE;
+            match_result = true;
         }
     }
 }
 
-gboolean MenuCategory::add_app(const std::string &category_name, std::shared_ptr<App> app)
+bool MenuCategory::add_app(const std::string &category_name, std::shared_ptr<App> app)
 {
     auto category = find_category(category_name);
 
@@ -119,13 +119,13 @@ gboolean MenuCategory::add_app(const std::string &category_name, std::shared_ptr
         {
             flush_app(app);
             store_categories();
-            return TRUE;
+            return true;
         }
     }
-    return FALSE;
+    return false;
 }
 
-gboolean MenuCategory::del_app(const std::string &category_name, std::shared_ptr<App> app)
+bool MenuCategory::del_app(const std::string &category_name, std::shared_ptr<App> app)
 {
     auto category = find_category(category_name);
 
@@ -135,10 +135,10 @@ gboolean MenuCategory::del_app(const std::string &category_name, std::shared_ptr
         {
             flush_app(app);
             store_categories();
-            return TRUE;
+            return true;
         }
     }
-    return FALSE;
+    return false;
 }
 
 std::vector<std::string> MenuCategory::get_apps(const std::string &category_name)
@@ -156,9 +156,9 @@ std::vector<std::string> MenuCategory::get_names()
 {
     std::vector<std::string> category_names;
 
-    for (int i = 0; i < this->categories.size(); ++i)
+    for (int i = 0; i < this->categories_.size(); ++i)
     {
-        auto &category = this->categories[i];
+        auto &category = this->categories_[i];
         auto &name = category->get_name();
         category_names.push_back(name);
     }
@@ -171,9 +171,9 @@ std::map<std::string, std::vector<std::string>> MenuCategory::get_all()
 
     gchar *category_name;
 
-    for (int i = 0; i < this->categories.size(); ++i)
+    for (int i = 0; i < this->categories_.size(); ++i)
     {
-        auto &category = this->categories[i];
+        auto &category = this->categories_[i];
 
         auto &category_name = category->get_name();
 
@@ -186,14 +186,14 @@ void MenuCategory::store_categories()
 {
     std::unique_ptr<CategoryWriter> writer(new CategoryWriter());
 
-    writer->write_to_xml(this->root, this->file_path);
+    writer->write_to_xml(this->root_, this->file_path_);
 }
 
 std::shared_ptr<Category> MenuCategory::find_category(const std::string &category_name)
 {
-    for (int i = 0; i < this->categories.size(); ++i)
+    for (int i = 0; i < this->categories_.size(); ++i)
     {
-        auto &category = this->categories[i];
+        auto &category = this->categories_[i];
         auto &name = category->get_name();
 
         if (name == category_name)

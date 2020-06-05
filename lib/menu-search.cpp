@@ -26,7 +26,7 @@ void MenuSearch::flush(const AppVec &apps)
 }
 
 AppVec MenuSearch::search_by_keyword(const std::string &keyword,
-                                     gboolean ignore_case,
+                                     bool ignore_case,
                                      const AppVec &apps)
 {
     AppVec match_apps;
@@ -53,7 +53,7 @@ AppVec MenuSearch::search_by_keyword(const std::string &keyword,
     return match_apps;
 }
 
-bool MenuSearch::strstr_with_case(const std::string &a, const std::string &b, gboolean ignore_case)
+bool MenuSearch::strstr_with_case(const std::string &a, const std::string &b, bool ignore_case)
 {
     if (b.length() == 0)
     {

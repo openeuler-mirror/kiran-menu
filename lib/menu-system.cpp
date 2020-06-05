@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 21:42:15
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-04 20:17:09
+ * @LastEditTime : 2020-06-05 10:02:15
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/menu-system.cpp
  */
@@ -34,7 +34,7 @@ static void monitor_window_open(WnckScreen *screen,
 
 MenuSystem::MenuSystem()
 {
-    this->settings = Gio::Settings::create(KIRAN_MENU_SCHEMA);
+    this->settings_ = Gio::Settings::create(KIRAN_MENU_SCHEMA);
 
     flush(AppVec());
 
@@ -66,22 +66,22 @@ MenuSystem::MenuSystem()
 
 MenuSystem::~MenuSystem()
 {
-    this->apps.clear();
-    this->new_apps.clear();
+    this->apps_.clear();
+    this->new_apps_.clear();
 }
 
 void MenuSystem::flush(const AppVec &apps)
 {
-    gboolean new_app_change = FALSE;
+    bool new_app_change = false;
 
     std::vector<std::shared_ptr<App>> new_installed_apps;
     std::vector<std::shared_ptr<App>> new_uninstalled_apps;
 
     // copy the keys of the->apps to old_apps.
-    auto old_apps = this->apps;
+    auto old_apps = this->apps_;
 
     // update system apps
-    this->apps.clear();
+    this->apps_.clear();
     auto registered_apps = Gio::AppInfo::get_all();
     for (auto iter = registered_apps.begin(); iter != registered_apps.end(); ++iter)
     {
@@ -90,13 +90,13 @@ void MenuSystem::flush(const AppVec &apps)
             auto desktop_id = (*iter)->get_id();
             Glib::Quark quark(desktop_id);
             std::shared_ptr<App> app(new App(desktop_id));
-            this->apps[quark.id()] = app;
+            this->apps_[quark.id()] = app;
             app->signal_launched().connect(sigc::mem_fun(this, &MenuSystem::app_launched));
         }
     }
 
     // new installed apps
-    static gboolean first_flush = TRUE;
+    static bool first_flush = true;
     if (!first_flush)
     {
         for (auto iter = registered_apps.begin(); iter != registered_apps.end(); ++iter)
@@ -114,24 +114,24 @@ void MenuSystem::flush(const AppVec &apps)
                 auto app = lookup_app(desktop_id);
                 new_installed_apps.push_back(app);
 
-                if (std::find(this->new_apps.begin(), this->new_apps.end(), quark.id()) == this->new_apps.end())
+                if (std::find(this->new_apps_.begin(), this->new_apps_.end(), quark.id()) == this->new_apps_.end())
                 {
-                    this->new_apps.push_back(quark.id());
-                    new_app_change = TRUE;
+                    this->new_apps_.push_back(quark.id());
+                    new_app_change = true;
                 }
             }
         }
     }
     else
     {
-        first_flush = FALSE;
+        first_flush = false;
     }
 
     // new uninstalled apps
     {
         for (auto iter = old_apps.begin(); iter != old_apps.end(); ++iter)
         {
-            if (this->apps.find(iter->first) == this->apps.end())
+            if (this->apps_.find(iter->first) == this->apps_.end())
             {
                 new_uninstalled_apps.push_back(iter->second);
             }
@@ -140,18 +140,18 @@ void MenuSystem::flush(const AppVec &apps)
 
     // uninstalled apps
     {
-        auto iter = std::remove_if(this->new_apps.begin(), this->new_apps.end(), [this, &new_app_change](int32_t elem) -> bool {
-            if (this->apps.find(elem) == this->apps.end())
+        auto iter = std::remove_if(this->new_apps_.begin(), this->new_apps_.end(), [this, &new_app_change](int32_t elem) -> bool {
+            if (this->apps_.find(elem) == this->apps_.end())
             {
-                new_app_change = TRUE;
+                new_app_change = true;
                 return true;
             }
             return false;
         });
 
-        if (iter != this->new_apps.end())
+        if (iter != this->new_apps_.end())
         {
-            this->new_apps.erase(iter, this->new_apps.end());
+            this->new_apps_.erase(iter, this->new_apps_.end());
         }
     }
 
@@ -162,12 +162,12 @@ void MenuSystem::flush(const AppVec &apps)
 
     if (new_installed_apps.size() > 0)
     {
-        this->signal_app_installed_.emit(new_installed_apps);
+        this->app_installed_.emit(new_installed_apps);
     }
 
     if (new_uninstalled_apps.size() > 0)
     {
-        this->signal_app_uninstalled_.emit(new_uninstalled_apps);
+        this->app_uninstalled_.emit(new_uninstalled_apps);
     }
 }
 
@@ -175,7 +175,7 @@ std::vector<std::shared_ptr<App>> MenuSystem::get_apps()
 {
     std::vector<std::shared_ptr<App>> apps;
 
-    for (auto iter = this->apps.begin(); iter != this->apps.end(); ++iter)
+    for (auto iter = this->apps_.begin(); iter != this->apps_.end(); ++iter)
     {
         apps.push_back(iter->second);
     }
@@ -186,8 +186,8 @@ std::shared_ptr<App> MenuSystem::lookup_app(const std::string &desktop_id)
 {
     Glib::Quark quark(desktop_id);
 
-    auto iter = this->apps.find(quark.id());
-    if (iter == this->apps.end())
+    auto iter = this->apps_.find(quark.id());
+    if (iter == this->apps_.end())
     {
         return nullptr;
     }
@@ -215,7 +215,7 @@ std::shared_ptr<App> MenuSystem::lookup_apps_with_window(WnckWindow *window)
 
     std::shared_ptr<App> match_app;
     WindowMatchType match_type = MATCH_NONE;
-    for (auto iter = this->apps.begin(); iter != this->apps.end(); ++iter)
+    for (auto iter = this->apps_.begin(); iter != this->apps_.end(); ++iter)
     {
         auto &app = iter->second;
         auto &exec = app->get_exec();
@@ -225,8 +225,8 @@ std::shared_ptr<App> MenuSystem::lookup_apps_with_window(WnckWindow *window)
 
         //g_print("exec_name: %s instance_name: %s group_name: %s locale_name: %s\n", exec_name, instance_name, group_name, locale_name.c_str());
 
-        gboolean match_instance_name = (g_strcmp0(exec_name, instance_name) == 0);
-        gboolean match_group_name = (g_strcmp0(group_name, locale_name.c_str()) == 0);
+        bool match_instance_name = (g_strcmp0(exec_name, instance_name) == 0);
+        bool match_group_name = (g_strcmp0(group_name, locale_name.c_str()) == 0);
 
         if (match_instance_name && match_group_name)
         {
@@ -271,7 +271,7 @@ std::vector<std::string> MenuSystem::get_nnew_apps(gint top_n)
 {
     std::vector<std::string> new_apps;
 
-    for (auto iter = this->new_apps.begin(); iter != this->new_apps.end(); ++iter)
+    for (auto iter = this->new_apps_.begin(); iter != this->new_apps_.end(); ++iter)
     {
         Glib::QueryQuark query_quark((GQuark)(*iter));
         Glib::ustring desktop_id = query_quark;
@@ -290,7 +290,7 @@ std::vector<std::string> MenuSystem::get_all_sorted_apps()
 {
     std::vector<std::string> apps;
 
-    for (auto iter = this->apps.begin(); iter != this->apps.end(); ++iter)
+    for (auto iter = this->apps_.begin(); iter != this->apps_.end(); ++iter)
     {
         auto &app = iter->second;
         apps.push_back(app->get_desktop_id());
@@ -315,13 +315,13 @@ void MenuSystem::remove_from_new_apps(std::shared_ptr<App> app)
     Glib::Quark quark(desktop_id);
     int32_t remove_value = quark.id();
 
-    auto iter = std::remove_if(this->new_apps.begin(), this->new_apps.end(), [remove_value](int32_t elem) {
+    auto iter = std::remove_if(this->new_apps_.begin(), this->new_apps_.end(), [remove_value](int32_t elem) {
         return elem == remove_value;
     });
 
-    if (iter != this->new_apps.end())
+    if (iter != this->new_apps_.end())
     {
-        this->new_apps.erase(iter, this->new_apps.end());
+        this->new_apps_.erase(iter, this->new_apps_.end());
         write_new_apps();
     }
 }
@@ -357,14 +357,14 @@ gchar *MenuSystem::get_exec_name(const gchar *exec_str)
 
 void MenuSystem::read_new_apps()
 {
-    this->new_apps.clear();
-    this->new_apps = read_as_to_list_quark(this->settings, "new-apps");
+    this->new_apps_.clear();
+    this->new_apps_ = read_as_to_list_quark(this->settings_, "new-apps");
 }
 
 void MenuSystem::write_new_apps()
 {
-    write_list_quark_to_as(this->settings, "new-apps", this->new_apps);
-    this->signal_new_app_changed_.emit();
+    write_list_quark_to_as(this->settings_, "new-apps", this->new_apps_);
+    this->new_app_changed_.emit();
 }
 
 void MenuSystem::app_launched(std::shared_ptr<App> app)

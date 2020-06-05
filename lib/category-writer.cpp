@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-30 17:28:19
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-03 17:25:16
+ * @LastEditTime : 2020-06-05 09:50:09
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/category-writer.cpp
  */
@@ -19,7 +19,7 @@ CategoryWriter::~CategoryWriter()
 {
 }
 
-gboolean CategoryWriter::write_to_xml(std::shared_ptr<CategoryNode> node, const std::string &file_path)
+bool CategoryWriter::write_to_xml(std::shared_ptr<CategoryNode> node, const std::string &file_path)
 {
     Glib::RefPtr<Gio::FileOutputStream> output;
     std::string error;
@@ -29,7 +29,7 @@ gboolean CategoryWriter::write_to_xml(std::shared_ptr<CategoryNode> node, const 
     if (!config_file)
     {
         g_warning("file %s create fail.\n", file_path.c_str());
-        return FALSE;
+        return false;
     }
 
     try
@@ -39,7 +39,7 @@ gboolean CategoryWriter::write_to_xml(std::shared_ptr<CategoryNode> node, const 
     catch (const Gio::Error &e)
     {
         g_warning("Could not save menu category data: %s", e.what().c_str());
-        return FALSE;
+        return false;
     }
 
     auto buffered_output = Gio::BufferedOutputStream::create(output);
@@ -52,41 +52,41 @@ gboolean CategoryWriter::write_to_xml(std::shared_ptr<CategoryNode> node, const 
     catch (const Glib::Error &e)
     {
         g_warning("failed to save menu category data: %s", e.what().c_str());
-        return FALSE;
+        return false;
     }
-    return TRUE;
+    return true;
 }
 
 #define PUT_STR_TO_CATEGORY_FILE(str)  \
     if (!data_output->put_string(str)) \
     {                                  \
-        return FALSE;                  \
+        return false;                  \
     }
 
-static gboolean write_prefix_space(gint recurse_level, Gio::DataOutputStream *data_output)
+static bool write_prefix_space(gint recurse_level, Gio::DataOutputStream *data_output)
 {
     for (gint i = 0; i < recurse_level; ++i)
     {
         PUT_STR_TO_CATEGORY_FILE("    ");
     }
-    return TRUE;
+    return true;
 }
 
 #define PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level, str) \
     {                                                         \
         if (!write_prefix_space(recurse_level, data_output))  \
         {                                                     \
-            return FALSE;                                     \
+            return false;                                     \
         }                                                     \
         if (!data_output->put_string(str))                    \
         {                                                     \
-            return FALSE;                                     \
+            return false;                                     \
         }                                                     \
     }
 
-gboolean CategoryWriter::write_rule(std::shared_ptr<CategoryNode> node, gint recurse_level, Gio::DataOutputStream *data_output)
+bool CategoryWriter::write_rule(std::shared_ptr<CategoryNode> node, gint recurse_level, Gio::DataOutputStream *data_output)
 {
-    g_return_val_if_fail(node != nullptr, FALSE);
+    g_return_val_if_fail(node != nullptr, false);
 
     for (auto iter = node->get_children(); iter; iter = iter->get_next())
     {
@@ -124,13 +124,13 @@ gboolean CategoryWriter::write_rule(std::shared_ptr<CategoryNode> node, gint rec
                 break;
         }
     }
-    return TRUE;
+    return true;
 }
 
-gboolean CategoryWriter::write_category(std::shared_ptr<CategoryNode> node, gint recurse_level, Gio::DataOutputStream *data_output)
+bool CategoryWriter::write_category(std::shared_ptr<CategoryNode> node, gint recurse_level, Gio::DataOutputStream *data_output)
 {
-    g_return_val_if_fail(node != nullptr, FALSE);
-    g_return_val_if_fail(node->get_type() == CategoryNodeType::CATEGORY_NODE_TYPE_CATEGORY, FALSE);
+    g_return_val_if_fail(node != nullptr, false);
+    g_return_val_if_fail(node->get_type() == CategoryNodeType::CATEGORY_NODE_TYPE_CATEGORY, false);
 
     PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level, "<category>\n");
 
@@ -176,7 +176,7 @@ gboolean CategoryWriter::write_category(std::shared_ptr<CategoryNode> node, gint
     PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level, "</category>\n");
 }
 
-gboolean CategoryWriter::write_root(std::shared_ptr<CategoryNode> node, Gio::DataOutputStream *data_output)
+bool CategoryWriter::write_root(std::shared_ptr<CategoryNode> node, Gio::DataOutputStream *data_output)
 {
     PUT_STR_TO_CATEGORY_FILE("<?xml version=\"1.0\"?>\n\n<categories>");
 
@@ -188,14 +188,14 @@ gboolean CategoryWriter::write_root(std::shared_ptr<CategoryNode> node, Gio::Dat
         {
             if (!write_category(category, 1, data_output))
             {
-                return FALSE;
+                return false;
             }
         }
     }
 
     PUT_STR_TO_CATEGORY_FILE("</categories>\n");
 
-    return TRUE;
+    return true;
 }
 
 }  // namespace Kiran

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-30 17:29:08
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-04 16:27:08
+ * @LastEditTime : 2020-06-05 09:29:11
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/category-node.cpp
  */
@@ -11,61 +11,60 @@
 
 namespace Kiran
 {
-CategoryNode::CategoryNode(CategoryNodeType type)
+CategoryNode::CategoryNode(CategoryNodeType type) : type_(type)
 {
-    this->type = type;
 }
 
 CategoryNode::~CategoryNode()
 {
-    this->next = nullptr;
-    this->children = nullptr;
+    this->next_ = nullptr;
+    this->children_ = nullptr;
 }
 
 void CategoryNode::insert_after(std::shared_ptr<CategoryNode> new_sibling)
 {
-    g_return_if_fail(new_sibling->parent.lock() == nullptr);
+    g_return_if_fail(new_sibling->parent_.lock() == nullptr);
 
-    auto parent_lck = this->parent.lock();
+    auto parent_lck = this->parent_.lock();
     g_return_if_fail(parent_lck != nullptr);
 
-    new_sibling->prev = this->shared_from_this();
-    new_sibling->next = this->next;
+    new_sibling->prev_ = this->shared_from_this();
+    new_sibling->next_ = this->next_;
 
-    this->next = new_sibling;
-    if (new_sibling->next)
+    this->next_ = new_sibling;
+    if (new_sibling->next_)
     {
-        new_sibling->next->prev = new_sibling;
+        new_sibling->next_->prev_ = new_sibling;
     }
     else
     {
-        parent_lck->last = new_sibling;
+        parent_lck->last_ = new_sibling;
     }
 
-    new_sibling->parent = parent_lck;
+    new_sibling->parent_ = parent_lck;
 }
 
 void CategoryNode::append_child(std::shared_ptr<CategoryNode> sub_node)
 {
-    auto last_lck = this->last.lock();
+    auto last_lck = this->last_.lock();
     if (last_lck)
     {
         last_lck->insert_after(sub_node);
     }
     else
     {
-        this->children = sub_node;
-        this->last = sub_node;
-        sub_node->parent = this->shared_from_this();
+        this->children_ = sub_node;
+        this->last_ = sub_node;
+        sub_node->parent_ = this->shared_from_this();
     }
 }
 
 bool CategoryNode::has_child_of_type(CategoryNodeType type)
 {
-    auto iter = this->children;
-    for (auto iter = this->children; iter; iter = iter->next)
+    auto iter = this->children_;
+    for (auto iter = this->children_; iter; iter = iter->next_)
     {
-        if (iter->type == type)
+        if (iter->type_ == type)
             return true;
     }
     return false;
@@ -74,33 +73,33 @@ bool CategoryNode::has_child_of_type(CategoryNodeType type)
 std::shared_ptr<CategoryNode> CategoryNode::steal()
 {
     auto self = this->shared_from_this();
-    auto parent_lck = this->parent.lock();
-    auto prev_lck = this->prev.lock();
+    auto parent_lck = this->parent_.lock();
+    auto prev_lck = this->prev_.lock();
 
     if (parent_lck)
     {
-        if (parent_lck->children == self)
+        if (parent_lck->children_ == self)
         {
-            parent_lck->children = self->next;
+            parent_lck->children_ = self->next_;
         }
 
-        if (parent_lck->last.lock() == self)
+        if (parent_lck->last_.lock() == self)
         {
-            parent_lck->last = self->prev;
+            parent_lck->last_ = self->prev_;
         }
     }
 
     if (prev_lck)
     {
-        prev_lck->next = this->next;
+        prev_lck->next_ = this->next_;
     }
 
-    if (this->next)
+    if (this->next_)
     {
-        this->next->prev = this->prev;
+        this->next_->prev_ = this->prev_;
     }
 
-    this->next = nullptr;
+    this->next_ = nullptr;
     return self;
 }
 

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 19:44:16
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-04 20:20:39
+ * @LastEditTime : 2020-06-05 09:37:19
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/menu-usage.h
  */
@@ -57,17 +57,17 @@ class MenuUsage : public MenuUnit
     sigc::signal<void()> app_changed_;
 
    private:
-    Glib::RefPtr<Gio::Settings> settings;
+    Glib::RefPtr<Gio::Settings> settings_;
 
-    std::map<uint32_t, UsageData> app_usages;
+    std::map<uint32_t, UsageData> app_usages_;
 
-    int32_t watch_start_time;
-    std::string focus_desktop_id;
+    int32_t watch_start_time_;
+    std::string focus_desktop_id_;
 
-    sigc::connection save_id;
+    sigc::connection save_id_;
 
-    Glib::RefPtr<Gio::DBus::Proxy> session_proxy;
-    bool screen_idle;
+    Glib::RefPtr<Gio::DBus::Proxy> session_proxy_;
+    bool screen_idle_;
 };
 
 }  // namespace Kiran

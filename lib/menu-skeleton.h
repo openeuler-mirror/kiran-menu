@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 21:00:34
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 09:00:09
+ * @LastEditTime : 2020-06-05 09:48:39
  * @Description  : 开始菜单类，继承KiranMenuBased接口类。
  * @FilePath     : /kiran-menu-2.0/lib/menu-skeleton.h
  */
@@ -36,17 +36,17 @@ class MenuSkeleton : public MenuBased
 
     virtual AppVec search_app(const std::string &keyword, bool ignore_case = false);
 
-    virtual gboolean add_favorite_app(const std::string &desktop_id);
+    virtual bool add_favorite_app(const std::string &desktop_id);
 
-    virtual gboolean del_favorite_app(const std::string &desktop_id);
+    virtual bool del_favorite_app(const std::string &desktop_id);
 
     virtual std::shared_ptr<App> lookup_favorite_app(const std::string &desktop_id);
 
     virtual AppVec get_favorite_apps();
 
-    virtual gboolean add_category_app(const std::string &category_name, const std::string &desktop_id);
+    virtual bool add_category_app(const std::string &category_name, const std::string &desktop_id);
 
-    virtual gboolean del_category_app(const std::string &category_name, const std::string &desktop_id);
+    virtual bool del_category_app(const std::string &category_name, const std::string &desktop_id);
 
     virtual std::vector<std::string> get_category_names();
 
@@ -67,13 +67,13 @@ class MenuSkeleton : public MenuBased
     void flush();
 
     //signal accessor:
-    sigc::signal<void> &signal_app_changed() { return this->signal_app_changed_; }
-    sigc::signal<void, AppVec> &signal_app_installed() { return this->signal_app_installed_; }
-    sigc::signal<void, AppVec> &signal_app_uninstalled() { return this->signal_app_uninstalled_; }
-    sigc::signal<void> &signal_new_app_changed() { return this->signal_new_app_changed_; }
-    sigc::signal<void, AppVec> &signal_favorite_app_added() { return this->signal_favorite_app_added_; }
-    sigc::signal<void, AppVec> &signal_favorite_app_deleted() { return this->signal_favorite_app_deleted_; }
-    sigc::signal<void> &signal_frequent_usage_app_changed() { return this->signal_frequent_usage_app_changed_; }
+    sigc::signal<void> &signal_app_changed() { return this->app_changed_; }
+    sigc::signal<void, AppVec> &signal_app_installed() { return this->app_installed_; }
+    sigc::signal<void, AppVec> &signal_app_uninstalled() { return this->app_uninstalled_; }
+    sigc::signal<void> &signal_new_app_changed() { return this->new_app_changed_; }
+    sigc::signal<void, AppVec> &signal_favorite_app_added() { return this->favorite_app_added_; }
+    sigc::signal<void, AppVec> &signal_favorite_app_deleted() { return this->favorite_app_deleted_; }
+    sigc::signal<void> &signal_frequent_usage_app_changed() { return this->frequent_usage_app_changed_; }
 
    private:
     AppVec trans_ids_to_apps(const std::vector<std::string> &desktop_ids);
@@ -86,22 +86,22 @@ class MenuSkeleton : public MenuBased
     void favorite_app_deleted(std::vector<std::string> desktop_ids);
 
    protected:
-    sigc::signal<void> signal_app_changed_;
-    sigc::signal<void, AppVec> signal_app_installed_;
-    sigc::signal<void, AppVec> signal_app_uninstalled_;
-    sigc::signal<void> signal_new_app_changed_;
-    sigc::signal<void, AppVec> signal_favorite_app_added_;
-    sigc::signal<void, AppVec> signal_favorite_app_deleted_;
-    sigc::signal<void> signal_frequent_usage_app_changed_;
+    sigc::signal<void> app_changed_;
+    sigc::signal<void, AppVec> app_installed_;
+    sigc::signal<void, AppVec> app_uninstalled_;
+    sigc::signal<void> new_app_changed_;
+    sigc::signal<void, AppVec> favorite_app_added_;
+    sigc::signal<void, AppVec> favorite_app_deleted_;
+    sigc::signal<void> frequent_usage_app_changed_;
 
    private:
     static MenuSkeleton *instance_;
 
-    std::shared_ptr<MenuSystem> system;
-    std::shared_ptr<MenuUsage> usage;
-    std::shared_ptr<MenuSearch> search;
-    std::shared_ptr<MenuFavorite> favorite;
-    std::shared_ptr<MenuCategory> category;
+    std::shared_ptr<MenuSystem> system_;
+    std::shared_ptr<MenuUsage> usage_;
+    std::shared_ptr<MenuSearch> search_;
+    std::shared_ptr<MenuFavorite> favorite_;
+    std::shared_ptr<MenuCategory> category_;
 };
 
 }  // namespace Kiran

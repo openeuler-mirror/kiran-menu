@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 17:21:54
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-04 20:22:27
+ * @LastEditTime : 2020-06-05 09:41:06
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/menu-system.h
  */
@@ -36,9 +36,9 @@ class MenuSystem : public MenuUnit
     void remove_from_new_apps(std::shared_ptr<App> app);
 
     //signal accessor:
-    sigc::signal<void, AppVec> &signal_app_installed() { return this->signal_app_installed_; }
-    sigc::signal<void, AppVec> &signal_app_uninstalled() { return this->signal_app_uninstalled_; }
-    sigc::signal<void> &signal_new_app_changed() { return this->signal_new_app_changed_; }
+    sigc::signal<void, AppVec> &signal_app_installed() { return this->app_installed_; }
+    sigc::signal<void, AppVec> &signal_app_uninstalled() { return this->app_uninstalled_; }
+    sigc::signal<void> &signal_new_app_changed() { return this->new_app_changed_; }
 
    private:
     gchar *get_exec_name(const gchar *exec_str);
@@ -47,16 +47,16 @@ class MenuSystem : public MenuUnit
     void app_launched(std::shared_ptr<App> app);
 
    protected:
-    sigc::signal<void, AppVec> signal_app_installed_;
-    sigc::signal<void, AppVec> signal_app_uninstalled_;
-    sigc::signal<void> signal_new_app_changed_;
+    sigc::signal<void, AppVec> app_installed_;
+    sigc::signal<void, AppVec> app_uninstalled_;
+    sigc::signal<void> new_app_changed_;
 
    private:
-    Glib::RefPtr<Gio::Settings> settings;
+    Glib::RefPtr<Gio::Settings> settings_;
 
-    std::map<int32_t, std::shared_ptr<App> > apps;
+    std::map<int32_t, std::shared_ptr<App> > apps_;
 
-    std::list<int32_t> new_apps;
+    std::list<int32_t> new_apps_;
 };
 
 }  // namespace Kiran
