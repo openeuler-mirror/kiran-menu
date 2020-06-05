@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:01:52
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 10:17:39
+ * @LastEditTime : 2020-06-05 11:46:14
  * @Description  : 用于菜单搜索功能
  * @FilePath     : /kiran-menu-2.0/lib/menu-search.cpp
  */
@@ -73,7 +73,7 @@ bool MenuSearch::strstr_with_case(const std::string &a, const std::string &b, bo
     {
         std::string a_lower = str_tolower(a);
         std::string b_lower = str_tolower(b);
-        return (std::search(a.begin(), a.end(), b.begin(), b.end()) != a.end());
+        return (std::search(a_lower.begin(), a_lower.end(), b_lower.begin(), b_lower.end()) != a_lower.end());
     }
 
     return false;
