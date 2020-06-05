@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 15:37:28
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 10:00:45
+ * @LastEditTime : 2020-06-05 10:24:58
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/menu-favorite.h
  */
@@ -17,6 +17,8 @@ class MenuFavorite : public MenuUnit
    public:
     MenuFavorite();
     virtual ~MenuFavorite();
+
+    virtual void init();
 
     virtual void flush(const AppVec &apps);
 

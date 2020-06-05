@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 20:35:20
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 10:01:35
+ * @LastEditTime : 2020-06-05 10:29:27
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/menu-usage.cpp
  */
@@ -44,6 +44,24 @@ MenuUsage::MenuUsage()
 
     this->screen_idle_ = false;
 
+    auto session_bus = Gio::DBus::Connection::get_sync(Gio::DBus::BusType::BUS_TYPE_SESSION);
+
+    this->session_proxy_ = Gio::DBus::Proxy::create_sync(session_bus,
+                                                         "org.gnome.SessionManager",
+                                                         "/org/gnome/SessionManager/Presence",
+                                                         "org.gnome.SessionManager");
+}
+
+MenuUsage::~MenuUsage()
+{
+    if (this->save_id_)
+    {
+        this->save_id_.disconnect();
+    }
+}
+
+void MenuUsage::init()
+{
     read_usages_from_settings();
 
     WnckScreen *screen = wnck_screen_get_default();
@@ -57,22 +75,7 @@ MenuUsage::MenuUsage()
         g_warning("the default screen is NULL. please run in GUI application.");
     }
 
-    auto session_bus = Gio::DBus::Connection::get_sync(Gio::DBus::BusType::BUS_TYPE_SESSION);
-
-    this->session_proxy_ = Gio::DBus::Proxy::create_sync(session_bus,
-                                                         "org.gnome.SessionManager",
-                                                         "/org/gnome/SessionManager/Presence",
-                                                         "org.gnome.SessionManager");
-
     this->session_proxy_->signal_signal().connect(sigc::mem_fun(this, &MenuUsage::session_proxy_signal));
-}
-
-MenuUsage::~MenuUsage()
-{
-    if (this->save_id_)
-    {
-        this->save_id_.disconnect();
-    }
 }
 
 void MenuUsage::flush(const AppVec &apps)

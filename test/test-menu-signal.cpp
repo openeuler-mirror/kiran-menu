@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-20 20:12:59
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-04 20:26:16
+ * @LastEditTime : 2020-06-05 10:27:28
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-menu-signal.cpp
  */
@@ -72,6 +72,8 @@ int main(int argc, char **argv)
 
     Gtk::Main kit(argc, argv);
 
+    Kiran::MenuSkeleton::global_init();
+
     auto menu = Kiran::MenuSkeleton::get_instance();
 
     menu->signal_app_changed().connect(&installed_changed);
@@ -83,5 +85,7 @@ int main(int argc, char **argv)
     menu->signal_frequent_usage_app_changed().connect(&frequent_usage_app_changed);
 
     kit.run();
+
+    Kiran::MenuSkeleton::global_deinit();
     return 0;
 }

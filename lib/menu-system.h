@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 17:21:54
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 09:41:06
+ * @LastEditTime : 2020-06-05 10:16:11
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/menu-system.h
  */
@@ -20,6 +20,8 @@ class MenuSystem : public MenuUnit
    public:
     MenuSystem();
     virtual ~MenuSystem();
+
+    void init();
 
     virtual void flush(const AppVec &apps);
 

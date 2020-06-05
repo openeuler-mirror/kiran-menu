@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 17:30:32
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 10:00:07
+ * @LastEditTime : 2020-06-05 10:25:49
  * @Description  : 管理菜单中的APP的分类
  * @FilePath     : /kiran-menu-2.0/lib/menu-category.h
  */
@@ -18,6 +18,8 @@ class MenuCategory : public MenuUnit
    public:
     MenuCategory();
     virtual ~MenuCategory();
+
+    virtual void init();
 
     virtual void flush(const AppVec &apps);
 

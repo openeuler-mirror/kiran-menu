@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 17:28:51
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 10:00:34
+ * @LastEditTime : 2020-06-05 10:26:17
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/menu-category.cpp
  */
@@ -18,11 +18,16 @@ namespace Kiran
 MenuCategory::MenuCategory()
 {
     this->file_path_ = "/usr/share/kiran-menu/com.unikylin.Kiran.MenuCategory.xml";
-
     std::unique_ptr<CategoryReader> reader(new CategoryReader());
-
     this->root_ = reader->create_from_xml(this->file_path_);
+}
 
+MenuCategory::~MenuCategory()
+{
+}
+
+void MenuCategory::init()
+{
     if (this->root_ && this->root_->get_children())
     {
         auto iter = this->root_->get_children()->get_children();
@@ -46,10 +51,6 @@ MenuCategory::MenuCategory()
             }
         }
     }
-}
-
-MenuCategory::~MenuCategory()
-{
 }
 
 void MenuCategory::flush(const AppVec &apps)

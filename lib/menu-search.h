@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 20:58:19
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 10:00:54
+ * @LastEditTime : 2020-06-05 10:17:56
  * @Description  : 用于菜单搜索功能
  * @FilePath     : /kiran-menu-2.0/lib/menu-search.h
  */
@@ -17,6 +17,8 @@ class MenuSearch : public MenuUnit
    public:
     MenuSearch();
     virtual ~MenuSearch();
+
+    virtual void init();
 
     virtual void flush(const AppVec &apps);
 

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 19:44:16
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 09:37:19
+ * @LastEditTime : 2020-06-05 10:28:07
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/menu-usage.h
  */
@@ -31,6 +31,8 @@ class MenuUsage : public MenuUnit
    public:
     MenuUsage();
     virtual ~MenuUsage();
+
+    virtual void init();
 
     virtual void flush(const AppVec &apps);
 

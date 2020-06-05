@@ -10,14 +10,16 @@ namespace Kiran
 MenuFavorite::MenuFavorite()
 {
     this->settings_ = Gio::Settings::create(KIRAN_MENU_SCHEMA);
-
     this->favorite_apps_ = read_as_to_list_quark(this->settings_, MENU_KEY_FAVORITE_APPS);
-
-    this->settings_->signal_changed(MENU_KEY_FAVORITE_APPS).connect(sigc::mem_fun(this, &MenuFavorite::app_changed));
 }
 
 MenuFavorite::~MenuFavorite()
 {
+}
+
+void MenuFavorite::init()
+{
+    this->settings_->signal_changed(MENU_KEY_FAVORITE_APPS).connect(sigc::mem_fun(this, &MenuFavorite::app_changed));
 }
 
 void MenuFavorite::flush(const AppVec &apps)

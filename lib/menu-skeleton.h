@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 21:00:34
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 09:48:39
+ * @LastEditTime : 2020-06-05 10:14:44
  * @Description  : 开始菜单类，继承KiranMenuBased接口类。
  * @FilePath     : /kiran-menu-2.0/lib/menu-skeleton.h
  */
@@ -32,7 +32,13 @@ class MenuSkeleton : public MenuBased
     MenuSkeleton();
     virtual ~MenuSkeleton();
 
-    static MenuSkeleton *get_instance();
+    static MenuSkeleton *get_instance() { return instance_; };
+
+    static void global_init();
+
+    static void global_deinit() { delete instance_; };
+
+    void init();
 
     virtual AppVec search_app(const std::string &keyword, bool ignore_case = false);
 

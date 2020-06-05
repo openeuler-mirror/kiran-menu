@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 21:42:15
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 10:02:15
+ * @LastEditTime : 2020-06-05 10:17:08
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/menu-system.cpp
  */
@@ -35,9 +35,15 @@ static void monitor_window_open(WnckScreen *screen,
 MenuSystem::MenuSystem()
 {
     this->settings_ = Gio::Settings::create(KIRAN_MENU_SCHEMA);
+}
 
+MenuSystem::~MenuSystem()
+{
+}
+
+void MenuSystem::init()
+{
     flush(AppVec());
-
     read_new_apps();
 
     WnckScreen *screen = wnck_screen_get_default();
@@ -45,29 +51,11 @@ MenuSystem::MenuSystem()
     {
         wnck_screen_force_update(screen);
         g_signal_connect(screen, "window-opened", G_CALLBACK(monitor_window_open), this);
-
-        // GList *windows = wnck_screen_get_windows(screen);
-        // for (GList *l = windows; l != NULL; l = l->next)
-        // {
-        //     WnckWindow *window = l->data;
-        //     GList *match_apps = kiran_menu_system_lookup_apps_with_window(self, window);
-
-        //     g_print("match %u: %s %s\n",
-        //             (match_apps != NULL),
-        //             wnck_window_get_class_instance_name(window),
-        //             wnck_window_get_class_group_name(window));
-        // }
     }
     else
     {
         g_warning("the default screen is NULL. please run in GUI application.");
     }
-}
-
-MenuSystem::~MenuSystem()
-{
-    this->apps_.clear();
-    this->new_apps_.clear();
 }
 
 void MenuSystem::flush(const AppVec &apps)

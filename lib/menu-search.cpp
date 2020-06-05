@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:01:52
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-04 14:12:45
+ * @LastEditTime : 2020-06-05 10:17:39
  * @Description  : 用于菜单搜索功能
  * @FilePath     : /kiran-menu-2.0/lib/menu-search.cpp
  */
@@ -18,6 +18,10 @@ MenuSearch::MenuSearch()
 }
 
 MenuSearch::~MenuSearch()
+{
+}
+
+void MenuSearch::init()
 {
 }
 

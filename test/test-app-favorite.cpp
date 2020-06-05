@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-09 09:31:02
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 08:56:57
+ * @LastEditTime : 2020-06-05 10:43:47
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-app-favorite.cpp
  */
@@ -10,7 +10,8 @@
 
 void test_favorite_apps(gconstpointer data)
 {
-    Kiran::MenuSkeleton *menu_skeleton = (Kiran::MenuSkeleton *)data;
+    // Kiran::MenuSkeleton *menu_skeleton = (Kiran::MenuSkeleton *)data;
+    Kiran::MenuSkeleton *menu_skeleton = Kiran::MenuSkeleton::get_instance();
 
     g_print("\n---------------------------------------------\n");
 

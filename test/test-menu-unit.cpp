@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-08 15:17:35
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 09:11:10
+ * @LastEditTime : 2020-06-05 10:52:24
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-menu-unit.cpp
  */
@@ -29,9 +29,11 @@ int main(int argc, char **argv)
 
     Gtk::Main kit(argc, argv);
 
+    Kiran::MenuSkeleton::global_init();
+
     Kiran::MenuSkeleton *menu_skeleton = Kiran::MenuSkeleton::get_instance();
 
-    g_test_add_data_func("/test-start-menu/test-favorite-apps", menu_skeleton,
+    g_test_add_data_func("/test-start-menu/test-favorite-apps", NULL,
                          test_favorite_apps);
 
     g_test_add_data_func("/test-start-menu/test-category-apps", menu_skeleton,
