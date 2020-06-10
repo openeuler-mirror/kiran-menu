@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-09 15:56:17
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-10 10:00:15
+ * @LastEditTime : 2020-06-10 17:57:39
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/workspace-manager.h
  */
@@ -31,6 +31,7 @@ class WorkspaceManager
     void change_workspace_count(int32_t count);
 
    private:
+    WorkspaceManager();
     void load_workspaces();
 
    private:

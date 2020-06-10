@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-09 15:56:39
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-09 17:05:32
+ * @LastEditTime : 2020-06-10 17:57:30
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/workspace-manager.cpp
  */
@@ -11,6 +11,14 @@
 
 namespace Kiran
 {
+WorkspaceManager::WorkspaceManager()
+{
+}
+
+WorkspaceManager::~WorkspaceManager()
+{
+}
+
 WorkspaceManager* WorkspaceManager::instance_ = nullptr;
 void WorkspaceManager::global_init()
 {
