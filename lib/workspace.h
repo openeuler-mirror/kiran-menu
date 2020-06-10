@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-09 15:55:52
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-10 09:35:52
+ * @LastEditTime : 2020-06-10 16:43:15
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/workspace.h
  */
@@ -26,6 +26,7 @@ class Workspace
     Workspace(WnckWorkspace *workspace);
     virtual ~Workspace();
 
+    // 获取工作空间中的窗口
     WindowVec get_windows();
 
    private:

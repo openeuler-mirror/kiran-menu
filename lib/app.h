@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:33
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-10 15:39:38
+ * @LastEditTime : 2020-06-10 16:42:45
  * @Description  : 维护APP的一些基本信息
  * @FilePath     : /kiran-menu-2.0/lib/app.h
  */
@@ -46,41 +46,52 @@ class App : public std::enable_shared_from_this<App>
     App(const std::string &desktop_id);
     virtual ~App();
 
+    // 获取desktop文件中的Name字段值
     const std::string &get_name() { return this->name_; }
+    // 获取desktop文件中的Name[locale]字段值
     const std::string &get_locale_name() { return this->locale_name_; }
+    // 获取desktop文件中的Comment字段值
     const std::string &get_comment() { return this->comment_; }
+    // 获取desktop文件中的Comment[locale]字段值
     const std::string &get_locale_comment() { return this->locale_comment_; }
+    // 获取desktop_id，即desktop文件名
     const std::string &get_desktop_id() { return this->desktop_id_; }
+    // 获取desktop文件中的Exec字段值
     const std::string &get_exec() { return this->exec_; }
+    // 获取desktop文件的文件全路径
     const std::string &get_file_name() { return this->file_name_; };
-    AppKind get_kind() { return this->kind_; };
 
+    // 获取desktop文件中的Categories字段值
     std::string get_categories();
 
+    // 获取desktop文件中设置的图标
     const Glib::RefPtr<Gio::Icon> get_icon();
 
     std::string get_startup_wm_class();
 
+    // 判断是否应该在菜单中显示
     bool should_show();
 
+    // 获取当前App对应的已打开的窗口列表
     WindowVec get_windows();
 
+    // 打开一个新的窗口（暂未实现）
     void open_new_window();
 
+    // 关闭当前App对应的所有窗口
     void close_all_windows();
 
-    /**
-     * @description: 启动指定的app
-     * @return: 启动是否成功，成功返回TRUE，失败返回FALSE
-     * @author: songchuanfei
-    */
+    // 启动应用，成功返回true，失败返回false
     bool launch();
 
+    // 添加WnckApplication的xid，一个xid对应一个启动的应用，一个App可能启动多个应用
     void add_wnck_app_by_xid(uint64_t xid);
+    // 删除xid
     void del_wnck_app_by_xid(uint64_t xid);
 
-    //signal accessor:
+    // 应用启动成功信号
     sigc::signal<void, std::shared_ptr<App>> signal_launched() { return this->launched_; };
+    //应用启动失败信号
     sigc::signal<void, std::shared_ptr<App>> signal_launch_failed() { return this->launch_failed_; };
 
    private:
