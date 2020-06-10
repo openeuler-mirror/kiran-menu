@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 20:35:20
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-10 09:49:47
+ * @LastEditTime : 2020-06-10 13:57:07
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/menu-usage.cpp
  */
@@ -96,9 +96,12 @@ void MenuUsage::active_window_changed(WnckScreen *screen, WnckWindow *previously
 
     if (app)
     {
-        this->focus_desktop_id_ = app->get_desktop_id();
-        auto &usage_data = get_usage_for_app(this->focus_desktop_id_);
-        usage_data.last_seen = cur_system_time;
+        if (app->should_show())
+        {
+            this->focus_desktop_id_ = app->get_desktop_id();
+            auto &usage_data = get_usage_for_app(this->focus_desktop_id_);
+            usage_data.last_seen = cur_system_time;
+        }
     }
     else
     {

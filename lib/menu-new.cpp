@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:27:46
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-10 13:30:31
+ * @LastEditTime : 2020-06-10 13:53:38
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/menu-new.cpp
  */
@@ -140,11 +140,15 @@ void MenuNew::remove_from_new_apps(std::shared_ptr<App> app)
 
 void MenuNew::app_installed(AppVec apps)
 {
-    g_print("app_installed\n");
     bool new_app_change = false;
     for (auto iter = apps.begin(); iter != apps.end(); ++iter)
     {
-        auto &desktop_id = (*iter)->get_desktop_id();
+        auto &app = (*iter);
+        if (!app->should_show())
+        {
+            continue;
+        }
+        auto &desktop_id = app->get_desktop_id();
         Glib::Quark quark(desktop_id);
         if (std::find(this->new_apps_.begin(), this->new_apps_.end(), quark.id()) == this->new_apps_.end())
         {
@@ -166,6 +170,10 @@ void MenuNew::app_uninstalled(AppVec apps)
     for (auto iter = apps.begin(); iter != apps.end(); ++iter)
     {
         auto &app = *iter;
+        if (!app->should_show())
+        {
+            continue;
+        }
         Glib::Quark quark(app->get_desktop_id());
         app_ids.insert(quark.id());
     }

@@ -2,13 +2,14 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:38
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-10 09:39:00
+ * @LastEditTime : 2020-06-10 15:42:31
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app.cpp
  */
 
 #include "lib/app.h"
 
+#include <cinttypes>
 #include <vector>
 
 #include "lib/helper.h"
@@ -43,8 +44,6 @@ App::App(const std::string &desktop_id)
 
 #undef GET_STRING
 #undef GET_LOCALE_STRING
-
-    this->wnck_app_ = NULL;
 }
 
 App::~App()
@@ -66,35 +65,54 @@ std::string App::get_startup_wm_class()
     return this->desktop_app_->get_startup_wm_class();
 }
 
+bool App::should_show()
+{
+    return this->desktop_app_->should_show();
+}
+
 WindowVec App::get_windows()
 {
     WindowVec windows;
-    if (!this->wnck_app_)
+    for (auto iter = this->xids_for_wnck_app_.begin(); iter != xids_for_wnck_app_.end(); ++iter)
     {
-        return windows;
-    }
-    auto wnck_windows = wnck_application_get_windows(this->wnck_app_);
-    for (auto l = wnck_windows; l != NULL; l = l->next)
-    {
-        auto wnck_window = (WnckWindow *)(l->data);
-        auto window = WindowManager::get_instance()->lookup_window(wnck_window);
-        windows.push_back(window);
+        auto xid = (*iter);
+        auto wnck_app = wnck_application_get(xid);
+        if (!wnck_app)
+        {
+            g_warning("<%s> not found the wnck_application. xid: %" PRIu64 "\n", __FUNCTION__, xid);
+            continue;
+        }
+
+        auto wnck_windows = wnck_application_get_windows(wnck_app);
+        for (auto l = wnck_windows; l != NULL; l = l->next)
+        {
+            auto wnck_window = (WnckWindow *)(l->data);
+            auto window = WindowManager::get_instance()->lookup_window(wnck_window);
+            windows.push_back(window);
+        }
     }
     return windows;
 }
 
 void App::close_all_windows()
 {
-    if (!this->wnck_app_)
+    for (auto iter = this->xids_for_wnck_app_.begin(); iter != xids_for_wnck_app_.end(); ++iter)
     {
-        return;
-    }
-    auto wnck_windows = wnck_application_get_windows(this->wnck_app_);
-    for (auto l = wnck_windows; l != NULL; l = l->next)
-    {
-        auto wnck_window = (WnckWindow *)(l->data);
-        auto window = WindowManager::get_instance()->lookup_window(wnck_window);
-        window->close();
+        auto xid = (*iter);
+        auto wnck_app = wnck_application_get(xid);
+        if (!wnck_app)
+        {
+            g_warning("<%s> not found the wnck_application. xid: %" PRIu64 "\n", __FUNCTION__, xid);
+            continue;
+        }
+
+        auto wnck_windows = wnck_application_get_windows(wnck_app);
+        for (auto l = wnck_windows; l != NULL; l = l->next)
+        {
+            auto wnck_window = (WnckWindow *)(l->data);
+            auto window = WindowManager::get_instance()->lookup_window(wnck_window);
+            window->close();
+        }
     }
 }
 
@@ -136,6 +154,16 @@ bool App::launch()
         g_warning("Failed to launch: %s", error.c_str());
     }
     return res;
+}
+
+void App::add_wnck_app_by_xid(uint64_t xid)
+{
+    xids_for_wnck_app_.insert(xid);
+}
+
+void App::del_wnck_app_by_xid(uint64_t xid)
+{
+    xids_for_wnck_app_.erase(xid);
 }
 
 void App::init_app_kind()

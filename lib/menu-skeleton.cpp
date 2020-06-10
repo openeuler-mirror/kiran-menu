@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 19:59:56
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-10 09:47:29
+ * @LastEditTime : 2020-06-10 14:16:53
  * @Description  : 开始菜单类
  * @FilePath     : /kiran-menu-2.0/lib/menu-skeleton.cpp
  */
@@ -76,23 +76,44 @@ void MenuSkeleton::init()
 
 AppVec MenuSkeleton::search_app(const std::string &keyword, bool ignore_case)
 {
-    auto apps = AppManager::get_instance()->get_apps();
+    auto apps = AppManager::get_instance()->get_should_show_apps();
     auto match_apps = this->search_->search_by_keyword(keyword, ignore_case, apps);
     return match_apps;
 }
 
+#define RETURN_VAL_IF_INVALID_DESKTOP_ID(desktop_id, ret)                                        \
+    {                                                                                            \
+        auto app = AppManager::get_instance()->lookup_app(desktop_id);                           \
+        if (!app)                                                                                \
+        {                                                                                        \
+            g_warning("<%s> not found the %s in AppManager.", __FUNCTION__, desktop_id.c_str()); \
+            return ret;                                                                          \
+        }                                                                                        \
+        if (!(app->should_show()))                                                               \
+        {                                                                                        \
+            g_warning("<%s> the %s cannot show in menu.", __FUNCTION__, desktop_id.c_str());     \
+            return ret;                                                                          \
+        }                                                                                        \
+    }
+
 bool MenuSkeleton::add_favorite_app(const std::string &desktop_id)
 {
+    RETURN_VAL_IF_INVALID_DESKTOP_ID(desktop_id, false);
+
     return this->favorite_->add_app(desktop_id);
 }
 
 bool MenuSkeleton::del_favorite_app(const std::string &desktop_id)
 {
+    RETURN_VAL_IF_INVALID_DESKTOP_ID(desktop_id, false);
+
     return this->favorite_->del_app(desktop_id);
 }
 
 std::shared_ptr<App> MenuSkeleton::lookup_favorite_app(const std::string &desktop_id)
 {
+    RETURN_VAL_IF_INVALID_DESKTOP_ID(desktop_id, nullptr);
+
     bool exist = this->favorite_->find_app(desktop_id);
 
     if (exist)
@@ -110,12 +131,16 @@ AppVec MenuSkeleton::get_favorite_apps()
 
 bool MenuSkeleton::add_category_app(const std::string &category_name, const std::string &desktop_id)
 {
+    RETURN_VAL_IF_INVALID_DESKTOP_ID(desktop_id, false);
+
     auto app = AppManager::get_instance()->lookup_app(desktop_id);
     return this->category_->add_app(category_name, app);
 }
 
 bool MenuSkeleton::del_category_app(const std::string &category_name, const std::string &desktop_id)
 {
+    RETURN_VAL_IF_INVALID_DESKTOP_ID(desktop_id, false);
+
     auto app = AppManager::get_instance()->lookup_app(desktop_id);
     return this->category_->del_app(category_name, app);
 }
@@ -198,7 +223,7 @@ std::shared_ptr<MenuUnit> MenuSkeleton::get_unit(MenuUnitType unit_type)
 void MenuSkeleton::flush()
 {
     AppManager::get_instance()->load_apps();
-    auto apps = AppManager::get_instance()->get_apps();
+    auto apps = AppManager::get_instance()->get_should_show_apps();
     this->favorite_->flush(apps);
     this->category_->flush(apps);
 
@@ -212,7 +237,7 @@ AppVec MenuSkeleton::trans_ids_to_apps(const std::vector<std::string> &desktop_i
     for (int i = 0; i < desktop_ids.size(); ++i)
     {
         auto app = AppManager::get_instance()->lookup_app(desktop_ids[i]);
-        if (app)
+        if (app && app->should_show())
         {
             apps.push_back(app);
         }
