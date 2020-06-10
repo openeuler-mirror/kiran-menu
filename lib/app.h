@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:33
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-03 19:44:04
+ * @LastEditTime : 2020-06-10 09:28:38
  * @Description  : 维护APP的一些基本信息
  * @FilePath     : /kiran-menu-2.0/lib/app.h
  */
@@ -11,18 +11,30 @@
 
 #include <giomm.h>
 #include <giomm/desktopappinfo.h>
+#include <libwnck/libwnck.h>
 
 #include <string>
+
+#include "lib/window.h"
 
 namespace Kiran
 {
 class App;
+class Window;
+
 using AppVec = std::vector<std::shared_ptr<App>>;
 
 enum class AppKind
 {
     FLATPAK,
     DESKTOP,
+    UNKNOWN,
+};
+
+enum class AppStatus
+{
+    RUNNING,
+    STOP,
     UNKNOWN,
 };
 
@@ -44,6 +56,13 @@ class App : public std::enable_shared_from_this<App>
 
     std::string get_categories();
     const Glib::RefPtr<Gio::Icon> get_icon();
+    std::string get_startup_wm_class();
+
+    WindowVec get_windows();
+
+    void open_new_window();
+
+    void close_all_windows();
 
     /**
      * @description: 启动指定的app
@@ -51,6 +70,8 @@ class App : public std::enable_shared_from_this<App>
      * @author: songchuanfei
     */
     bool launch();
+
+    void set_wnck_app(WnckApplication *wnck_app) { this->wnck_app_ = wnck_app; }
 
     //signal accessor:
     sigc::signal<void, std::shared_ptr<App>> signal_launched() { return this->launched_; };
@@ -87,6 +108,8 @@ class App : public std::enable_shared_from_this<App>
     AppKind kind_;
 
     Glib::RefPtr<Gio::DesktopAppInfo> desktop_app_;
+
+    WnckApplication *wnck_app_;
 };
 
 }  // namespace Kiran

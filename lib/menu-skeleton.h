@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 21:00:34
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 10:14:44
+ * @LastEditTime : 2020-06-10 09:45:14
  * @Description  : 开始菜单类，继承KiranMenuBased接口类。
  * @FilePath     : /kiran-menu-2.0/lib/menu-skeleton.h
  */
@@ -11,8 +11,8 @@
 #include "lib/menu-based.h"
 #include "lib/menu-category.h"
 #include "lib/menu-favorite.h"
+#include "lib/menu-new.h"
 #include "lib/menu-search.h"
-#include "lib/menu-system.h"
 #include "lib/menu-usage.h"
 
 namespace Kiran
@@ -22,7 +22,7 @@ enum class MenuUnitType
     KIRAN_MENU_TYPE_CATEGORY,
     KIRAN_MENU_TYPE_FAVORITE,
     KIRAN_MENU_TYPE_SEARCH,
-    KIRAN_MENU_TYPE_SYSTEM,
+    KIRAN_MENU_TYPE_NEW,
     KIRAN_MENU_TYPE_USAGE,
 };
 
@@ -36,7 +36,7 @@ class MenuSkeleton : public MenuBased
 
     static void global_init();
 
-    static void global_deinit() { delete instance_; };
+    static void global_deinit();
 
     void init();
 
@@ -67,6 +67,10 @@ class MenuSkeleton : public MenuBased
     virtual AppVec get_nnew_apps(gint top_n);
 
     virtual AppVec get_all_sorted_apps();
+
+    virtual std::shared_ptr<Window> get_active_window();
+
+    virtual AppVec get_running_apps();
 
     std::shared_ptr<MenuUnit> get_unit(MenuUnitType unit_type);
 
@@ -103,11 +107,11 @@ class MenuSkeleton : public MenuBased
    private:
     static MenuSkeleton *instance_;
 
-    std::shared_ptr<MenuSystem> system_;
     std::shared_ptr<MenuUsage> usage_;
     std::shared_ptr<MenuSearch> search_;
     std::shared_ptr<MenuFavorite> favorite_;
     std::shared_ptr<MenuCategory> category_;
+    std::shared_ptr<MenuNew> new_;
 };
 
 }  // namespace Kiran

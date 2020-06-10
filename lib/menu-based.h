@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:23:14
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 09:59:55
+ * @LastEditTime : 2020-06-10 09:47:04
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/menu-based.h
  */
@@ -125,5 +125,19 @@ class MenuBased
      * @author: tangjie02
      */
     virtual AppVec get_all_sorted_apps() = 0;
+
+    /**
+     * @description: 获取当前活动窗口
+     * @return: 
+     * @author: tangjie02
+     */
+    virtual std::shared_ptr<Window> get_active_window() = 0;
+
+    /**
+     * @description: 获取正在运行的应用
+     * @return: 
+     * @author: tangjie02
+     */
+    virtual AppVec get_running_apps() = 0;
 };
 }  // namespace Kiran

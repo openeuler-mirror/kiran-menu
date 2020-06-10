@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:38
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-03 19:37:39
+ * @LastEditTime : 2020-06-10 09:39:00
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app.cpp
  */
@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "lib/helper.h"
+#include "lib/window-manager.h"
 
 namespace Kiran
 {
@@ -42,6 +43,8 @@ App::App(const std::string &desktop_id)
 
 #undef GET_STRING
 #undef GET_LOCALE_STRING
+
+    this->wnck_app_ = NULL;
 }
 
 App::~App()
@@ -56,6 +59,43 @@ std::string App::get_categories()
 const Glib::RefPtr<Gio::Icon> App::get_icon()
 {
     return this->desktop_app_->get_icon();
+}
+
+std::string App::get_startup_wm_class()
+{
+    return this->desktop_app_->get_startup_wm_class();
+}
+
+WindowVec App::get_windows()
+{
+    WindowVec windows;
+    if (!this->wnck_app_)
+    {
+        return windows;
+    }
+    auto wnck_windows = wnck_application_get_windows(this->wnck_app_);
+    for (auto l = wnck_windows; l != NULL; l = l->next)
+    {
+        auto wnck_window = (WnckWindow *)(l->data);
+        auto window = WindowManager::get_instance()->lookup_window(wnck_window);
+        windows.push_back(window);
+    }
+    return windows;
+}
+
+void App::close_all_windows()
+{
+    if (!this->wnck_app_)
+    {
+        return;
+    }
+    auto wnck_windows = wnck_application_get_windows(this->wnck_app_);
+    for (auto l = wnck_windows; l != NULL; l = l->next)
+    {
+        auto wnck_window = (WnckWindow *)(l->data);
+        auto window = WindowManager::get_instance()->lookup_window(wnck_window);
+        window->close();
+    }
 }
 
 bool App::launch()

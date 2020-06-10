@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 20:35:20
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 10:29:27
+ * @LastEditTime : 2020-06-10 09:49:47
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/menu-usage.cpp
  */
@@ -10,11 +10,10 @@
 
 #include <libwnck/libwnck.h>
 
+#include "lib/app-manager.h"
 #include "lib/helper.h"
 #include "lib/math-helper.h"
 #include "lib/menu-common.h"
-#include "lib/menu-skeleton.h"
-#include "lib/menu-system.h"
 
 namespace Kiran
 {
@@ -92,10 +91,8 @@ void MenuUsage::active_window_changed(WnckScreen *screen, WnckWindow *previously
         this->focus_desktop_id_.clear();
     }
 
-    auto unit = MenuSkeleton::get_instance()->get_unit(MenuUnitType::KIRAN_MENU_TYPE_SYSTEM);
-    auto menu_system = std::dynamic_pointer_cast<MenuSystem>(unit);
-    WnckWindow *active_window = wnck_screen_get_active_window(screen);
-    auto app = menu_system->lookup_apps_with_window(active_window);
+    auto active_window = WindowManager::get_instance()->get_active_window();
+    auto app = AppManager::get_instance()->lookup_app_with_window(active_window);
 
     if (app)
     {
@@ -106,7 +103,7 @@ void MenuUsage::active_window_changed(WnckScreen *screen, WnckWindow *previously
     else
     {
         g_debug("not found matching app for changed window: %s\n",
-                active_window ? wnck_window_get_name(active_window) : "null window name");
+                active_window ? active_window->get_name().c_str() : "null window name");
     }
     this->watch_start_time_ = cur_system_time;
 }
