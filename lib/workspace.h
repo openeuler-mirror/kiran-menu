@@ -2,8 +2,8 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-09 15:55:52
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-10 16:43:15
- * @Description  : 
+ * @LastEditTime : 2020-06-10 17:43:28
+ * @Description  : 该类是对WnckWorkspace的封装，大部分接口和wnck_window_xxxx相同。
  * @FilePath     : /kiran-menu-2.0/lib/workspace.h
  */
 

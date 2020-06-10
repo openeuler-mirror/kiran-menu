@@ -1,11 +1,19 @@
 @startuml
 
-Kiran::MenuSkeleton -up..|> Kiran::MenuBased
-Kiran::MenuSkeleton o..> Kiran::MenuNew
-Kiran::MenuSkeleton o..> Kiran::MenuUsage
-Kiran::MenuSkeleton o..> Kiran::MenuCategory
-Kiran::MenuSkeleton o..> Kiran::MenuFavorite
-Kiran::MenuSkeleton o..> Kiran::MenuSearch
+
+note "init_backend_system." as INIT
+
+
+INIT .. Kiran::MenuSkeleton
+INIT .. Kiran::AppManager
+INIT .. Kiran::WindowManager
+INIT .. Kiran::WorkspaceManager
+
+Kiran::MenuSkeleton o--> Kiran::MenuNew
+Kiran::MenuSkeleton o--> Kiran::MenuUsage
+Kiran::MenuSkeleton o--> Kiran::MenuCategory
+Kiran::MenuSkeleton o--> Kiran::MenuFavorite
+Kiran::MenuSkeleton o--> Kiran::MenuSearch
 
 
 Kiran::MenuCategory --> Kiran::Category
@@ -16,8 +24,8 @@ Kiran::CategoryReader --> Kiran::CategoryNode
 Kiran::CategoryWriter --> Kiran::CategoryNode
 
 
-Kiran::AppManager --|> Kiran::App
-Kiran::WindowManager --|> Kiran::Window
-Kiran::WorkspaceManager --|> Kiran::Workspace
+Kiran::AppManager o..> Kiran::App
+Kiran::WindowManager o..> Kiran::Window
+Kiran::WorkspaceManager o..> Kiran::Workspace
 
 @enduml

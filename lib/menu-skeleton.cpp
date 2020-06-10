@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 19:59:56
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-10 14:16:53
+ * @LastEditTime : 2020-06-10 17:23:29
  * @Description  : 开始菜单类
  * @FilePath     : /kiran-menu-2.0/lib/menu-skeleton.cpp
  */
@@ -36,18 +36,12 @@ MenuSkeleton::~MenuSkeleton()
 MenuSkeleton *MenuSkeleton::instance_ = nullptr;
 void MenuSkeleton::global_init()
 {
-    WindowManager::global_init();
-    AppManager::global_init(WindowManager::get_instance());
-
     instance_ = new MenuSkeleton();
     instance_->init();
 }
 
 void MenuSkeleton::global_deinit()
 {
-    AppManager::global_deinit();
-    WindowManager::global_deinit();
-
     delete instance_;
 }
 
@@ -189,16 +183,6 @@ AppVec MenuSkeleton::get_all_sorted_apps()
 {
     auto desktop_ids = AppManager::get_instance()->get_all_sorted_apps();
     return trans_ids_to_apps(desktop_ids);
-}
-
-std::shared_ptr<Window> MenuSkeleton::get_active_window()
-{
-    return WindowManager::get_instance()->get_active_window();
-}
-
-AppVec MenuSkeleton::get_running_apps()
-{
-    return AppManager::get_instance()->get_running_apps();
 }
 
 std::shared_ptr<MenuUnit> MenuSkeleton::get_unit(MenuUnitType unit_type)

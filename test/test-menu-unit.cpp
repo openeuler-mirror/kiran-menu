@@ -2,13 +2,13 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-08 15:17:35
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 10:52:24
+ * @LastEditTime : 2020-06-10 17:28:19
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-menu-unit.cpp
  */
 #include <gtkmm.h>
 
-#include "lib/menu-based.h"
+#include "lib/core_worker.h"
 #include "test/test-menu-common.h"
 
 void test_favorite_apps(gconstpointer data);
@@ -29,7 +29,7 @@ int main(int argc, char **argv)
 
     Gtk::Main kit(argc, argv);
 
-    Kiran::MenuSkeleton::global_init();
+    Kiran::init_backend_system();
 
     Kiran::MenuSkeleton *menu_skeleton = Kiran::MenuSkeleton::get_instance();
 
