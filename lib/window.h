@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:46
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-10 16:24:56
+ * @LastEditTime : 2020-06-11 16:30:26
  * @Description  : 该类是对WnckWindow的封装，大部分接口和wnck_window_xxxx相同。
  * @FilePath     : /kiran-menu-2.0/lib/window.h
  */
@@ -18,13 +18,16 @@ class App;
 class Window;
 class Workspace;
 
-using WindowVec = std::vector<std::shared_ptr<Window>>;
+using WindowVec = std::vector<std::shared_ptr<Kiran::Window>>;
 
 class Window : public std::enable_shared_from_this<Window>
 {
    public:
-    Window(WnckWindow* window);
+    Window() = delete;
+    Window(const Window& window) = delete;
     virtual ~Window();
+
+    static std::shared_ptr<Window> create(WnckWindow* wnck_window);
 
     // 获取窗口的名字
     std::string get_name();
@@ -62,6 +65,8 @@ class Window : public std::enable_shared_from_this<Window>
     // 获取窗口类型
     WnckWindowType get_window_type();
 
+    bool is_pinned();
+
     // 激活窗口
     void activate();
 
@@ -86,8 +91,21 @@ class Window : public std::enable_shared_from_this<Window>
     // 关闭窗口
     void close();
 
+    // 获取当前所在的工作区。如果窗口为pin状态或者不在任何工作区，则返回空
+    std::shared_ptr<Workspace> get_workspace();
+
+   private:
+    Window(WnckWindow* window);
+
+    void flush_workspace();
+
+    static void workspace_changed(WnckWindow* wnck_window, gpointer user_data);
+
    private:
     WnckWindow* wnck_window_;
+
+    int32_t last_workspace_number_;
+    bool last_is_pinned_;
 
     friend class App;
 };

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:27:36
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-10 12:04:38
+ * @LastEditTime : 2020-06-11 16:12:51
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window-manager.cpp
  */
@@ -23,27 +23,11 @@ WindowManager::~WindowManager()
 {
 }
 
-WindowManager* WindowManager::instance_ = nullptr;
+WindowManager *WindowManager::instance_ = nullptr;
 void WindowManager::global_init()
 {
     instance_ = new WindowManager();
     instance_->init();
-}
-
-void monitor_window_opened(WnckScreen* screen,
-                           WnckWindow* window,
-                           gpointer user_data)
-{
-    WindowManager* self = (WindowManager*)user_data;
-    self->add_window(window);
-}
-
-static void monitor_window_closed(WnckScreen* screen,
-                                  WnckWindow* window,
-                                  gpointer user_data)
-{
-    WindowManager* self = (WindowManager*)user_data;
-    self->remove_window(window);
 }
 
 void WindowManager::init()
@@ -53,8 +37,18 @@ void WindowManager::init()
     auto screen = wnck_screen_get_default();
     g_return_if_fail(screen != NULL);
 
-    g_signal_connect(screen, "window-opened", G_CALLBACK(monitor_window_opened), this);
-    g_signal_connect(screen, "window-closed", G_CALLBACK(monitor_window_closed), this);
+    g_signal_connect(screen, "window-opened", G_CALLBACK(WindowManager::window_opened), this);
+    g_signal_connect(screen, "window-closed", G_CALLBACK(WindowManager::window_closed), this);
+}
+
+std::shared_ptr<Window> WindowManager::get_window(uint64_t xid)
+{
+    auto iter = this->windows_.find(xid);
+    if (iter == this->windows_.end())
+    {
+        return nullptr;
+    }
+    return iter->second;
 }
 
 std::shared_ptr<Window> WindowManager::get_active_window()
@@ -67,7 +61,17 @@ std::shared_ptr<Window> WindowManager::get_active_window()
     return lookup_window(wnck_window);
 }
 
-std::shared_ptr<Window> WindowManager::lookup_window(WnckWindow* wnck_window)
+WindowVec WindowManager::get_windows()
+{
+    WindowVec windows;
+    for (auto iter = this->windows_.begin(); iter != this->windows_.end(); ++iter)
+    {
+        windows.push_back(iter->second);
+    }
+    return windows;
+}
+
+std::shared_ptr<Window> WindowManager::lookup_window(WnckWindow *wnck_window)
 {
     if (!wnck_window)
     {
@@ -82,51 +86,9 @@ std::shared_ptr<Window> WindowManager::lookup_window(WnckWindow* wnck_window)
     }
     else
     {
-        auto window = std::make_shared<Window>(wnck_window);
+        auto window = Window::create(wnck_window);
         this->windows_.emplace(xid, window);
         return window;
-    }
-}
-
-void WindowManager::add_window(WnckWindow* wnck_window)
-{
-    RETURN_IF_TRUE(wnck_window == NULL);
-
-    auto xid = (uint64_t)wnck_window_get_xid(wnck_window);
-
-    auto iter = this->windows_.find(xid);
-    if (iter != this->windows_.end())
-    {
-        g_debug("the window already exists. name: %s xid: %" PRIu64 "\n",
-                iter->second->get_name().c_str(),
-                iter->second->get_xid());
-    }
-    else
-    {
-        auto window = std::make_shared<Window>(wnck_window);
-        this->windows_.emplace(xid, window);
-        this->add_window_.emit(window);
-    }
-}
-
-void WindowManager::remove_window(WnckWindow* wnck_window)
-{
-    RETURN_IF_TRUE(wnck_window == NULL);
-
-    auto xid = (uint64_t)wnck_window_get_xid(wnck_window);
-
-    auto iter = this->windows_.find(xid);
-    if (iter != this->windows_.end())
-    {
-        auto window = iter->second;
-        this->windows_.erase(iter);
-        this->remove_window_.emit(window);
-    }
-    else
-    {
-        g_warning("the window not exists. name: %s xid: %" PRIu64 "\n",
-                  wnck_window_get_name(wnck_window),
-                  wnck_window_get_xid(wnck_window));
     }
 }
 
@@ -139,16 +101,64 @@ void WindowManager::load_windows()
 
     auto wnck_windows = wnck_screen_get_windows(screen);
 
-    for (GList* l = wnck_windows; l != NULL; l = l->next)
+    for (GList *l = wnck_windows; l != NULL; l = l->next)
     {
-        auto wnck_window = (WnckWindow*)(l->data);
+        auto wnck_window = (WnckWindow *)(l->data);
         auto xid = (uint64_t)wnck_window_get_xid(wnck_window);
-        auto window = std::make_shared<Window>(wnck_window);
+        auto window = Window::create(wnck_window);
         auto iter = this->windows_.emplace(xid, window);
         if (!iter.second)
         {
             iter.first->second = window;
         }
+    }
+}
+
+void WindowManager::window_opened(WnckScreen *screen, WnckWindow *wnck_window, gpointer user_data)
+{
+    auto window_manager = (WindowManager *)user_data;
+
+    g_return_if_fail(wnck_window != NULL);
+    g_return_if_fail(window_manager == WindowManager::get_instance());
+
+    auto xid = (uint64_t)wnck_window_get_xid(wnck_window);
+
+    auto iter = window_manager->windows_.find(xid);
+    if (iter != window_manager->windows_.end())
+    {
+        g_debug("the window already exists. name: %s xid: %" PRIu64 "\n",
+                iter->second->get_name().c_str(),
+                iter->second->get_xid());
+    }
+    else
+    {
+        auto window = Window::create(wnck_window);
+        window_manager->windows_.emplace(xid, window);
+        window_manager->window_opened_.emit(window);
+    }
+}
+
+void WindowManager::window_closed(WnckScreen *screen, WnckWindow *wnck_window, gpointer user_data)
+{
+    auto window_manager = (WindowManager *)user_data;
+
+    g_return_if_fail(wnck_window != NULL);
+    g_return_if_fail(window_manager == WindowManager::get_instance());
+
+    auto xid = (uint64_t)wnck_window_get_xid(wnck_window);
+
+    auto iter = window_manager->windows_.find(xid);
+    if (iter != window_manager->windows_.end())
+    {
+        auto window = iter->second;
+        window_manager->windows_.erase(iter);
+        window_manager->window_closed_.emit(window);
+    }
+    else
+    {
+        g_warning("the window not exists. name: %s xid: %" PRIu64 "\n",
+                  wnck_window_get_name(wnck_window),
+                  wnck_window_get_xid(wnck_window));
     }
 }
 

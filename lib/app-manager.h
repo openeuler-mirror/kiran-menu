@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 17:21:54
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-10 15:30:08
+ * @LastEditTime : 2020-06-11 15:46:16
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app-manager.h
  */
@@ -30,28 +30,39 @@ class AppManager
 
     void load_apps();
 
-    void add_application(WnckApplication *wnck_application);
-
-    void remove_application(WnckApplication *wnck_application);
-
+    // 获取所有App列表(每个App对应一个desktop文件)
     AppVec get_apps();
 
+    // 获取可以在菜单中显示的App列表
     AppVec get_should_show_apps();
 
+    // 获取正在运行的App列表
     AppVec get_running_apps();
 
+    // 通过desktop_id获取App
     std::shared_ptr<App> lookup_app(const std::string &desktop_id);
 
+    // 通过窗口对象获取App
     std::shared_ptr<App> lookup_app_with_window(std::shared_ptr<Window> window);
 
+    // 通过已启动的应用程序的xid(对应group leader window的xid)获取App
     std::shared_ptr<App> lookup_app_with_xid(uint64_t xid);
 
+    // 获取所有App的desktop_id，并根据desktop文件的Name字段进行排序
     std::vector<std::string> get_all_sorted_apps();
 
-    //signal accessor:
+    // App安装时的信号
     sigc::signal<void, AppVec> &signal_app_installed() { return this->app_installed_; }
+    // App卸载时的信号
     sigc::signal<void, AppVec> &signal_app_uninstalled() { return this->app_uninstalled_; }
+    // 通过调用App::launch启动应用成功的信号，如果需要监听所有启动的情况，建议使用signal_app_opened
     sigc::signal<void, std::shared_ptr<App>> &signal_app_launched() { return this->app_launched_; };
+    // 应用程序启动信号
+    sigc::signal<void, std::shared_ptr<App>> &signal_app_opened() { return this->app_opened_; };
+    // 应用程序卸载信号
+    sigc::signal<void, std::shared_ptr<App>> &signal_app_closed() { return this->app_closed_; };
+    // 应用程序窗口变化信号
+    sigc::signal<void, std::shared_ptr<App>> &signal_window_change_for_app() { return this->window_change_for_app_; }
 
    private:
     AppManager(WindowManager *window_manager);
@@ -66,8 +77,15 @@ class AppManager
     std::shared_ptr<App> get_app_from_desktop(std::shared_ptr<Window> window);
     std::shared_ptr<App> get_app_from_window_group(std::shared_ptr<Window> window);
 
-    void add_window(std::shared_ptr<Window> window);
-    void remove_window(std::shared_ptr<Window> window);
+    // 启动一个应用时的信号处理
+    static void app_opened(WnckScreen *screen, WnckApplication *wnck_application, gpointer user_data);
+    // 关闭一个应用时的信号处理
+    static void app_closed(WnckScreen *screen, WnckApplication *wnck_application, gpointer user_data);
+
+    // 处理窗口打开信号
+    void window_opened(std::shared_ptr<Window> window);
+    // 处理窗口关闭信号
+    void window_closed(std::shared_ptr<Window> window);
 
     std::string get_exec_name(const std::string &exec_str);
     void app_launched(std::shared_ptr<App> app);
@@ -76,6 +94,9 @@ class AppManager
     sigc::signal<void, AppVec> app_installed_;
     sigc::signal<void, AppVec> app_uninstalled_;
     sigc::signal<void, std::shared_ptr<App>> app_launched_;
+    sigc::signal<void, std::shared_ptr<App>> app_opened_;
+    sigc::signal<void, std::shared_ptr<App>> app_closed_;
+    sigc::signal<void, std::shared_ptr<App>> window_change_for_app_;
 
    private:
     static AppManager *instance_;

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 21:42:15
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-10 15:43:18
+ * @LastEditTime : 2020-06-11 14:02:37
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app-manager.cpp
  */
@@ -33,22 +33,6 @@ void AppManager::global_init(WindowManager *window_manager)
     instance_->init();
 }
 
-static void monitor_application_opened(WnckScreen *screen,
-                                       WnckApplication *app,
-                                       gpointer user_data)
-{
-    AppManager *self = (AppManager *)user_data;
-    self->add_application(app);
-}
-
-static void monitor_application_closed(WnckScreen *screen,
-                                       WnckApplication *app,
-                                       gpointer user_data)
-{
-    AppManager *self = (AppManager *)user_data;
-    self->remove_application(app);
-}
-
 void AppManager::init()
 {
     load_apps();
@@ -56,8 +40,11 @@ void AppManager::init()
     auto screen = wnck_screen_get_default();
     g_return_if_fail(screen != NULL);
 
-    g_signal_connect(screen, "application-opened", G_CALLBACK(monitor_application_opened), this);
-    g_signal_connect(screen, "application-closed", G_CALLBACK(monitor_application_closed), this);
+    g_signal_connect(screen, "application-opened", G_CALLBACK(AppManager::app_opened), this);
+    g_signal_connect(screen, "application-closed", G_CALLBACK(AppManager::app_closed), this);
+
+    this->window_manager_->signal_window_opened().connect(sigc::mem_fun(this, &AppManager::window_opened));
+    this->window_manager_->signal_window_closed().connect(sigc::mem_fun(this, &AppManager::window_closed));
 }
 
 void AppManager::load_apps()
@@ -87,7 +74,6 @@ void AppManager::load_apps()
         {
             this->wmclass_apps_[app->get_startup_wm_class()] = app;
         }
-
         app->signal_launched().connect(sigc::mem_fun(this, &AppManager::app_launched));
     }
 
@@ -156,65 +142,6 @@ void AppManager::load_apps()
     }
 }
 
-void AppManager::add_application(WnckApplication *wnck_application)
-{
-    g_return_if_fail(wnck_application != NULL);
-
-    auto xwindow = wnck_application_get_xid(wnck_application);
-    auto iter = this->xid_to_app_.find(xwindow);
-    if (iter != this->xid_to_app_.end())
-    {
-        g_warning("the wnck_application already exist. name: %s xid: %" PRIu64 "\n",
-                  wnck_application_get_name(wnck_application),
-                  xwindow);
-        return;
-    }
-
-    auto wnck_windows = wnck_application_get_windows(wnck_application);
-    bool add_result = false;
-    for (auto l = wnck_windows; l != NULL; l = l->next)
-    {
-        auto wnck_window = (WnckWindow *)(l->data);
-        auto window = this->window_manager_->lookup_window(wnck_window);
-        auto app = lookup_app_with_window(window);
-        if (app)
-        {
-            this->xid_to_app_.emplace(xwindow, app);
-            app->add_wnck_app_by_xid(xwindow);
-            add_result = true;
-        }
-    }
-
-    if (!add_result)
-    {
-        g_warning("not found matching App for the wnck_application. name: %s xid: %" PRIu64 "\n",
-                  wnck_application_get_name(wnck_application),
-                  xwindow);
-    }
-}
-
-void AppManager::remove_application(WnckApplication *wnck_application)
-{
-    g_return_if_fail(wnck_application != NULL);
-
-    auto xwindow = wnck_application_get_xid(wnck_application);
-    auto iter = this->xid_to_app_.find(xwindow);
-    if (iter == this->xid_to_app_.end())
-    {
-        g_warning("not found the App for the wnck_application. name: %s xid: %" PRIu64 "\n",
-                  wnck_application_get_name(wnck_application),
-                  xwindow);
-        return;
-    }
-
-    if (iter->second.expired() == false)
-    {
-        auto app = iter->second.lock();
-        app->del_wnck_app_by_xid(xwindow);
-    }
-    this->xid_to_app_.erase(iter);
-}
-
 std::vector<std::shared_ptr<App>> AppManager::get_apps()
 {
     std::vector<std::shared_ptr<App>> apps;
@@ -249,6 +176,13 @@ AppVec AppManager::get_running_apps()
         {
             apps.push_back(iter->second.lock());
         }
+    }
+    auto iter = std::unique(apps.begin(), apps.end(), [](decltype(*apps.begin()) a, decltype(*apps.begin()) b) {
+        return a.get() == b.get();
+    });
+    if (iter != apps.end())
+    {
+        apps.erase(iter, apps.end());
     }
     return apps;
 }
@@ -299,6 +233,10 @@ std::shared_ptr<App> AppManager::lookup_app_with_window(std::shared_ptr<Window> 
 
     app = get_app_from_window_group(window);
     RETURN_VAL_IF_TRUE(app, app);
+
+    g_warning("not found matching App for the window. name: %s xid: %" PRIu64 "\n",
+              window->get_name().c_str(),
+              window->get_xid());
 
     return nullptr;
 }
@@ -623,6 +561,95 @@ std::shared_ptr<App> AppManager::get_app_from_window_group(std::shared_ptr<Windo
         RETURN_VAL_IF_TRUE(app, app);
     }
     return nullptr;
+}
+
+void AppManager::app_opened(WnckScreen *screen, WnckApplication *wnck_application, gpointer user_data)
+{
+    auto app_manager = (AppManager *)user_data;
+
+    g_return_if_fail(wnck_application != NULL);
+    g_return_if_fail(app_manager == AppManager::get_instance());
+
+    auto xwindow = wnck_application_get_xid(wnck_application);
+    auto iter = app_manager->xid_to_app_.find(xwindow);
+    if (iter != app_manager->xid_to_app_.end())
+    {
+        g_warning("the wnck_application already exist. name: %s xid: %" PRIu64 "\n",
+                  wnck_application_get_name(wnck_application),
+                  xwindow);
+        return;
+    }
+
+    auto wnck_windows = wnck_application_get_windows(wnck_application);
+    bool add_result = false;
+    std::shared_ptr<App> app;
+    for (auto l = wnck_windows; l != NULL; l = l->next)
+    {
+        auto wnck_window = (WnckWindow *)(l->data);
+        auto window = app_manager->window_manager_->lookup_window(wnck_window);
+        app = app_manager->lookup_app_with_window(window);
+        if (app)
+        {
+            app_manager->xid_to_app_.emplace(xwindow, app);
+            app->add_wnck_app_by_xid(xwindow);
+            add_result = true;
+            break;
+        }
+    }
+
+    if (!add_result)
+    {
+        g_warning("not found matching App for the wnck_application. name: %s xid: %" PRIu64 "\n",
+                  wnck_application_get_name(wnck_application),
+                  xwindow);
+    }
+    else
+    {
+        app_manager->app_opened_.emit(app);
+    }
+}
+
+void AppManager::app_closed(WnckScreen *screen, WnckApplication *wnck_application, gpointer user_data)
+{
+    auto app_manager = (AppManager *)user_data;
+
+    g_return_if_fail(wnck_application != NULL);
+    g_return_if_fail(app_manager == AppManager::get_instance());
+
+    auto xwindow = wnck_application_get_xid(wnck_application);
+    auto iter = app_manager->xid_to_app_.find(xwindow);
+    if (iter == app_manager->xid_to_app_.end())
+    {
+        g_warning("not found the App for the wnck_application. name: %s xid: %" PRIu64 "\n",
+                  wnck_application_get_name(wnck_application),
+                  xwindow);
+        return;
+    }
+
+    if (iter->second.expired() == false)
+    {
+        auto app = iter->second.lock();
+        app->del_wnck_app_by_xid(xwindow);
+        app_manager->app_closed_.emit(app);
+    }
+    app_manager->xid_to_app_.erase(iter);
+}
+
+void AppManager::window_opened(std::shared_ptr<Window> window)
+{
+    auto app = lookup_app_with_window(window);
+    if (app)
+    {
+        this->window_change_for_app_.emit(app);
+    }
+}
+void AppManager::window_closed(std::shared_ptr<Window> window)
+{
+    auto app = lookup_app_with_window(window);
+    if (app)
+    {
+        this->window_change_for_app_.emit(app);
+    }
 }
 
 std::string AppManager::get_exec_name(const std::string &exec_str)

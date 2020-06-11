@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:33
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-10 16:42:45
+ * @LastEditTime : 2020-06-11 13:56:43
  * @Description  : 维护APP的一些基本信息
  * @FilePath     : /kiran-menu-2.0/lib/app.h
  */
@@ -23,7 +23,7 @@ namespace Kiran
 class App;
 class Window;
 
-using AppVec = std::vector<std::shared_ptr<App>>;
+using AppVec = std::vector<std::shared_ptr<Kiran::App>>;
 
 enum class AppKind
 {
@@ -89,9 +89,9 @@ class App : public std::enable_shared_from_this<App>
     // 删除xid
     void del_wnck_app_by_xid(uint64_t xid);
 
-    // 应用启动成功信号
+    // 通过调用App::launch启动应用成功的信号
     sigc::signal<void, std::shared_ptr<App>> signal_launched() { return this->launched_; };
-    //应用启动失败信号
+    // 通过调用App::launch启动应用失败的信号
     sigc::signal<void, std::shared_ptr<App>> signal_launch_failed() { return this->launch_failed_; };
 
    private:
