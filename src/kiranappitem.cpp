@@ -57,7 +57,7 @@ bool KiranAppItem::on_key_press_event(GdkEventKey *key_event)
         } while (0);
         break;
     case GDK_KEY_Return:
-        app->launch();
+        launch_app();
         break;
     default:
         break;
