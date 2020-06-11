@@ -12,14 +12,6 @@
 #include <jsoncpp/json/reader.h>
 #include <glibmm/i18n.h>
 
-/**
- * @brief 启动用户信息编辑程序(mate-about-me)
- */
-void launch_about_me()
-{
-
-}
-
 KiranMenuWindow::KiranMenuWindow(Gtk::WindowType window_type):
     Gtk::Window(window_type)
 {

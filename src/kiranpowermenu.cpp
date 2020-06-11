@@ -30,11 +30,27 @@ KiranPowerMenu::KiranPowerMenu()
     shutdown_item.signal_activate().connect(sigc::hide_return(sigc::ptr_fun(&KiranPower::shutdown)));
 
 
+    logout_item.signal_activate().connect(sigc::mem_fun(*this, &KiranPowerMenu::hide_menu_window));
+    suspend_item.signal_activate().connect(sigc::mem_fun(*this, &KiranPowerMenu::hide_menu_window));
+    hibernate_item.signal_activate().connect(sigc::mem_fun(*this, &KiranPowerMenu::hide_menu_window));
+    reboot_item.signal_activate().connect(sigc::mem_fun(*this, &KiranPowerMenu::hide_menu_window));
+    shutdown_item.signal_activate().connect(sigc::mem_fun(*this, &KiranPowerMenu::hide_menu_window));
+
 }
 
 KiranPowerMenu::~KiranPowerMenu()
 {
 
+}
+
+void KiranPowerMenu::hide_menu_window()
+{
+    Gtk::Widget *menu_window;
+
+    if (!this->get_attach_widget())
+        return;
+    menu_window = this->get_attach_widget()->get_toplevel();
+    menu_window->hide();
 }
 
 bool KiranPowerMenu::on_map_event(GdkEventAny *any_event)

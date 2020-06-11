@@ -8,6 +8,7 @@ KiranPowerButton::KiranPowerButton()
     auto context = get_style_context();
 
     menu = new KiranPowerMenu();
+    menu->attach_to_widget(*this);
     menu->show_all();
 
     icon.set_from_resource("/kiran-menu/sidebar/power");

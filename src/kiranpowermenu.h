@@ -9,6 +9,8 @@ public:
     KiranPowerMenu();
     ~KiranPowerMenu();
 
+    void hide_menu_window();
+
 protected:
     virtual bool on_map_event(GdkEventAny *any_event) override;
     virtual bool on_focus_in_event(GdkEventFocus *focus_event) override;
