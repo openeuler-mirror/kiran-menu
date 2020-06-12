@@ -11,6 +11,7 @@ set(DEP_LIBDIR ${GTKMM_LIBDIR})
 set(TEST_MENU_UNIT test-menu-unit)
 set(TEST_MENU_SIGNAL test-menu-signal)
 set(TEST_DISPLAY test-display)
+set(TEST_LAUNCH_ACTION test-launch-action)
 
 add_executable(${TEST_MENU_UNIT}
     "test-all-apps.cpp"
@@ -26,7 +27,10 @@ add_executable(${TEST_MENU_SIGNAL}
 add_executable(${TEST_DISPLAY}
     "test-display.cpp")
 
-list (APPEND TESTS ${TEST_MENU_UNIT} ${TEST_MENU_SIGNAL} ${TEST_DISPLAY})
+add_executable(${TEST_LAUNCH_ACTION}
+    "test-launch-action.cpp")
+
+list (APPEND TESTS ${TEST_MENU_UNIT} ${TEST_MENU_SIGNAL} ${TEST_DISPLAY} ${TEST_LAUNCH_ACTION})
 
 foreach(TEST_ITEM IN ITEMS ${TESTS})
 

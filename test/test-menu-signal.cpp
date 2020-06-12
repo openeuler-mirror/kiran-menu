@@ -86,6 +86,5 @@ int main(int argc, char **argv)
 
     kit.run();
 
-    Kiran::deinit_backend_system();
     return 0;
 }
