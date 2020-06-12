@@ -1,8 +1,16 @@
+/*
+ * @Author       : tangjie02
+ * @Date         : 2020-06-04 13:34:58
+ * @LastEditors  : tangjie02
+ * @LastEditTime : 2020-06-04 13:34:59
+ * @Description  : 
+ * @FilePath     : /kiran-menu-2.0/test/test-menu-common.h
+ */
 #pragma once
 #include <gio/gio.h>
 
-#include "lib/kiran-app.h"
-#include "lib/kiran-menu-based.h"
+#include "lib/app.h"
+#include "lib/menu-skeleton.h"
 
 #define CHECK_PROXY_CALL_ERR(result, error)                       \
     {                                                             \
