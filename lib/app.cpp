@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:38
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-12 11:52:05
+ * @LastEditTime : 2020-06-12 13:41:05
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app.cpp
  */
@@ -53,6 +53,17 @@ App::~App()
 std::string App::get_categories()
 {
     return this->desktop_app_->get_categories();
+}
+
+std::vector<std::string> App::get_actions()
+{
+    std::vector<std::string> raw_actions;
+    auto actions = this->desktop_app_->list_actions();
+    for (auto iter = actions.begin(); iter != actions.end(); ++iter)
+    {
+        raw_actions.push_back((*iter).raw());
+    }
+    return raw_actions;
 }
 
 const Glib::RefPtr<Gio::Icon> App::get_icon()
@@ -161,6 +172,13 @@ bool App::launch()
         g_warning("Failed to launch: %s", error.c_str());
     }
     return res;
+}
+
+void App::launch_action(const std::string &action_name)
+{
+    this->desktop_app_->launch_action(action_name);
+    // there is no way to detect failures that occur while using this function
+    // this->launched_.emit(this->shared_from_this());
 }
 
 void App::add_wnck_app_by_xid(uint64_t xid)

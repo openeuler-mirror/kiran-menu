@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-11 09:30:42
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-12 12:43:09
+ * @LastEditTime : 2020-06-12 13:42:51
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-display.cpp
  */
@@ -217,6 +217,13 @@ int main(int argc, char **argv)
     timing_print(NULL);
 
     g_timeout_add_seconds(10, timing_print, NULL);
+
+    auto app = Kiran::AppManager::get_instance()->lookup_app("firefox.desktop");
+    auto actions = app->get_actions();
+    if (actions.size() > 0)
+    {
+        app->launch_action(actions[0]);
+    }
 
     kit.run();
 
