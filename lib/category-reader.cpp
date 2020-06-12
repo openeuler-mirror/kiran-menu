@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-30 17:28:47
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-04 14:30:25
+ * @LastEditTime : 2020-06-09 12:05:28
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/category-reader.cpp
  */
@@ -161,7 +161,7 @@ void CategoryReader::on_text(ParseContext &context, const Glib::ustring &text)
 std::shared_ptr<CategoryNode> CategoryReader::create_from_xml(const std::string &file_path)
 {
     std::string error;
-    char *text;
+    g_autofree char *text = NULL;
     gsize length;
 
     text = NULL;

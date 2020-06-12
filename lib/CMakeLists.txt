@@ -14,6 +14,7 @@ pkg_search_module(GLIBMM REQUIRED glibmm-2.4)
 pkg_search_module(GIOMM REQUIRED giomm-2.4)
 pkg_search_module(GTHREAD REQUIRED gthread-2.0)
 pkg_search_module(WNCK3 REQUIRED libwnck-3.0)
+pkg_search_module(GDKMM3 REQUIRED gdkmm-3.0)
 
 
 set(DEP_LIBDIR ${GLIBMM_LIBDIR})
@@ -21,12 +22,12 @@ set(DEP_LIBDIR ${GLIBMM_LIBDIR})
 
 target_include_directories(${TARGET_NAME} PUBLIC 
     ${PROJECT_SOURCE_DIR}
-    ${GLIBMM_INCLUDE_DIRS})
-
-target_include_directories(${TARGET_NAME} PRIVATE 
+    ${GLIBMM_INCLUDE_DIRS}
     ${GIOMM_INCLUDE_DIRS} 
     ${GTHREAD_INCLUDE_DIRS}
-    ${WNCK3_INCLUDE_DIRS})
+    ${WNCK3_INCLUDE_DIRS}
+    ${GDKMM3_INCLUDE_DIRS})
+
 
 target_compile_options(${TARGET_NAME} PUBLIC
     -std=c++11
@@ -39,8 +40,8 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     ${GLIBMM_LIBRARIES}
     ${GIOMM_LIBRARIES}
     ${GTHREAD_LIBRARIES}
-    ${WNCK3_LIBRARIES})
-
+    ${WNCK3_LIBRARIES}
+    ${GDKMM3_LIBRARIES})
 
 
 install(FILES "com.unikylin.Kiran.StartMenu.gschema.xml.in" 

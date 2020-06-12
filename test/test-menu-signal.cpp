@@ -2,14 +2,14 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-20 20:12:59
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 10:27:28
+ * @LastEditTime : 2020-06-10 17:27:28
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-menu-signal.cpp
  */
 #include <gtkmm.h>
 
 #include "lib/app.h"
-#include "lib/menu-skeleton.h"
+#include "lib/core_worker.h"
 
 void sig_hander(int signo)
 {
@@ -72,7 +72,7 @@ int main(int argc, char **argv)
 
     Gtk::Main kit(argc, argv);
 
-    Kiran::MenuSkeleton::global_init();
+    Kiran::init_backend_system();
 
     auto menu = Kiran::MenuSkeleton::get_instance();
 
@@ -86,6 +86,5 @@ int main(int argc, char **argv)
 
     kit.run();
 
-    Kiran::MenuSkeleton::global_deinit();
     return 0;
 }
