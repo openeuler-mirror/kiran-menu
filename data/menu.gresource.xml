@@ -9,6 +9,7 @@
     <file alias="sidebar/home-dir">images/home-dir.png</file>
     <file alias="sidebar/settings">images/settings.png</file>
     <file alias="sidebar/monitor">images/task-monitor.png</file>
+    <file alias="sidebar/lock">images/lock.png</file>
     <file alias="sidebar/power">images/power.png</file>
     <file alias="menu.css">data/menu.css</file>
     <file alias="ui/menu">data/menu.ui.xml</file>
@@ -16,5 +17,8 @@
     <file alias="icon/group">images/group.png</file>
     <file alias="icon/expand">images/expand.png</file>
     <file alias="icon/shrink">images/shrink.png</file>
+    <file alias="icon/arrow">images/arrow.png</file>
+    <file alias="icon/location">images/location.png</file>
+    <file alias="icon/menu">images/menu.png</file>
   </gresource>
 </gresources>

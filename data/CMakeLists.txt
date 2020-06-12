@@ -17,3 +17,14 @@ install(FILES ${PROJECT_BINARY_DIR}/data/org.mate.panel.KiranMenuApplet.mate-pan
     
 install(FILES ${PROJECT_BINARY_DIR}/data/org.mate.panel.applet.KiranMenuAppletFactory.service
         DESTINATION "${CMAKE_INSTALL_PREFIX}/share/dbus-1/services")
+
+install(FILES "com.unikylin.Kiran.StartMenu.gschema.xml.in" 
+    DESTINATION  ${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas/
+    RENAME "com.unikylin.Kiran.StartMenu.gschema.xml" 
+)
+
+install(FILES "com.unikylin.Kiran.MenuCategory.xml" 
+    DESTINATION  ${CMAKE_INSTALL_PREFIX}/share/kiran-menu/
+)
+
+install(CODE "execute_process(COMMAND glib-compile-schemas \"${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas/\")")

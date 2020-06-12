@@ -1,0 +1,73 @@
+#ifndef KIRANMENUWINDOW_H
+#define KIRANMENUWINDOW_H
+
+#include <gtkmm.h>
+#include "kiranuserinfo.h"
+#include "kiranappitem.h"
+#include "kirancategoryitem.h"
+#include "kiranmenuprofile.h"
+
+#include "menu-skeleton.h"
+
+class KiranMenuWindow : public Gtk::Window
+{
+public:
+    KiranMenuWindow(Gtk::WindowType window_type = Gtk::WINDOW_TOPLEVEL);
+    ~KiranMenuWindow();
+
+    void reload_apps_data();
+    void load_favorite_apps();
+    void load_frequent_apps();
+
+protected:
+    virtual bool on_map_event(GdkEventAny *any_event) override;
+    virtual bool on_unmap_event(GdkEventAny *any_event) override;
+    virtual bool on_leave_notify_event(GdkEventCrossing *crossing_event) override;
+    virtual bool on_key_press_event(GdkEventKey *key_event) override;
+    virtual bool on_button_press_event(GdkEventButton *button_event) override;
+    virtual void on_realize();
+    void on_active_change();
+
+    //virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
+
+    void on_search_change();
+    void on_search_stop();
+
+    void switch_to_category_overview(const std::string &selected_category);
+    void switch_to_apps_overview(const std::string &selected_category);
+    void switch_to_apps_overview(double position);
+
+    bool promise_item_viewable(GdkEventFocus *event, Gtk::Widget *item);
+
+private:
+    Glib::RefPtr<Gtk::Builder> builder;
+
+    Gtk::Box *box;
+    Gtk::SearchEntry *search_entry;
+    Gtk::Grid *side_box;
+    Gtk::Stack *overview_stack, *appview_stack;
+    Gtk::Box *all_apps_box, *new_apps_box;
+    Gtk::Box *favorite_apps_box, *frequent_apps_box;
+    Gtk::Grid *category_overview_box, *search_results_box;
+
+    KiranUserInfo *user_info;
+    std::vector<std::string> category_names;
+    std::map<std::string, KiranCategoryItem*> category_items;
+
+    KiranMenuProfile profile;
+    Kiran::MenuSkeleton *backend;
+
+    void add_app_button(const char *icon_resource,
+                        const char *tooltip,
+                        const char *cmdline);
+    void add_sidebar_buttons();
+
+    void load_all_apps();
+    void load_date_info();
+    void load_user_info();
+
+    KiranAppItem *create_app_item(std::shared_ptr<Kiran::App> app,
+                                  Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL);
+};
+
+#endif // KIRANMENUWINDOW_H

@@ -1,14 +1,13 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Copyright (C) 2020
+# This file is distributed under the same license as the kiran-menu package.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: 2.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-19 12:08+0800\n"
+"POT-Creation-Date: 2020-06-05 15:14+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,98 +16,88 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/kiran-expand-button.c:19 src/kiran-expand-button.c:42
-msgid "Expand"
-msgstr "展开"
+#: src/kiranpowerbutton.cpp:15
+msgid "Power options"
+msgstr "电源选项"
 
-#: src/kiran-expand-button.c:42
-msgid "Shrink"
-msgstr "收起"
-
-#: src/kiran-menu-window.c:278
-msgid "No Apps match the results!"
-msgstr "未找到符合条件的应用程序"
-
-#: src/kiran-menu-window.c:293
-msgid "Search Results"
-msgstr "搜索结果"
-
-#: src/kiran-menu-window.c:406
-msgid "Favorites"
-msgstr "收藏夹"
-
-#: src/kiran-menu-window.c:438
-msgid "Frequently Used"
-msgstr "常用应用"
-
-#: src/kiran-menu-window.c:447 src/kiran-menu-window.c:502
-msgid "No apps available"
-msgstr "暂无应用信息"
-
-#: src/kiran-menu-window.c:491
-msgid "New Installed"
-msgstr "最近安装"
-
-#: src/kiran-menu-window.c:710
-msgid "Home Directory"
-msgstr "主目录"
-
-#: src/kiran-menu-window.c:711
-msgid "System monitor"
-msgstr "资源管理器"
-
-#: src/kiran-menu-window.c:712
-msgid "Open help"
-msgstr "帮助中心"
-
-#: src/kiran-menu-window.c:714
-msgid "About me"
-msgstr "关于我"
-
-#: src/kiran-menu-window.c:715
-msgid "Control center"
-msgstr "控制面板"
-
-#: src/kiran-app-item.c:153
-msgid "Launch"
-msgstr "启动"
-
-#: src/kiran-app-item.c:157
-msgid "Add to desktop"
-msgstr "添加到桌面"
-
-#: src/kiran-app-item.c:162
-msgid "Add to favorites"
-msgstr "添加到收藏夹"
-
-#: src/kiran-app-item.c:165
-msgid "Remove from favorites"
-msgstr "从收藏夹中移除"
-
-#: src/kiran-search-entry.c:86
+#: src/kiransearchentry.cpp:20
 msgid "Search for applications"
 msgstr "搜索应用程序"
 
-msgid "All Applications"
-msgstr "所有应用"
+#: src/kiranmenuappletbutton.cpp:10
+msgid "Kiran Start Menu"
+msgstr "Kiran开始菜单"
 
-msgid "Back"
-msgstr "返回"
+#: src/kiranpowermenu.cpp:7
+msgid "Logout"
+msgstr "注销"
 
-msgid "Shutdown"
-msgstr "关机"
-
-msgid "Reboot"
-msgstr "重启计算机"
-
+#: src/kiranpowermenu.cpp:8
 msgid "Suspend"
-msgstr "挂起"
+msgstr "待机"
 
+#: src/kiranpowermenu.cpp:9
 msgid "Hibernate"
 msgstr "休眠"
 
-msgid "Logout"
-msgstr "注销"
+#: src/kiranpowermenu.cpp:10
+msgid "Shutdown"
+msgstr "关机"
+
+#: src/kiranpowermenu.cpp:11
+msgid "Reboot"
+msgstr "重启"
+
+#: src/kiranmenuwindow.cpp:393
+msgid "Home Directory"
+msgstr "主目录"
+
+#: src/kiranmenuwindow.cpp:394
+msgid "System monitor"
+msgstr "资源管理器"
+
+#: src/kiranmenuwindow.cpp:395
+msgid "Open help"
+msgstr "帮助中心"
+
+#: src/kiranmenuwindow.cpp:397
+msgid "Control center"
+msgstr "控制面板"
+
+#: src/kiranmenuwindow.cpp:398
+msgid "Lock Screen"
+msgstr "锁定屏幕"
+
+#: src/kiranappitem.cpp:74
+msgid "Launch"
+msgstr "启动"
+
+#: src/kiranappitem.cpp:78
+msgid "Add to desktop"
+msgstr "添加到桌面"
+
+#: src/kiranappitem.cpp:83
+msgid "Add to favorites"
+msgstr "添加到收藏夹"
+
+#: src/kiranappitem.cpp:86
+msgid "Remove from favorites"
+msgstr "从收藏夹中移除"
+
+msgid "Frequently used"
+msgstr "常用应用"
+
+msgid "Favorite Apps"
+msgstr "收藏夹"
+
+msgid "Edit Profiles"
+msgstr "更改设置"
+
+msgid "Hello"
+msgstr "你好"
+
+msgid "%a %b %e %Y"
+msgstr "%Y年%m月%d日 星期%a"
 
 msgid "Office"
 msgstr "办公"
@@ -133,3 +122,9 @@ msgstr "设置"
 
 msgid "Others"
 msgstr "其它"
+
+msgid "Click to edit user information"
+msgstr "点击更改用户信息"
+
+msgid "Click to change date and time settings"
+msgstr "点击更改日期时间设置"

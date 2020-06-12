@@ -1,26 +1,41 @@
 @define-color placeholder_text_color #c8c8c8;
 
-kiran-app-item {
+.kiran-app-item {
     background: transparent;
-
+    color: #ffffff;
     font-family: "Noto Sans CJK SC";
     border-width: 0px;
     border-right-width: 3px;
     border-style: solid;
     border-color: transparent;
     min-height: 40px;
-
+    padding: 0px;
     padding-left: 25px;
-    -KiranAppItem-icon-spacing: 12px;
+    box-shadow: none;
 
-    color: white;
+    -gtkmm__CustomObject_KiranAppItem-icon-spacing: 12px;
 }
 
-.category-item-box {
-    margin-left: 12px;
+.kiran-app-entry {
+    min-height: 100px;
+    min-width: 88px;
+    border: none;
+    border-radius: 5px;
+    -gtkmm__CustomObject_KiranAppItem-icon-spacing: 8px;
+    -gtkmm__CustomObject_KiranAppItem-max-width: 88px;
+    -gtkmm__CustomObject_KiranAppItem-max-height: 100px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
-kiran-category-item {
+.kiran-app-entry:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+
+.kiran-category-item {
     background-color: transparent;
     border-width: 0px;
     border-right-width: 3px;
@@ -29,23 +44,35 @@ kiran-category-item {
     color: white;
     margin-top: 10px;
     margin-bottom: 10px;
-    padding-left: 10px;
+    padding-left: 12px;
+
+    -gtkmm__CustomObject_KiranCategoryItem-icon-spacing: 12px;
 }
 
-kiran-category-item:hover {
-    background-color: rgba(255, 255, 255, 0.1);;
-}
 
-kiran-category-item  label {
-    margin-left: 10px;
-    font-weight: bold;
-}
-
-kiran-app-item:focus, kiran-category-item:focus {
-
+.kiran-app-item:hover, .kiran-category-item:hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: #4cb5ff;
     border-style: solid;
+}
+
+.kiran-app-item:focus, .kiran-category-item:focus, .kiran-app-entry:focus {
+    outline-offset: -2px;
+    outline-style: dotted;
+    outline-color: #ffffff;
+    outline-width: 1px;
+}
+
+.kiran-search-entry {
+    border-radius: 3px;
+}
+
+window#menu-window {
+    background: rgba(28, 28, 28, 0.9);
+    min-width: 760px;
+    min-height: 682px;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 button.kiran-app-button {
@@ -57,7 +84,7 @@ button.kiran-app-button {
     min-height: 30px;
 }
 
-button:focus {
+button:focus{
     outline-offset: -2px;
     outline-style: dotted;
     outline-color: #ffffff;
@@ -68,43 +95,30 @@ button.kiran-app-button:hover {
     background: rgba(255, 255, 255, 0.1);
 }
 
-button.switch-button {
-    border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.2);
+separator {
+    color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+separator#sidebar-separator {
+    margin-left: 12px;
+    margin-right: 12px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+menuitem {
     color: white;
-    background: rgba(255, 255, 255, 0.05);
-    font-weight: bold;
-}
-
-button.switch-button:hover
-{
-    border-color: rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.1);
-}
-
-button.switch-button:focus
-{
-    outline-offset: -3px;
-}
-
-button.toggle.kiran-expand-button {
-    border: none;
-    min-height: 40px;
     background: transparent;
-    color: white;
-    padding-top: 0px;
-    padding-bottom: 0px;
-    box-shadow: none;
 }
 
-button.toggle.kiran-expand-button:hover {
-    border: none;
-    min-height: 40px;
-    background: rgba(255, 255, 255, 0.1);
-    padding-top: 0px;
-    padding-bottom: 0px;
-    box-shadow: none;
+menuitem:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+menu {
+    background: #1f1f1f;
+    border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 entry.kiran-search-entry {
@@ -126,21 +140,13 @@ entry.kiran-search-entry selection {
     background: rgba(255, 255, 255, 0.2);
 }
 
-separator {
-    color: rgba(255, 255, 255, 0.2);
-    background-color: rgba(255, 255, 255, 0.2);
-}
-
-separator#sidebar-separator {
-    margin-left: 12px;
-    margin-right: 12px;
-    margin-top: 5px;
-    margin-bottom: 5px;
-}
-
-window#menu-window {
-    background-color: #0c0c0c;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+.kiran-section-box {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding-bottom: 10px;
+    padding-left: 10px;
 }
 
 scrollbar.vertical {
@@ -150,7 +156,7 @@ scrollbar.vertical {
 }
 scrollbar.vertical button {
     min-height: 0px;
-    min-width: 0px; 
+    min-width: 0px;
     background: transparent;
     border: none;
 }
@@ -176,76 +182,7 @@ scrollbar.vertical button.up scrollbar.vertical button.down {
     border: none;
 }
 
-#category-overview-box {
-    margin-top: 20px;
-    margin-bottom: 20px;
-    padding-left: 10px;
-    padding-right: 20px;
-}
-
-popover.kiran-power-menu button{
-    color: white;
-    padding-left: 20px;
-    padding-right: 10px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    min-width: 80px;
-}
-
-popover.kiran-power-menu {
-    padding-top: 5px;
-    padding-bottom: 5px;
-}
-
-popover.kiran-power-menu.background {
-    background-color: #1f1f1f;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-}
-
-popover.kiran-power-menu button {
-    background: transparent;
-    color: white;
-    border: none;
-}
-
-popover.kiran-power-menu button:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-label#app-empty-prompt {
-    color: #ffffff;
-    padding-left: 36px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-}
-
 label.search-empty-prompt {
     font-size: 18px;
     color: #8b8b8b;
-}
-
-menu {
-    background: #1f1f1f;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-}
-
-menuitem {
-    background: transparent;
-    color: #ffffff;
-}
-
-menuitem:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-menuitem:active {
-    background: rgba(255, 255, 255, 0.3);
-}
-
-
-button.kiran-expand-button {
-    padding: 0px;
-    padding-left: 26px;
-    min-height: 38px;
-    border-width: 0px;
 }

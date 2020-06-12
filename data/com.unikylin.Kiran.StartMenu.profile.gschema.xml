@@ -1,0 +1,16 @@
+<schemalist>
+  <schema id="com.unikylin.Kiran.StartMenu.profile" path="/com/unikylin/kiran/StartMenu/profile/">
+    <key name="background-color" type="s">
+      <default>'#1c1c1c'</default>
+      <summary>Background color of start menu</summary>
+    </key>
+    <key name="background-opacity" type="d">
+      <default>1.0</default>
+      <summary>Background Opacity of start menu</summary>
+    </key>
+    <key name="weather-location" type="s">
+      <default>'Beijing'</default>
+      <summary>The city to show weather data</summary>
+    </key>
+</schemalist>
+
