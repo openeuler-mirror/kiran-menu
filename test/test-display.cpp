@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-11 09:30:42
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-11 17:19:24
+ * @LastEditTime : 2020-06-12 12:43:09
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-display.cpp
  */
@@ -20,27 +20,52 @@ void sig_hander(int signo)
 
 void window_opened(std::shared_ptr<Kiran::Window> window)
 {
-    g_print("signal: window '%s' is opened\n", window->get_name().c_str());
+    g_print("signal: window '%s' is opened. xid: %" PRIu64 "\n",
+            window->get_name().c_str(),
+            window->get_xid());
 }
 
 void window_closed(std::shared_ptr<Kiran::Window> window)
 {
-    g_print("signal: window '%s' is closed\n", window->get_name().c_str());
+    g_print("signal: window '%s' is closed. xid: %" PRIu64 "\n",
+            window->get_name().c_str(),
+            window->get_xid());
 }
 
-void app_opened(std::shared_ptr<Kiran::App> app)
+void active_window_changed(std::shared_ptr<Kiran::Window> prev_active_window, std::shared_ptr<Kiran::Window> cur_active_window)
 {
-    g_print("signal: app '%s' is opened\n", app->get_desktop_id().c_str());
+    g_print("signal: active window change. prev: '%s' prev_xid: %" PRIu64 " cur: '%s' cur_xid: %" PRIu64 "\n",
+            prev_active_window ? prev_active_window->get_name().c_str() : "null",
+            prev_active_window ? prev_active_window->get_xid() : 0,
+            cur_active_window ? cur_active_window->get_name().c_str() : "null",
+            cur_active_window ? cur_active_window->get_xid() : 0);
 }
 
-void app_closed(std::shared_ptr<Kiran::App> app)
+void app_action_changed(std::shared_ptr<Kiran::App> app, Kiran::AppAction action)
 {
-    g_print("signal: app '%s' is closed\n", app->get_desktop_id().c_str());
-}
+    switch (action)
+    {
+        case Kiran::AppAction::APP_OPENED:
+            g_print("signal: app '%s' is opened.\n", app->get_desktop_id().c_str());
+            // g_print("signal: app '%s' is opened. xid: %" PRIu64 " pid: %" PRIu64 "\n",
+            //         app->get_desktop_id().c_str(),
+            //         app->get_xid(),
+            //         app->get_pid());
+            break;
+        case Kiran::AppAction::APP_CLOSED:
+            g_print("signal: app '%s' is closed.\n", app->get_desktop_id().c_str());
 
-void window_change_for_app(std::shared_ptr<Kiran::App> app)
-{
-    g_print("signal: the window of the app '%s' is changed\n", app->get_desktop_id().c_str());
+            // g_print("signal: app '%s' is closed. xid: %" PRIu64 " pid: %" PRIu64 "\n",
+            //         app->get_desktop_id().c_str(),
+            //         app->get_xid(),
+            //         app->get_pid());
+            break;
+        case Kiran::AppAction::APP_WINDOW_CHANGED:
+            g_print("signal: the window of the app '%s' is changed\n", app->get_desktop_id().c_str());
+            break;
+        case Kiran::AppAction::APP_ALL_WINDOWS_CLOSED:
+            g_print("signal: the all windows of the app '%s' is closed\n", app->get_desktop_id().c_str());
+    }
 }
 
 void workspace_created(std::shared_ptr<Kiran::Workspace> workspace)
@@ -61,9 +86,6 @@ gboolean timing_print(gpointer user_data)
 
         auto window_manager = Kiran::WindowManager::get_instance();
 
-        window_manager->signal_window_opened().connect(&window_opened);
-        window_manager->signal_window_closed().connect(&window_closed);
-
         auto windows = window_manager->get_windows();
 
         g_print("total window number: %d\n", windows.size());
@@ -81,6 +103,8 @@ gboolean timing_print(gpointer user_data)
             g_print("   class_instance_name:    %s\n", window->get_class_instance_name().c_str());
             g_print("   pid:                    %d\n", window->get_pid());
             g_print("   window_type:            %d\n", window->get_window_type());
+            g_print("   is_pinned:              %d\n", window->is_pinned());
+            g_print("   is_above:               %d\n", window->is_above());
             g_print("   is_active:              %d\n", window->is_active());
             g_print("   app_id:                 %s\n", app ? app->get_desktop_id().c_str() : "null");
 
@@ -104,10 +128,6 @@ gboolean timing_print(gpointer user_data)
         g_print("--------------------------- relate to app ---------------------------\n\n");
 
         auto app_manager = Kiran::AppManager::get_instance();
-
-        app_manager->signal_app_opened().connect(&app_opened);
-        app_manager->signal_app_closed().connect(&app_closed);
-        app_manager->signal_window_change_for_app().connect(&window_change_for_app);
 
         auto apps = app_manager->get_running_apps();
 
@@ -140,9 +160,6 @@ gboolean timing_print(gpointer user_data)
         g_print("--------------------------- relate to workspace ---------------------------\n\n");
 
         auto workspace_manager = Kiran::WorkspaceManager::get_instance();
-
-        workspace_manager->signal_workspace_created().connect(&workspace_created);
-        workspace_manager->signal_workspace_destroyed().connect(&workspace_destroyed);
 
         workspace_manager->change_workspace_count(2);
         auto workspaces = workspace_manager->get_workspaces();
@@ -180,9 +197,26 @@ int main(int argc, char **argv)
 
     Kiran::init_backend_system();
 
+    auto window_manager = Kiran::WindowManager::get_instance();
+
+    window_manager->signal_window_opened().connect(&window_opened);
+    window_manager->signal_window_closed().connect(&window_closed);
+    window_manager->signal_active_window_changed().connect(&active_window_changed);
+
+    auto app_manager = Kiran::AppManager::get_instance();
+
+    app_manager->signal_app_action_changed().connect(&app_action_changed);
+
+    auto workspace_manager = Kiran::WorkspaceManager::get_instance();
+
+    workspace_manager->signal_workspace_created().connect(&workspace_created);
+    workspace_manager->signal_workspace_destroyed().connect(&workspace_destroyed);
+
+    // Kiran::ScreenManager::global_init();
+
     timing_print(NULL);
 
-    g_timeout_add_seconds(5, timing_print, NULL);
+    g_timeout_add_seconds(10, timing_print, NULL);
 
     kit.run();
 

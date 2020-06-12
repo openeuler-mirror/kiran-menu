@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:38
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-10 15:42:31
+ * @LastEditTime : 2020-06-12 11:52:05
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app.cpp
  */
@@ -88,7 +88,10 @@ WindowVec App::get_windows()
         {
             auto wnck_window = (WnckWindow *)(l->data);
             auto window = WindowManager::get_instance()->lookup_window(wnck_window);
-            windows.push_back(window);
+            if (window)
+            {
+                windows.push_back(window);
+            }
         }
     }
     return windows;
@@ -111,9 +114,13 @@ void App::close_all_windows()
         {
             auto wnck_window = (WnckWindow *)(l->data);
             auto window = WindowManager::get_instance()->lookup_window(wnck_window);
-            window->close();
+            if (window)
+            {
+                window->close();
+            }
         }
     }
+    this->close_all_windows_.emit(this->shared_from_this());
 }
 
 bool App::launch()

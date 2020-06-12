@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:33
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-11 13:56:43
+ * @LastEditTime : 2020-06-12 09:56:00
  * @Description  : 维护APP的一些基本信息
  * @FilePath     : /kiran-menu-2.0/lib/app.h
  */
@@ -37,6 +37,20 @@ enum class AppStatus
     RUNNING,
     STOP,
     UNKNOWN,
+};
+
+enum class AppAction : uint32_t
+{
+    // 通过调用App::launch启动应用成功的信号，如果需要监听所有启动的情况，建议使用APP_OPENED
+    APP_LAUNCHED = (0 << 1),
+    // 应用程序启动
+    APP_OPENED = (1 << 1),
+    // 应用程序关闭
+    APP_CLOSED = (2 << 1),
+    // 应用程序窗口列表变化
+    APP_WINDOW_CHANGED = (3 << 1),
+    // 应用程序所有窗口被关闭
+    APP_ALL_WINDOWS_CLOSED = (4 << 1),
 };
 
 class App : public std::enable_shared_from_this<App>
@@ -89,10 +103,15 @@ class App : public std::enable_shared_from_this<App>
     // 删除xid
     void del_wnck_app_by_xid(uint64_t xid);
 
+   protected:
     // 通过调用App::launch启动应用成功的信号
-    sigc::signal<void, std::shared_ptr<App>> signal_launched() { return this->launched_; };
+    sigc::signal<void, std::shared_ptr<App>> signal_launched() { return this->launched_; }
     // 通过调用App::launch启动应用失败的信号
-    sigc::signal<void, std::shared_ptr<App>> signal_launch_failed() { return this->launch_failed_; };
+    sigc::signal<void, std::shared_ptr<App>> signal_launch_failed() { return this->launch_failed_; }
+    // 关闭所有窗口信号
+    sigc::signal<void, std::shared_ptr<App>> signal_close_all_windows() { return this->close_all_windows_; }
+    // 打开一个新窗口信号
+    // sigc::signal<void, std::shared_ptr<App>> signal_open_new_window() { return this->open_new_window_; }
 
    private:
     void init_app_kind();
@@ -104,6 +123,8 @@ class App : public std::enable_shared_from_this<App>
    protected:
     sigc::signal<void, std::shared_ptr<App>> launched_;
     sigc::signal<void, std::shared_ptr<App>> launch_failed_;
+    sigc::signal<void, std::shared_ptr<App>> close_all_windows_;
+    // sigc::signal<void, std::shared_ptr<App>> open_new_window_;
 
    private:
     std::string desktop_id_;
@@ -127,6 +148,10 @@ class App : public std::enable_shared_from_this<App>
     Glib::RefPtr<Gio::DesktopAppInfo> desktop_app_;
 
     std::set<uint64_t> xids_for_wnck_app_;
+
+    std::set<uint64_t> windows_;
+
+    friend class AppManager;
 };
 
 }  // namespace Kiran

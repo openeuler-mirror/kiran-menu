@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:27:46
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-10 13:53:38
+ * @LastEditTime : 2020-06-12 09:58:19
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/menu-new.cpp
  */
@@ -20,27 +20,6 @@
 
 namespace Kiran
 {
-static void monitor_window_open(WnckScreen *screen,
-                                WnckWindow *wnck_window,
-                                gpointer user_data)
-{
-    MenuNew *self = (MenuNew *)user_data;
-    g_return_if_fail(wnck_window != NULL);
-
-    auto window = WindowManager::get_instance()->lookup_window(wnck_window);
-    g_return_if_fail(window != nullptr);
-
-    auto app = AppManager::get_instance()->lookup_app_with_window(window);
-
-    if (!app)
-    {
-        g_debug("not found matching app for open window: %s\n", window->get_name().c_str());
-        return;
-    }
-
-    self->remove_from_new_apps(app);
-}
-
 MenuNew::MenuNew()
 {
     this->settings_ = Gio::Settings::create(KIRAN_MENU_SCHEMA);
@@ -56,18 +35,8 @@ void MenuNew::init()
 
     AppManager::get_instance()->signal_app_installed().connect(sigc::mem_fun(this, &MenuNew::app_installed));
     AppManager::get_instance()->signal_app_uninstalled().connect(sigc::mem_fun(this, &MenuNew::app_uninstalled));
-    AppManager::get_instance()->signal_app_launched().connect(sigc::mem_fun(this, &MenuNew::app_launched));
-
-    WnckScreen *screen = wnck_screen_get_default();
-    if (screen)
-    {
-        wnck_screen_force_update(screen);
-        g_signal_connect(screen, "window-opened", G_CALLBACK(monitor_window_open), this);
-    }
-    else
-    {
-        g_warning("the default screen is NULL. please run in GUI application.");
-    }
+    AppManager::get_instance()->signal_app_action_changed().connect(sigc::mem_fun(this, &MenuNew::app_action_changed));
+    WindowManager::get_instance()->signal_window_opened().connect(sigc::mem_fun(this, &MenuNew::window_opened));
 }
 
 void MenuNew::flush(const AppVec &apps)
@@ -198,9 +167,21 @@ void MenuNew::app_uninstalled(AppVec apps)
     }
 }
 
-void MenuNew::app_launched(std::shared_ptr<App> app)
+void MenuNew::app_action_changed(std::shared_ptr<App> app, AppAction action)
 {
-    remove_from_new_apps(app);
+    if (action == AppAction::APP_LAUNCHED)
+    {
+        remove_from_new_apps(app);
+    }
+}
+
+void MenuNew::window_opened(std::shared_ptr<Window> window)
+{
+    auto app = AppManager::get_instance()->lookup_app_with_window(window);
+    if (app)
+    {
+        this->remove_from_new_apps(app);
+    }
 }
 
 void MenuNew::read_new_apps()

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:51
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-11 16:50:32
+ * @LastEditTime : 2020-06-12 10:07:04
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window.cpp
  */
@@ -115,6 +115,11 @@ WnckWindowType Window::get_window_type()
 bool Window::is_pinned()
 {
     return wnck_window_is_pinned(this->wnck_window_);
+}
+
+bool Window::is_above()
+{
+    return wnck_window_is_above(this->wnck_window_);
 }
 
 void Window::activate()

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 17:21:54
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-11 15:46:16
+ * @LastEditTime : 2020-06-12 09:56:16
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app-manager.h
  */
@@ -55,14 +55,8 @@ class AppManager
     sigc::signal<void, AppVec> &signal_app_installed() { return this->app_installed_; }
     // App卸载时的信号
     sigc::signal<void, AppVec> &signal_app_uninstalled() { return this->app_uninstalled_; }
-    // 通过调用App::launch启动应用成功的信号，如果需要监听所有启动的情况，建议使用signal_app_opened
-    sigc::signal<void, std::shared_ptr<App>> &signal_app_launched() { return this->app_launched_; };
-    // 应用程序启动信号
-    sigc::signal<void, std::shared_ptr<App>> &signal_app_opened() { return this->app_opened_; };
-    // 应用程序卸载信号
-    sigc::signal<void, std::shared_ptr<App>> &signal_app_closed() { return this->app_closed_; };
-    // 应用程序窗口变化信号
-    sigc::signal<void, std::shared_ptr<App>> &signal_window_change_for_app() { return this->window_change_for_app_; }
+    // 应用程序状态发生变化
+    sigc::signal<void, std::shared_ptr<App>, AppAction> &signal_app_action_changed() { return this->signal_app_action_changed_; }
 
    private:
     AppManager(WindowManager *window_manager);
@@ -88,15 +82,15 @@ class AppManager
     void window_closed(std::shared_ptr<Window> window);
 
     std::string get_exec_name(const std::string &exec_str);
+
     void app_launched(std::shared_ptr<App> app);
+    void app_close_all_windows(std::shared_ptr<App> app);
+    // void app_open_new_window(std::shared_ptr<App> app);
 
    protected:
     sigc::signal<void, AppVec> app_installed_;
     sigc::signal<void, AppVec> app_uninstalled_;
-    sigc::signal<void, std::shared_ptr<App>> app_launched_;
-    sigc::signal<void, std::shared_ptr<App>> app_opened_;
-    sigc::signal<void, std::shared_ptr<App>> app_closed_;
-    sigc::signal<void, std::shared_ptr<App>> window_change_for_app_;
+    sigc::signal<void, std::shared_ptr<App>, AppAction> signal_app_action_changed_;
 
    private:
     static AppManager *instance_;

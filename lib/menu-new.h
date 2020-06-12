@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:27:42
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-08 17:24:47
+ * @LastEditTime : 2020-06-11 19:38:59
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/menu-new.h
  */
@@ -34,7 +34,8 @@ class MenuNew : public MenuUnit
    private:
     void app_installed(AppVec apps);
     void app_uninstalled(AppVec apps);
-    void app_launched(std::shared_ptr<App> app);
+    void app_action_changed(std::shared_ptr<App> app, AppAction action);
+    void window_opened(std::shared_ptr<Window> window);
 
     void read_new_apps();
     void write_new_apps();

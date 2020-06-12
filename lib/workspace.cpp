@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-09 15:56:04
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-11 17:07:25
+ * @LastEditTime : 2020-06-12 11:58:48
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/workspace.cpp
  */
@@ -59,27 +59,23 @@ void Workspace::flush_windows()
     {
         auto window = WindowManager::get_instance()->get_window(*iter);
 
-        bool is_erase = false;
-
         if (!window)
         {
-            is_erase = true;
+            this->windows_.erase(iter);
+            continue;
         }
 
         auto workspace = window->get_workspace();
 
         if (workspace && workspace->get_number() != this->get_number())
         {
-            is_erase = true;
+            this->windows_.erase(iter);
+            continue;
         }
         else if (!workspace && !window->is_pinned())
         {
-            is_erase = true;
-        }
-
-        if (is_erase)
-        {
             this->windows_.erase(iter);
+            continue;
         }
     }
 }

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 21:42:15
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-11 14:02:37
+ * @LastEditTime : 2020-06-12 11:51:12
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app-manager.cpp
  */
@@ -75,6 +75,8 @@ void AppManager::load_apps()
             this->wmclass_apps_[app->get_startup_wm_class()] = app;
         }
         app->signal_launched().connect(sigc::mem_fun(this, &AppManager::app_launched));
+        app->signal_close_all_windows().connect(sigc::mem_fun(this, &AppManager::app_close_all_windows));
+        // app->signal_open_new_window().connect(sigc::mem_fun(this, &AppManager::app_open_new_window));
     }
 
     // new installed apps
@@ -120,26 +122,26 @@ void AppManager::load_apps()
     }
 
     // load wnck_application
-    this->xid_to_app_.clear();
-    auto screen = wnck_screen_get_default();
-    auto wnck_windows = wnck_screen_get_windows(screen);
-    for (auto l = wnck_windows; l != NULL; l = l->next)
-    {
-        auto wnck_window = (WnckWindow *)(l->data);
-        auto wnck_application = wnck_window_get_application(wnck_window);
-        auto xwindow = wnck_application_get_xid(wnck_application);
-        auto iter = this->xid_to_app_.find(xwindow);
-        if (iter == this->xid_to_app_.end())
-        {
-            auto window = this->window_manager_->lookup_window(wnck_window);
-            auto app = lookup_app_with_window(window);
-            if (app)
-            {
-                this->xid_to_app_.emplace(xwindow, app);
-                app->add_wnck_app_by_xid(xwindow);
-            }
-        }
-    }
+    // this->xid_to_app_.clear();
+    // auto screen = wnck_screen_get_default();
+    // auto wnck_windows = wnck_screen_get_windows(screen);
+    // for (auto l = wnck_windows; l != NULL; l = l->next)
+    // {
+    //     auto wnck_window = (WnckWindow *)(l->data);
+    //     auto wnck_application = wnck_window_get_application(wnck_window);
+    //     auto xwindow = wnck_application_get_xid(wnck_application);
+    //     auto iter = this->xid_to_app_.find(xwindow);
+    //     if (iter == this->xid_to_app_.end())
+    //     {
+    //         auto window = this->window_manager_->lookup_window(wnck_window);
+    //         auto app = lookup_app_with_window(window);
+    //         if (app)
+    //         {
+    //             this->xid_to_app_.emplace(xwindow, app);
+    //             app->add_wnck_app_by_xid(xwindow);
+    //         }
+    //     }
+    // }
 }
 
 std::vector<std::shared_ptr<App>> AppManager::get_apps()
@@ -586,7 +588,7 @@ void AppManager::app_opened(WnckScreen *screen, WnckApplication *wnck_applicatio
     for (auto l = wnck_windows; l != NULL; l = l->next)
     {
         auto wnck_window = (WnckWindow *)(l->data);
-        auto window = app_manager->window_manager_->lookup_window(wnck_window);
+        auto window = app_manager->window_manager_->lookup_and_create_window(wnck_window);
         app = app_manager->lookup_app_with_window(window);
         if (app)
         {
@@ -605,7 +607,12 @@ void AppManager::app_opened(WnckScreen *screen, WnckApplication *wnck_applicatio
     }
     else
     {
-        app_manager->app_opened_.emit(app);
+        app_manager->signal_app_action_changed_.emit(app, AppAction::APP_OPENED);
+
+        // g_print("-------signal: app '%s' is opened. xid: %" PRIu64 " pid: %" PRIu64 "\n",
+        //         app->get_desktop_id().c_str(),
+        //         wnck_application_get_xid(wnck_application),
+        //         wnck_application_get_pid(wnck_application));
     }
 }
 
@@ -630,7 +637,12 @@ void AppManager::app_closed(WnckScreen *screen, WnckApplication *wnck_applicatio
     {
         auto app = iter->second.lock();
         app->del_wnck_app_by_xid(xwindow);
-        app_manager->app_closed_.emit(app);
+        app_manager->signal_app_action_changed_.emit(app, AppAction::APP_CLOSED);
+
+        // g_print("-----------signal: app '%s' is closed. xid: %" PRIu64 " pid: %" PRIu64 "\n",
+        //         app->get_desktop_id().c_str(),
+        //         wnck_application_get_xid(wnck_application),
+        //         wnck_application_get_pid(wnck_application));
     }
     app_manager->xid_to_app_.erase(iter);
 }
@@ -640,7 +652,7 @@ void AppManager::window_opened(std::shared_ptr<Window> window)
     auto app = lookup_app_with_window(window);
     if (app)
     {
-        this->window_change_for_app_.emit(app);
+        this->signal_app_action_changed_.emit(app, AppAction::APP_WINDOW_CHANGED);
     }
 }
 void AppManager::window_closed(std::shared_ptr<Window> window)
@@ -648,7 +660,7 @@ void AppManager::window_closed(std::shared_ptr<Window> window)
     auto app = lookup_app_with_window(window);
     if (app)
     {
-        this->window_change_for_app_.emit(app);
+        this->signal_app_action_changed_.emit(app, AppAction::APP_WINDOW_CHANGED);
     }
 }
 
@@ -666,7 +678,12 @@ std::string AppManager::get_exec_name(const std::string &exec_str)
 
 void AppManager::app_launched(std::shared_ptr<App> app)
 {
-    this->app_launched_.emit(app);
+    this->signal_app_action_changed_.emit(app, AppAction::APP_LAUNCHED);
+}
+
+void AppManager::app_close_all_windows(std::shared_ptr<App> app)
+{
+    this->signal_app_action_changed_.emit(app, AppAction::APP_ALL_WINDOWS_CLOSED);
 }
 
 }  // namespace Kiran

@@ -8,6 +8,7 @@ INIT .. Kiran::MenuSkeleton
 INIT .. Kiran::AppManager
 INIT .. Kiran::WindowManager
 INIT .. Kiran::WorkspaceManager
+INIT .. Kiran::ScreenManager
 
 Kiran::MenuSkeleton o--> Kiran::MenuNew
 Kiran::MenuSkeleton o--> Kiran::MenuUsage

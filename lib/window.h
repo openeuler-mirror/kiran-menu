@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:46
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-11 16:30:26
+ * @LastEditTime : 2020-06-12 10:07:26
  * @Description  : 该类是对WnckWindow的封装，大部分接口和wnck_window_xxxx相同。
  * @FilePath     : /kiran-menu-2.0/lib/window.h
  */
@@ -65,7 +65,11 @@ class Window : public std::enable_shared_from_this<Window>
     // 获取窗口类型
     WnckWindowType get_window_type();
 
+    // 窗口是否存在所有工作区中
     bool is_pinned();
+
+    // 窗口是否置顶
+    bool is_above();
 
     // 激活窗口
     void activate();
