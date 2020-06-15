@@ -2,13 +2,14 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:27:28
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-12 11:50:16
+ * @LastEditTime : 2020-06-15 11:08:25
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window-manager.h
  */
 
 #pragma once
 
+#include "lib/screen-manager.h"
 #include "lib/window.h"
 
 namespace Kiran
@@ -20,7 +21,7 @@ class WindowManager
 
     static WindowManager *get_instance() { return instance_; };
 
-    static void global_init();
+    static void global_init(ScreenManager *screen_manager);
 
     static void global_deinit() { delete instance_; };
 
@@ -50,8 +51,14 @@ class WindowManager
     sigc::signal<void, std::shared_ptr<Window>, std::shared_ptr<Window>> &signal_active_window_changed() { return this->active_window_changed_; }
 
    private:
-    WindowManager();
+    WindowManager(ScreenManager *screen_manager);
+
     void load_windows();
+
+    void force_update_window();
+
+    // 更新窗口预览图
+    bool update_window_snapshot();
 
     // 处理窗口打开信号
     static void window_opened(WnckScreen *screen, WnckWindow *wnck_window, gpointer user_data);
@@ -67,6 +74,8 @@ class WindowManager
 
    private:
     static WindowManager *instance_;
+
+    ScreenManager *screen_manager_;
 
     std::map<uint64_t, std::shared_ptr<Window>> windows_;
 };

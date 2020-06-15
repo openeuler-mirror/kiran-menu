@@ -2,12 +2,16 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:27:36
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-12 11:55:55
+ * @LastEditTime : 2020-06-15 11:24:58
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window-manager.cpp
  */
 
 #include "lib/window-manager.h"
+
+#include <X11/extensions/Xcomposite.h>
+#include <gdk/gdk.h>
+#include <gdk/gdkx.h>
 
 #include <cinttypes>
 
@@ -15,7 +19,7 @@
 
 namespace Kiran
 {
-WindowManager::WindowManager()
+WindowManager::WindowManager(ScreenManager *screen_manager) : screen_manager_(screen_manager)
 {
 }
 
@@ -24,9 +28,9 @@ WindowManager::~WindowManager()
 }
 
 WindowManager *WindowManager::instance_ = nullptr;
-void WindowManager::global_init()
+void WindowManager::global_init(ScreenManager *screen_manager)
 {
-    instance_ = new WindowManager();
+    instance_ = new WindowManager(screen_manager);
     instance_->init();
 }
 
@@ -40,6 +44,21 @@ void WindowManager::init()
     g_signal_connect(screen, "window-opened", G_CALLBACK(WindowManager::window_opened), this);
     g_signal_connect(screen, "window-closed", G_CALLBACK(WindowManager::window_closed), this);
     g_signal_connect(screen, "active-window-changed", G_CALLBACK(WindowManager::active_window_changed), this);
+
+    auto context = Glib::MainContext::get_default();
+    if (context)
+    {
+        context->signal_idle().connect(sigc::mem_fun(this, &WindowManager::update_window_snapshot));
+    }
+    else
+    {
+        g_warning("failed to get default main context.\n");
+    }
+
+    if (this->screen_manager_)
+    {
+        this->screen_manager_->signal_force_update().connect(sigc::mem_fun(this, &WindowManager::force_update_window));
+    }
 }
 
 std::shared_ptr<Window> WindowManager::get_window(uint64_t xid)
@@ -135,6 +154,45 @@ void WindowManager::load_windows()
         {
             iter.first->second = window;
         }
+    }
+}
+
+void WindowManager::force_update_window()
+{
+    update_window_snapshot();
+}
+
+bool WindowManager::update_window_snapshot()
+{
+    auto display = gdk_x11_get_default_xdisplay();
+    auto gdk_screen = gdk_screen_get_default();
+    g_return_val_if_fail(display != NULL, false);
+    g_return_val_if_fail(gdk_screen != NULL, false);
+
+    if (gdk_screen_is_composited(gdk_screen))
+    {
+        for (auto iter = this->windows_.begin(); iter != this->windows_.end(); ++iter)
+        {
+            auto window = iter->second;
+            auto xid = window->get_xid();
+
+            XWindowAttributes attrs;
+            XGetWindowAttributes(display, xid, &attrs);
+            if (attrs.map_state == IsUnmapped || attrs.map_state == IsUnviewable)
+                continue;
+
+            auto pixmap = XCompositeNameWindowPixmap(display, xid);
+
+            if (!pixmap)
+            {
+                continue;
+            }
+            window->set_pixmap(pixmap);
+        }
+    }
+    else
+    {
+        g_warning("the extension composite is unsupported.\n");
     }
 }
 

@@ -2,12 +2,16 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-11 09:30:42
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-12 13:53:34
+ * @LastEditTime : 2020-06-15 11:44:12
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-display.cpp
  */
 
+#include <gdk/gdk.h>
 #include <gtkmm.h>
+// xlib.h must be defined after gdkmm header file.
+#include <cairomm/xlib_surface.h>
+#include <gdk/gdkx.h>
 
 #include <cinttypes>
 
@@ -181,6 +185,44 @@ gboolean timing_print(gpointer user_data)
                         window->is_pinned());
             }
             g_print("\n\n");
+        }
+    }
+
+    /*------------------------------------------- save the screenshot of all windows --------------------------------------*/
+
+    {
+        g_print("---------------------------save the screenshot of all windows ---------------------------\n\n");
+
+        auto window_manager = Kiran::WindowManager::get_instance();
+        auto windows = window_manager->get_windows();
+        auto display = gdk_x11_get_default_xdisplay();
+        for (int i = 0; i < windows.size(); ++i)
+        {
+            auto window = windows[i];
+            auto pixmap = window->get_pixmap();
+            auto geometry = window->get_geometry();
+            auto name = window->get_name();
+            auto xid = window->get_xid();
+            std::ostringstream oss;
+            auto new_name = name;
+            std::replace(new_name.begin(), new_name.end(), ' ', '-');
+            std::replace(new_name.begin(), new_name.end(), ':', '-');
+            oss << new_name << "_" << xid << ".png";
+
+            g_print("save screentshot: name: %s xid: %" PRIu64 " pixmap: %" PRIu64 " width: %d height: %d\n",
+                    name.c_str(),
+                    xid,
+                    pixmap,
+                    std::get<2>(geometry),
+                    std::get<3>(geometry));
+
+            if (pixmap)
+            {
+                XWindowAttributes attrs;
+                XGetWindowAttributes(display, xid, &attrs);
+                auto surface = Cairo::XlibSurface::create(display, pixmap, attrs.visual, attrs.width, attrs.height);
+                surface->write_to_png(oss.str());
+            }
         }
     }
 

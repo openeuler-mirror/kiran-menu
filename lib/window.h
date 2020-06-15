@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:46
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-12 10:07:26
+ * @LastEditTime : 2020-06-15 09:53:56
  * @Description  : 该类是对WnckWindow的封装，大部分接口和wnck_window_xxxx相同。
  * @FilePath     : /kiran-menu-2.0/lib/window.h
  */
@@ -10,6 +10,8 @@
 #pragma once
 
 #include <gdkmm.h>
+// xlib.h must be defined after gdkmm header file.
+#include <X11/Xlib.h>
 #include <libwnck/libwnck.h>
 
 namespace Kiran
@@ -38,8 +40,8 @@ class Window : public std::enable_shared_from_this<Window>
     // 获取窗口图标
     GdkPixbuf* get_icon();
 
-    // 获取窗口的预览图（待测试）
-    GdkPixbuf* get_mini_icon();
+    // 获取窗口预览图的pixmap
+    Pixmap get_pixmap() { return this->pixmap_; }
 
     // 获取与该窗口关联的App对象
     std::shared_ptr<App> get_app();
@@ -95,6 +97,9 @@ class Window : public std::enable_shared_from_this<Window>
     // 关闭窗口
     void close();
 
+    // 获取窗口位置和大小
+    std::tuple<int, int, int, int> get_geometry();
+
     // 获取当前所在的工作区。如果窗口为pin状态或者不在任何工作区，则返回空
     std::shared_ptr<Workspace> get_workspace();
 
@@ -105,12 +110,17 @@ class Window : public std::enable_shared_from_this<Window>
 
     static void workspace_changed(WnckWindow* wnck_window, gpointer user_data);
 
+    void set_pixmap(Pixmap pixmap) { this->pixmap_ = pixmap; }
+
    private:
     WnckWindow* wnck_window_;
 
     int32_t last_workspace_number_;
+
     bool last_is_pinned_;
 
-    friend class App;
+    Pixmap pixmap_;
+
+    friend class WindowManager;
 };
 }  // namespace Kiran

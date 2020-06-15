@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:51
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-12 10:07:04
+ * @LastEditTime : 2020-06-15 10:18:42
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window.cpp
  */
@@ -24,7 +24,8 @@ std::shared_ptr<Window> Window::create(WnckWindow* wnck_window)
 
 Window::Window(WnckWindow* wnck_window) : wnck_window_(wnck_window),
                                           last_workspace_number_(-1),
-                                          last_is_pinned_(false)
+                                          last_is_pinned_(false),
+                                          pixmap_(0)
 {
     g_signal_connect(this->wnck_window_, "workspace-changed", G_CALLBACK(Window::workspace_changed), NULL);
 }
@@ -46,11 +47,6 @@ std::string Window::get_icon_name()
 GdkPixbuf* Window::get_icon()
 {
     return wnck_window_get_icon(this->wnck_window_);
-}
-
-GdkPixbuf* Window::get_mini_icon()
-{
-    return wnck_window_get_mini_icon(this->wnck_window_);
 }
 
 std::shared_ptr<App> Window::get_app()
@@ -162,6 +158,13 @@ void Window::close()
 {
     uint64_t now = Glib::DateTime::create_now_local().to_unix();
     wnck_window_close(this->wnck_window_, now);
+}
+
+std::tuple<int, int, int, int> Window::get_geometry()
+{
+    int x, y, w, h;
+    wnck_window_get_geometry(this->wnck_window_, &x, &y, &w, &h);
+    return std::make_tuple(x, y, w, h);
 }
 
 std::shared_ptr<Workspace> Window::get_workspace()
