@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:27:36
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-15 11:24:58
+ * @LastEditTime : 2020-06-15 17:05:49
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window-manager.cpp
  */
@@ -166,8 +166,10 @@ bool WindowManager::update_window_snapshot()
 {
     auto display = gdk_x11_get_default_xdisplay();
     auto gdk_screen = gdk_screen_get_default();
+    auto gdk_display = gdk_display_get_default();
     g_return_val_if_fail(display != NULL, false);
     g_return_val_if_fail(gdk_screen != NULL, false);
+    g_return_val_if_fail(gdk_display != NULL, false);
 
     if (gdk_screen_is_composited(gdk_screen))
     {
@@ -177,9 +179,17 @@ bool WindowManager::update_window_snapshot()
             auto xid = window->get_xid();
 
             XWindowAttributes attrs;
-            XGetWindowAttributes(display, xid, &attrs);
-            if (attrs.map_state == IsUnmapped || attrs.map_state == IsUnviewable)
+            gdk_x11_display_error_trap_push(gdk_display);
+            gboolean result = XGetWindowAttributes(display, xid, &attrs);
+            if (gdk_x11_display_error_trap_pop(gdk_display) || !result)
+            {
                 continue;
+            }
+
+            if (attrs.map_state == IsUnmapped || attrs.map_state == IsUnviewable)
+            {
+                continue;
+            }
 
             auto pixmap = XCompositeNameWindowPixmap(display, xid);
 
@@ -187,6 +197,7 @@ bool WindowManager::update_window_snapshot()
             {
                 continue;
             }
+
             window->set_pixmap(pixmap);
         }
     }
@@ -194,6 +205,7 @@ bool WindowManager::update_window_snapshot()
     {
         g_warning("the extension composite is unsupported.\n");
     }
+    return true;
 }
 
 void WindowManager::window_opened(WnckScreen *screen, WnckWindow *wnck_window, gpointer user_data)
