@@ -2,11 +2,14 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 21:42:15
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-19 16:22:20
+ * @LastEditTime : 2020-06-19 17:23:58
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app-manager.cpp
  */
 #include "lib/app-manager.h"
+
+#include <gdk/gdk.h>
+#include <gdk/gdkx.h>
 
 #include <cinttypes>
 #include <sstream>
@@ -172,7 +175,7 @@ AppVec AppManager::get_should_show_apps()
 AppVec AppManager::get_running_apps()
 {
     AppVec apps;
-    for (auto iter = this->xid_to_app_.begin(); iter != this->xid_to_app_.end(); ++iter)
+    for (auto iter = this->wnck_apps_.begin(); iter != this->wnck_apps_.end(); ++iter)
     {
         if (!(iter->second.expired()))
         {
@@ -224,6 +227,9 @@ std::shared_ptr<App> AppManager::lookup_app_with_window(std::shared_ptr<Window> 
     app = get_app_from_sandboxed_app(window);
     RETURN_VAL_IF_TRUE(app, app);
 
+    app = get_app_from_gapplication_id(window);
+    RETURN_VAL_IF_TRUE(app, app);
+
     app = get_app_from_window_wmclass(window);
     RETURN_VAL_IF_TRUE(app, app);
 
@@ -245,8 +251,8 @@ std::shared_ptr<App> AppManager::lookup_app_with_window(std::shared_ptr<Window> 
 
 std::shared_ptr<App> AppManager::lookup_app_with_xid(uint64_t xid)
 {
-    auto iter = this->xid_to_app_.find(xid);
-    if (iter != this->xid_to_app_.end())
+    auto iter = this->xid_to_apps_.find(xid);
+    if (iter != this->xid_to_apps_.end())
     {
         auto &app = iter->second;
         if (!app.expired())
@@ -284,6 +290,11 @@ std::shared_ptr<App> AppManager::get_app_from_sandboxed_app(std::shared_ptr<Wind
 {
     std::shared_ptr<App> app;
     auto pid = window->get_pid();
+
+    if (!pid)
+    {
+        return nullptr;
+    }
 
     // check whether is flatpak app
     do
@@ -374,6 +385,47 @@ std::shared_ptr<App> AppManager::get_app_from_sandboxed_app(std::shared_ptr<Wind
         app = lookup_app(desktop_id);
         RETURN_VAL_IF_TRUE(app, app);
     } while (0);
+    return nullptr;
+}
+
+std::shared_ptr<App> AppManager::get_app_from_gapplication_id(std::shared_ptr<Window> window)
+{
+    unsigned char *data = NULL;
+    g_autofree char *name = NULL;
+    Atom actual_type;
+    int actual_format;
+    unsigned long nitems, bytes_after;
+
+    auto display = gdk_x11_get_default_xdisplay();
+    auto gdk_display = gdk_display_get_default();
+    auto xid = window->get_xid();
+
+    g_return_val_if_fail(display != NULL, nullptr);
+    g_return_val_if_fail(gdk_display != NULL, nullptr);
+
+    auto prop_atom = XInternAtom(display, "_GTK_APPLICATION_ID", true);
+
+    gdk_x11_display_error_trap_push(gdk_display);
+
+    auto result = XGetWindowProperty(display, xid, prop_atom, 0, G_MAXLONG, false,
+                                     AnyPropertyType,
+                                     &actual_type,
+                                     &actual_format,
+                                     &nitems,
+                                     &bytes_after,
+                                     &data);
+    if (!gdk_x11_display_error_trap_pop(gdk_display) &&
+        (result == Success) &&
+        data != NULL)
+    {
+        name = strdup((char *)data);
+        XFree(data);
+
+        auto desktop_id = std::string(name) + std::string(".desktop");
+        auto app = lookup_app(desktop_id);
+        RETURN_VAL_IF_TRUE(app, app);
+    }
+
     return nullptr;
 }
 
@@ -567,6 +619,9 @@ std::shared_ptr<App> AppManager::get_app_from_window_group(std::shared_ptr<Windo
         app = get_app_from_sandboxed_app(*iter);
         RETURN_VAL_IF_TRUE(app, app);
 
+        app = get_app_from_gapplication_id(window);
+        RETURN_VAL_IF_TRUE(app, app);
+
         app = get_app_from_window_wmclass(*iter);
         RETURN_VAL_IF_TRUE(app, app);
 
@@ -587,8 +642,8 @@ void AppManager::app_opened(WnckScreen *screen, WnckApplication *wnck_applicatio
     g_return_if_fail(app_manager == AppManager::get_instance());
 
     auto xwindow = wnck_application_get_xid(wnck_application);
-    auto iter = app_manager->xid_to_app_.find(xwindow);
-    if (iter != app_manager->xid_to_app_.end())
+    auto iter = app_manager->wnck_apps_.find(xwindow);
+    if (iter != app_manager->wnck_apps_.end())
     {
         g_warning("the wnck_application already exist. name: %s xid: %" PRIu64 "\n",
                   wnck_application_get_name(wnck_application),
@@ -606,7 +661,7 @@ void AppManager::app_opened(WnckScreen *screen, WnckApplication *wnck_applicatio
         app = app_manager->lookup_app_with_window(window);
         if (app)
         {
-            app_manager->xid_to_app_.emplace(xwindow, app);
+            app_manager->wnck_apps_.emplace(xwindow, app);
             app->add_wnck_app_by_xid(xwindow);
             add_result = true;
             break;
@@ -638,8 +693,8 @@ void AppManager::app_closed(WnckScreen *screen, WnckApplication *wnck_applicatio
     g_return_if_fail(app_manager == AppManager::get_instance());
 
     auto xwindow = wnck_application_get_xid(wnck_application);
-    auto iter = app_manager->xid_to_app_.find(xwindow);
-    if (iter == app_manager->xid_to_app_.end())
+    auto iter = app_manager->wnck_apps_.find(xwindow);
+    if (iter == app_manager->wnck_apps_.end())
     {
         g_warning("not found the App for the wnck_application. name: %s xid: %" PRIu64 "\n",
                   wnck_application_get_name(wnck_application),
@@ -658,7 +713,7 @@ void AppManager::app_closed(WnckScreen *screen, WnckApplication *wnck_applicatio
         //         wnck_application_get_xid(wnck_application),
         //         wnck_application_get_pid(wnck_application));
     }
-    app_manager->xid_to_app_.erase(iter);
+    app_manager->wnck_apps_.erase(iter);
 }
 
 void AppManager::window_opened(std::shared_ptr<Window> window)
@@ -666,16 +721,20 @@ void AppManager::window_opened(std::shared_ptr<Window> window)
     auto app = lookup_app_with_window(window);
     if (app)
     {
+        this->xid_to_apps_.emplace(window->get_xid(), app);
+
         this->signal_app_action_changed_.emit(app, AppAction::APP_WINDOW_CHANGED);
     }
 }
 void AppManager::window_closed(std::shared_ptr<Window> window)
 {
-    auto app = lookup_app_with_window(window);
+    auto app = lookup_app_with_xid(window->get_xid());
     if (app)
     {
         this->signal_app_action_changed_.emit(app, AppAction::APP_WINDOW_CHANGED);
     }
+
+    this->xid_to_apps_.erase(window->get_xid());
 }
 
 std::string AppManager::get_exec_name(const std::string &exec_str)

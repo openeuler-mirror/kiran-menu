@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-11 09:30:42
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-15 11:44:12
+ * @LastEditTime : 2020-06-19 16:40:49
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-display.cpp
  */
@@ -258,7 +258,7 @@ int main(int argc, char **argv)
 
     timing_print(NULL);
 
-    g_timeout_add_seconds(10, timing_print, NULL);
+    // g_timeout_add_seconds(10, timing_print, NULL);
 
     kit.run();
 

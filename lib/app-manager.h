@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 17:21:54
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-12 09:56:16
+ * @LastEditTime : 2020-06-19 17:20:08
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app-manager.h
  */
@@ -17,7 +17,7 @@ namespace Kiran
 {
 class AppManager
 {
-   public:
+public:
     virtual ~AppManager();
 
     static AppManager *get_instance() { return instance_; };
@@ -58,11 +58,12 @@ class AppManager
     // 应用程序状态发生变化
     sigc::signal<void, std::shared_ptr<App>, AppAction> &signal_app_action_changed() { return this->signal_app_action_changed_; }
 
-   private:
+private:
     AppManager(WindowManager *window_manager);
 
-   private:
+private:
     std::shared_ptr<App> get_app_from_sandboxed_app(std::shared_ptr<Window> window);
+    std::shared_ptr<App> get_app_from_gapplication_id(std::shared_ptr<Window> window);
     std::shared_ptr<App> get_app_from_window_wmclass(std::shared_ptr<Window> window);
     std::shared_ptr<App> lookup_app_with_wmclass(const std::string &wmclass);
     std::shared_ptr<App> lookup_app_with_desktop_wmclass(const std::string &wmclass);
@@ -87,12 +88,12 @@ class AppManager
     void app_close_all_windows(std::shared_ptr<App> app);
     // void app_open_new_window(std::shared_ptr<App> app);
 
-   protected:
+protected:
     sigc::signal<void, AppVec> app_installed_;
     sigc::signal<void, AppVec> app_uninstalled_;
     sigc::signal<void, std::shared_ptr<App>, AppAction> signal_app_action_changed_;
 
-   private:
+private:
     static AppManager *instance_;
 
     WindowManager *window_manager_;
@@ -100,7 +101,9 @@ class AppManager
     std::map<int32_t, std::shared_ptr<App>> apps_;
     std::map<std::string, std::shared_ptr<App>> wmclass_apps_;
 
-    std::map<uint64_t, std::weak_ptr<App>> xid_to_app_;
+    std::map<uint64_t, std::weak_ptr<App>> wnck_apps_;
+
+    std::map<uint64_t, std::weak_ptr<App>> xid_to_apps_;
 };
 
 }  // namespace Kiran
