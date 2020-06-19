@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 21:42:15
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-12 11:51:12
+ * @LastEditTime : 2020-06-19 16:22:20
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app-manager.cpp
  */
@@ -329,7 +329,14 @@ std::shared_ptr<App> AppManager::get_app_from_sandboxed_app(std::shared_ptr<Wind
         {
             break;
         }
-        if (!file->load_contents(security_label_contents, security_label_contents_size))
+        try
+        {
+            if (!file->load_contents(security_label_contents, security_label_contents_size))
+            {
+                break;
+            }
+        }
+        catch (const Glib::Exception &e)
         {
             break;
         }
@@ -499,7 +506,14 @@ std::shared_ptr<App> AppManager::get_app_from_env(std::shared_ptr<Window> window
         return nullptr;
     }
 
-    if (!file->load_contents(file_contents, file_size))
+    try
+    {
+        if (!file->load_contents(file_contents, file_size))
+        {
+            return nullptr;
+        }
+    }
+    catch (const Glib::Exception &e)
     {
         return nullptr;
     }
