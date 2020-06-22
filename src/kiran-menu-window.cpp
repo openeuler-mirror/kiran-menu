@@ -7,7 +7,6 @@
 
 #include <unistd.h>
 #include <iostream>
-#include <jsoncpp/json/reader.h>
 #include <glibmm/i18n.h>
 
 KiranMenuWindow::KiranMenuWindow(Gtk::WindowType window_type):
