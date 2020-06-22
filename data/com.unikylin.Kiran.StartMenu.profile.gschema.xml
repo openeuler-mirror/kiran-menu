@@ -12,5 +12,6 @@
       <default>'Beijing'</default>
       <summary>The city to show weather data</summary>
     </key>
+  </schema>
 </schemalist>
 
