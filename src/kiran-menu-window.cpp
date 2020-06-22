@@ -23,7 +23,6 @@ KiranMenuWindow::KiranMenuWindow(Gtk::WindowType window_type):
     set_decorated(false);
     set_accept_focus(true);
     set_focus_on_map(true);
-    set_size_request(760, 690);
 
     Kiran::MenuSkeleton::global_init();
     backend = Kiran::MenuSkeleton::get_instance();
@@ -125,11 +124,17 @@ void KiranMenuWindow::reload_apps_data()
 void KiranMenuWindow::on_realize()
 {
     Glib::RefPtr<Gdk::Visual> rgba_visual;
+    Gdk::Rectangle rect;
     auto screen = Gdk::Screen::get_default();
+    auto monitor = screen->get_display()->get_primary_monitor();
 
     /*设置窗口的Visual为RGBA visual，确保窗口背景透明度可以正常绘制 */
     rgba_visual = screen->get_rgba_visual();
     gtk_widget_set_visual(GTK_WIDGET(this->gobj()), rgba_visual->gobj());
+
+    monitor->get_workarea(rect);
+
+    set_size_request(-1, rect.get_height()*2/3);
     Gtk::Window::on_realize();
 }
 
