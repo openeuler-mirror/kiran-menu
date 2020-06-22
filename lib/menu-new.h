@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:27:42
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-11 19:38:59
+ * @LastEditTime : 2020-06-22 08:46:50
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/menu-new.h
  */
@@ -16,7 +16,7 @@ namespace Kiran
 {
 class MenuNew : public MenuUnit
 {
-   public:
+public:
     MenuNew();
     virtual ~MenuNew();
 
@@ -31,7 +31,7 @@ class MenuNew : public MenuUnit
     //signal accessor:
     sigc::signal<void> &signal_new_app_changed() { return this->new_app_changed_; }
 
-   private:
+private:
     void app_installed(AppVec apps);
     void app_uninstalled(AppVec apps);
     void app_action_changed(std::shared_ptr<App> app, AppAction action);
@@ -40,10 +40,10 @@ class MenuNew : public MenuUnit
     void read_new_apps();
     void write_new_apps();
 
-   protected:
+protected:
     sigc::signal<void> new_app_changed_;
 
-   private:
+private:
     Glib::RefPtr<Gio::Settings> settings_;
 
     std::list<int32_t> new_apps_;

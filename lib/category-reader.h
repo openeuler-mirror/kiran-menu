@@ -19,7 +19,7 @@ namespace Kiran
 {
 class CategoryReader : public Parser
 {
-   public:
+public:
     CategoryReader();
     virtual ~CategoryReader();
 
@@ -35,7 +35,7 @@ class CategoryReader : public Parser
 
     std::shared_ptr<CategoryNode> create_from_xml(const std::string& file_path);
 
-   private:
+private:
     void throw_error(ParseContext& context,
                      Glib::MarkupError::Code error_code,
                      const char* format,
@@ -70,7 +70,7 @@ class CategoryReader : public Parser
     gboolean all_whitespace(const char* text,
                             int text_len);
 
-   private:
+private:
     std::shared_ptr<CategoryNode> root_;
     std::shared_ptr<CategoryNode> last_;
 };

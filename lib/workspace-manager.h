@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-09 15:56:17
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-15 11:11:34
+ * @LastEditTime : 2020-06-22 08:46:12
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/workspace-manager.h
  */
@@ -23,7 +23,7 @@ namespace Kiran
 
 class WorkspaceManager
 {
-   public:
+public:
     virtual ~WorkspaceManager();
 
     static WorkspaceManager *get_instance() { return instance_; };
@@ -51,7 +51,7 @@ class WorkspaceManager
     // 工作区销毁信号
     sigc::signal<void, std::shared_ptr<Workspace>> &signal_workspace_destroyed() { return this->workspace_destroyed_; }
 
-   private:
+private:
     WorkspaceManager();
 
     void load_workspaces();
@@ -59,7 +59,7 @@ class WorkspaceManager
     static void workspace_created(WnckScreen *screen, WnckWorkspace *wnck_workspace, gpointer user_data);
     static void workspace_destroyed(WnckScreen *screen, WnckWorkspace *wnck_workspace, gpointer user_data);
 
-   private:
+private:
     static WorkspaceManager *instance_;
 
     sigc::signal<void, std::shared_ptr<Workspace>> workspace_created_;

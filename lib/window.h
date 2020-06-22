@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:46
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-15 09:53:56
+ * @LastEditTime : 2020-06-22 08:46:26
  * @Description  : 该类是对WnckWindow的封装，大部分接口和wnck_window_xxxx相同。
  * @FilePath     : /kiran-menu-2.0/lib/window.h
  */
@@ -24,7 +24,7 @@ using WindowVec = std::vector<std::shared_ptr<Kiran::Window>>;
 
 class Window : public std::enable_shared_from_this<Window>
 {
-   public:
+public:
     Window() = delete;
     Window(const Window& window) = delete;
     virtual ~Window();
@@ -103,7 +103,7 @@ class Window : public std::enable_shared_from_this<Window>
     // 获取当前所在的工作区。如果窗口为pin状态或者不在任何工作区，则返回空
     std::shared_ptr<Workspace> get_workspace();
 
-   private:
+private:
     Window(WnckWindow* window);
 
     void flush_workspace();
@@ -112,7 +112,7 @@ class Window : public std::enable_shared_from_this<Window>
 
     void set_pixmap(Pixmap pixmap) { this->pixmap_ = pixmap; }
 
-   private:
+private:
     WnckWindow* wnck_window_;
 
     int32_t last_workspace_number_;

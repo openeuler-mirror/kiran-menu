@@ -24,7 +24,7 @@ using WorkspaceVec = std::vector<std::shared_ptr<Kiran::Workspace>>;
 
 class Workspace
 {
-   public:
+public:
     Workspace(WnckWorkspace *workspace);
     virtual ~Workspace();
 
@@ -40,7 +40,7 @@ class Workspace
     // 获取工作空间中的窗口
     WindowVec get_windows();
 
-   private:
+private:
     void flush_windows();
 
     // 添加窗口
@@ -48,7 +48,7 @@ class Workspace
     //移除窗口
     void remove_window(std::shared_ptr<Window> window);
 
-   private:
+private:
     WnckWorkspace *workspace_;
 
     std::set<uint64_t> windows_;

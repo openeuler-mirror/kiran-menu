@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 21:00:34
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-12 09:00:07
+ * @LastEditTime : 2020-06-22 08:46:43
  * @Description  : 开始菜单类，继承KiranMenuBased接口类。
  * @FilePath     : /kiran-menu-2.0/lib/menu-skeleton.h
  */
@@ -27,7 +27,7 @@ enum class MenuUnitType
 
 class MenuSkeleton
 {
-   public:
+public:
     MenuSkeleton();
     virtual ~MenuSkeleton();
 
@@ -94,7 +94,7 @@ class MenuSkeleton
     sigc::signal<void, AppVec> &signal_favorite_app_deleted() { return this->favorite_app_deleted_; }
     sigc::signal<void> &signal_frequent_usage_app_changed() { return this->frequent_usage_app_changed_; }
 
-   private:
+private:
     AppVec trans_ids_to_apps(const std::vector<std::string> &desktop_ids);
 
     void app_installed(AppVec apps);
@@ -104,7 +104,7 @@ class MenuSkeleton
     void favorite_app_added(std::vector<std::string> desktop_ids);
     void favorite_app_deleted(std::vector<std::string> desktop_ids);
 
-   protected:
+protected:
     sigc::signal<void> app_changed_;
     sigc::signal<void, AppVec> app_installed_;
     sigc::signal<void, AppVec> app_uninstalled_;
@@ -113,7 +113,7 @@ class MenuSkeleton
     sigc::signal<void, AppVec> favorite_app_deleted_;
     sigc::signal<void> frequent_usage_app_changed_;
 
-   private:
+private:
     static MenuSkeleton *instance_;
 
     std::shared_ptr<MenuUsage> usage_;

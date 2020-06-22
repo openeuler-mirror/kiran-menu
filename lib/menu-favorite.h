@@ -14,7 +14,7 @@ namespace Kiran
 {
 class MenuFavorite : public MenuUnit
 {
-   public:
+public:
     MenuFavorite();
     virtual ~MenuFavorite();
 
@@ -34,14 +34,14 @@ class MenuFavorite : public MenuUnit
     sigc::signal<void, std::vector<std::string>> &signal_app_added() { return this->app_added_; }
     sigc::signal<void, std::vector<std::string>> &signal_app_deleted() { return this->app_deleted_; }
 
-   private:
+private:
     void app_changed(const Glib::ustring &key);
 
-   protected:
+protected:
     sigc::signal<void, std::vector<std::string>> app_added_;
     sigc::signal<void, std::vector<std::string>> app_deleted_;
 
-   private:
+private:
     Glib::RefPtr<Gio::Settings> settings_;
 
     std::list<int32_t> favorite_apps_;

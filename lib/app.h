@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:33
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-12 13:45:28
+ * @LastEditTime : 2020-06-22 08:47:36
  * @Description  : 维护APP的一些基本信息
  * @FilePath     : /kiran-menu-2.0/lib/app.h
  */
@@ -55,7 +55,7 @@ enum class AppAction : uint32_t
 
 class App : public std::enable_shared_from_this<App>
 {
-   public:
+public:
     App(const App &) = delete;
     App(const std::string &desktop_id);
     virtual ~App();
@@ -106,7 +106,7 @@ class App : public std::enable_shared_from_this<App>
     // 删除xid
     void del_wnck_app_by_xid(uint64_t xid);
 
-   protected:
+protected:
     // 通过调用App::launch启动应用成功的信号
     sigc::signal<void, std::shared_ptr<App>> signal_launched() { return this->launched_; }
     // 通过调用App::launch启动应用失败的信号
@@ -116,20 +116,20 @@ class App : public std::enable_shared_from_this<App>
     // 打开一个新窗口信号
     // sigc::signal<void, std::shared_ptr<App>> signal_open_new_window() { return this->open_new_window_; }
 
-   private:
+private:
     void init_app_kind();
 
     void expand_macro(char macro, GString *exec);
     bool expand_application_parameters(int *argc, char ***argv, GError **error);
     bool launch_flatpak(GError **error);
 
-   protected:
+protected:
     sigc::signal<void, std::shared_ptr<App>> launched_;
     sigc::signal<void, std::shared_ptr<App>> launch_failed_;
     sigc::signal<void, std::shared_ptr<App>> close_all_windows_;
     // sigc::signal<void, std::shared_ptr<App>> open_new_window_;
 
-   private:
+private:
     std::string desktop_id_;
 
     std::string file_name_;

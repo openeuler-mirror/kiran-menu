@@ -20,7 +20,7 @@ namespace Kiran
 {
 class Category
 {
-   public:
+public:
     Category(std::shared_ptr<CategoryNode> node);
     virtual ~Category();
 
@@ -44,7 +44,7 @@ class Category
 
     bool add_rule_exclude_app(std::shared_ptr<App> app);
 
-   private:
+private:
     bool match_desktop_category(std::shared_ptr<CategoryNode> node, std::shared_ptr<App> app);
     bool match_desktop_id(std::shared_ptr<CategoryNode> node, std::shared_ptr<App> app);
     bool match_rule(std::shared_ptr<CategoryNode> node, std::shared_ptr<App> app);
@@ -52,7 +52,7 @@ class Category
 
     bool delete_node_with_desktop_id(std::shared_ptr<CategoryNode> node, const std::string &desktop_id);
 
-   private:
+private:
     std::string name_;
     std::string icon_;
 

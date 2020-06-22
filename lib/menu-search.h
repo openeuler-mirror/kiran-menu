@@ -14,7 +14,7 @@ namespace Kiran
 {
 class MenuSearch : public MenuUnit
 {
-   public:
+public:
     MenuSearch();
     virtual ~MenuSearch();
 
@@ -26,7 +26,7 @@ class MenuSearch : public MenuUnit
                              bool ignore_case,
                              const AppVec &apps);
 
-   private:
+private:
     bool strstr_with_case(const std::string &a, const std::string &b, bool ignore_case);
 };
 }  // namespace Kiran

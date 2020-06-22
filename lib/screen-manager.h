@@ -15,7 +15,7 @@ namespace Kiran
 {
 class ScreenManager
 {
-   public:
+public:
     virtual ~ScreenManager();
 
     static ScreenManager *get_instance() { return instance_; };
@@ -33,10 +33,10 @@ class ScreenManager
     // 调用force_update函数触发的信号
     sigc::signal<void> &signal_force_update() { return this->force_update_; }
 
-   private:
+private:
     ScreenManager();
 
-   private:
+private:
     static ScreenManager *instance_;
 
     WnckScreen *screen_;
