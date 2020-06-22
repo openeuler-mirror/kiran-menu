@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 22:54:02
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-10 11:41:54
+ * @LastEditTime : 2020-06-22 09:43:18
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/helper.h
  */
@@ -80,5 +80,16 @@ constexpr StringHash operator"" _hash(char const *p, size_t)
 {
     return hash_compile_time(p);
 }
+
+/// find characters in a string.
+size_t find_chars(const std::string &s, const char *chs, size_t char_cnt, size_t off);
+template <size_t _Size>
+inline size_t find_chars(const std::string &s, const char (&chs)[_Size], size_t off = 0)
+{
+    // _Size - 1 will exclude the '\0'
+    return find_chars(s, chs, _Size - 1, off);
+}
+
+std::string get_mainname(const std::string &file_name);
 
 }  // namespace Kiran

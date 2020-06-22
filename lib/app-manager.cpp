@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 21:42:15
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-22 08:39:47
+ * @LastEditTime : 2020-06-22 09:45:03
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app-manager.cpp
  */
@@ -436,7 +436,7 @@ std::shared_ptr<App> AppManager::get_app_from_window_wmclass(std::shared_ptr<Win
     auto wm_class_instance = window->get_class_instance_name();
     auto wm_class = window->get_class_group_name();
 
-    // g_print("wm_class_instance: %s wm_class: %s\n", wm_class_instance.c_str(), wm_class.c_str());
+    g_print("wm_class_instance: %s wm_class: %s\n", wm_class_instance.c_str(), wm_class.c_str());
 
     app = lookup_app_with_wmclass(wm_class_instance);
     RETURN_VAL_IF_TRUE(app, app);
@@ -475,15 +475,17 @@ std::shared_ptr<App> AppManager::lookup_app_with_desktop_wmclass(const std::stri
     std::shared_ptr<App> app;
 
     std::string basename = wmclass + std::string(".desktop");
+    app = lookup_app_with_heuristic_basename(basename);
+    RETURN_VAL_IF_TRUE(app, app);
 
+    std::string mainname = get_mainname(wmclass);
+    basename = mainname + std::string(".desktop");
     app = lookup_app_with_heuristic_basename(basename);
     RETURN_VAL_IF_TRUE(app, app);
 
     std::string lower_wmclass = str_tolower(wmclass);
     std::replace(lower_wmclass.begin(), lower_wmclass.end(), ' ', '-');
-
     basename = lower_wmclass + std::string(".desktop");
-
     app = lookup_app_with_heuristic_basename(basename);
     RETURN_VAL_IF_TRUE(app, app);
 

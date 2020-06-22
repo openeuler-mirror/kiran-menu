@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 22:54:57
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-10 11:28:35
+ * @LastEditTime : 2020-06-22 09:38:42
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/helper.cpp
  */
@@ -79,6 +79,36 @@ std::vector<std::string> str_split(const std::string &s, const std::string &sepe
         }
     }
     return result;
+}
+
+size_t find_chars(const std::string& s, const char* chs, size_t char_cnt, size_t off)
+{
+    for (size_t p = off; p < s.length(); p++)
+    {
+        auto c = s[p];
+        for (size_t i = 0; i < char_cnt; i++)
+        {
+            if (c == chs[i])
+            {
+                return p;
+            }
+        }
+    }
+    return std::string::npos;
+}
+
+std::string get_mainname(const std::string &file_name)
+{
+    auto pos = file_name.rfind('.');
+    if (pos == std::string::npos)
+    {
+        return file_name;
+    }
+    if (find_chars(file_name, "/\\", pos) != std::string::npos)
+    {
+        return file_name;
+    }
+    return file_name.substr(0, pos);
 }
 
 }  // namespace Kiran
