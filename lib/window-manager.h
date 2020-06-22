@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:27:28
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-15 11:08:25
+ * @LastEditTime : 2020-06-22 08:38:35
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window-manager.h
  */
@@ -16,7 +16,7 @@ namespace Kiran
 {
 class WindowManager
 {
-   public:
+public:
     virtual ~WindowManager();
 
     static WindowManager *get_instance() { return instance_; };
@@ -36,6 +36,9 @@ class WindowManager
     // 获取所有窗口
     WindowVec get_windows();
 
+    // 创建一个临时窗口，WindowManager不进行维护
+    std::shared_ptr<Window> create_temp_window(WnckWindow *wnck_window);
+
     // 通过wnck_window查找对应的Window对象
     std::shared_ptr<Window> lookup_window(WnckWindow *wnck_window);
 
@@ -50,7 +53,7 @@ class WindowManager
     // 激活窗口发生变化，参数分别为：返回值，上一次激活窗口，当前激活窗口
     sigc::signal<void, std::shared_ptr<Window>, std::shared_ptr<Window>> &signal_active_window_changed() { return this->active_window_changed_; }
 
-   private:
+private:
     WindowManager(ScreenManager *screen_manager);
 
     void load_windows();
@@ -67,12 +70,12 @@ class WindowManager
     // 处理激活窗口变化信号
     static void active_window_changed(WnckScreen *screen, WnckWindow *prev_wnck_window, gpointer user_data);
 
-   protected:
+protected:
     sigc::signal<void, std::shared_ptr<Window>> window_opened_;
     sigc::signal<void, std::shared_ptr<Window>> window_closed_;
     sigc::signal<void, std::shared_ptr<Window>, std::shared_ptr<Window>> active_window_changed_;
 
-   private:
+private:
     static WindowManager *instance_;
 
     ScreenManager *screen_manager_;

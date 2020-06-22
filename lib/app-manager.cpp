@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 21:42:15
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-19 17:23:58
+ * @LastEditTime : 2020-06-22 08:39:47
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app-manager.cpp
  */
@@ -397,7 +397,7 @@ std::shared_ptr<App> AppManager::get_app_from_gapplication_id(std::shared_ptr<Wi
     unsigned long nitems, bytes_after;
 
     auto display = gdk_x11_get_default_xdisplay();
-    auto gdk_display = gdk_display_get_default();
+    auto gdk_display = gdk_x11_lookup_xdisplay(display);
     auto xid = window->get_xid();
 
     g_return_val_if_fail(display != NULL, nullptr);
@@ -657,7 +657,7 @@ void AppManager::app_opened(WnckScreen *screen, WnckApplication *wnck_applicatio
     for (auto l = wnck_windows; l != NULL; l = l->next)
     {
         auto wnck_window = (WnckWindow *)(l->data);
-        auto window = app_manager->window_manager_->lookup_and_create_window(wnck_window);
+        auto window = app_manager->window_manager_->create_temp_window(wnck_window);
         app = app_manager->lookup_app_with_window(window);
         if (app)
         {

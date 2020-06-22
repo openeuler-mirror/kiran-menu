@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:27:36
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-15 17:05:49
+ * @LastEditTime : 2020-06-22 08:42:34
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window-manager.cpp
  */
@@ -91,6 +91,12 @@ WindowVec WindowManager::get_windows()
     return windows;
 }
 
+std::shared_ptr<Window> WindowManager::create_temp_window(WnckWindow *wnck_window)
+{
+    auto window = Window::create(wnck_window);
+    return window;
+}
+
 std::shared_ptr<Window> WindowManager::lookup_window(WnckWindow *wnck_window)
 {
     if (!wnck_window)
@@ -166,7 +172,8 @@ bool WindowManager::update_window_snapshot()
 {
     auto display = gdk_x11_get_default_xdisplay();
     auto gdk_screen = gdk_screen_get_default();
-    auto gdk_display = gdk_display_get_default();
+    auto gdk_display = gdk_x11_lookup_xdisplay(display);
+
     g_return_val_if_fail(display != NULL, false);
     g_return_val_if_fail(gdk_screen != NULL, false);
     g_return_val_if_fail(gdk_display != NULL, false);
@@ -191,9 +198,10 @@ bool WindowManager::update_window_snapshot()
                 continue;
             }
 
+            gdk_x11_display_error_trap_push(gdk_display);
             auto pixmap = XCompositeNameWindowPixmap(display, xid);
 
-            if (!pixmap)
+            if (gdk_x11_display_error_trap_pop(gdk_display) || !pixmap)
             {
                 continue;
             }
@@ -212,6 +220,10 @@ void WindowManager::window_opened(WnckScreen *screen, WnckWindow *wnck_window, g
 {
     auto window_manager = (WindowManager *)user_data;
 
+    g_print("open window name: %s xid: %" PRIu64 "\n",
+            wnck_window_get_name(wnck_window),
+            wnck_window_get_xid(wnck_window));
+
     g_return_if_fail(wnck_window != NULL);
     g_return_if_fail(window_manager == WindowManager::get_instance());
 
@@ -220,9 +232,9 @@ void WindowManager::window_opened(WnckScreen *screen, WnckWindow *wnck_window, g
     auto iter = window_manager->windows_.find(xid);
     if (iter != window_manager->windows_.end())
     {
-        g_debug("the window already exists. name: %s xid: %" PRIu64 "\n",
-                iter->second->get_name().c_str(),
-                iter->second->get_xid());
+        g_warning("the window already exists. name: %s xid: %" PRIu64 "\n",
+                  iter->second->get_name().c_str(),
+                  iter->second->get_xid());
     }
     else
     {
