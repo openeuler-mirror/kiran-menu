@@ -538,9 +538,13 @@ void KiranMenuWindow::load_user_info()
     builder->get_widget<Gtk::Image>("avatar-icon", user_icon);
 
     name_label->set_markup(Glib::ustring(_("Hello")) + ", <b>" + user_info->get_username() +"</b>");
-    auto pixbuf = Gdk::Pixbuf::create_from_file(user_info->get_iconfile(), 60, 60);
-    if (pixbuf)
-        user_icon->set(pixbuf);
+    try {
+    	auto pixbuf = Gdk::Pixbuf::create_from_file(user_info->get_iconfile(), 60, 60);
+    	if (pixbuf)
+            user_icon->set(pixbuf);
+    } catch (const Glib::Error &e) {
+	    std::cerr<<"Failed to load user avatar file: "<<e.what()<<std::endl; 
+    }
 }
 
 bool KiranMenuWindow::promise_item_viewable(GdkEventFocus *event, Gtk::Widget *item)
