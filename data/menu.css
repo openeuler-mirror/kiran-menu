@@ -13,7 +13,7 @@
     padding-left: 25px;
     box-shadow: none;
 
-    -gtkmm__CustomObject_KiranAppItem-icon-spacing: 12px;
+    -gtkmm__CustomObject_KiranMenuAppItem-icon-spacing: 12px;
 }
 
 .kiran-app-entry {
@@ -21,9 +21,9 @@
     min-width: 88px;
     border: none;
     border-radius: 5px;
-    -gtkmm__CustomObject_KiranAppItem-icon-spacing: 8px;
-    -gtkmm__CustomObject_KiranAppItem-max-width: 88px;
-    -gtkmm__CustomObject_KiranAppItem-max-height: 100px;
+    -gtkmm__CustomObject_KiranMenuAppItem-icon-spacing: 8px;
+    -gtkmm__CustomObject_KiranMenuAppItem-max-width: 88px;
+    -gtkmm__CustomObject_KiranMenuAppItem-max-height: 100px;
     padding-left: 8px;
     padding-right: 8px;
     padding-top: 10px;
@@ -46,7 +46,7 @@
     margin-bottom: 10px;
     padding-left: 12px;
 
-    -gtkmm__CustomObject_KiranCategoryItem-icon-spacing: 12px;
+    -gtkmm__CustomObject_KiranMenuCategoryItem-icon-spacing: 12px;
 }
 
 

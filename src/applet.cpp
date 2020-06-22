@@ -1,6 +1,6 @@
 #include <gtkmm.h>
 #include <mate-panel-applet.h>
-#include "kiranmenuappletbutton.h"
+#include "kiran-menu-applet-button.h"
 #include <iostream>
 #include <glibmm/i18n.h>
 #include <locale.h>

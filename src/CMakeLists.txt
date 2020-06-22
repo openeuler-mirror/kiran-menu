@@ -1,20 +1,19 @@
 cmake_minimum_required(VERSION 3.0)
 
 add_executable(kiran-menu-applet
-	kiranappbutton.cpp
-	kiranappitem.cpp
-	kirancategoryitem.cpp
+        kiran-menu-app-launcher.cpp
+        kiran-menu-app-item.cpp
+        kiran-menu-category-item.cpp
 	kiranhelper.cpp
-	kiranmenuappletbutton.cpp
-	kiranmenulistitem.cpp
-	kiranmenuprofile.cpp
-	kiranmenuwindow.cpp
-	kiranpowerbutton.cpp
-	kiranpower.cpp
-	kiranpowermenu.cpp
-	kiransearchentry.cpp
-	kiranuserinfo.cpp
-	kiranweatherproxy.cpp
+        kiran-menu-applet-button.cpp
+        kiran-menu-list-item.cpp
+        kiran-menu-profile.cpp
+        kiran-menu-window.cpp
+        kiran-menu-power-button.cpp
+        kiranpower.cpp
+        kiran-menu-power-menu.cpp
+        kiran-search-entry.cpp
+        kiran-user-info.cpp
 	applet.cpp
 )
 

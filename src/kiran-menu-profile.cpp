@@ -1,4 +1,4 @@
-#include "kiranmenuprofile.h"
+#include "kiran-menu-profile.h"
 
 KiranMenuProfile::KiranMenuProfile()
 {

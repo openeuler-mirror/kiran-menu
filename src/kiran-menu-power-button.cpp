@@ -1,13 +1,12 @@
-#include "kiranpowerbutton.h"
-#include "kiranpowermenu.h"
+#include "kiran-menu-power-button.h"
 
 #include <glibmm/i18n.h>
 
-KiranPowerButton::KiranPowerButton()
+KiranMenuPowerButton::KiranMenuPowerButton()
 {
     auto context = get_style_context();
 
-    menu = new KiranPowerMenu();
+    menu = new KiranMenuPowerMenu();
     menu->attach_to_widget(*this);
     menu->show_all();
 
@@ -17,12 +16,12 @@ KiranPowerButton::KiranPowerButton()
     context->add_class("kiran-app-button");
 }
 
-KiranPowerButton::~KiranPowerButton()
+KiranMenuPowerButton::~KiranMenuPowerButton()
 {
     delete menu;
 }
 
-void KiranPowerButton::on_clicked()
+void KiranMenuPowerButton::on_clicked()
 {
     GdkEvent *event = gtk_get_current_event();
 

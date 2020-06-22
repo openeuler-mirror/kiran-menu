@@ -3,7 +3,7 @@
 
 #include <gtkmm.h>
 #include <mate-panel-applet.h>
-#include "kiranmenuwindow.h"
+#include "kiran-menu-window.h"
 
 class KiranMenuAppletButton : public Gtk::ToggleButton
 {

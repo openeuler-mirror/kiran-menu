@@ -2,10 +2,10 @@
 #define KIRANMENUWINDOW_H
 
 #include <gtkmm.h>
-#include "kiranuserinfo.h"
-#include "kiranappitem.h"
-#include "kirancategoryitem.h"
-#include "kiranmenuprofile.h"
+#include "kiran-user-info.h"
+#include "kiran-menu-app-item.h"
+#include "kiran-menu-category-item.h"
+#include "kiran-menu-profile.h"
 
 #include "menu-skeleton.h"
 
@@ -52,7 +52,7 @@ private:
 
     KiranUserInfo *user_info;
     std::vector<std::string> category_names;
-    std::map<std::string, KiranCategoryItem*> category_items;
+    std::map<std::string, KiranMenuCategoryItem*> category_items;
 
     KiranMenuProfile profile;
     Kiran::MenuSkeleton *backend;
@@ -66,7 +66,7 @@ private:
     void load_date_info();
     void load_user_info();
 
-    KiranAppItem *create_app_item(std::shared_ptr<Kiran::App> app,
+    KiranMenuAppItem *create_app_item(std::shared_ptr<Kiran::App> app,
                                   Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL);
 };
 

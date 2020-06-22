@@ -1,9 +1,7 @@
-#include "kiranmenuwindow.h"
-#include "kiranappbutton.h"
-#include "kiranpowerbutton.h"
-#include "kiransearchentry.h"
-#include "kiranappitem.h"
-#include "kirancategoryitem.h"
+#include "kiran-menu-window.h"
+#include "kiran-menu-app-launcher.h"
+#include "kiran-menu-power-button.h"
+#include "kiran-search-entry.h"
 #include "kiranhelper.h"
 
 
@@ -197,7 +195,7 @@ void KiranMenuWindow::on_search_change()
     auto apps_list = backend->search_app(search_entry->get_text().data(), true);
     if (apps_list.size()) {
         g_message("search results length %lu\n", apps_list.size());
-        auto category_item = Gtk::manage(new KiranCategoryItem("Search Results", false));
+        auto category_item = Gtk::manage(new KiranMenuCategoryItem("Search Results", false));
 
         search_results_box->add(*category_item);
         for (auto iter = apps_list.begin(); iter != apps_list.end(); iter++) {
@@ -236,13 +234,13 @@ void KiranMenuWindow::on_search_stop()
  */
 void KiranMenuWindow::switch_to_category_overview(const std::string &selected_category)
 {
-    KiranCategoryItem *selected_item = NULL;
+    KiranMenuCategoryItem *selected_item = NULL;
 
     KiranHelper::remove_all_for_container(*category_overview_box);
 
 
     for (auto iter = category_names.begin(); iter != category_names.end(); iter++) {
-        auto item = Gtk::manage(new KiranCategoryItem(*iter, true));
+        auto item = Gtk::manage(new KiranMenuCategoryItem(*iter, true));
         item->set_hexpand(true);
         item->show_all();
 
@@ -269,7 +267,7 @@ void KiranMenuWindow::switch_to_category_overview(const std::string &selected_ca
  */
 void KiranMenuWindow::switch_to_apps_overview(const std::string &selected_category)
 {
-    KiranCategoryItem *item;
+    KiranMenuCategoryItem *item;
     Gtk::Allocation allocation;
     double adjusted_pos = -1;
 
@@ -279,7 +277,7 @@ void KiranMenuWindow::switch_to_apps_overview(const std::string &selected_catego
         //找到分类标签对应的控件
         auto iter = category_items.find(selected_category);
         if (iter != category_items.end()) {
-            std::pair<std::string, KiranCategoryItem*> data = *iter;
+            std::pair<std::string, KiranMenuCategoryItem*> data = *iter;
             item = data.second;
 
             //滚动到指定的分类标签
@@ -393,7 +391,7 @@ void KiranMenuWindow::add_app_button(const char *icon_resource,
                                      const char *tooltip,
                                      const char *cmdline)
 {
-    KiranAppButton *button = Gtk::manage(new KiranAppButton(icon_resource, tooltip, cmdline));
+    KiranMenuAppLauncher *button = Gtk::manage(new KiranMenuAppLauncher(icon_resource, tooltip, cmdline));
 
     button->signal_app_launched().connect(sigc::mem_fun(*this, &Gtk::Widget::hide));
     side_box->add(*button);
@@ -407,7 +405,7 @@ void KiranMenuWindow::add_sidebar_buttons()
     separator= Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_VERTICAL));
     separator->set_name("sidebar-separator");
 
-    power_btn = Gtk::manage(new KiranPowerButton());
+    power_btn = Gtk::manage(new KiranMenuPowerButton());
 
     side_box->set_orientation(Gtk::ORIENTATION_VERTICAL);
     add_app_button("/kiran-menu/sidebar/home-dir", _("Home Directory"), "caja");
@@ -440,12 +438,12 @@ void KiranMenuWindow::load_all_apps()
     //遍历分类列表，建立应用列表
     auto iter = category_names.begin();
     while (iter != category_names.end()) {
-        auto item = Gtk::manage(new KiranCategoryItem(*iter, true));
+        auto item = Gtk::manage(new KiranMenuCategoryItem(*iter, true));
 
         item->signal_focus_in_event().connect(sigc::bind<Gtk::Widget*>(
                                                   sigc::mem_fun(*this, &KiranMenuWindow::promise_item_viewable),
                                                   item));
-        category_items.insert(category_items.end(), std::pair<std::string, KiranCategoryItem*>(*iter, item));
+        category_items.insert(category_items.end(), std::pair<std::string, KiranMenuCategoryItem*>(*iter, item));
         item->signal_clicked().connect(sigc::bind<const std::string&>(
                                            sigc::mem_fun(*this, &KiranMenuWindow::switch_to_category_overview),
                                            item->get_category_name()));
@@ -478,7 +476,7 @@ void KiranMenuWindow::load_frequent_apps()
     KiranHelper::remove_all_for_container(*frequent_apps_box);
     KiranHelper::remove_all_for_container(*frequent_header_box);
 
-    item = Gtk::manage(new KiranCategoryItem("Frequently used", false));
+    item = Gtk::manage(new KiranMenuCategoryItem("Frequently used", false));
     frequent_header_box->add(*item);
 
     auto apps_list = backend->get_nfrequent_apps(4);
@@ -508,7 +506,7 @@ void KiranMenuWindow::load_favorite_apps()
     KiranHelper::remove_all_for_container(*favorite_apps_box);
     KiranHelper::remove_all_for_container(*favorite_header_box);
 
-    item = Gtk::manage(new KiranCategoryItem("Favorite Apps", false));
+    item = Gtk::manage(new KiranMenuCategoryItem("Favorite Apps", false));
     favorite_header_box->add(*item);
 
     auto apps_list = backend->get_favorite_apps();
@@ -573,10 +571,10 @@ bool KiranMenuWindow::promise_item_viewable(GdkEventFocus *event, Gtk::Widget *i
     return false;
 }
 
-KiranAppItem *KiranMenuWindow::create_app_item(std::shared_ptr<Kiran::App> app, Gtk::Orientation orient)
+KiranMenuAppItem *KiranMenuWindow::create_app_item(std::shared_ptr<Kiran::App> app, Gtk::Orientation orient)
 {
 
-    auto item = Gtk::manage(new KiranAppItem(app));
+    auto item = Gtk::manage(new KiranMenuAppItem(app));
 
     item->set_orientation(orient);
     item->signal_launched().connect(sigc::mem_fun(*this, &Gtk::Widget::hide));

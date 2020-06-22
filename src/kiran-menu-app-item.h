@@ -1,14 +1,14 @@
 #ifndef KIRANAPPITEM_H
 #define KIRANAPPITEM_H
 
-#include "kiranmenulistitem.h"
+#include "kiran-menu-list-item.h"
 #include "menu-skeleton.h"
 
-class KiranAppItem : public KiranMenuListItem
+class KiranMenuAppItem : public KiranMenuListItem
 {
 public:
-    KiranAppItem(std::shared_ptr<Kiran::App> _app, int icon_size = 24, Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL);
-    ~KiranAppItem();
+    KiranMenuAppItem(std::shared_ptr<Kiran::App> _app, int icon_size = 24, Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL);
+    ~KiranMenuAppItem();
     sigc::signal<void> signal_launched();
     virtual void set_orientation(Gtk::Orientation orient) override;
     void launch_app();

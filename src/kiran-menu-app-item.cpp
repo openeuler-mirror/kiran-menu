@@ -1,4 +1,4 @@
-#include "kiranappitem.h"
+#include "kiran-menu-app-item.h"
 #include "kiranhelper.h"
 #include <iostream>
 #include <glibmm/i18n.h>
@@ -6,8 +6,8 @@
 
 #define MENU_ITEM_COUNT G_N_ELEMENTS(item_labels)
 
-KiranAppItem::KiranAppItem(std::shared_ptr<Kiran::App> _app, int _icon_size, Gtk::Orientation orient):
-    Glib::ObjectBase("KiranAppItem"),
+KiranMenuAppItem::KiranMenuAppItem(std::shared_ptr<Kiran::App> _app, int _icon_size, Gtk::Orientation orient):
+    Glib::ObjectBase("KiranMenuAppItem"),
     KiranMenuListItem(_icon_size, orient),
     app(_app)
 {
@@ -20,10 +20,10 @@ KiranAppItem::KiranAppItem(std::shared_ptr<Kiran::App> _app, int _icon_size, Gtk
     set_tooltip_text(app->get_locale_comment());
 }
 
-KiranAppItem::~KiranAppItem() {
+KiranMenuAppItem::~KiranMenuAppItem() {
 }
 
-bool KiranAppItem::on_button_press_event(GdkEventButton *button_event)
+bool KiranMenuAppItem::on_button_press_event(GdkEventButton *button_event)
 {
     if (gdk_event_triggers_context_menu((GdkEvent*)button_event)) {
         //鼠标右键点击，显示上下文菜单
@@ -37,7 +37,7 @@ bool KiranAppItem::on_button_press_event(GdkEventButton *button_event)
     return false;
 }
 
-bool KiranAppItem::on_key_press_event(GdkEventKey *key_event)
+bool KiranMenuAppItem::on_key_press_event(GdkEventKey *key_event)
 {
     switch(key_event->keyval) {
     case GDK_KEY_Menu:
@@ -66,7 +66,7 @@ bool KiranAppItem::on_key_press_event(GdkEventKey *key_event)
     return false;
 }
 
-void KiranAppItem::create_context_menu()
+void KiranMenuAppItem::create_context_menu()
 {
     Gtk::MenuItem *item;
     auto backend = Kiran::MenuSkeleton::get_instance();
@@ -74,7 +74,7 @@ void KiranAppItem::create_context_menu()
     KiranHelper::remove_all_for_container(context_menu);
 
     item = Gtk::manage(new Gtk::MenuItem(_("Launch")));
-    item->signal_activate().connect(sigc::hide_return(sigc::mem_fun(*this, &KiranAppItem::launch_app)));
+    item->signal_activate().connect(sigc::hide_return(sigc::mem_fun(*this, &KiranMenuAppItem::launch_app)));
     context_menu.append(*item);
 
     item = Gtk::manage(new Gtk::MenuItem(_("Add to desktop")));
@@ -120,7 +120,7 @@ void KiranAppItem::create_context_menu()
     context_menu.show_all();
 }
 
-bool KiranAppItem::is_in_favorite()
+bool KiranMenuAppItem::is_in_favorite()
 {
     auto backend = Kiran::MenuSkeleton::get_instance();
 
@@ -129,12 +129,12 @@ bool KiranAppItem::is_in_favorite()
     return true;
 }
 
-sigc::signal<void> KiranAppItem::signal_launched()
+sigc::signal<void> KiranMenuAppItem::signal_launched()
 {
     return m_signal_launched;
 }
 
-void KiranAppItem::set_orientation(Gtk::Orientation orient)
+void KiranMenuAppItem::set_orientation(Gtk::Orientation orient)
 {
     auto context = get_style_context();
 
@@ -151,7 +151,7 @@ void KiranAppItem::set_orientation(Gtk::Orientation orient)
     KiranMenuListItem::set_orientation(orient);
 }
 
-void KiranAppItem::launch_app()
+void KiranMenuAppItem::launch_app()
 {
     app->launch();
     signal_launched().emit();

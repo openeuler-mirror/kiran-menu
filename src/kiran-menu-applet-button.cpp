@@ -1,4 +1,4 @@
-#include "kiranmenuappletbutton.h"
+#include "kiran-menu-applet-button.h"
 #include <glibmm/i18n.h>
 
 #define BUTTON_MARGIN 6

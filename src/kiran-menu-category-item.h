@@ -1,12 +1,12 @@
 #ifndef KIRANCATEGORYITEM_H
 #define KIRANCATEGORYITEM_H
 
-#include "kiranmenulistitem.h"
+#include "kiran-menu-list-item.h"
 
-class KiranCategoryItem : public KiranMenuListItem
+class KiranMenuCategoryItem : public KiranMenuListItem
 {
 public:
-    KiranCategoryItem(const std::string &name, bool clickable);
+    KiranMenuCategoryItem(const std::string &name, bool clickable);
     const std::string &get_category_name();
     sigc::signal<void> signal_clicked();
 
