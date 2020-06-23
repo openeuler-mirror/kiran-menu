@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:33
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-22 08:47:36
+ * @LastEditTime : 2020-06-23 17:32:13
  * @Description  : 维护APP的一些基本信息
  * @FilePath     : /kiran-menu-2.0/lib/app.h
  */
@@ -91,6 +91,9 @@ public:
 
     // 获取当前App对应的已打开的窗口列表
     WindowVec get_windows();
+
+    // 获取任务栏中显示的窗口列表
+    WindowVec get_taskbar_windows();
 
     // 关闭当前App对应的所有窗口
     void close_all_windows();

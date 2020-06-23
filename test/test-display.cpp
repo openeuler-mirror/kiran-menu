@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-11 09:30:42
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-19 16:40:49
+ * @LastEditTime : 2020-06-23 17:34:40
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-display.cpp
  */
@@ -147,6 +147,13 @@ gboolean timing_print(gpointer user_data)
             {
                 auto window = windows[j];
                 g_print("   related window name: %s\n", window->get_name().c_str());
+            }
+
+            auto taskbar_windows = app->get_taskbar_windows();
+            for (int j = 0; j < taskbar_windows.size(); ++j)
+            {
+                auto window = windows[j];
+                g_print("   related tarskbar window name: %s\n", window->get_name().c_str());
             }
             g_print("\n\n");
         }

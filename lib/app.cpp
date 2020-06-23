@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:38
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-16 17:34:53
+ * @LastEditTime : 2020-06-23 17:39:21
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app.cpp
  */
@@ -105,6 +105,16 @@ WindowVec App::get_windows()
             }
         }
     }
+    return windows;
+}
+
+WindowVec App::get_taskbar_windows()
+{
+    auto windows = get_windows();
+    auto iter = std::remove_if(windows.begin(), windows.end(), [](std::shared_ptr<Kiran::Window> window){
+        return window->get_window_type() != WNCK_WINDOW_NORMAL && window->get_window_type() != WNCK_WINDOW_DIALOG;
+    });
+    windows.erase(iter, windows.end());
     return windows;
 }
 
