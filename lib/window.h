@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:46
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-22 08:46:26
+ * @LastEditTime : 2020-06-23 14:38:33
  * @Description  : 该类是对WnckWindow的封装，大部分接口和wnck_window_xxxx相同。
  * @FilePath     : /kiran-menu-2.0/lib/window.h
  */
@@ -74,7 +74,7 @@ public:
     bool is_above();
 
     // 激活窗口
-    void activate();
+    void activate(uint32_t timestamp);
 
     // 使窗口最小化
     void minimize();

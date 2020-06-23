@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:51
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-15 10:18:42
+ * @LastEditTime : 2020-06-23 14:38:42
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window.cpp
  */
@@ -118,10 +118,9 @@ bool Window::is_above()
     return wnck_window_is_above(this->wnck_window_);
 }
 
-void Window::activate()
+void Window::activate(uint32_t timestamp)
 {
-    uint64_t now = Glib::DateTime::create_now_local().to_unix();
-    wnck_window_activate(this->wnck_window_, (uint32_t)now);
+    wnck_window_activate(this->wnck_window_, timestamp);
 }
 
 void Window::minimize()
