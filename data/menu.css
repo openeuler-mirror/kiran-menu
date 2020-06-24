@@ -186,3 +186,25 @@ label.search-empty-prompt {
     font-size: 18px;
     color: #8b8b8b;
 }
+
+window.test {
+    background: red;
+}
+
+.tasklist-widget {
+    background: green;
+}
+
+.kiran-tasklist-button:hover{
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.window-previewer:hover {
+    border: 1px solid gray;
+    border-radius: 5px;
+}
+
+.window-previewer {
+    border: 1px solid transparent;
+    border-radius: 5px;
+}

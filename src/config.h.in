@@ -1,4 +1,5 @@
 
-#define RESOURCE_PATH   "@CMAKE_INSTALL_PREFIX@/share/@CMAKE_PROJECT_NAME@/menu.gresource"
+#define MENU_RESOURCE_PATH       "@CMAKE_INSTALL_PREFIX@/share/@CMAKE_PROJECT_NAME@/menu.gresource"
+#define TASKLIST_RESOURCE_PATH   "@CMAKE_INSTALL_PREFIX@/share/@CMAKE_PROJECT_NAME@/tasklist.gresource"
 #define DATA_DIR        "@CMAKE_INSTALL_PREFIX@/share/"
 #define PACKAGE_NAME    "@PROJECT_NAME@"
