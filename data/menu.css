@@ -1,9 +1,12 @@
 @define-color placeholder_text_color #c8c8c8;
 
+* {
+    font-family: "Noto Sans CJK SC";
+}
+
 .kiran-app-item {
     background: transparent;
     color: #ffffff;
-    font-family: "Noto Sans CJK SC";
     border-width: 0px;
     border-right-width: 3px;
     border-style: solid;
