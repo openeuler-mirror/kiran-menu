@@ -406,8 +406,11 @@ void KiranMenuWindow::add_sidebar_buttons()
     Gtk::Separator *separator;
     Gtk::Button *power_btn;
 
-    separator= Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_VERTICAL));
-    separator->set_name("sidebar-separator");
+    separator= Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+    separator->set_margin_start(9);
+    separator->set_margin_end(9);
+    separator->set_margin_top(5);
+    separator->set_margin_bottom(5);
 
     power_btn = Gtk::manage(new KiranMenuPowerButton());
 

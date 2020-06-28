@@ -11,7 +11,8 @@
     min-height: 40px;
     padding: 0px;
     padding-left: 25px;
-    box-shadow: none;
+    border-image: none;
+    outline: none;
 
     -gtkmm__CustomObject_KiranMenuAppItem-icon-spacing: 12px;
 }
@@ -28,6 +29,8 @@
     padding-right: 8px;
     padding-top: 10px;
     padding-bottom: 10px;
+    border-image: none;
+    outline: none;
 }
 
 .kiran-app-entry:hover {
@@ -45,6 +48,8 @@
     margin-top: 10px;
     margin-bottom: 10px;
     padding-left: 12px;
+    border-image: none;
+    outline: none;
 
     -gtkmm__CustomObject_KiranMenuCategoryItem-icon-spacing: 12px;
 }
@@ -65,6 +70,7 @@
 
 .kiran-search-entry {
     border-radius: 3px;
+    box-shadow: none;
 }
 
 window#menu-window {
@@ -80,31 +86,41 @@ button.kiran-app-button {
     border-style: solid;
     border-color: transparent;
     background: transparent;
+    box-shadow: none;
+    border-image: none;
 
     min-height: 30px;
 }
 
-button:focus{
+button.kiran-app-button:focus{
     outline-offset: -2px;
     outline-style: dotted;
     outline-color: #ffffff;
     outline-width: 1px;
+    border-color: transparent;
+    box-shadow: none;
+    border-image: none;
 }
 
 button.kiran-app-button:hover {
     background: rgba(255, 255, 255, 0.1);
+    border-color: transparent;
+    box-shadow: none;
+    outline: none;
+    border-image: none;
 }
 
-separator {
-    color: rgba(255, 255, 255, 0.2);
+separator.horizontal, separator.vertical
+{
     background-color: rgba(255, 255, 255, 0.2);
 }
 
 separator#sidebar-separator {
-    margin-left: 12px;
-    margin-right: 12px;
+    margin-left: 5px;
+    margin-right: 5px;
     margin-top: 5px;
     margin-bottom: 5px;
+    background-color: red;
 }
 
 menuitem {
@@ -133,6 +149,7 @@ entry.kiran-search-entry {
 
 entry.kiran-search-entry:focus {
     border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: none;
 }
 
 entry.kiran-search-entry selection {
@@ -149,11 +166,33 @@ entry.kiran-search-entry selection {
     padding-left: 10px;
 }
 
-scrollbar.vertical {
-    border-width: 1px;
-    background-color: transparent;
+scrolledwindow {
+    border: none;
+    background: transparent;
+}
+
+viewport {
+    background: transparent;
+}
+
+scrollbar {
+    -GtkScrollbar-has-backward-stepper: 0;
+    -GtkScrollbar-has-forward-stepper: 0;
+}
+
+scrollbar.vertical{
+    border: none;
+    background: transparent;
+    border-image: none;
     min-width:5px;
 }
+
+scrollbar.vertical trough {
+   background: transparent;
+   border-image: none;
+   border: none;
+}
+
 scrollbar.vertical button {
     min-height: 0px;
     min-width: 0px;
@@ -162,16 +201,18 @@ scrollbar.vertical button {
 }
 
 scrollbar.vertical slider {
-    background-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
+    border-image: none;
     border-width: 1px;
     border-radius: 5px;
+    border-color: rgba(255, 255, 255, 0.1);
 
     min-width: 5px;
     min-height: 40px;
 }
 
 scrollbar.vertical slider:active, scrollbar.vertical slider:hover {
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.2);
     border-width: 1px;
     border-radius: 5px;
 }
