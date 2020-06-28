@@ -533,6 +533,7 @@ void KiranMenuWindow::load_user_info()
 {
     Gtk::Image *user_icon;
     Gtk::Label *name_label;
+    Glib::RefPtr<Gdk::Pixbuf> avatar_pixbuf;
 
     if (!user_info->is_ready())
         return;
@@ -542,12 +543,15 @@ void KiranMenuWindow::load_user_info()
 
     name_label->set_markup(Glib::ustring(_("Hello")) + ", <b>" + user_info->get_username() +"</b>");
     try {
-    	auto pixbuf = Gdk::Pixbuf::create_from_file(user_info->get_iconfile(), 60, 60);
-    	if (pixbuf)
-            user_icon->set(pixbuf);
+        avatar_pixbuf = Gdk::Pixbuf::create_from_file(user_info->get_iconfile(), 60, 60);
     } catch (const Glib::Error &e) {
-	    std::cerr<<"Failed to load user avatar file: "<<e.what()<<std::endl; 
+	std::cerr<<"Failed to load user avatar from file: "<<e.what()<<std::endl;
+	auto pixbuf = Gdk::Pixbuf::create_from_resource("/kiran-menu/icon/avatar");
+
+        avatar_pixbuf = pixbuf->scale_simple(60, 60, Gdk::INTERP_BILINEAR);
     }
+    if (avatar_pixbuf)
+            user_icon->set(avatar_pixbuf);
 }
 
 bool KiranMenuWindow::promise_item_viewable(GdkEventFocus *event, Gtk::Widget *item)

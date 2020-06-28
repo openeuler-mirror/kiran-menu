@@ -394,6 +394,7 @@
                 <property name="vexpand">False</property>
                 <child>
                   <object class="GtkBox">
+                    <property name="width_request">398</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="hexpand">True</property>
