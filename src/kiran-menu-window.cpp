@@ -492,29 +492,30 @@ void KiranMenuWindow::load_all_apps()
             more_apps_box->set_visible(false);
     }
 
-    //遍历分类列表，建立应用列表
-    auto iter = category_names.begin();
-    while (iter != category_names.end()) {
-        auto apps_list = backend->get_category_apps(*iter);
-        auto item = Gtk::manage(new KiranMenuCategoryItem(*iter, true));
+    //删除空的应用分类
+    auto start = std::remove_if(category_names.begin(), category_names.end(),
+		    [this](const std::string &name) -> bool {
+		        return (this->backend->get_category_apps(name).size() == 0);
+		    });
+    category_names.erase(start, category_names.end());
 
-        if (apps_list.size() == 0)
-            //隐藏无应用的分类标签
-            continue;
+    //遍历分类列表，建立应用列表
+    for (auto category: category_names) {
+        auto apps_list = backend->get_category_apps(category);
+        auto item = Gtk::manage(new KiranMenuCategoryItem(category, true));
 
         item->signal_focus_in_event().connect(sigc::bind<Gtk::Widget*>(
                                                   sigc::mem_fun(*this, &KiranMenuWindow::promise_item_viewable),
                                                   item));
-        category_items.insert(category_items.end(), std::pair<std::string, KiranMenuCategoryItem*>(*iter, item));
+        category_items.insert(category_items.end(), std::pair<std::string, KiranMenuCategoryItem*>(category, item));
         item->signal_clicked().connect(sigc::bind<const std::string&>(
                                            sigc::mem_fun(*this, &KiranMenuWindow::switch_to_category_overview),
                                            item->get_category_name()));
         all_apps_box->add(*item);
-        for (auto iter = apps_list.begin(); iter != apps_list.end(); iter++) {
-            auto item = create_app_item(*iter);
+        for (auto app: apps_list) {
+            auto item = create_app_item(app);
             all_apps_box->add(*item);
         }
-        iter++;
     }
 
     all_apps_box->show_all();
