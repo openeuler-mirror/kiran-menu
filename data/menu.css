@@ -230,3 +230,23 @@ label.search-empty-prompt {
     font-size: 18px;
     color: #8b8b8b;
 }
+
+.kiran-expand-button {
+    box-shadow: none;
+    background: transparent;
+    border: none;
+    border-image: none;
+    color: #ffffff;
+    padding-left: 24px;
+    -GtkButton-image-spacing: 12px;
+}
+
+button.kiran-expand-button:focus{
+    outline-offset: -2px;
+    outline-style: dotted;
+    outline-color: #ffffff;
+    outline-width: 1px;
+    border-color: transparent;
+    box-shadow: none;
+    border-image: none;
+}

@@ -90,6 +90,9 @@ msgstr "常用应用"
 msgid "Favorite Apps"
 msgstr "收藏夹"
 
+msgid "New Installed"
+msgstr "新安装应用"
+
 msgid "Edit Profiles"
 msgstr "更改设置"
 
@@ -128,3 +131,9 @@ msgstr "点击更改用户信息"
 
 msgid "Click to change date and time settings"
 msgstr "点击更改日期时间设置"
+
+msgid "Shrink"
+msgstr "收起"
+
+msgid "Expand"
+msgstr "展开"

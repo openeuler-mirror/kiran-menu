@@ -9,6 +9,8 @@
 #include <iostream>
 #include <glibmm/i18n.h>
 
+#define NEW_APPS_MAX_SIZE 3
+
 KiranMenuWindow::KiranMenuWindow(Gtk::WindowType window_type):
     Gtk::Window(window_type)
 {
@@ -441,6 +443,51 @@ void KiranMenuWindow::load_all_apps()
     KiranHelper::remove_all_for_container(*new_apps_box);
     KiranHelper::remove_all_for_container(*all_apps_box);
 
+    //加载新安装应用列表
+    auto new_apps_list = backend->get_nnew_apps(-1);
+    if (new_apps_list.size() > 0) {
+        int index = 1;
+        Gtk::Box *more_apps_box = nullptr;
+        Gtk::ToggleButton *expand_button = nullptr;
+
+        auto item = Gtk::manage(new KiranMenuCategoryItem(_("New Installed"), false));
+        new_apps_box->add(*item);
+        for (auto app: new_apps_list) {
+            auto item = create_app_item(app);
+
+            if (index <= NEW_APPS_MAX_SIZE)
+                new_apps_box->add(*item);
+            else {
+                //新安装应用数量多，只显示部分应用和展开按钮
+                if (!more_apps_box) {
+                    auto image = Gtk::manage(new Gtk::Image());
+                    image->set_from_resource("/kiran-menu/icon/expand");
+
+                    expand_button = Gtk::manage(new Gtk::ToggleButton(_("Expand")));
+                    more_apps_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
+                    new_apps_box->add(*expand_button);
+                    new_apps_box->add(*more_apps_box);
+
+                    expand_button->get_style_context()->add_class("kiran-expand-button");
+                    expand_button->set_image(*image);
+                    expand_button->set_image_position(Gtk::POS_RIGHT);
+                    expand_button->set_alignment(0.0, 0.5);
+                    expand_button->signal_toggled().connect(
+                                [expand_button, more_apps_box, image]() -> void {
+                                    more_apps_box->set_visible(expand_button->get_active());
+                                    expand_button->set_label(expand_button->get_active()?_("Shrink"):_("Expand"));
+                                    image->set_from_resource(
+                                                expand_button->get_active()?"/kiran-menu/icon/shrink":"/kiran-menu/icon/expand");
+                                });
+                }
+                more_apps_box->add(*item);
+            }
+            index++;
+        }
+        new_apps_box->show_all();
+        if (more_apps_box)
+            more_apps_box->set_visible(false);
+    }
 
     //遍历分类列表，建立应用列表
     auto iter = category_names.begin();
@@ -464,7 +511,6 @@ void KiranMenuWindow::load_all_apps()
         iter++;
     }
 
-    new_apps_box->show_all();
     all_apps_box->show_all();
 }
 
