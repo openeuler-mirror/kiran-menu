@@ -29,7 +29,7 @@ void KiranMenuCategoryItem::set_clickable(bool clickable)
         //不再关注鼠标点击事件
         set_events(events &  ~Gdk::BUTTON_PRESS_MASK);
     }
-    set_can_focus(clickable);
+    set_can_focus(true);
 }
 
 const std::string &KiranMenuCategoryItem::get_category_name()
@@ -62,7 +62,7 @@ bool KiranMenuCategoryItem::on_button_press_event(GdkEventButton *button_event)
 bool KiranMenuCategoryItem::on_key_press_event(GdkEventKey *key_event)
 {
     if (!clickable)
-        return true;
+        return false;
     if (key_event->keyval == GDK_KEY_Return)
         m_signal_clicked.emit();
 

@@ -451,6 +451,9 @@ void KiranMenuWindow::load_all_apps()
         Gtk::ToggleButton *expand_button = nullptr;
 
         auto item = Gtk::manage(new KiranMenuCategoryItem(_("New Installed"), false));
+        item->signal_focus_in_event().connect(sigc::bind<Gtk::Widget*>(
+                                                  sigc::mem_fun(*this, &KiranMenuWindow::promise_item_viewable),
+                                                  item));
         new_apps_box->add(*item);
         for (auto app: new_apps_list) {
             auto item = create_app_item(app);
