@@ -95,7 +95,7 @@ void KiranMenuAppletButton::on_toggled()
         window_allocation = window.get_allocation();
 
         //获取按钮的位置坐标
-        get_window()->get_root_origin(root_x, root_y);
+        get_window()->get_origin(root_x, root_y);
         orient = mate_panel_applet_get_orient(applet);
         switch (orient)
         {
