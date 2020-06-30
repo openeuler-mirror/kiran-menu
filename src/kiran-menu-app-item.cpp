@@ -16,7 +16,15 @@ KiranMenuAppItem::KiranMenuAppItem(std::shared_ptr<Kiran::App> _app, int _icon_s
     context->add_class("kiran-app-item");
 
     set_text(app->get_locale_name());
-    set_icon(app->get_icon());
+
+    if (app->get_icon()) {
+        set_icon(app->get_icon());
+    } else {
+        g_message("app '%s' has no icon\n", app->get_file_name().data());
+        auto icon = Gio::ThemedIcon::create("application-x-executable");
+        set_icon(Glib::RefPtr<Gio::Icon>::cast_dynamic(icon));
+    }
+
     set_tooltip_text(app->get_locale_comment());
 }
 
