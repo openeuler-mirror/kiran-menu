@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:38
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-03 19:37:39
+ * @LastEditTime : 2020-06-29 20:20:02
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app.cpp
  */
@@ -63,16 +63,16 @@ bool App::launch()
     bool res = false;
     std::string error;
 
-    if (this->kind_ == AppKind::FLATPAK)
-    {
-        GError *err;
-        res = launch_flatpak(&err);
-        if (!res)
-        {
-            error = err->message;
-        }
-    }
-    else
+    // if (this->kind_ == AppKind::FLATPAK)
+    // {
+    //     GError *err;
+    //     res = launch_flatpak(&err);
+    //     if (!res)
+    //     {
+    //         error = err->message;
+    //     }
+    // }
+    // else
     {
         try
         {
