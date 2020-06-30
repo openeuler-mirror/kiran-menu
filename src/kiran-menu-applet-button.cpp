@@ -18,8 +18,6 @@ KiranMenuAppletButton::KiranMenuAppletButton(MatePanelApplet *panel_applet)
 
 KiranMenuAppletButton::~KiranMenuAppletButton()
 {
-    if (connection2.connected())
-            connection2.disconnect();
     connection1.disconnect();
     g_object_unref(applet);
 }
@@ -123,15 +121,10 @@ void KiranMenuAppletButton::on_toggled()
 
 void KiranMenuAppletButton::update_icon()
 {
-    auto icon_theme = Gtk::IconTheme::get_default();
-
     if (icon_pixbuf)
         icon_pixbuf.reset();
 
-    icon_pixbuf = icon_theme->load_icon("start-here", 96, get_scale_factor(), Gtk::ICON_LOOKUP_FORCE_SIZE);
-    if (!connection2.connected())
-        connection2 = icon_theme->signal_changed().connect(sigc::mem_fun(*this, &KiranMenuAppletButton::update_icon));
-
+    icon_pixbuf = Gdk::Pixbuf::create_from_resource("/kiran-menu/icon/logo");
     if (get_realized())
         queue_resize();        //resize之后会redraw的
 }

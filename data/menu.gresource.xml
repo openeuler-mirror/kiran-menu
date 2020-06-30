@@ -12,7 +12,7 @@
     <file alias="sidebar/power">images/power.png</file>
     <file alias="menu.css">data/menu.css</file>
     <file alias="ui/menu">data/menu.ui.xml</file>
-    <file alias="logo">images/logo.png</file>
+    <file alias="icon/logo">images/logo.png</file>
     <file alias="icon/avatar">images/avatar_default.png</file>
     <file alias="icon/group">images/group.png</file>
     <file alias="icon/expand">images/expand.png</file>
