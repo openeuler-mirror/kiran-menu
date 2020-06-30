@@ -527,26 +527,29 @@ void KiranMenuWindow::load_all_apps()
 void KiranMenuWindow::load_frequent_apps()
 {
     KiranMenuListItem *item;
-    Gtk::Box *frequent_apps_box, *frequent_header_box;
+    Gtk::Box *frequent_apps_box, *frequent_header_box, *frequent_container;
 
     builder->get_widget<Gtk::Box>("frequent-apps-box", frequent_apps_box);
     builder->get_widget<Gtk::Box>("frequent-header-box", frequent_header_box);
+    builder->get_widget<Gtk::Box>("frequent-box", frequent_container);
     frequent_apps_box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
 
     KiranHelper::remove_all_for_container(*frequent_apps_box);
     KiranHelper::remove_all_for_container(*frequent_header_box);
 
-    item = Gtk::manage(new KiranMenuCategoryItem("Frequently used", false));
-    frequent_header_box->add(*item);
-
     auto apps_list = backend->get_nfrequent_apps(4);
-    for (auto iter = apps_list.begin(); iter != apps_list.end(); iter++) {
-        item = create_app_item(*iter, Gtk::ORIENTATION_VERTICAL);
-        frequent_apps_box->pack_start(*item, Gtk::PACK_SHRINK);
+    //apps_list.clear();
+    if (apps_list.size() > 0) {
+        item = Gtk::manage(new KiranMenuCategoryItem("Frequently used", false));
+        frequent_header_box->add(*item);
+        for (auto iter = apps_list.begin(); iter != apps_list.end(); iter++) {
+            item = create_app_item(*iter, Gtk::ORIENTATION_VERTICAL);
+            frequent_apps_box->pack_start(*item, Gtk::PACK_SHRINK);
+        }
+        frequent_container->show_all();
+    } else {
+        frequent_container->hide();
     }
-
-    frequent_header_box->show_all();
-    frequent_apps_box->show_all();
 }
 
 /**

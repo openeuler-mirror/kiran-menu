@@ -487,7 +487,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkBox">
+              <object class="GtkBox" id="frequent-box">
                 <property name="height_request">158</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
