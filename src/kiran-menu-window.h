@@ -18,6 +18,7 @@ public:
     void reload_apps_data();
     void load_favorite_apps();
     void load_frequent_apps();
+    void load_new_apps();
 
 protected:
     virtual bool on_map_event(GdkEventAny *any_event) override;
