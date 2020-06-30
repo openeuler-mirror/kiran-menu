@@ -67,7 +67,7 @@ KiranMenuWindow::KiranMenuWindow(Gtk::WindowType window_type):
     date_box->signal_button_press_event().connect([this](GdkEventButton *button) -> bool {
         std::vector<std::string> args;
 
-        args.push_back("/usr/bin/system-config-date");
+        args.push_back("/usr/bin/mate-time-admin");
         args.push_back("");
 
         this->hide();
