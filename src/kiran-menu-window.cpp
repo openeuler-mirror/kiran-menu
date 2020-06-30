@@ -201,7 +201,7 @@ void KiranMenuWindow::on_search_change()
     auto apps_list = backend->search_app(search_entry->get_text().data(), true);
     if (apps_list.size()) {
         g_message("search results length %lu\n", apps_list.size());
-        auto category_item = Gtk::manage(new KiranMenuCategoryItem("Search Results", false));
+        auto category_item = Gtk::manage(new KiranMenuCategoryItem(_("Search Results"), false));
 
         search_results_box->add(*category_item);
         for (auto iter = apps_list.begin(); iter != apps_list.end(); iter++) {
@@ -211,7 +211,7 @@ void KiranMenuWindow::on_search_change()
         }
     } else {
         //搜索结果为空
-        Gtk::Label *label = Gtk::manage(new Gtk::Label("No matched apps found!"));
+        Gtk::Label *label = Gtk::manage(new Gtk::Label(_("No matched apps found!")));
 
         label->get_style_context()->add_class("search-empty-prompt");
         label->set_hexpand(true);

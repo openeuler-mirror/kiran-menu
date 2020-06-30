@@ -137,3 +137,9 @@ msgstr "收起"
 
 msgid "Expand"
 msgstr "展开"
+
+msgid "Search Results"
+msgstr "搜索结果"
+
+msgid "No matched apps found!"
+msgstr "无符合条件的应用"
