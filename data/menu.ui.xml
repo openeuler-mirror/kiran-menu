@@ -72,12 +72,6 @@
                     <property name="top_attach">0</property>
                   </packing>
                 </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -390,7 +384,6 @@
                   <object class="GtkBox" id="compact-favorites-header">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="margin_top">10</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <placeholder/>
