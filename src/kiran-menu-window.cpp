@@ -524,6 +524,7 @@ void KiranMenuWindow::load_all_apps()
     builder->get_widget<Gtk::Box>("all-apps-box", all_apps_box);
 
     //清空原有的应用和分类信息
+    category_items.clear();
     KiranHelper::remove_all_for_container(*all_apps_box);
 
     //删除空的应用分类
