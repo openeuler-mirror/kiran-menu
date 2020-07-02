@@ -14,6 +14,12 @@ KiranMenuAppletButton::KiranMenuAppletButton(MatePanelApplet *panel_applet)
      * 当窗口隐藏时更新插件按钮状态
     */
     connection1 = window.signal_hide().connect(sigc::bind<bool>(sigc::mem_fun(*this, &Gtk::ToggleButton::set_active), false));
+    window.signal_size_changed().connect(
+                [this](int width, int height) -> void {
+                    g_message("window size changed to %d x %d, reposition\n",
+                              width, height);
+                    this->on_toggled();
+                });
 }
 
 KiranMenuAppletButton::~KiranMenuAppletButton()

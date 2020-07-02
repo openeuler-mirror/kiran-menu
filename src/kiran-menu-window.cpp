@@ -108,6 +108,11 @@ KiranMenuWindow::~KiranMenuWindow()
     delete user_info;
 }
 
+sigc::signal<void, int, int> KiranMenuWindow::signal_size_changed()
+{
+    return m_signal_size_changed;
+}
+
 void KiranMenuWindow::reload_apps_data()
 {
     load_new_apps();
@@ -361,6 +366,26 @@ bool KiranMenuWindow::on_button_press_event(GdkEventButton *event)
     }
 
     return false;
+}
+
+bool KiranMenuWindow::on_configure_event(GdkEventConfigure *configure_event)
+{
+    /**
+     * 缓存窗口当前位置和尺寸，以检查是否是大小发生变化
+     * 如果尺寸发生变化，发出信号通知
+     */
+    if (get_mapped()) {
+        if (geometry.get_width() != configure_event->width ||
+                geometry.get_height() != configure_event->height)
+            m_signal_size_changed.emit(configure_event->width, configure_event->height);
+    }
+
+    geometry.set_x(configure_event->x);
+    geometry.set_y(configure_event->y);
+    geometry.set_width(configure_event->width);
+    geometry.set_height(configure_event->height);
+
+    return Gtk::Window::on_configure_event(configure_event);
 }
 
 bool KiranMenuWindow::on_key_press_event(GdkEventKey *key_event)

@@ -15,6 +15,9 @@ public:
     KiranMenuWindow(Gtk::WindowType window_type = Gtk::WINDOW_TOPLEVEL);
     ~KiranMenuWindow();
 
+    //尺寸变化信号
+    sigc::signal<void,int,int> signal_size_changed();
+
     void reload_apps_data();
     void load_favorite_apps();
     void load_frequent_apps();
@@ -29,6 +32,7 @@ protected:
     virtual bool on_leave_notify_event(GdkEventCrossing *crossing_event) override;
     virtual bool on_key_press_event(GdkEventKey *key_event) override;
     virtual bool on_button_press_event(GdkEventButton *button_event) override;
+    virtual bool on_configure_event(GdkEventConfigure* configure_event) override;
     virtual void on_realize();
     void on_active_change();
 
@@ -58,6 +62,8 @@ private:
     Gtk::Grid *category_overview_box, *search_results_box;
     Gtk::Box *compact_tab_box;
 
+    Gdk::Rectangle geometry;
+
     KiranUserInfo *user_info;
     std::vector<std::string> category_names;
     std::map<std::string, KiranMenuCategoryItem*> category_items;
@@ -67,6 +73,7 @@ private:
     KiranMenuProfile profile;
     Kiran::MenuSkeleton *backend;
     MenuDisplayMode display_mode;
+    sigc::signal<void,int,int> m_signal_size_changed;
 
     void add_app_button(const char *icon_resource,
                         const char *tooltip,
