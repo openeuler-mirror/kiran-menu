@@ -20,6 +20,9 @@ public:
     void load_frequent_apps();
     void load_new_apps();
 
+    //设置开始菜单显示模式(紧凑或扩展）
+    void set_display_mode(MenuDisplayMode mode);
+
 protected:
     virtual bool on_map_event(GdkEventAny *any_event) override;
     virtual bool on_unmap_event(GdkEventAny *any_event) override;
@@ -35,10 +38,13 @@ protected:
     void on_search_stop();
 
     void switch_to_category_overview(const std::string &selected_category);
-    void switch_to_apps_overview(const std::string &selected_category);
-    void switch_to_apps_overview(double position);
+    void switch_to_apps_overview(const std::string &selected_category, bool animation = true);
+    void switch_to_apps_overview(double position, bool animation = true);
+    void switch_to_compact_favorites_view(bool animation = true);
 
     bool promise_item_viewable(GdkEventFocus *event, Gtk::Widget *item);
+
+    void check_size();
 
 private:
     Glib::RefPtr<Gtk::Builder> builder;
@@ -50,17 +56,27 @@ private:
     Gtk::Box *all_apps_box, *new_apps_box;
     Gtk::Box *favorite_apps_box, *frequent_apps_box;
     Gtk::Grid *category_overview_box, *search_results_box;
+    Gtk::Box *compact_tab_box;
 
     KiranUserInfo *user_info;
     std::vector<std::string> category_names;
     std::map<std::string, KiranMenuCategoryItem*> category_items;
 
+    Gtk::StyleProperty<int> compact_min_height_property, expand_min_height_property;
+
     KiranMenuProfile profile;
     Kiran::MenuSkeleton *backend;
+    MenuDisplayMode display_mode;
 
     void add_app_button(const char *icon_resource,
                         const char *tooltip,
                         const char *cmdline);
+
+    void add_app_tab(const char *icon_resource,
+                     const char *tooltip,
+                     const char *page);
+    void create_empty_prompt_label(Gtk::Label* &label, const char *prompt_text);
+
     void add_sidebar_buttons();
 
     void load_all_apps();
@@ -69,6 +85,7 @@ private:
 
     KiranMenuAppItem *create_app_item(std::shared_ptr<Kiran::App> app,
                                   Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL);
+    KiranMenuCategoryItem *create_category_item(const std::string &name, bool clickable=true);
 };
 
 #endif // KIRANMENUWINDOW_H

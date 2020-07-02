@@ -3,10 +3,11 @@
 KiranMenuProfile::KiranMenuProfile()
 {
     settings = Gio::Settings::create("com.unikylin.Kiran.StartMenu.profile");
-    settings->signal_changed().connect(sigc::hide(sigc::mem_fun(*this, &KiranMenuProfile::on_settings_changed)));
+    settings->signal_changed().connect(
+               sigc::mem_fun(*this, &KiranMenuProfile::on_settings_changed));
 }
 
-sigc::signal<void> KiranMenuProfile::signal_changed()
+sigc::signal<void, const Glib::ustring &> KiranMenuProfile::signal_changed()
 {
     return m_signal_changed;
 }
@@ -26,6 +27,11 @@ double KiranMenuProfile::get_opacity()
     return settings->get_double("background-opacity");
 }
 
+MenuDisplayMode KiranMenuProfile::get_display_mode()
+{
+    return static_cast<MenuDisplayMode>(settings->get_enum("display-mode"));
+}
+
 void KiranMenuProfile::set_background_color(const Gdk::RGBA &color)
 {
     settings->set_string("background-color", color.to_string());
@@ -36,7 +42,8 @@ void KiranMenuProfile::set_opacity(double value)
     settings->set_double("background-opacity", value);
 }
 
-void KiranMenuProfile::on_settings_changed()
+void KiranMenuProfile::on_settings_changed(const Glib::ustring &key)
 {
-    m_signal_changed.emit();
+    g_message("settings key '%s' changed\n", key.data());
+    m_signal_changed.emit(key);
 }
