@@ -755,14 +755,9 @@ void KiranMenuWindow::load_user_info()
 
 bool KiranMenuWindow::promise_item_viewable(GdkEventFocus *event, Gtk::Widget *item)
 {
-    Gtk::Viewport *viewport = NULL;
-    for (auto widget = item->get_parent(); widget != nullptr; widget = widget->get_parent()) {
-        if (GTK_IS_VIEWPORT(widget->gobj())) {
-                viewport = static_cast<Gtk::Viewport*>(widget);
-                break;
-        }
-    }
+    Gtk::Viewport *viewport = nullptr;
 
+    viewport = dynamic_cast<Gtk::Viewport*>(item->get_ancestor(GTK_TYPE_VIEWPORT));
     if (viewport) {
         Gtk::Allocation allocation;
         int view_height;
