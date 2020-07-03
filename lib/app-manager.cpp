@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 21:42:15
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-22 09:45:03
+ * @LastEditTime : 2020-07-03 14:45:01
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app-manager.cpp
  */
@@ -745,7 +745,7 @@ std::string AppManager::get_exec_name(const std::string &exec_str)
 
     if (exec_split.size() == 0)
     {
-        return NULL;
+        return std::string();
     }
 
     return Glib::path_get_basename(exec_split[0]);
