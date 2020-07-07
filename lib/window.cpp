@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:51
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-23 14:38:42
+ * @LastEditTime : 2020-07-07 11:51:15
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window.cpp
  */
@@ -11,6 +11,7 @@
 
 #include "lib/app-manager.h"
 #include "lib/app.h"
+#include "lib/helper.h"
 #include "lib/workspace-manager.h"
 
 namespace Kiran
@@ -36,12 +37,12 @@ Window::~Window()
 
 std::string Window::get_name()
 {
-    return wnck_window_get_name(this->wnck_window_);
+    RET_WRAP_NULL(wnck_window_get_name(this->wnck_window_));
 }
 
 std::string Window::get_icon_name()
 {
-    return wnck_window_get_icon_name(this->wnck_window_);
+    RET_WRAP_NULL(wnck_window_get_icon_name(this->wnck_window_));
 }
 
 GdkPixbuf* Window::get_icon()
@@ -90,12 +91,12 @@ std::shared_ptr<Window> Window::get_transient()
 
 std::string Window::get_class_group_name()
 {
-    return wnck_window_get_class_group_name(this->wnck_window_);
+    RET_WRAP_NULL(wnck_window_get_class_group_name(this->wnck_window_));
 }
 
 std::string Window::get_class_instance_name()
 {
-    return wnck_window_get_class_instance_name(this->wnck_window_);
+    RET_WRAP_NULL(wnck_window_get_class_instance_name(this->wnck_window_));
 }
 
 int32_t Window::get_pid()

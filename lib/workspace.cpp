@@ -2,15 +2,15 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-09 15:56:04
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-12 11:58:48
+ * @LastEditTime : 2020-07-07 11:52:59
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/workspace.cpp
  */
 
 #include "lib/workspace.h"
 
+#include "lib/helper.h"
 #include "window-manager.h"
-
 namespace Kiran
 {
 Workspace::Workspace(WnckWorkspace *workspace) : workspace_(workspace)
@@ -28,7 +28,7 @@ int Workspace::get_number()
 
 std::string Workspace::get_name()
 {
-    return wnck_workspace_get_name(this->workspace_);
+    RET_WRAP_NULL(wnck_workspace_get_name(this->workspace_));
 }
 
 void Workspace::change_name(const std::string &name)

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 22:54:02
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-22 09:43:18
+ * @LastEditTime : 2020-07-07 11:49:59
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/helper.h
  */
@@ -44,6 +44,16 @@ namespace Kiran
 #define CONTINUE_IF_TRUE(cond) \
     {                          \
         if (cond) continue;    \
+    }
+
+#define RET_WRAP_NULL(expr) \
+    {                       \
+        auto _ret = expr;   \
+        if (_ret == NULL)   \
+        {                   \
+            return nullptr; \
+        }                   \
+        return _ret;        \
     }
 
 std::string str_trim(const std::string &str);
