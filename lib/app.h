@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:33
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-23 17:32:13
+ * @LastEditTime : 2020-07-07 11:16:49
  * @Description  : 维护APP的一些基本信息
  * @FilePath     : /kiran-menu-2.0/lib/app.h
  */
@@ -78,8 +78,11 @@ public:
     // 获取desktop文件中的Categories字段值
     std::string get_categories();
 
-    // 获取actions列表名，例如"Open a New Window", "Open a New Private Window"
+    // 获取actions列表名，例如 "new-window"，"new-private-window"
     std::vector<std::string> get_actions();
+
+    // 获取action的名字，改名字可用于用户交互显示，例如"Open a New Window/新建窗口", "Open a New Private Window/新建隐私浏览窗口"
+    std::string get_action_name(const std::string &action);
 
     // 获取desktop文件中设置的图标
     const Glib::RefPtr<Gio::Icon> get_icon();
@@ -101,7 +104,7 @@ public:
     // 启动应用，成功返回true，失败返回false
     bool launch();
 
-    // 通过action_name启动应用，例如"Open a New Window", "Open a New Private Window"
+    // 通过action_name启动应用，例如"new-window"，"new-private-window"
     void launch_action(const std::string &action_name);
 
     // 添加WnckApplication的xid，一个xid对应一个启动的应用，一个App可能启动多个应用

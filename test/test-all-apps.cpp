@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-07 17:36:28
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 08:55:16
+ * @LastEditTime : 2020-07-07 11:27:28
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-all-apps.cpp
  */
@@ -16,17 +16,36 @@ void test_all_apps(gconstpointer data)
 {
     Kiran::MenuSkeleton *menu_skeleton = (Kiran::MenuSkeleton *)data;
 
-    auto new_apps = menu_skeleton->get_nnew_apps(-1);
-
-    g_print("\n---------------------------------------------\n");
-
-    g_print("new apps: ");
-    for (int i = 0; i < new_apps.size(); ++i)
     {
-        auto &app = new_apps[i];
-        g_print("%s ", app->get_desktop_id().c_str());
+        g_print("\n-------------------------- all apps-----------------------\n");
+        auto all_apps = menu_skeleton->get_all_sorted_apps();
+        for (int i = 0; i < all_apps.size(); ++i)
+        {
+            auto &app = all_apps[i];
+            g_print("desktop_id: %s\n", app->get_desktop_id().c_str());
+
+            auto actions = app->get_actions();
+            for (int j = 0; j < actions.size(); ++j)
+            {
+                g_print("   action/name: %s/%s\n", actions[j].c_str(), app->get_action_name(actions[j]).c_str());
+            }
+            g_print("\n");
+        }
+        g_print("\n");
     }
-    g_print("\n");
+
+    {
+        g_print("\n--------------------- new apps ------------------------\n");
+        auto new_apps = menu_skeleton->get_nnew_apps(-1);
+
+        for (int i = 0; i < new_apps.size(); ++i)
+        {
+            auto &app = new_apps[i];
+
+            g_print("desktop_id: %s\n", app->get_desktop_id().c_str());
+        }
+        g_print("\n");
+    }
 
     gint64 start_clock = g_get_real_time();
     for (int i = 0; i <= CASES; ++i)
