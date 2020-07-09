@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:51
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-07 11:51:15
+ * @LastEditTime : 2020-07-09 10:25:44
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window.cpp
  */
@@ -154,6 +154,10 @@ void Window::move_to_workspace(std::shared_ptr<Workspace> workspace)
     wnck_window_move_to_workspace(this->wnck_window_, workspace->workspace_);
 }
 
+uint64_t Window::get_window_group()
+{
+    return wnck_window_get_group_leader(this->wnck_window_);
+}
 void Window::close()
 {
     uint64_t now = Glib::DateTime::create_now_local().to_unix();

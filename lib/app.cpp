@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:38
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-07 11:26:49
+ * @LastEditTime : 2020-07-09 10:50:20
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app.cpp
  */
@@ -17,11 +17,12 @@
 
 namespace Kiran
 {
-App::App(const std::string &desktop_id)
+App::App(const std::string &desktop_id) : kind_(AppKind::DESKTOP),
+                                          desktop_id_(desktop_id)
 {
-    this->desktop_id_ = desktop_id;
-
     this->desktop_app_ = Gio::DesktopAppInfo::create(desktop_id);
+
+    g_return_if_fail(this->desktop_app_);
 
     this->file_name_ = this->desktop_app_->get_filename();
 
@@ -40,10 +41,17 @@ App::App(const std::string &desktop_id)
 
     this->path_ = GET_STRING("Path");
 
-    init_app_kind();
-
 #undef GET_STRING
 #undef GET_LOCALE_STRING
+}
+
+App::App(uint64_t xid) : kind_(AppKind::FAKE_DESKTOP)
+{
+    std::ostringstream oss;
+    oss << "fake_" << xid;
+    this->desktop_id_ = oss.str();
+
+    add_wnck_app_by_xid(xid);
 }
 
 App::~App()
@@ -52,12 +60,17 @@ App::~App()
 
 std::string App::get_categories()
 {
+    RETURN_VAL_IF_FALSE(this->desktop_app_, std::string());
+
     return this->desktop_app_->get_categories();
 }
 
 std::vector<std::string> App::get_actions()
 {
     std::vector<std::string> raw_actions;
+
+    RETURN_VAL_IF_FALSE(this->desktop_app_, raw_actions);
+
     auto actions = this->desktop_app_->list_actions();
     for (auto iter = actions.begin(); iter != actions.end(); ++iter)
     {
@@ -68,28 +81,32 @@ std::vector<std::string> App::get_actions()
 
 std::string App::get_action_name(const std::string &action)
 {
+    RETURN_VAL_IF_FALSE(this->desktop_app_, std::string());
     return this->desktop_app_->get_action_name(action).raw();
 }
 
 const Glib::RefPtr<Gio::Icon> App::get_icon()
 {
+    RETURN_VAL_IF_FALSE(this->desktop_app_, Glib::RefPtr<Gio::Icon>());
     return this->desktop_app_->get_icon();
 }
 
 std::string App::get_startup_wm_class()
 {
+    RETURN_VAL_IF_FALSE(this->desktop_app_, std::string());
     return this->desktop_app_->get_startup_wm_class();
 }
 
 bool App::should_show()
 {
+    RETURN_VAL_IF_FALSE(this->desktop_app_, false);
     return this->desktop_app_->should_show();
 }
 
 WindowVec App::get_windows()
 {
     WindowVec windows;
-    for (auto iter = this->xids_for_wnck_app_.begin(); iter != xids_for_wnck_app_.end(); ++iter)
+    for (auto iter = this->wnck_apps_.begin(); iter != wnck_apps_.end(); ++iter)
     {
         auto xid = (*iter);
         auto wnck_app = wnck_application_get(xid);
@@ -125,7 +142,7 @@ WindowVec App::get_taskbar_windows()
 
 void App::close_all_windows()
 {
-    for (auto iter = this->xids_for_wnck_app_.begin(); iter != xids_for_wnck_app_.end(); ++iter)
+    for (auto iter = this->wnck_apps_.begin(); iter != wnck_apps_.end(); ++iter)
     {
         auto xid = (*iter);
         auto wnck_app = wnck_application_get(xid);
@@ -151,30 +168,20 @@ void App::close_all_windows()
 
 bool App::launch()
 {
+    g_return_val_if_fail(this->desktop_app_, false);
+
     bool res = false;
     std::string error;
 
-    // if (this->kind_ == AppKind::FLATPAK)
-    // {
-    //     GError *err;
-    //     res = launch_flatpak(&err);
-    //     if (!res)
-    //     {
-    //         error = err->message;
-    //     }
-    // }
-    // else
+    try
     {
-        try
-        {
-            std::vector<Glib::RefPtr<Gio::File> > files;
-            res = this->desktop_app_->launch(files);
-        }
-        catch (const Glib::Error &e)
-        {
-            res = false;
-            error = e.what().raw();
-        }
+        std::vector<Glib::RefPtr<Gio::File> > files;
+        res = this->desktop_app_->launch(files);
+    }
+    catch (const Glib::Error &e)
+    {
+        res = false;
+        error = e.what().raw();
     }
 
     if (res)
@@ -191,6 +198,8 @@ bool App::launch()
 
 void App::launch_action(const std::string &action_name)
 {
+    g_return_if_fail(this->desktop_app_);
+
     this->desktop_app_->launch_action(action_name);
     // there is no way to detect failures that occur while using this function
     // this->launched_.emit(this->shared_from_this());
@@ -198,51 +207,17 @@ void App::launch_action(const std::string &action_name)
 
 void App::add_wnck_app_by_xid(uint64_t xid)
 {
-    xids_for_wnck_app_.insert(xid);
+    wnck_apps_.insert(xid);
+
+    if (this->kind_ == AppKind::FAKE_DESKTOP && wnck_apps_.size() > 1)
+    {
+        g_warning("the fake app is related by multiply wnck applications.");
+    }
 }
 
 void App::del_wnck_app_by_xid(uint64_t xid)
 {
-    xids_for_wnck_app_.erase(xid);
-}
-
-void App::init_app_kind()
-{
-    this->kind_ = AppKind::UNKNOWN;
-
-    RETURN_IF_FALSE(this->exec_.length() > 0);
-    RETURN_IF_FALSE((bool)this->desktop_app_);
-
-    auto exec_split = str_split(this->exec_, " ");
-
-    if (exec_split.size() == 0)
-    {
-        return;
-    }
-
-    auto file = Gio::File::create_for_path(exec_split[0]);
-    if (!file)
-    {
-        g_warning("create file %s fail.", exec_split[0].c_str());
-        return;
-    }
-
-    auto exec_name = file->get_basename();
-
-    if (exec_name == "flatpak")
-    {
-        this->kind_ = AppKind::FLATPAK;
-        return;
-    }
-
-    auto x_flatpak = this->desktop_app_->get_string("X-Flatpak").raw();
-    if (x_flatpak.length() > 0)
-    {
-        this->kind_ = AppKind::FLATPAK;
-        return;
-    }
-
-    this->kind_ = AppKind::DESKTOP;
+    wnck_apps_.erase(xid);
 }
 
 typedef struct

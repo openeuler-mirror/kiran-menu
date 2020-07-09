@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:33
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-07 11:16:49
+ * @LastEditTime : 2020-07-09 09:25:12
  * @Description  : 维护APP的一些基本信息
  * @FilePath     : /kiran-menu-2.0/lib/app.h
  */
@@ -27,9 +27,12 @@ using AppVec = std::vector<std::shared_ptr<Kiran::App>>;
 
 enum class AppKind
 {
-    FLATPAK,
-    DESKTOP,
+    // 未知类型，正常情况不应该出现
     UNKNOWN,
+    // 可以对应到desktop文件
+    DESKTOP,
+    // 无法对应到desktop文件，这里会伪造一个不存在的desktop_id，格式为"fake_${xid}"
+    FAKE_DESKTOP,
 };
 
 enum class AppStatus
@@ -56,8 +59,12 @@ enum class AppAction : uint32_t
 class App : public std::enable_shared_from_this<App>
 {
 public:
+    App() = delete;
     App(const App &) = delete;
+    // 通过desktop_id创建App
     App(const std::string &desktop_id);
+    // 通过WnckApplication的xid创建App
+    App(uint64_t xid);
     virtual ~App();
 
     // 获取desktop文件中的Name字段值
@@ -74,6 +81,8 @@ public:
     const std::string &get_exec() { return this->exec_; }
     // 获取desktop文件的文件全路径
     const std::string &get_file_name() { return this->file_name_; };
+    // 获取应用类型
+    AppKind get_kind() { return this->kind_; }
 
     // 获取desktop文件中的Categories字段值
     std::string get_categories();
@@ -123,8 +132,6 @@ protected:
     // sigc::signal<void, std::shared_ptr<App>> signal_open_new_window() { return this->open_new_window_; }
 
 private:
-    void init_app_kind();
-
     void expand_macro(char macro, GString *exec);
     bool expand_application_parameters(int *argc, char ***argv, GError **error);
     bool launch_flatpak(GError **error);
@@ -156,9 +163,7 @@ private:
 
     Glib::RefPtr<Gio::DesktopAppInfo> desktop_app_;
 
-    std::set<uint64_t> xids_for_wnck_app_;
-
-    std::set<uint64_t> windows_;
+    std::set<uint64_t> wnck_apps_;
 
     friend class AppManager;
 };

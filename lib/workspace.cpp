@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-09 15:56:04
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-07 11:52:59
+ * @LastEditTime : 2020-07-09 09:53:52
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/workspace.cpp
  */
@@ -55,13 +55,13 @@ WindowVec Workspace::get_windows()
 
 void Workspace::flush_windows()
 {
-    for (auto iter = this->windows_.begin(); iter != this->windows_.end(); ++iter)
+    for (auto iter = this->windows_.begin(); iter != this->windows_.end();)
     {
         auto window = WindowManager::get_instance()->get_window(*iter);
 
         if (!window)
         {
-            this->windows_.erase(iter);
+            this->windows_.erase(iter++);
             continue;
         }
 
@@ -69,14 +69,15 @@ void Workspace::flush_windows()
 
         if (workspace && workspace->get_number() != this->get_number())
         {
-            this->windows_.erase(iter);
+            this->windows_.erase(iter++);
             continue;
         }
         else if (!workspace && !window->is_pinned())
         {
-            this->windows_.erase(iter);
+            this->windows_.erase(iter++);
             continue;
         }
+        ++iter;
     }
 }
 

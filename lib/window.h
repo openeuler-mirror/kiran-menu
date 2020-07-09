@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:46
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-23 14:38:33
+ * @LastEditTime : 2020-07-09 10:25:52
  * @Description  : 该类是对WnckWindow的封装，大部分接口和wnck_window_xxxx相同。
  * @FilePath     : /kiran-menu-2.0/lib/window.h
  */
@@ -94,6 +94,9 @@ public:
     // 将窗口移动到指定工作区
     void move_to_workspace(std::shared_ptr<Workspace> workspace);
 
+    // 获取窗口的window_group，即WnckApplication的xid，同一个进程的窗口应该有相同的window_group
+    uint64_t get_window_group();
+
     // 关闭窗口
     void close();
 
@@ -120,6 +123,9 @@ private:
     bool last_is_pinned_;
 
     Pixmap pixmap_;
+
+    // 因为在应用程序关闭的时候，无法
+    // uint64_t window_group_;
 
     friend class WindowManager;
 };

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-11 09:30:42
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-23 17:34:40
+ * @LastEditTime : 2020-07-09 10:33:22
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-display.cpp
  */
@@ -141,6 +141,8 @@ gboolean timing_print(gpointer user_data)
         {
             auto app = apps[i];
             g_print("running app_id: %s\n", app->get_desktop_id().c_str());
+
+            g_print("   type: %d\n", app->get_kind());
 
             auto windows = app->get_windows();
             for (int j = 0; j < windows.size(); ++j)

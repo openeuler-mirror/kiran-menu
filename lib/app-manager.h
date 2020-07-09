@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 17:21:54
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-19 17:20:08
+ * @LastEditTime : 2020-07-09 09:48:48
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app-manager.h
  */
@@ -28,7 +28,7 @@ public:
 
     void init();
 
-    void load_apps();
+    void load_desktop_apps();
 
     // 获取所有App列表(每个App对应一个desktop文件)
     AppVec get_apps();
@@ -45,7 +45,7 @@ public:
     // 通过窗口对象获取App
     std::shared_ptr<App> lookup_app_with_window(std::shared_ptr<Window> window);
 
-    // 通过已启动的应用程序的xid(对应group leader window的xid)获取App
+    // 通过WnckApplication的xid获取App
     std::shared_ptr<App> lookup_app_with_xid(uint64_t xid);
 
     // 获取所有App的desktop_id，并根据desktop文件的Name字段进行排序
@@ -71,6 +71,8 @@ private:
     std::shared_ptr<App> get_app_from_env(std::shared_ptr<Window> window);
     std::shared_ptr<App> get_app_from_desktop(std::shared_ptr<Window> window);
     std::shared_ptr<App> get_app_from_window_group(std::shared_ptr<Window> window);
+
+    void clear_desktop_apps();
 
     // 启动一个应用时的信号处理
     static void app_opened(WnckScreen *screen, WnckApplication *wnck_application, gpointer user_data);
@@ -98,12 +100,10 @@ private:
 
     WindowManager *window_manager_;
 
-    std::map<int32_t, std::shared_ptr<App>> apps_;
-    std::map<std::string, std::shared_ptr<App>> wmclass_apps_;
+    std::map<std::string, std::shared_ptr<App>> apps_;
+    std::map<std::string, std::weak_ptr<App>> wmclass_apps_;
 
     std::map<uint64_t, std::weak_ptr<App>> wnck_apps_;
-
-    std::map<uint64_t, std::weak_ptr<App>> xid_to_apps_;
 };
 
 }  // namespace Kiran

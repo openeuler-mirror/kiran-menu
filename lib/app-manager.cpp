@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 21:42:15
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-03 14:45:01
+ * @LastEditTime : 2020-07-09 10:52:07
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app-manager.cpp
  */
@@ -38,7 +38,7 @@ void AppManager::global_init(WindowManager *window_manager)
 
 void AppManager::init()
 {
-    load_apps();
+    load_desktop_apps();
 
     auto screen = wnck_screen_get_default();
     g_return_if_fail(screen != NULL);
@@ -50,7 +50,7 @@ void AppManager::init()
     this->window_manager_->signal_window_closed().connect(sigc::mem_fun(this, &AppManager::window_closed));
 }
 
-void AppManager::load_apps()
+void AppManager::load_desktop_apps()
 {
     bool new_app_change = false;
 
@@ -60,17 +60,17 @@ void AppManager::load_apps()
     // copy the keys of the->apps to old_apps.
     auto old_apps = this->apps_;
 
-    // update system apps
-    this->apps_.clear();
+    // clear the apps which type is AppKind::DESKTOP
+    this->clear_desktop_apps();
     this->wmclass_apps_.clear();
 
+    // update system apps
     auto registered_apps = Gio::AppInfo::get_all();
     for (auto iter = registered_apps.begin(); iter != registered_apps.end(); ++iter)
     {
         auto desktop_id = (*iter)->get_id();
-        Glib::Quark quark(desktop_id);
         std::shared_ptr<App> app(new App(desktop_id));
-        this->apps_[quark.id()] = app;
+        this->apps_[desktop_id] = app;
 
         auto wm_class = app->get_startup_wm_class();
         if (wm_class.length() > 0)
@@ -89,9 +89,8 @@ void AppManager::load_apps()
         for (auto iter = registered_apps.begin(); iter != registered_apps.end(); ++iter)
         {
             auto desktop_id = (*iter)->get_id();
-            Glib::Quark quark(desktop_id);
 
-            if (old_apps.find(quark.id()) == old_apps.end() && (*iter)->should_show())
+            if (old_apps.find(desktop_id) == old_apps.end() && (*iter)->should_show())
             {
                 auto app = lookup_app(desktop_id);
                 new_installed_apps.push_back(app);
@@ -123,28 +122,6 @@ void AppManager::load_apps()
     {
         this->app_uninstalled_.emit(new_uninstalled_apps);
     }
-
-    // load wnck_application
-    // this->xid_to_app_.clear();
-    // auto screen = wnck_screen_get_default();
-    // auto wnck_windows = wnck_screen_get_windows(screen);
-    // for (auto l = wnck_windows; l != NULL; l = l->next)
-    // {
-    //     auto wnck_window = (WnckWindow *)(l->data);
-    //     auto wnck_application = wnck_window_get_application(wnck_window);
-    //     auto xwindow = wnck_application_get_xid(wnck_application);
-    //     auto iter = this->xid_to_app_.find(xwindow);
-    //     if (iter == this->xid_to_app_.end())
-    //     {
-    //         auto window = this->window_manager_->lookup_window(wnck_window);
-    //         auto app = lookup_app_with_window(window);
-    //         if (app)
-    //         {
-    //             this->xid_to_app_.emplace(xwindow, app);
-    //             app->add_wnck_app_by_xid(xwindow);
-    //         }
-    //     }
-    // }
 }
 
 std::vector<std::shared_ptr<App>> AppManager::get_apps()
@@ -196,9 +173,7 @@ std::shared_ptr<App> AppManager::lookup_app(const std::string &desktop_id)
 {
     RETURN_VAL_IF_TRUE(desktop_id.length() == 0, nullptr);
 
-    Glib::Quark quark(desktop_id);
-
-    auto iter = this->apps_.find(quark.id());
+    auto iter = this->apps_.find(desktop_id);
     if (iter == this->apps_.end())
     {
         return nullptr;
@@ -221,7 +196,7 @@ std::shared_ptr<App> AppManager::lookup_app_with_window(std::shared_ptr<Window> 
 
     std::shared_ptr<App> app;
 
-    app = lookup_app_with_xid(window->get_xid());
+    app = lookup_app_with_xid(window->get_window_group());
     RETURN_VAL_IF_TRUE(app, app);
 
     app = get_app_from_sandboxed_app(window);
@@ -251,8 +226,8 @@ std::shared_ptr<App> AppManager::lookup_app_with_window(std::shared_ptr<Window> 
 
 std::shared_ptr<App> AppManager::lookup_app_with_xid(uint64_t xid)
 {
-    auto iter = this->xid_to_apps_.find(xid);
-    if (iter != this->xid_to_apps_.end())
+    auto iter = this->wnck_apps_.find(xid);
+    if (iter != this->wnck_apps_.end())
     {
         auto &app = iter->second;
         if (!app.expired())
@@ -458,13 +433,13 @@ std::shared_ptr<App> AppManager::lookup_app_with_wmclass(const std::string &wmcl
     RETURN_VAL_IF_TRUE(wmclass.length() == 0, nullptr);
 
     auto iter = this->wmclass_apps_.find(wmclass);
-    if (iter == this->wmclass_apps_.end())
+    if (iter == this->wmclass_apps_.end() || iter->second.expired())
     {
         return nullptr;
     }
     else
     {
-        return iter->second;
+        return iter->second.lock();
     }
 }
 
@@ -636,6 +611,19 @@ std::shared_ptr<App> AppManager::get_app_from_window_group(std::shared_ptr<Windo
     return nullptr;
 }
 
+void AppManager::clear_desktop_apps()
+{
+    for (auto iter = this->apps_.begin(); iter != this->apps_.end();)
+    {
+        if (iter->second->get_kind() == AppKind::DESKTOP)
+        {
+            this->apps_.erase(iter++);
+            continue;
+        }
+        ++iter;
+    }
+}
+
 void AppManager::app_opened(WnckScreen *screen, WnckApplication *wnck_application, gpointer user_data)
 {
     auto app_manager = (AppManager *)user_data;
@@ -672,19 +660,25 @@ void AppManager::app_opened(WnckScreen *screen, WnckApplication *wnck_applicatio
 
     if (!add_result)
     {
-        g_warning("not found matching App for the wnck_application. name: %s xid: %" PRIu64 "\n",
-                  wnck_application_get_name(wnck_application),
-                  xwindow);
-    }
-    else
-    {
-        app_manager->signal_app_action_changed_.emit(app, AppAction::APP_OPENED);
+        g_debug("because not found matching App for the wnck_application. so create a fake app.  name: %s xid: %" PRIu64 "\n",
+                wnck_application_get_name(wnck_application),
+                xwindow);
 
-        // g_print("-------signal: app '%s' is opened. xid: %" PRIu64 " pid: %" PRIu64 "\n",
-        //         app->get_desktop_id().c_str(),
-        //         wnck_application_get_xid(wnck_application),
-        //         wnck_application_get_pid(wnck_application));
+        app = std::make_shared<App>(xwindow);
+        app_manager->wnck_apps_[xwindow] = app;
+        auto &desktop_id = app->get_desktop_id();
+
+        if (app_manager->apps_.find(desktop_id) != app_manager->apps_.end())
+        {
+            g_warning("exist a app that have same desktop_id. desktop_id: %s name: %s xid: %" PRIu64 "\n",
+                      desktop_id.c_str(),
+                      wnck_application_get_name(wnck_application),
+                      xwindow);
+        }
+        app_manager->apps_[desktop_id] = app;
     }
+
+    app_manager->signal_app_action_changed_.emit(app, AppAction::APP_OPENED);
 }
 
 void AppManager::app_closed(WnckScreen *screen, WnckApplication *wnck_application, gpointer user_data)
@@ -694,6 +688,8 @@ void AppManager::app_closed(WnckScreen *screen, WnckApplication *wnck_applicatio
     g_return_if_fail(wnck_application != NULL);
     g_return_if_fail(app_manager == AppManager::get_instance());
 
+    std::shared_ptr<App> app;
+
     auto xwindow = wnck_application_get_xid(wnck_application);
     auto iter = app_manager->wnck_apps_.find(xwindow);
     if (iter == app_manager->wnck_apps_.end())
@@ -701,21 +697,32 @@ void AppManager::app_closed(WnckScreen *screen, WnckApplication *wnck_applicatio
         g_warning("not found the App for the wnck_application. name: %s xid: %" PRIu64 "\n",
                   wnck_application_get_name(wnck_application),
                   xwindow);
-        return;
     }
-
-    if (iter->second.expired() == false)
+    else
     {
-        auto app = iter->second.lock();
-        app->del_wnck_app_by_xid(xwindow);
-        app_manager->signal_app_action_changed_.emit(app, AppAction::APP_CLOSED);
-
-        // g_print("-----------signal: app '%s' is closed. xid: %" PRIu64 " pid: %" PRIu64 "\n",
-        //         app->get_desktop_id().c_str(),
-        //         wnck_application_get_xid(wnck_application),
-        //         wnck_application_get_pid(wnck_application));
+        if (iter->second.expired() == false)
+        {
+            app = iter->second.lock();
+            app->del_wnck_app_by_xid(xwindow);
+            app_manager->signal_app_action_changed_.emit(app, AppAction::APP_CLOSED);
+        }
+        app_manager->wnck_apps_.erase(iter);
     }
-    app_manager->wnck_apps_.erase(iter);
+
+    if (app && app->get_kind() == AppKind::FAKE_DESKTOP)
+    {
+        auto iter = app_manager->apps_.find(app->get_desktop_id());
+        if (iter != app_manager->apps_.end())
+        {
+            app_manager->apps_.erase(iter);
+        }
+        else
+        {
+            g_warning("not found the fake App for the wnck_application. name: %s xid: %" PRIu64 "\n",
+                      wnck_application_get_name(wnck_application),
+                      xwindow);
+        }
+    }
 }
 
 void AppManager::window_opened(std::shared_ptr<Window> window)
@@ -723,20 +730,16 @@ void AppManager::window_opened(std::shared_ptr<Window> window)
     auto app = lookup_app_with_window(window);
     if (app)
     {
-        this->xid_to_apps_.emplace(window->get_xid(), app);
-
         this->signal_app_action_changed_.emit(app, AppAction::APP_WINDOW_CHANGED);
     }
 }
 void AppManager::window_closed(std::shared_ptr<Window> window)
 {
-    auto app = lookup_app_with_xid(window->get_xid());
+    auto app = lookup_app_with_window(window);
     if (app)
     {
         this->signal_app_action_changed_.emit(app, AppAction::APP_WINDOW_CHANGED);
     }
-
-    this->xid_to_apps_.erase(window->get_xid());
 }
 
 std::string AppManager::get_exec_name(const std::string &exec_str)

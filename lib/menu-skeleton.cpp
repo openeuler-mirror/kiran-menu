@@ -206,7 +206,7 @@ std::shared_ptr<MenuUnit> MenuSkeleton::get_unit(MenuUnitType unit_type)
 
 void MenuSkeleton::flush()
 {
-    AppManager::get_instance()->load_apps();
+    AppManager::get_instance()->load_desktop_apps();
     auto apps = AppManager::get_instance()->get_should_show_apps();
     this->favorite_->flush(apps);
     this->category_->flush(apps);
