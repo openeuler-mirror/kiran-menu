@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-30 17:28:19
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 09:50:09
+ * @LastEditTime : 2020-07-09 14:55:28
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/category-writer.cpp
  */
@@ -174,6 +174,7 @@ bool CategoryWriter::write_category(std::shared_ptr<CategoryNode> node, gint rec
     }
 
     PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level, "</category>\n");
+    return true;
 }
 
 bool CategoryWriter::write_root(std::shared_ptr<CategoryNode> node, Gio::DataOutputStream *data_output)

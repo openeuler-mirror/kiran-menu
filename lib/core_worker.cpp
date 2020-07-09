@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-10 17:15:59
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-19 18:24:21
+ * @LastEditTime : 2020-07-09 14:16:29
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/core_worker.cpp
  */
@@ -21,13 +21,17 @@ void init_backend_system()
 
     WorkspaceManager::global_init();
 
-    MenuSkeleton::global_init();
+    MenuSkeleton::global_init(AppManager::get_instance());
+
+    TaskBarSkeleton::global_init(AppManager::get_instance());
 
     ScreenManager::get_instance()->force_update();
 }
 
 void deinit_backend_system()
 {
+    TaskBarSkeleton::global_deinit();
+
     MenuSkeleton::global_deinit();
 
     WorkspaceManager::global_deinit();

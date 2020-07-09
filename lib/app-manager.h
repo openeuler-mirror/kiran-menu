@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 17:21:54
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-09 09:48:48
+ * @LastEditTime : 2020-07-09 11:33:04
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app-manager.h
  */
@@ -26,10 +26,6 @@ public:
 
     static void global_deinit() { delete instance_; };
 
-    void init();
-
-    void load_desktop_apps();
-
     // 获取所有App列表(每个App对应一个desktop文件)
     AppVec get_apps();
 
@@ -51,6 +47,8 @@ public:
     // 获取所有App的desktop_id，并根据desktop文件的Name字段进行排序
     std::vector<std::string> get_all_sorted_apps();
 
+    // desktop应用列表发生变化信号
+    sigc::signal<void> &signal_desktop_app_changed() { return this->app_desktop_changed_; }
     // App安装时的信号
     sigc::signal<void, AppVec> &signal_app_installed() { return this->app_installed_; }
     // App卸载时的信号
@@ -60,6 +58,8 @@ public:
 
 private:
     AppManager(WindowManager *window_manager);
+
+    void init();
 
 private:
     std::shared_ptr<App> get_app_from_sandboxed_app(std::shared_ptr<Window> window);
@@ -72,7 +72,11 @@ private:
     std::shared_ptr<App> get_app_from_desktop(std::shared_ptr<Window> window);
     std::shared_ptr<App> get_app_from_window_group(std::shared_ptr<Window> window);
 
+    void load_desktop_apps();
     void clear_desktop_apps();
+
+    // desktop应用变化的信号处理
+    static void desktop_app_changed(GAppInfoMonitor *gappinfomonitor, gpointer user_data);
 
     // 启动一个应用时的信号处理
     static void app_opened(WnckScreen *screen, WnckApplication *wnck_application, gpointer user_data);
@@ -91,6 +95,7 @@ private:
     // void app_open_new_window(std::shared_ptr<App> app);
 
 protected:
+    sigc::signal<void> app_desktop_changed_;
     sigc::signal<void, AppVec> app_installed_;
     sigc::signal<void, AppVec> app_uninstalled_;
     sigc::signal<void, std::shared_ptr<App>, AppAction> signal_app_action_changed_;

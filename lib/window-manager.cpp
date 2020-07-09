@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:27:36
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-22 08:42:34
+ * @LastEditTime : 2020-07-09 15:18:21
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window-manager.cpp
  */
@@ -220,9 +220,9 @@ void WindowManager::window_opened(WnckScreen *screen, WnckWindow *wnck_window, g
 {
     auto window_manager = (WindowManager *)user_data;
 
-    g_print("open window name: %s xid: %" PRIu64 "\n",
-            wnck_window_get_name(wnck_window),
-            wnck_window_get_xid(wnck_window));
+    // g_print("open window name: %s xid: %" PRIu64 "\n",
+    //         wnck_window_get_name(wnck_window),
+    //         wnck_window_get_xid(wnck_window));
 
     g_return_if_fail(wnck_window != NULL);
     g_return_if_fail(window_manager == WindowManager::get_instance());

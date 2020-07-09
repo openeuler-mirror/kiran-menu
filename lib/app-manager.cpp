@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 21:42:15
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-09 10:52:07
+ * @LastEditTime : 2020-07-09 15:18:04
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app-manager.cpp
  */
@@ -14,8 +14,8 @@
 #include <cinttypes>
 #include <sstream>
 
+#include "lib/common.h"
 #include "lib/helper.h"
-#include "lib/menu-common.h"
 
 namespace Kiran
 {
@@ -34,94 +34,6 @@ void AppManager::global_init(WindowManager *window_manager)
 {
     instance_ = new AppManager(window_manager);
     instance_->init();
-}
-
-void AppManager::init()
-{
-    load_desktop_apps();
-
-    auto screen = wnck_screen_get_default();
-    g_return_if_fail(screen != NULL);
-
-    g_signal_connect(screen, "application-opened", G_CALLBACK(AppManager::app_opened), this);
-    g_signal_connect(screen, "application-closed", G_CALLBACK(AppManager::app_closed), this);
-
-    this->window_manager_->signal_window_opened().connect(sigc::mem_fun(this, &AppManager::window_opened));
-    this->window_manager_->signal_window_closed().connect(sigc::mem_fun(this, &AppManager::window_closed));
-}
-
-void AppManager::load_desktop_apps()
-{
-    bool new_app_change = false;
-
-    std::vector<std::shared_ptr<App>> new_installed_apps;
-    std::vector<std::shared_ptr<App>> new_uninstalled_apps;
-
-    // copy the keys of the->apps to old_apps.
-    auto old_apps = this->apps_;
-
-    // clear the apps which type is AppKind::DESKTOP
-    this->clear_desktop_apps();
-    this->wmclass_apps_.clear();
-
-    // update system apps
-    auto registered_apps = Gio::AppInfo::get_all();
-    for (auto iter = registered_apps.begin(); iter != registered_apps.end(); ++iter)
-    {
-        auto desktop_id = (*iter)->get_id();
-        std::shared_ptr<App> app(new App(desktop_id));
-        this->apps_[desktop_id] = app;
-
-        auto wm_class = app->get_startup_wm_class();
-        if (wm_class.length() > 0)
-        {
-            this->wmclass_apps_[app->get_startup_wm_class()] = app;
-        }
-        app->signal_launched().connect(sigc::mem_fun(this, &AppManager::app_launched));
-        app->signal_close_all_windows().connect(sigc::mem_fun(this, &AppManager::app_close_all_windows));
-        // app->signal_open_new_window().connect(sigc::mem_fun(this, &AppManager::app_open_new_window));
-    }
-
-    // new installed apps
-    static bool first_flush = true;
-    if (!first_flush)
-    {
-        for (auto iter = registered_apps.begin(); iter != registered_apps.end(); ++iter)
-        {
-            auto desktop_id = (*iter)->get_id();
-
-            if (old_apps.find(desktop_id) == old_apps.end() && (*iter)->should_show())
-            {
-                auto app = lookup_app(desktop_id);
-                new_installed_apps.push_back(app);
-            }
-        }
-    }
-    else
-    {
-        first_flush = false;
-    }
-
-    // new uninstalled apps
-    {
-        for (auto iter = old_apps.begin(); iter != old_apps.end(); ++iter)
-        {
-            if (this->apps_.find(iter->first) == this->apps_.end() && iter->second->should_show())
-            {
-                new_uninstalled_apps.push_back(iter->second);
-            }
-        }
-    }
-
-    if (new_installed_apps.size() > 0)
-    {
-        this->app_installed_.emit(new_installed_apps);
-    }
-
-    if (new_uninstalled_apps.size() > 0)
-    {
-        this->app_uninstalled_.emit(new_uninstalled_apps);
-    }
 }
 
 std::vector<std::shared_ptr<App>> AppManager::get_apps()
@@ -259,6 +171,24 @@ std::vector<std::string> AppManager::get_all_sorted_apps()
     });
 
     return apps;
+}
+
+void AppManager::init()
+{
+    load_desktop_apps();
+
+    auto monitor = g_app_info_monitor_get();
+    g_return_if_fail(monitor != NULL);
+    g_signal_connect(monitor, "changed", G_CALLBACK(AppManager::desktop_app_changed), this);
+
+    auto screen = wnck_screen_get_default();
+    g_return_if_fail(screen != NULL);
+
+    g_signal_connect(screen, "application-opened", G_CALLBACK(AppManager::app_opened), this);
+    g_signal_connect(screen, "application-closed", G_CALLBACK(AppManager::app_closed), this);
+
+    this->window_manager_->signal_window_opened().connect(sigc::mem_fun(this, &AppManager::window_opened));
+    this->window_manager_->signal_window_closed().connect(sigc::mem_fun(this, &AppManager::window_closed));
 }
 
 std::shared_ptr<App> AppManager::get_app_from_sandboxed_app(std::shared_ptr<Window> window)
@@ -411,7 +341,7 @@ std::shared_ptr<App> AppManager::get_app_from_window_wmclass(std::shared_ptr<Win
     auto wm_class_instance = window->get_class_instance_name();
     auto wm_class = window->get_class_group_name();
 
-    g_print("wm_class_instance: %s wm_class: %s\n", wm_class_instance.c_str(), wm_class.c_str());
+    // g_print("wm_class_instance: %s wm_class: %s\n", wm_class_instance.c_str(), wm_class.c_str());
 
     app = lookup_app_with_wmclass(wm_class_instance);
     RETURN_VAL_IF_TRUE(app, app);
@@ -611,6 +541,80 @@ std::shared_ptr<App> AppManager::get_app_from_window_group(std::shared_ptr<Windo
     return nullptr;
 }
 
+void AppManager::load_desktop_apps()
+{
+    bool new_app_change = false;
+
+    std::vector<std::shared_ptr<App>> new_installed_apps;
+    std::vector<std::shared_ptr<App>> new_uninstalled_apps;
+
+    // copy the keys of the->apps to old_apps.
+    auto old_apps = this->apps_;
+
+    // clear the apps which type is AppKind::DESKTOP
+    this->clear_desktop_apps();
+    this->wmclass_apps_.clear();
+
+    // update system apps
+    auto registered_apps = Gio::AppInfo::get_all();
+    for (auto iter = registered_apps.begin(); iter != registered_apps.end(); ++iter)
+    {
+        auto desktop_id = (*iter)->get_id();
+        std::shared_ptr<App> app(new App(desktop_id));
+        this->apps_[desktop_id] = app;
+
+        auto wm_class = app->get_startup_wm_class();
+        if (wm_class.length() > 0)
+        {
+            this->wmclass_apps_[app->get_startup_wm_class()] = app;
+        }
+        app->signal_launched().connect(sigc::mem_fun(this, &AppManager::app_launched));
+        app->signal_close_all_windows().connect(sigc::mem_fun(this, &AppManager::app_close_all_windows));
+        // app->signal_open_new_window().connect(sigc::mem_fun(this, &AppManager::app_open_new_window));
+    }
+
+    // new installed apps
+    static bool first_flush = true;
+    if (!first_flush)
+    {
+        for (auto iter = registered_apps.begin(); iter != registered_apps.end(); ++iter)
+        {
+            auto desktop_id = (*iter)->get_id();
+
+            if (old_apps.find(desktop_id) == old_apps.end() && (*iter)->should_show())
+            {
+                auto app = lookup_app(desktop_id);
+                new_installed_apps.push_back(app);
+            }
+        }
+    }
+    else
+    {
+        first_flush = false;
+    }
+
+    // new uninstalled apps
+    {
+        for (auto iter = old_apps.begin(); iter != old_apps.end(); ++iter)
+        {
+            if (this->apps_.find(iter->first) == this->apps_.end() && iter->second->should_show())
+            {
+                new_uninstalled_apps.push_back(iter->second);
+            }
+        }
+    }
+
+    if (new_installed_apps.size() > 0)
+    {
+        this->app_installed_.emit(new_installed_apps);
+    }
+
+    if (new_uninstalled_apps.size() > 0)
+    {
+        this->app_uninstalled_.emit(new_uninstalled_apps);
+    }
+}
+
 void AppManager::clear_desktop_apps()
 {
     for (auto iter = this->apps_.begin(); iter != this->apps_.end();)
@@ -622,6 +626,17 @@ void AppManager::clear_desktop_apps()
         }
         ++iter;
     }
+}
+
+void AppManager::desktop_app_changed(GAppInfoMonitor *gappinfomonitor, gpointer user_data)
+{
+    auto app_manager = (AppManager *)user_data;
+
+    g_return_if_fail(app_manager == AppManager::get_instance());
+
+    app_manager->load_desktop_apps();
+
+    app_manager->app_desktop_changed_.emit();
 }
 
 void AppManager::app_opened(WnckScreen *screen, WnckApplication *wnck_application, gpointer user_data)

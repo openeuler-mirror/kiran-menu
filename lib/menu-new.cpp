@@ -14,8 +14,8 @@
 #include <set>
 
 #include "lib/app-manager.h"
+#include "lib/common.h"
 #include "lib/helper.h"
-#include "lib/menu-common.h"
 #include "lib/window-manager.h"
 
 namespace Kiran
