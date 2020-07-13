@@ -20,5 +20,7 @@
     <file alias="icon/arrow">images/arrow.png</file>
     <file alias="icon/location">images/location.png</file>
     <file alias="icon/menu">images/menu.png</file>
+    <file alias="icon/favorite">images/favorite.png</file>
+    <file alias="icon/list">images/list.png</file>
   </gresource>
 </gresources>

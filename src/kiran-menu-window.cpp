@@ -3,6 +3,7 @@
 #include "kiran-menu-power-button.h"
 #include "kiran-search-entry.h"
 #include "kiranhelper.h"
+#include "kiran-menu-avatar-widget.h"
 
 
 #include <unistd.h>
@@ -12,10 +13,12 @@
 #define NEW_APPS_MAX_SIZE 3
 
 KiranMenuWindow::KiranMenuWindow(Gtk::WindowType window_type):
-    Gtk::Window(window_type)
+    Glib::ObjectBase("KiranMenuWindow"),
+    Gtk::Window(window_type),
+    compact_min_height_property(*this, "compact-min-height", 0),
+    expand_min_height_property(*this, "expand-min-height", 0)
 {
     Gtk::Box *search_box;
-    Glib::RefPtr<Gtk::StyleContext> context = get_style_context();
 
     set_name("menu-window");
     set_skip_taskbar_hint(true);
@@ -43,27 +46,21 @@ KiranMenuWindow::KiranMenuWindow(Gtk::WindowType window_type):
     builder->get_widget<Gtk::Box>("all-apps-box", all_apps_box);
     builder->get_widget<Gtk::Grid>("category-overview-box", category_overview_box);
     builder->get_widget<Gtk::Grid>("search-results-box", search_results_box);
+    builder->get_widget("compact-tab-box", compact_tab_box);
 
     category_overview_box->set_orientation(Gtk::ORIENTATION_VERTICAL);
 
-    profile.signal_changed().connect(sigc::mem_fun(*this, &Gtk::Widget::queue_draw));
-
-    Gtk::EventBox *userinfo_box, *date_box;
-    builder->get_widget<Gtk::EventBox>("userinfo-box", userinfo_box);
-    builder->get_widget<Gtk::EventBox>("date-box", date_box);
-    userinfo_box->add_events(Gdk::BUTTON_PRESS_MASK);
-    userinfo_box->signal_button_press_event().connect([this](GdkEventButton *button) -> bool {
-        std::vector<std::string> args;
-
-        args.push_back("/usr/bin/mate-about-me");
-        args.push_back("");
-
-        this->hide();
-        Glib::spawn_async(std::string(), args, Glib::SPAWN_STDOUT_TO_DEV_NULL | Glib::SPAWN_STDERR_TO_DEV_NULL | Glib::SPAWN_CLOEXEC_PIPES);
-
-        return false;
+    profile.signal_changed().connect(
+        [this](const Glib::ustring &key) -> void {
+            if (key == "display-mode") {
+                this->set_display_mode(this->profile.get_display_mode());
+            } else
+                this->queue_draw();
     });
 
+    Gtk::EventBox *date_box;
+
+    builder->get_widget<Gtk::EventBox>("date-box", date_box);
     date_box->add_events(Gdk::BUTTON_PRESS_MASK | Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
     date_box->signal_button_press_event().connect([this](GdkEventButton *button) -> bool {
         std::vector<std::string> args;
@@ -79,7 +76,7 @@ KiranMenuWindow::KiranMenuWindow(Gtk::WindowType window_type):
 
     //添加搜索框
     builder->get_widget<Gtk::Box>("search-box", search_box);
-    search_entry = Gtk::manage(new KiranSearchEntry());
+    search_entry = Gtk::make_managed<KiranSearchEntry>();
     search_entry->set_can_default(true);
     search_entry->set_can_focus(true);
     search_entry->set_activates_default(true);
@@ -95,18 +92,15 @@ KiranMenuWindow::KiranMenuWindow(Gtk::WindowType window_type):
     box->reparent(*this);
     box->show_all();
 
-    reload_apps_data();
+    //reload_apps_data();
+
+    property_is_active().signal_changed().connect(sigc::mem_fun(*this, &KiranMenuWindow::on_active_change));
 
     //加载当前用户信息
     user_info = new KiranUserInfo(getuid());
-    if (!user_info->is_ready()) {
-        user_info->signal_data_ready().connect(sigc::mem_fun(*this, &KiranMenuWindow::load_user_info));
-    }
-    else
-        load_user_info();
+    set_display_mode(profile.get_display_mode());
 
-    load_date_info();
-    property_is_active().signal_changed().connect(sigc::mem_fun(*this, &KiranMenuWindow::on_active_change));
+
 }
 
 KiranMenuWindow::~KiranMenuWindow()
@@ -114,12 +108,17 @@ KiranMenuWindow::~KiranMenuWindow()
     delete user_info;
 }
 
+sigc::signal<void, int, int> KiranMenuWindow::signal_size_changed()
+{
+    return m_signal_size_changed;
+}
+
 void KiranMenuWindow::reload_apps_data()
 {
     load_new_apps();
+    load_frequent_apps();
     load_all_apps();
     load_favorite_apps();
-    load_frequent_apps();
 }
 
 void KiranMenuWindow::on_realize()
@@ -133,9 +132,6 @@ void KiranMenuWindow::on_realize()
     rgba_visual = screen->get_rgba_visual();
     gtk_widget_set_visual(GTK_WIDGET(this->gobj()), rgba_visual->gobj());
 
-    monitor->get_workarea(rect);
-
-    set_size_request(-1, rect.get_height()*2/3);
     Gtk::Window::on_realize();
 }
 
@@ -201,7 +197,7 @@ void KiranMenuWindow::on_search_change()
     auto apps_list = backend->search_app(search_entry->get_text().data(), true);
     if (apps_list.size()) {
         g_message("search results length %lu\n", apps_list.size());
-        auto category_item = Gtk::manage(new KiranMenuCategoryItem(_("Search Results"), false));
+        auto category_item = Gtk::make_managed<KiranMenuCategoryItem>(_("Search Results"), false);
 
         search_results_box->add(*category_item);
         for (auto iter = apps_list.begin(); iter != apps_list.end(); iter++) {
@@ -211,14 +207,9 @@ void KiranMenuWindow::on_search_change()
         }
     } else {
         //搜索结果为空
-        Gtk::Label *label = Gtk::manage(new Gtk::Label(_("No matched apps found!")));
+        Gtk::Label *label;
 
-        label->get_style_context()->add_class("search-empty-prompt");
-        label->set_hexpand(true);
-        label->set_vexpand(true);
-        label->set_halign(Gtk::ALIGN_CENTER);
-        label->set_valign(Gtk::ALIGN_CENTER);
-
+        create_empty_prompt_label(label, _("No matched apps found!"));
         search_results_box->add(*label);
     }
 
@@ -240,13 +231,13 @@ void KiranMenuWindow::on_search_stop()
  */
 void KiranMenuWindow::switch_to_category_overview(const std::string &selected_category)
 {
-    KiranMenuCategoryItem *selected_item = NULL;
+    KiranMenuCategoryItem *selected_item = nullptr;
 
     KiranHelper::remove_all_for_container(*category_overview_box);
 
 
     for (auto iter = category_names.begin(); iter != category_names.end(); iter++) {
-        auto item = Gtk::manage(new KiranMenuCategoryItem(*iter, true));
+        auto item = Gtk::make_managed<KiranMenuCategoryItem>(*iter, true);
         item->set_hexpand(true);
         item->show_all();
 
@@ -254,9 +245,10 @@ void KiranMenuWindow::switch_to_category_overview(const std::string &selected_ca
             std::cout<<"found target category: "<<item->get_category_name()<<std::endl;
             selected_item = item;
         }
-        item->signal_clicked().connect(sigc::bind<const std::string&>(
+        item->signal_clicked().connect(sigc::bind<const std::string&, bool>(
                                            sigc::mem_fun<const std::string&>(*this, &KiranMenuWindow::switch_to_apps_overview),
-                                           item->get_category_name()));
+                                           item->get_category_name(),
+                                           true));
         category_overview_box->add(*item);
     }
 
@@ -271,7 +263,7 @@ void KiranMenuWindow::switch_to_category_overview(const std::string &selected_ca
  *        该分类对应的分类标签处(该分类标签位于滚动窗口内部的最上方位置）
  * @param selected_category：要选择的分类名称
  */
-void KiranMenuWindow::switch_to_apps_overview(const std::string &selected_category)
+void KiranMenuWindow::switch_to_apps_overview(const std::string &selected_category, bool animation)
 {
     KiranMenuCategoryItem *item;
     Gtk::Allocation allocation;
@@ -289,9 +281,10 @@ void KiranMenuWindow::switch_to_apps_overview(const std::string &selected_catego
             //滚动到指定的分类标签
             allocation = item->get_allocation();
             adjusted_pos = allocation.get_y();
-            switch_to_apps_overview(adjusted_pos);
+            switch_to_apps_overview(adjusted_pos, animation);
 
             //将指定的分类标签控件添加焦点
+            g_message("grab focus for category '%s'\n", selected_category.data());
             item->grab_focus();
         } else
             std::cout<<"invalid category name '"<<selected_category<<"'"<<std::endl;
@@ -302,9 +295,12 @@ void KiranMenuWindow::switch_to_apps_overview(const std::string &selected_catego
  * @brief 切换到应用视图，并滚动到position对应的位置
  * @param position 要滚动到的位置，该位置将传递给应用列表所在viewport的adjustment
  */
-void KiranMenuWindow::switch_to_apps_overview(double position)
+void KiranMenuWindow::switch_to_apps_overview(double position, bool animation)
 {
     Gtk::Viewport *all_apps_viewport;
+    Gtk::StackTransitionType transition;
+
+    transition = animation?Gtk::STACK_TRANSITION_TYPE_CROSSFADE:Gtk::STACK_TRANSITION_TYPE_NONE;
 
     if (position >= 0) {
         builder->get_widget<Gtk::Viewport>("all-apps-viewport", all_apps_viewport);
@@ -314,7 +310,15 @@ void KiranMenuWindow::switch_to_apps_overview(double position)
     }
 
     //切换到应用程序列表
-    overview_stack->set_visible_child("apps-overview-page", Gtk::STACK_TRANSITION_TYPE_CROSSFADE);
+    overview_stack->set_visible_child("apps-overview-page", transition);
+}
+
+void KiranMenuWindow::switch_to_compact_favorites_view(bool animation)
+{
+    Gtk::StackTransitionType transition;
+
+    transition = animation?Gtk::STACK_TRANSITION_TYPE_CROSSFADE:Gtk::STACK_TRANSITION_TYPE_NONE;
+    overview_stack->set_visible_child("compact-favorites-page", transition);
 }
 
 bool KiranMenuWindow::on_map_event(GdkEventAny *any_event)
@@ -325,12 +329,18 @@ bool KiranMenuWindow::on_map_event(GdkEventAny *any_event)
      * 获取当前系统的鼠标事件，这样才能在鼠标点击窗口外部时及时隐藏窗口
      */
     KiranHelper::grab_input(*this);
-    switch_to_apps_overview(0);
+
+    //应用列表滚动到开始位置
+    switch_to_apps_overview(0, false);
+
+    //紧凑模式下默认显示收藏夹
+    if (display_mode == DISPLAY_MODE_COMPACT)
+        switch_to_compact_favorites_view(false);
+
     on_search_stop();
     search_entry->set_text("");
     search_entry->grab_focus();
 
-    g_message("window %d x %d\n", get_width(), get_height());
     return true;
 }
 
@@ -356,6 +366,26 @@ bool KiranMenuWindow::on_button_press_event(GdkEventButton *event)
     }
 
     return false;
+}
+
+bool KiranMenuWindow::on_configure_event(GdkEventConfigure *configure_event)
+{
+    /**
+     * 缓存窗口当前位置和尺寸，以检查是否是大小发生变化
+     * 如果尺寸发生变化，发出信号通知
+     */
+    if (get_mapped()) {
+        if (geometry.get_width() != configure_event->width ||
+                geometry.get_height() != configure_event->height)
+            m_signal_size_changed.emit(configure_event->width, configure_event->height);
+    }
+
+    geometry.set_x(configure_event->x);
+    geometry.set_y(configure_event->y);
+    geometry.set_width(configure_event->width);
+    geometry.set_height(configure_event->height);
+
+    return Gtk::Window::on_configure_event(configure_event);
 }
 
 bool KiranMenuWindow::on_key_press_event(GdkEventKey *key_event)
@@ -397,30 +427,84 @@ void KiranMenuWindow::add_app_button(const char *icon_resource,
                                      const char *tooltip,
                                      const char *cmdline)
 {
-    KiranMenuAppLauncher *button = Gtk::manage(new KiranMenuAppLauncher(icon_resource, tooltip, cmdline));
+    KiranMenuAppLauncher *button = Gtk::make_managed<KiranMenuAppLauncher>(icon_resource, tooltip, cmdline);
 
     button->signal_app_launched().connect(sigc::mem_fun(*this, &Gtk::Widget::hide));
     side_box->add(*button);
 }
 
+/**
+ * @brief 在侧边栏中添加tab标签按钮
+ * @param icon_resource: tab标签按钮显示的图标资源路径
+ * @param tooltip: 标签按钮的工具提示文本
+ * @param page: 点击对应的标签按钮时，要显示的tab页名称
+ */
+void KiranMenuWindow::add_app_tab(const char *icon_resource,
+                                  const char *tooltip,
+                                  const char *page)
+{
+    Gtk::Button *button = Gtk::make_managed<Gtk::Button>();
+    Gtk::Image *image = Gtk::make_managed<Gtk::Image>();
+
+    try {
+        image->set_pixel_size(16);
+        image->set_from_resource(icon_resource);
+    } catch (const Glib::Error &e) {
+        std::cerr<<"Failed to load resouce '"<<icon_resource<<"': "<<e.what()<<std::endl;
+    }
+
+    button->set_always_show_image(true);
+    button->set_image(*image);
+    button->set_tooltip_text(tooltip);
+    button->get_style_context()->add_class("kiran-app-button");
+
+    button->signal_clicked().connect(
+                [this, page]() -> void{
+                    this->overview_stack->set_visible_child(page, Gtk::STACK_TRANSITION_TYPE_CROSSFADE);
+                });
+
+    compact_tab_box->add(*button);
+}
+
+/**
+ * @brief 创建无结果的提示标签
+ * @param label         创建的标签
+ * @param prompt_text   提示文本
+ */
+void KiranMenuWindow::create_empty_prompt_label(Gtk::Label* &label, const char *prompt_text)
+{
+    label = Gtk::make_managed<Gtk::Label>(prompt_text);
+
+    label->get_style_context()->add_class("search-empty-prompt");
+    label->set_hexpand(true);
+    label->set_vexpand(true);
+    label->set_halign(Gtk::ALIGN_CENTER);
+    label->set_valign(Gtk::ALIGN_CENTER);
+}
+
+/**
+ * @brief 为侧边栏添加标签页和快捷启动按钮
+ */
 void KiranMenuWindow::add_sidebar_buttons()
 {
     Gtk::Separator *separator;
     Gtk::Button *power_btn;
 
-    separator= Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+    separator= Gtk::make_managed<Gtk::Separator>(Gtk::ORIENTATION_HORIZONTAL);
     separator->set_margin_start(9);
     separator->set_margin_end(9);
     separator->set_margin_top(5);
     separator->set_margin_bottom(5);
 
-    power_btn = Gtk::manage(new KiranMenuPowerButton());
-
+    power_btn = Gtk::make_managed<KiranMenuPowerButton>();
     side_box->set_orientation(Gtk::ORIENTATION_VERTICAL);
+
+    add_app_tab("/kiran-menu/icon/favorite", _("Favorites"), "compact-favorites-page");
+    add_app_tab("/kiran-menu/icon/list", _("All applications"), "apps-overview-page");
+
+    compact_tab_box->add(*separator);
+
     add_app_button("/kiran-menu/sidebar/home-dir", _("Home Directory"), "caja");
-    add_app_button("/kiran-menu/sidebar/monitor", _("System monitor"), "mate-system-monitor");
-    add_app_button("/kiran-menu/sidebar/help", _("Open help"), "yelp");
-    side_box->add(*separator);
     add_app_button("/kiran-menu/sidebar/settings", _("Control center"), "mate-control-center");
     add_app_button("/kiran-menu/sidebar/lock", _("Lock Screen"), "mate-screensaver-command -l");
     side_box->add(*power_btn);
@@ -440,6 +524,7 @@ void KiranMenuWindow::load_all_apps()
     builder->get_widget<Gtk::Box>("all-apps-box", all_apps_box);
 
     //清空原有的应用和分类信息
+    category_items.clear();
     KiranHelper::remove_all_for_container(*all_apps_box);
 
     //删除空的应用分类
@@ -452,11 +537,8 @@ void KiranMenuWindow::load_all_apps()
     //遍历分类列表，建立应用列表
     for (auto category: category_names) {
         auto apps_list = backend->get_category_apps(category);
-        auto item = Gtk::manage(new KiranMenuCategoryItem(category, true));
+        auto item = create_category_item(category);
 
-        item->signal_focus_in_event().connect(sigc::bind<Gtk::Widget*>(
-                                                  sigc::mem_fun(*this, &KiranMenuWindow::promise_item_viewable),
-                                                  item));
         category_items.insert(category_items.end(), std::pair<std::string, KiranMenuCategoryItem*>(category, item));
         item->signal_clicked().connect(sigc::bind<const std::string&>(
                                            sigc::mem_fun(*this, &KiranMenuWindow::switch_to_category_overview),
@@ -477,28 +559,46 @@ void KiranMenuWindow::load_all_apps()
 void KiranMenuWindow::load_frequent_apps()
 {
     KiranMenuListItem *item;
-    Gtk::Box *frequent_apps_box, *frequent_header_box, *frequent_container;
-
-    builder->get_widget<Gtk::Box>("frequent-apps-box", frequent_apps_box);
-    builder->get_widget<Gtk::Box>("frequent-header-box", frequent_header_box);
-    builder->get_widget<Gtk::Box>("frequent-box", frequent_container);
-    frequent_apps_box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
-
-    KiranHelper::remove_all_for_container(*frequent_apps_box);
-    KiranHelper::remove_all_for_container(*frequent_header_box);
-
+    Gtk::Box *frequent_apps_box;
     auto apps_list = backend->get_nfrequent_apps(4);
-    //apps_list.clear();
-    if (apps_list.size() > 0) {
-        item = Gtk::manage(new KiranMenuCategoryItem("Frequently used", false));
-        frequent_header_box->add(*item);
-        for (auto iter = apps_list.begin(); iter != apps_list.end(); iter++) {
-            item = create_app_item(*iter, Gtk::ORIENTATION_VERTICAL);
-            frequent_apps_box->pack_start(*item, Gtk::PACK_SHRINK);
+
+    if (display_mode == DISPLAY_MODE_COMPACT) {
+        //TODO
+        builder->get_widget<Gtk::Box>("compact-frequent-box", frequent_apps_box);
+        KiranHelper::remove_all_for_container(*frequent_apps_box);
+
+        if (apps_list.size() > 0) {
+            item = create_category_item(_("Frequently used"), false);
+            frequent_apps_box->add(*item);
+
+            for (auto app: apps_list) {
+                item = create_app_item(app, Gtk::ORIENTATION_HORIZONTAL);
+                frequent_apps_box->add(*item);
+            }
         }
-        frequent_container->show_all();
+        frequent_apps_box->show_all();
     } else {
-        frequent_container->hide();
+        Gtk::Box *frequent_header_box, *frequent_container;
+
+        builder->get_widget<Gtk::Box>("frequent-apps-box", frequent_apps_box);
+        builder->get_widget<Gtk::Box>("frequent-header-box", frequent_header_box);
+        builder->get_widget<Gtk::Box>("frequent-box", frequent_container);
+        frequent_apps_box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+
+        KiranHelper::remove_all_for_container(*frequent_apps_box);
+        KiranHelper::remove_all_for_container(*frequent_header_box);
+
+        if (apps_list.size() > 0) {
+            item = create_category_item(_("Frequently used"), false);
+            frequent_header_box->add(*item);
+            for (auto app: apps_list) {
+                item = create_app_item(app, Gtk::ORIENTATION_VERTICAL);
+                frequent_apps_box->pack_start(*item, Gtk::PACK_SHRINK);
+            }
+            frequent_container->show_all();
+        } else {
+            frequent_container->hide();
+        }
     }
 }
 
@@ -515,11 +615,8 @@ void KiranMenuWindow::load_new_apps()
         int index = 1;
         Gtk::Box *more_apps_box = nullptr;
         Gtk::ToggleButton *expand_button = nullptr;
+        auto item = create_category_item(_("New Installed"), false);
 
-        auto item = Gtk::manage(new KiranMenuCategoryItem(_("New Installed"), false));
-        item->signal_focus_in_event().connect(sigc::bind<Gtk::Widget*>(
-                                                  sigc::mem_fun(*this, &KiranMenuWindow::promise_item_viewable),
-                                                  item));
         new_apps_box->add(*item);
         for (auto app: new_apps_list) {
             auto item = create_app_item(app);
@@ -529,11 +626,11 @@ void KiranMenuWindow::load_new_apps()
             else {
                 //新安装应用数量多，只显示部分应用和展开按钮
                 if (!more_apps_box) {
-                    auto image = Gtk::manage(new Gtk::Image());
+                    auto image = Gtk::make_managed<Gtk::Image>();
                     image->set_from_resource("/kiran-menu/icon/expand");
 
-                    expand_button = Gtk::manage(new Gtk::ToggleButton(_("Expand")));
-                    more_apps_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
+                    expand_button = Gtk::make_managed<Gtk::ToggleButton>(_("Expand"));
+                    more_apps_box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
                     new_apps_box->add(*expand_button);
                     new_apps_box->add(*more_apps_box);
 
@@ -564,29 +661,58 @@ void KiranMenuWindow::load_new_apps()
  */
 void KiranMenuWindow::load_favorite_apps()
 {
-#define APP_COLUMN_COUNT 4                  //每行显示的app个数
     KiranMenuListItem *item;
     Gtk::Box *favorite_header_box;
     Gtk::Grid *favorite_apps_box;
-    int index = 0;
+    auto apps_list = backend->get_favorite_apps();
 
-    builder->get_widget<Gtk::Grid>("favorite-apps-box", favorite_apps_box);
-    builder->get_widget<Gtk::Box>("favorite-header-box", favorite_header_box);
+    if (display_mode == DISPLAY_MODE_COMPACT) {
+        //TODO 紧凑模式
+
+        builder->get_widget<Gtk::Grid>("compact-favorites-box", favorite_apps_box);
+        builder->get_widget<Gtk::Box>("compact-favorites-header", favorite_header_box);
+    } else {
+#define APP_COLUMN_COUNT 4                  //每行显示的app个数
+        builder->get_widget<Gtk::Grid>("favorite-apps-box", favorite_apps_box);
+        builder->get_widget<Gtk::Box>("favorite-header-box", favorite_header_box);
+    }
 
     KiranHelper::remove_all_for_container(*favorite_apps_box);
     KiranHelper::remove_all_for_container(*favorite_header_box);
 
-    item = Gtk::manage(new KiranMenuCategoryItem("Favorite Apps", false));
-    favorite_header_box->add(*item);
 
-    auto apps_list = backend->get_favorite_apps();
-    for (auto iter = apps_list.begin(); iter != apps_list.end(); iter++, index++) {
-        item = create_app_item(*iter, Gtk::ORIENTATION_VERTICAL);
-        favorite_apps_box->attach(*item, index % APP_COLUMN_COUNT, index / APP_COLUMN_COUNT, 1, 1);
+
+    if (apps_list.size() == 0) {
+        Gtk::Label *label;
+
+        create_empty_prompt_label(label, _("No favorite apps!"));
+        favorite_apps_box->add(*label);
+    } else {
+        int index = 0;
+        item = create_category_item(_("Favorite Apps"), false);
+
+        favorite_header_box->add(*item);
+
+        for (auto app: apps_list) {
+            if (display_mode == DISPLAY_MODE_EXPAND) {
+                item = create_app_item(app, Gtk::ORIENTATION_VERTICAL);
+                favorite_apps_box->attach(*item,
+                                          index % APP_COLUMN_COUNT,
+                                          index / APP_COLUMN_COUNT,
+                                          1, 1);
+                index++;
+            } else {
+                item = create_app_item(app);
+                item->set_hexpand(true);
+                item->set_halign(Gtk::ALIGN_FILL);
+                favorite_apps_box->add(*item);
+            }
+        }
     }
 
     favorite_header_box->show_all();
     favorite_apps_box->show_all();
+
 }
 
 /**
@@ -594,39 +720,42 @@ void KiranMenuWindow::load_favorite_apps()
  */
 void KiranMenuWindow::load_user_info()
 {
-    Gtk::Image *user_icon;
-    Gtk::Label *name_label;
-    Glib::RefPtr<Gdk::Pixbuf> avatar_pixbuf;
+
+    Gtk::Box *avatar_box;
+    KiranMenuAvatarWidget *avatar;
+    int icon_size = 60;
 
     if (!user_info->is_ready())
         return;
 
-    builder->get_widget<Gtk::Label>("username-label", name_label);
-    builder->get_widget<Gtk::Image>("avatar-icon", user_icon);
+    if (display_mode == DISPLAY_MODE_COMPACT)
+        icon_size = 36;
 
-    name_label->set_markup(Glib::ustring(_("Hello")) + ", <b>" + user_info->get_username() +"</b>");
-    try {
-        avatar_pixbuf = Gdk::Pixbuf::create_from_file(user_info->get_iconfile(), 60, 60);
-    } catch (const Glib::Error &e) {
-	std::cerr<<"Failed to load user avatar from file: "<<e.what()<<std::endl;
-	auto pixbuf = Gdk::Pixbuf::create_from_resource("/kiran-menu/icon/avatar");
+    avatar = Gtk::make_managed<KiranMenuAvatarWidget>(icon_size);
+    avatar->set_icon(user_info->get_iconfile());
 
-        avatar_pixbuf = pixbuf->scale_simple(60, 60, Gdk::INTERP_BILINEAR);
+    if (display_mode == DISPLAY_MODE_COMPACT) {
+        //显示用户头像并在tooltip中提示用户名
+        builder->get_widget("compact-avatar-box", avatar_box);
+        avatar->set_tooltip_text(Glib::ustring(user_info->get_username()));
+    } else {
+        Gtk::Label *name_label;
+        builder->get_widget("expand-avatar-box", avatar_box);
+        builder->get_widget<Gtk::Label>("username-label", name_label);
+
+        avatar->set_vexpand(true);
+        name_label->set_markup(Glib::ustring(_("Hello")) + ", <b>" + user_info->get_username() +"</b>");
     }
-    if (avatar_pixbuf)
-            user_icon->set(avatar_pixbuf);
+    KiranHelper::remove_all_for_container(*avatar_box);
+    avatar_box->add(*avatar);
+    avatar_box->show_all();
 }
 
 bool KiranMenuWindow::promise_item_viewable(GdkEventFocus *event, Gtk::Widget *item)
 {
-    Gtk::Viewport *viewport = NULL;
-    for (auto widget = item->get_parent(); widget != nullptr; widget = widget->get_parent()) {
-        if (GTK_IS_VIEWPORT(widget->gobj())) {
-                viewport = static_cast<Gtk::Viewport*>(widget);
-                break;
-        }
-    }
+    Gtk::Viewport *viewport = nullptr;
 
+    viewport = dynamic_cast<Gtk::Viewport*>(item->get_ancestor(GTK_TYPE_VIEWPORT));
     if (viewport) {
         Gtk::Allocation allocation;
         int view_height;
@@ -649,10 +778,85 @@ bool KiranMenuWindow::promise_item_viewable(GdkEventFocus *event, Gtk::Widget *i
     return false;
 }
 
+void KiranMenuWindow::check_size()
+{
+    Gdk::Rectangle rect;
+    int compact_height, expand_height, min_height;
+    auto monitor = get_screen()->get_display()->get_primary_monitor();
+
+    monitor->get_workarea(rect);
+    compact_height = compact_min_height_property.get_value();
+    expand_height = expand_min_height_property.get_value();
+
+    if (display_mode == DISPLAY_MODE_COMPACT)
+        min_height = compact_height;
+    else
+        min_height = expand_height;
+
+    if (rect.get_height() < min_height)
+        min_height = rect.get_height();
+
+    set_size_request(-1, min_height);
+}
+
+void KiranMenuWindow::set_display_mode(MenuDisplayMode mode)
+{
+    Gtk::Box *avatar_button;
+    Gtk::Box *expand_panel, *compact_tab_box;
+    Gdk::Rectangle workarea;
+    int min_width, natural_width, min_height;
+    auto monitor = get_screen()->get_display()->get_primary_monitor();
+
+    monitor->get_workarea(workarea);
+
+    //FIXME, read min size from css??
+    builder->get_widget("compact-avatar-box", avatar_button);
+    builder->get_widget("expand-panel", expand_panel);
+    builder->get_widget("compact-tab-box", compact_tab_box);
+
+    display_mode = mode;
+
+    if(display_mode == DISPLAY_MODE_COMPACT) {
+        //紧凑模式下隐藏右侧面板
+        avatar_button->set_visible(true);
+        expand_panel->set_visible(false);
+        compact_tab_box->set_visible(true);
+
+        get_preferred_width(min_width, natural_width);
+
+        min_height = compact_min_height_property.get_value();
+    } else {
+        avatar_button->set_visible(false);
+        expand_panel->set_visible(true);
+        compact_tab_box->set_visible(false);
+
+        get_preferred_width(min_width, natural_width);
+        min_height = expand_min_height_property.get_value();
+
+        load_date_info();
+    }
+
+    g_message("min-height %d\n", min_height);
+    if (workarea.get_height() < min_height)
+        min_height = workarea.get_height();
+
+    resize(natural_width, min_height);
+
+    if (!user_info->is_ready()) {
+        user_info->signal_data_ready().connect(
+                    sigc::mem_fun(*this, &KiranMenuWindow::load_user_info));
+    }
+    else
+        load_user_info();
+
+    reload_apps_data();
+}
+
+
 KiranMenuAppItem *KiranMenuWindow::create_app_item(std::shared_ptr<Kiran::App> app, Gtk::Orientation orient)
 {
 
-    auto item = Gtk::manage(new KiranMenuAppItem(app));
+    auto item = Gtk::make_managed<KiranMenuAppItem>(app);
 
     item->set_orientation(orient);
     item->signal_launched().connect(sigc::mem_fun(*this, &Gtk::Widget::hide));
@@ -661,6 +865,17 @@ KiranMenuAppItem *KiranMenuWindow::create_app_item(std::shared_ptr<Kiran::App> a
                                               item));
 
 
+    return item;
+}
+
+KiranMenuCategoryItem *KiranMenuWindow::create_category_item(const std::string &name,
+                                                             bool clickable)
+{
+    auto item = Gtk::make_managed<KiranMenuCategoryItem>(name, clickable);
+
+    item->signal_focus_in_event().connect(sigc::bind<Gtk::Widget*>(
+                                              sigc::mem_fun(*this, &KiranMenuWindow::promise_item_viewable),
+                                              item));
     return item;
 }
 

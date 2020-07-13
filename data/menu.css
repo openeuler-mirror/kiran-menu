@@ -81,7 +81,10 @@ window#menu-window {
     min-width: 760px;
     min-height: 682px;
     color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
+    -gtkmm__CustomObject_KiranMenuWindow-compact-min-height: 682px;
+    -gtkmm__CustomObject_KiranMenuWindow-expand-min-height: 682px;
 }
 
 button.kiran-app-button {
