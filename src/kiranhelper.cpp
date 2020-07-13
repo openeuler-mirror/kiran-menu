@@ -1,19 +1,19 @@
 #include "kiranhelper.h"
 
-KiranHelper::KiranHelper()
-{
-
-}
-
 void KiranHelper::remove_widget(Gtk::Widget &widget)
 {
     if (widget.get_parent())
         widget.get_parent()->remove(widget);
 }
 
-void KiranHelper::remove_all_for_container(Gtk::Container &container)
+void KiranHelper::remove_all_for_container(Gtk::Container &container, bool need_free)
 {
-    container.foreach(sigc::ptr_fun(&KiranHelper::remove_widget));
+    for (auto widget: container.get_children()) {
+        container.remove(*widget);
+
+        if (need_free)
+            delete widget;
+    }
 }
 
 bool KiranHelper::grab_input(Gtk::Widget &widget)

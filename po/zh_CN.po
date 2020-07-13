@@ -90,6 +90,9 @@ msgstr "常用应用"
 msgid "Favorite Apps"
 msgstr "收藏夹"
 
+msgid "New Installed"
+msgstr "新安装应用"
+
 msgid "Edit Profiles"
 msgstr "更改设置"
 
@@ -128,3 +131,27 @@ msgstr "点击更改用户信息"
 
 msgid "Click to change date and time settings"
 msgstr "点击更改日期时间设置"
+
+msgid "Shrink"
+msgstr "收起"
+
+msgid "Expand"
+msgstr "展开"
+
+msgid "Search Results"
+msgstr "搜索结果"
+
+msgid "No matched apps found!"
+msgstr "无符合条件的应用"
+
+msgid "Favorites"
+msgstr "收藏夹"
+
+msgid "All applications"
+msgstr "所有应用"
+
+msgid "No favorite apps!"
+msgstr "收藏夹列表为空"
+
+msgid "No frequently used apps!"
+msgstr "暂无常用应用信息"

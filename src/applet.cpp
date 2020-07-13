@@ -1,6 +1,6 @@
 #include <gtkmm.h>
 #include <mate-panel-applet.h>
-#include "kiranmenuappletbutton.h"
+#include "kiran-menu-applet-button.h"
 #include <iostream>
 #include <glibmm/i18n.h>
 #include <locale.h>
@@ -53,6 +53,7 @@ kiran_menu_applet_fill (MatePanelApplet *applet,
     textdomain (GETTEXT_PACKAGE);
 
     Gtk::Main::init_gtkmm_internals();
+    Kiran::init_backend_system();
 
     if (!strcmp(iid, "KiranMenuApplet")) {
         //开始菜单插件

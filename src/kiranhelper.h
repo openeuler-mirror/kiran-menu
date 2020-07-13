@@ -10,10 +10,11 @@ using KiranWindowPointer = std::shared_ptr<Kiran::Window>;
 class KiranHelper
 {
 public:
-    KiranHelper();
+    KiranHelper() = delete;
+    ~KiranHelper() = delete;
 
     static void remove_widget(Gtk::Widget &widget);
-    static void remove_all_for_container(Gtk::Container &container);
+    static void remove_all_for_container(Gtk::Container &container, bool need_free = true);
     static bool grab_input(Gtk::Widget &widget);
     static void ungrab_input(Gtk::Widget &widget);
 

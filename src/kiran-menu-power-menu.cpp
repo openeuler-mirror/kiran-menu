@@ -1,10 +1,10 @@
-#include "kiranpowermenu.h"
+#include "kiran-menu-power-menu.h"
 #include "kiranpower.h"
 #include <glibmm/i18n.h>
 #include <iostream>
 #include "kiranhelper.h"
 
-KiranPowerMenu::KiranPowerMenu()
+KiranMenuPowerMenu::KiranMenuPowerMenu()
 {
     logout_item.set_label(_("Logout"));
     suspend_item.set_label(_("Suspend"));
@@ -30,20 +30,20 @@ KiranPowerMenu::KiranPowerMenu()
     shutdown_item.signal_activate().connect(sigc::hide_return(sigc::ptr_fun(&KiranPower::shutdown)));
 
 
-    logout_item.signal_activate().connect(sigc::mem_fun(*this, &KiranPowerMenu::hide_menu_window));
-    suspend_item.signal_activate().connect(sigc::mem_fun(*this, &KiranPowerMenu::hide_menu_window));
-    hibernate_item.signal_activate().connect(sigc::mem_fun(*this, &KiranPowerMenu::hide_menu_window));
-    reboot_item.signal_activate().connect(sigc::mem_fun(*this, &KiranPowerMenu::hide_menu_window));
-    shutdown_item.signal_activate().connect(sigc::mem_fun(*this, &KiranPowerMenu::hide_menu_window));
+    logout_item.signal_activate().connect(sigc::mem_fun(*this, &KiranMenuPowerMenu::hide_menu_window));
+    suspend_item.signal_activate().connect(sigc::mem_fun(*this, &KiranMenuPowerMenu::hide_menu_window));
+    hibernate_item.signal_activate().connect(sigc::mem_fun(*this, &KiranMenuPowerMenu::hide_menu_window));
+    reboot_item.signal_activate().connect(sigc::mem_fun(*this, &KiranMenuPowerMenu::hide_menu_window));
+    shutdown_item.signal_activate().connect(sigc::mem_fun(*this, &KiranMenuPowerMenu::hide_menu_window));
 
 }
 
-KiranPowerMenu::~KiranPowerMenu()
+KiranMenuPowerMenu::~KiranMenuPowerMenu()
 {
 
 }
 
-void KiranPowerMenu::hide_menu_window()
+void KiranMenuPowerMenu::hide_menu_window()
 {
     Gtk::Widget *menu_window;
 
@@ -53,7 +53,7 @@ void KiranPowerMenu::hide_menu_window()
     menu_window->hide();
 }
 
-bool KiranPowerMenu::on_map_event(GdkEventAny *any_event)
+bool KiranMenuPowerMenu::on_map_event(GdkEventAny *any_event)
 {
     bool res;
 
@@ -63,7 +63,7 @@ bool KiranPowerMenu::on_map_event(GdkEventAny *any_event)
     return res;
 }
 
-bool KiranPowerMenu::on_focus_in_event(GdkEventFocus *focus_event)
+bool KiranMenuPowerMenu::on_focus_in_event(GdkEventFocus *focus_event)
 {
     bool res;
 

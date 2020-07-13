@@ -6,3 +6,4 @@ menu.gresource
 /.vscode
 *~
 po/*.mo
+*.user

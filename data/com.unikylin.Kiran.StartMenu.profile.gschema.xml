@@ -1,4 +1,8 @@
 <schemalist>
+    <enum id="com.unikylin.Kiran.StartMenu.DisplayMode">
+    <value nick="compact" value="0"/>
+    <value nick="expand" value="1"/>
+    </enum>
   <schema id="com.unikylin.Kiran.StartMenu.profile" path="/com/unikylin/kiran/StartMenu/profile/">
     <key name="background-color" type="s">
       <default>'#1c1c1c'</default>
@@ -8,9 +12,10 @@
       <default>1.0</default>
       <summary>Background Opacity of start menu</summary>
     </key>
-    <key name="weather-location" type="s">
-      <default>'Beijing'</default>
-      <summary>The city to show weather data</summary>
+    <key name="display-mode" enum="com.unikylin.Kiran.StartMenu.DisplayMode">
+      <default>'compact'</default>
+      <summary>Display mode for menu. 'compact' or 'expand'</summary>
     </key>
+  </schema>
 </schemalist>
 

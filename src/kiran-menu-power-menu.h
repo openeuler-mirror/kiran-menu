@@ -1,13 +1,13 @@
-#ifndef KIRANPOWERMENU_H
-#define KIRANPOWERMENU_H
+#ifndef KIRANMENUPOWERMENU_H
+#define KIRANMENUPOWERMENU_H
 
 #include <gtkmm.h>
 
-class KiranPowerMenu : public Gtk::Menu
+class KiranMenuPowerMenu : public Gtk::Menu
 {
 public:
-    KiranPowerMenu();
-    ~KiranPowerMenu();
+    KiranMenuPowerMenu();
+    ~KiranMenuPowerMenu();
 
     void hide_menu_window();
 
@@ -23,4 +23,4 @@ private:
     Gtk::MenuItem logout_item;
 };
 
-#endif // KIRANPOWERMENU_H
+#endif // KIRANMENUPOWERMENU_H

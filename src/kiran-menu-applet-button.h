@@ -3,7 +3,7 @@
 
 #include <gtkmm.h>
 #include <mate-panel-applet.h>
-#include "kiranmenuwindow.h"
+#include "kiran-menu-window.h"
 
 class KiranMenuAppletButton : public Gtk::ToggleButton
 {
@@ -26,7 +26,7 @@ private:
 
     Glib::RefPtr<Gdk::Pixbuf> icon_pixbuf;      //图标
     int icon_size;                              //图标显示尺寸
-    sigc::connection connection1, connection2;
+    sigc::connection connection1;
 };
 
 #endif // KIRANMENUAPPLETBUTTON_H

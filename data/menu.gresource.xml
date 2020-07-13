@@ -4,7 +4,6 @@
     <file alias="action/arrow-left">images/arrow-left.png</file>
     <file alias="action/arrow-right">images/arrow-right.png</file>
     <file alias="action/search">images/search.png</file>
-    <file alias="sidebar/avatar">images/avatar_default.png</file>
     <file alias="sidebar/help">images/help.png</file>
     <file alias="sidebar/home-dir">images/home-dir.png</file>
     <file alias="sidebar/settings">images/settings.png</file>
@@ -13,12 +12,15 @@
     <file alias="sidebar/power">images/power.png</file>
     <file alias="menu.css">data/menu.css</file>
     <file alias="ui/menu">data/menu.ui.xml</file>
-    <file alias="logo">images/logo.png</file>
+    <file alias="icon/logo">images/logo.png</file>
+    <file alias="icon/avatar">images/avatar_default.png</file>
     <file alias="icon/group">images/group.png</file>
     <file alias="icon/expand">images/expand.png</file>
     <file alias="icon/shrink">images/shrink.png</file>
     <file alias="icon/arrow">images/arrow.png</file>
     <file alias="icon/location">images/location.png</file>
     <file alias="icon/menu">images/menu.png</file>
+    <file alias="icon/favorite">images/favorite.png</file>
+    <file alias="icon/list">images/list.png</file>
   </gresource>
 </gresources>

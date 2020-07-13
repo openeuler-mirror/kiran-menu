@@ -1,4 +1,4 @@
-#include "kiranmenuappletbutton.h"
+#include "kiran-menu-applet-button.h"
 #include <glibmm/i18n.h>
 
 #define BUTTON_MARGIN 6
@@ -14,12 +14,16 @@ KiranMenuAppletButton::KiranMenuAppletButton(MatePanelApplet *panel_applet)
      * 当窗口隐藏时更新插件按钮状态
     */
     connection1 = window.signal_hide().connect(sigc::bind<bool>(sigc::mem_fun(*this, &Gtk::ToggleButton::set_active), false));
+    window.signal_size_changed().connect(
+                [this](int width, int height) -> void {
+                    g_message("window size changed to %d x %d, reposition\n",
+                              width, height);
+                    this->on_toggled();
+                });
 }
 
 KiranMenuAppletButton::~KiranMenuAppletButton()
 {
-    if (connection2.connected())
-            connection2.disconnect();
     connection1.disconnect();
     g_object_unref(applet);
 }
@@ -95,7 +99,7 @@ void KiranMenuAppletButton::on_toggled()
         window_allocation = window.get_allocation();
 
         //获取按钮的位置坐标
-        get_window()->get_root_origin(root_x, root_y);
+        get_window()->get_origin(root_x, root_y);
         orient = mate_panel_applet_get_orient(applet);
         switch (orient)
         {
@@ -123,15 +127,10 @@ void KiranMenuAppletButton::on_toggled()
 
 void KiranMenuAppletButton::update_icon()
 {
-    auto icon_theme = Gtk::IconTheme::get_default();
-
     if (icon_pixbuf)
         icon_pixbuf.reset();
 
-    icon_pixbuf = icon_theme->load_icon("start-here", 96, get_scale_factor(), Gtk::ICON_LOOKUP_FORCE_SIZE);
-    if (!connection2.connected())
-        connection2 = icon_theme->signal_changed().connect(sigc::mem_fun(*this, &KiranMenuAppletButton::update_icon));
-
+    icon_pixbuf = Gdk::Pixbuf::create_from_resource("/kiran-menu/icon/logo");
     if (get_realized())
         queue_resize();        //resize之后会redraw的
 }
