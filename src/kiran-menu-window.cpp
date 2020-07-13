@@ -76,7 +76,7 @@ KiranMenuWindow::KiranMenuWindow(Gtk::WindowType window_type):
 
     //添加搜索框
     builder->get_widget<Gtk::Box>("search-box", search_box);
-    search_entry = Gtk::manage(new KiranSearchEntry());
+    search_entry = Gtk::make_managed<KiranSearchEntry>();
     search_entry->set_can_default(true);
     search_entry->set_can_focus(true);
     search_entry->set_activates_default(true);
@@ -197,7 +197,7 @@ void KiranMenuWindow::on_search_change()
     auto apps_list = backend->search_app(search_entry->get_text().data(), true);
     if (apps_list.size()) {
         g_message("search results length %lu\n", apps_list.size());
-        auto category_item = Gtk::manage(new KiranMenuCategoryItem(_("Search Results"), false));
+        auto category_item = Gtk::make_managed<KiranMenuCategoryItem>(_("Search Results"), false);
 
         search_results_box->add(*category_item);
         for (auto iter = apps_list.begin(); iter != apps_list.end(); iter++) {
@@ -237,7 +237,7 @@ void KiranMenuWindow::switch_to_category_overview(const std::string &selected_ca
 
 
     for (auto iter = category_names.begin(); iter != category_names.end(); iter++) {
-        auto item = Gtk::manage(new KiranMenuCategoryItem(*iter, true));
+        auto item = Gtk::make_managed<KiranMenuCategoryItem>(*iter, true);
         item->set_hexpand(true);
         item->show_all();
 
@@ -427,7 +427,7 @@ void KiranMenuWindow::add_app_button(const char *icon_resource,
                                      const char *tooltip,
                                      const char *cmdline)
 {
-    KiranMenuAppLauncher *button = Gtk::manage(new KiranMenuAppLauncher(icon_resource, tooltip, cmdline));
+    KiranMenuAppLauncher *button = Gtk::make_managed<KiranMenuAppLauncher>(icon_resource, tooltip, cmdline);
 
     button->signal_app_launched().connect(sigc::mem_fun(*this, &Gtk::Widget::hide));
     side_box->add(*button);
@@ -443,8 +443,8 @@ void KiranMenuWindow::add_app_tab(const char *icon_resource,
                                   const char *tooltip,
                                   const char *page)
 {
-    Gtk::Button *button = Gtk::manage(new Gtk::Button());
-    Gtk::Image *image = Gtk::manage(new Gtk::Image());
+    Gtk::Button *button = Gtk::make_managed<Gtk::Button>();
+    Gtk::Image *image = Gtk::make_managed<Gtk::Image>();
 
     try {
         image->set_pixel_size(16);
@@ -473,7 +473,7 @@ void KiranMenuWindow::add_app_tab(const char *icon_resource,
  */
 void KiranMenuWindow::create_empty_prompt_label(Gtk::Label* &label, const char *prompt_text)
 {
-    label = Gtk::manage(new Gtk::Label(prompt_text));
+    label = Gtk::make_managed<Gtk::Label>(prompt_text);
 
     label->get_style_context()->add_class("search-empty-prompt");
     label->set_hexpand(true);
@@ -490,13 +490,13 @@ void KiranMenuWindow::add_sidebar_buttons()
     Gtk::Separator *separator;
     Gtk::Button *power_btn;
 
-    separator= Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL));
+    separator= Gtk::make_managed<Gtk::Separator>(Gtk::ORIENTATION_HORIZONTAL);
     separator->set_margin_start(9);
     separator->set_margin_end(9);
     separator->set_margin_top(5);
     separator->set_margin_bottom(5);
 
-    power_btn = Gtk::manage(new KiranMenuPowerButton());
+    power_btn = Gtk::make_managed<KiranMenuPowerButton>();
     side_box->set_orientation(Gtk::ORIENTATION_VERTICAL);
 
     add_app_tab("/kiran-menu/icon/favorite", _("Favorites"), "compact-favorites-page");
@@ -626,11 +626,11 @@ void KiranMenuWindow::load_new_apps()
             else {
                 //新安装应用数量多，只显示部分应用和展开按钮
                 if (!more_apps_box) {
-                    auto image = Gtk::manage(new Gtk::Image());
+                    auto image = Gtk::make_managed<Gtk::Image>();
                     image->set_from_resource("/kiran-menu/icon/expand");
 
-                    expand_button = Gtk::manage(new Gtk::ToggleButton(_("Expand")));
-                    more_apps_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL));
+                    expand_button = Gtk::make_managed<Gtk::ToggleButton>(_("Expand"));
+                    more_apps_box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
                     new_apps_box->add(*expand_button);
                     new_apps_box->add(*more_apps_box);
 
@@ -731,7 +731,7 @@ void KiranMenuWindow::load_user_info()
     if (display_mode == DISPLAY_MODE_COMPACT)
         icon_size = 36;
 
-    avatar = Gtk::manage(new KiranMenuAvatarWidget(icon_size));
+    avatar = Gtk::make_managed<KiranMenuAvatarWidget>(icon_size);
     avatar->set_icon(user_info->get_iconfile());
 
     if (display_mode == DISPLAY_MODE_COMPACT) {
@@ -856,7 +856,7 @@ void KiranMenuWindow::set_display_mode(MenuDisplayMode mode)
 KiranMenuAppItem *KiranMenuWindow::create_app_item(std::shared_ptr<Kiran::App> app, Gtk::Orientation orient)
 {
 
-    auto item = Gtk::manage(new KiranMenuAppItem(app));
+    auto item = Gtk::make_managed<KiranMenuAppItem>(app);
 
     item->set_orientation(orient);
     item->signal_launched().connect(sigc::mem_fun(*this, &Gtk::Widget::hide));
@@ -871,7 +871,7 @@ KiranMenuAppItem *KiranMenuWindow::create_app_item(std::shared_ptr<Kiran::App> a
 KiranMenuCategoryItem *KiranMenuWindow::create_category_item(const std::string &name,
                                                              bool clickable)
 {
-    auto item = Gtk::manage(new KiranMenuCategoryItem(name, clickable));
+    auto item = Gtk::make_managed<KiranMenuCategoryItem>(name, clickable);
 
     item->signal_focus_in_event().connect(sigc::bind<Gtk::Widget*>(
                                               sigc::mem_fun(*this, &KiranMenuWindow::promise_item_viewable),

@@ -81,11 +81,11 @@ void KiranMenuAppItem::create_context_menu()
 
     KiranHelper::remove_all_for_container(context_menu);
 
-    item = Gtk::manage(new Gtk::MenuItem(_("Launch")));
+    item = Gtk::make_managed<Gtk::MenuItem>(_("Launch"));
     item->signal_activate().connect(sigc::hide_return(sigc::mem_fun(*this, &KiranMenuAppItem::launch_app)));
     context_menu.append(*item);
 
-    item = Gtk::manage(new Gtk::MenuItem(_("Add to desktop")));
+    item = Gtk::make_managed<Gtk::MenuItem>(_("Add to desktop"));
     item->signal_activate().connect([item, this]() {
         std::string target_dir;
         Gio::FileCopyFlags flags = Gio::FILE_COPY_BACKUP | Gio::FILE_COPY_TARGET_DEFAULT_PERMS;
@@ -111,10 +111,10 @@ void KiranMenuAppItem::create_context_menu()
     context_menu.append(*item);
 
     if (!is_in_favorite()) {
-        item = Gtk::manage(new Gtk::MenuItem(_("Add to favorites")));
+        item = Gtk::make_managed<Gtk::MenuItem>(_("Add to favorites"));
         item->signal_activate().connect(sigc::hide_return(sigc::bind<const std::string&>(sigc::mem_fun(*backend, &Kiran::MenuSkeleton::add_favorite_app), app->get_desktop_id())));
     } else {
-        item = Gtk::manage(new Gtk::MenuItem(_("Remove from favorites")));
+        item = Gtk::make_managed<Gtk::MenuItem>(_("Remove from favorites"));
         item->signal_activate().connect(sigc::hide_return(
                                             sigc::bind<const std::string&>(
                                                 sigc::mem_fun(*backend, &Kiran::MenuSkeleton::del_favorite_app), app->get_desktop_id()
