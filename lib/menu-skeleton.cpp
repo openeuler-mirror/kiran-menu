@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 19:59:56
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-09 14:17:12
+ * @LastEditTime : 2020-07-13 08:33:06
  * @Description  : 开始菜单类
  * @FilePath     : /kiran-menu-2.0/lib/menu-skeleton.cpp
  */
@@ -10,7 +10,6 @@
 #include "lib/menu-skeleton.h"
 
 #include "lib/app-manager.h"
-#include "lib/common.h"
 #include "lib/window-manager.h"
 
 namespace Kiran
@@ -64,6 +63,21 @@ AppVec MenuSkeleton::search_app(const std::string &keyword, bool ignore_case)
     auto match_apps = this->search_->search_by_keyword(keyword, ignore_case, apps);
     return match_apps;
 }
+
+#define RETURN_VAL_IF_INVALID_DESKTOP_ID(desktop_id, ret)                                        \
+    {                                                                                            \
+        auto app = app_manager_->lookup_app(desktop_id);                                         \
+        if (!app)                                                                                \
+        {                                                                                        \
+            g_warning("<%s> not found the %s in AppManager.", __FUNCTION__, desktop_id.c_str()); \
+            return ret;                                                                          \
+        }                                                                                        \
+        if (!(app->should_show()))                                                               \
+        {                                                                                        \
+            g_warning("<%s> the %s cannot show in menu.", __FUNCTION__, desktop_id.c_str());     \
+            return ret;                                                                          \
+        }                                                                                        \
+    }
 
 bool MenuSkeleton::add_favorite_app(const std::string &desktop_id)
 {

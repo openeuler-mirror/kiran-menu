@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-07-09 11:03:43
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-09 14:27:51
+ * @LastEditTime : 2020-07-13 08:34:12
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/taskbar-skeleton.cpp
  */
@@ -38,8 +38,6 @@ void TaskBarSkeleton::init()
 
 bool TaskBarSkeleton::add_fixed_app(const std::string &desktop_id)
 {
-    RETURN_VAL_IF_INVALID_DESKTOP_ID(desktop_id, false);
-
     Glib::Quark quark(desktop_id);
 
     auto iter = std::find(this->fixed_apps_.begin(), this->fixed_apps_.end(), quark.id());
@@ -60,8 +58,6 @@ bool TaskBarSkeleton::add_fixed_app(const std::string &desktop_id)
 
 bool TaskBarSkeleton::del_fixed_app(const std::string &desktop_id)
 {
-    RETURN_VAL_IF_INVALID_DESKTOP_ID(desktop_id, false);
-
     Glib::Quark quark(desktop_id);
 
     auto iter = std::find(this->fixed_apps_.begin(), this->fixed_apps_.end(), quark.id());
@@ -83,8 +79,6 @@ bool TaskBarSkeleton::del_fixed_app(const std::string &desktop_id)
 
 std::shared_ptr<App> TaskBarSkeleton::lookup_fixed_app(const std::string &desktop_id)
 {
-    RETURN_VAL_IF_INVALID_DESKTOP_ID(desktop_id, nullptr);
-
     Glib::Quark quark(desktop_id);
 
     auto iter = std::find(this->fixed_apps_.begin(), this->fixed_apps_.end(), quark.id());
