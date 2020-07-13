@@ -18,6 +18,7 @@ protected:
     virtual bool on_key_press_event(GdkEventKey *key_event) override;
 
     void create_context_menu();
+    bool add_app_to_desktop();
 
 private:
     Gtk::Menu context_menu;

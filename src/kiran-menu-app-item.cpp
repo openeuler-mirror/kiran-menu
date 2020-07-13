@@ -83,35 +83,7 @@ void KiranMenuAppItem::create_context_menu()
     context_menu.append(*item);
 
     item = Gtk::make_managed<Gtk::MenuItem>(_("Add to desktop"));
-    item->signal_activate().connect([item, this]() {
-        std::string target_dir;
-        Gio::FileCopyFlags flags = Gio::FILE_COPY_BACKUP | Gio::FILE_COPY_TARGET_DEFAULT_PERMS;
-        std::shared_ptr<Kiran::App> app;
-
-        if (this->app.expired()) {
-            g_warning("%s: app already expired\n", __FUNCTION__);
-            return;
-        }
-
-        app = this->app.lock();
-        target_dir = Glib::get_user_special_dir(Glib::USER_DIRECTORY_DESKTOP);
-        try {
-            auto src_file = Gio::File::create_for_path(app->get_file_name());
-            auto dest_file = Gio::File::create_for_path(target_dir + "/" + src_file->get_basename());
-
-            //如果桌面上已经存在相同的文件，跳过拷贝操作
-            if (dest_file->query_exists())
-                return;
-
-            if (!src_file->copy(dest_file, flags))
-                std::cerr<<"Failed to copy"<<std::endl;
-
-            //将desktop文件标记为可执行
-            chmod(dest_file->get_path().data(), 0755);
-        } catch (const Glib::Error &e) {
-            std::cerr<<"Error occured while trying to copy desktop file: "<<e.what()<<std::endl;
-        }
-    });
+    item->signal_activate().connect(sigc::hide_return(sigc::mem_fun(*this, &KiranMenuAppItem::add_app_to_desktop)));
     context_menu.append(*item);
 
     if (!is_in_favorite()) {
@@ -141,6 +113,39 @@ void KiranMenuAppItem::create_context_menu()
     if (!context_menu.get_attach_widget())
         context_menu.attach_to_widget(*this);
     context_menu.show_all();
+}
+
+bool KiranMenuAppItem::add_app_to_desktop()
+{
+    std::string target_dir;
+    Gio::FileCopyFlags flags = Gio::FILE_COPY_BACKUP | Gio::FILE_COPY_TARGET_DEFAULT_PERMS;
+    std::shared_ptr<Kiran::App> app;
+
+    if (this->app.expired()) {
+        g_warning("%s: app already expired\n", __FUNCTION__);
+        return false;
+    }
+
+    app = this->app.lock();
+    target_dir = Glib::get_user_special_dir(Glib::USER_DIRECTORY_DESKTOP);
+    try {
+        auto src_file = Gio::File::create_for_path(app->get_file_name());
+        auto dest_file = Gio::File::create_for_path(target_dir + "/" + src_file->get_basename());
+
+        //如果桌面上已经存在相同的文件，跳过拷贝操作
+        if (dest_file->query_exists())
+            return true;
+
+        if (!src_file->copy(dest_file, flags))
+            std::cerr<<"Failed to copy"<<std::endl;
+
+        //将desktop文件标记为可执行
+        chmod(dest_file->get_path().data(), 0755);
+        return true;
+    } catch (const Glib::Error &e) {
+        std::cerr<<"Error occured while trying to copy desktop file: "<<e.what()<<std::endl;
+        return false;
+    }
 }
 
 bool KiranMenuAppItem::is_in_favorite()
