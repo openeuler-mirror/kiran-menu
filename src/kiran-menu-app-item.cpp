@@ -6,29 +6,26 @@
 
 #define MENU_ITEM_COUNT G_N_ELEMENTS(item_labels)
 
-KiranMenuAppItem::KiranMenuAppItem(std::shared_ptr<Kiran::App> _app, int _icon_size, Gtk::Orientation orient):
+KiranMenuAppItem::KiranMenuAppItem(const std::shared_ptr<Kiran::App> &app_, int _icon_size, Gtk::Orientation orient):
     Glib::ObjectBase("KiranMenuAppItem"),
     KiranMenuListItem(_icon_size, orient),
-    app(_app)
+    app(app_)
 {
     auto context = get_style_context();
 
     context->add_class("kiran-app-item");
 
-    set_text(app->get_locale_name());
+    set_text(app_->get_locale_name());
 
-    if (app->get_icon()) {
-        set_icon(app->get_icon());
+    if (app_->get_icon()) {
+        set_icon(app_->get_icon());
     } else {
-        g_message("app '%s' has no icon\n", app->get_file_name().data());
+        g_message("app '%s' has no icon\n", app_->get_file_name().data());
         auto icon = Gio::ThemedIcon::create("application-x-executable");
         set_icon(Glib::RefPtr<Gio::Icon>::cast_dynamic(icon));
     }
 
-    set_tooltip_text(app->get_locale_comment());
-}
-
-KiranMenuAppItem::~KiranMenuAppItem() {
+    set_tooltip_text(app_->get_locale_comment());
 }
 
 bool KiranMenuAppItem::on_button_press_event(GdkEventButton *button_event)
@@ -89,10 +86,17 @@ void KiranMenuAppItem::create_context_menu()
     item->signal_activate().connect([item, this]() {
         std::string target_dir;
         Gio::FileCopyFlags flags = Gio::FILE_COPY_BACKUP | Gio::FILE_COPY_TARGET_DEFAULT_PERMS;
+        std::shared_ptr<Kiran::App> app;
 
+        if (this->app.expired()) {
+            g_warning("%s: app already expired\n", __FUNCTION__);
+            return;
+        }
+
+        app = this->app.lock();
         target_dir = Glib::get_user_special_dir(Glib::USER_DIRECTORY_DESKTOP);
         try {
-            auto src_file = Gio::File::create_for_path(this->app->get_file_name());
+            auto src_file = Gio::File::create_for_path(app->get_file_name());
             auto dest_file = Gio::File::create_for_path(target_dir + "/" + src_file->get_basename());
 
             //如果桌面上已经存在相同的文件，跳过拷贝操作
@@ -112,13 +116,24 @@ void KiranMenuAppItem::create_context_menu()
 
     if (!is_in_favorite()) {
         item = Gtk::make_managed<Gtk::MenuItem>(_("Add to favorites"));
-        item->signal_activate().connect(sigc::hide_return(sigc::bind<const std::string&>(sigc::mem_fun(*backend, &Kiran::MenuSkeleton::add_favorite_app), app->get_desktop_id())));
+        item->signal_activate().connect(
+                    [this]() -> void {
+                        if (!this->app.expired()) {
+                            auto app = this->app.lock();
+
+                            Kiran::MenuSkeleton::get_instance()->add_favorite_app(app->get_desktop_id());
+                        }
+                    });
     } else {
         item = Gtk::make_managed<Gtk::MenuItem>(_("Remove from favorites"));
-        item->signal_activate().connect(sigc::hide_return(
-                                            sigc::bind<const std::string&>(
-                                                sigc::mem_fun(*backend, &Kiran::MenuSkeleton::del_favorite_app), app->get_desktop_id()
-                                            )));
+        item->signal_activate().connect(
+                    [this]() -> void {
+                        if (!this->app.expired()) {
+                            auto app = this->app.lock();
+
+                            Kiran::MenuSkeleton::get_instance()->del_favorite_app(app->get_desktop_id());
+                        }
+                    });
     }
 
     context_menu.append(*item);
@@ -130,9 +145,10 @@ void KiranMenuAppItem::create_context_menu()
 
 bool KiranMenuAppItem::is_in_favorite()
 {
+    auto app = this->app.lock();
     auto backend = Kiran::MenuSkeleton::get_instance();
 
-    if (backend->lookup_favorite_app(app->get_desktop_id()) == nullptr)
+    if (!app || backend->lookup_favorite_app(app->get_desktop_id()) == nullptr)
         return false;
     return true;
 }
@@ -161,6 +177,10 @@ void KiranMenuAppItem::set_orientation(Gtk::Orientation orient)
 
 void KiranMenuAppItem::launch_app()
 {
-    app->launch();
+    if (app.expired()) {
+        g_warning("%s: app already expired\n", __FUNCTION__);
+        return;
+    }
+    app.lock()->launch();
     signal_launched().emit();
 }

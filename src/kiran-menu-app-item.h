@@ -7,8 +7,8 @@
 class KiranMenuAppItem : public KiranMenuListItem
 {
 public:
-    KiranMenuAppItem(std::shared_ptr<Kiran::App> _app, int icon_size = 24, Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL);
-    ~KiranMenuAppItem();
+    KiranMenuAppItem(const std::shared_ptr<Kiran::App> &_app, int icon_size = 24, Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL);
+    ~KiranMenuAppItem() = default;
     sigc::signal<void> signal_launched();
     virtual void set_orientation(Gtk::Orientation orient) override;
     void launch_app();
@@ -22,7 +22,7 @@ protected:
 private:
     Gtk::Menu context_menu;
     Gtk::MenuItem *items;
-    std::shared_ptr<Kiran::App> app;
+    std::weak_ptr<Kiran::App> app;
 
     bool menu_shown;
     sigc::signal <void> m_signal_launched;
