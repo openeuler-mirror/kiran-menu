@@ -2,12 +2,16 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-11 09:30:42
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-12 13:53:34
+ * @LastEditTime : 2020-07-09 10:33:22
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-display.cpp
  */
 
+#include <gdk/gdk.h>
 #include <gtkmm.h>
+// xlib.h must be defined after gdkmm header file.
+#include <cairomm/xlib_surface.h>
+#include <gdk/gdkx.h>
 
 #include <cinttypes>
 
@@ -138,11 +142,20 @@ gboolean timing_print(gpointer user_data)
             auto app = apps[i];
             g_print("running app_id: %s\n", app->get_desktop_id().c_str());
 
+            g_print("   type: %d\n", app->get_kind());
+
             auto windows = app->get_windows();
             for (int j = 0; j < windows.size(); ++j)
             {
                 auto window = windows[j];
                 g_print("   related window name: %s\n", window->get_name().c_str());
+            }
+
+            auto taskbar_windows = app->get_taskbar_windows();
+            for (int j = 0; j < taskbar_windows.size(); ++j)
+            {
+                auto window = windows[j];
+                g_print("   related tarskbar window name: %s\n", window->get_name().c_str());
             }
             g_print("\n\n");
         }
@@ -184,6 +197,44 @@ gboolean timing_print(gpointer user_data)
         }
     }
 
+    /*------------------------------------------- save the screenshot of all windows --------------------------------------*/
+
+    {
+        g_print("---------------------------save the screenshot of all windows ---------------------------\n\n");
+
+        auto window_manager = Kiran::WindowManager::get_instance();
+        auto windows = window_manager->get_windows();
+        auto display = gdk_x11_get_default_xdisplay();
+        for (int i = 0; i < windows.size(); ++i)
+        {
+            auto window = windows[i];
+            auto pixmap = window->get_pixmap();
+            auto geometry = window->get_geometry();
+            auto name = window->get_name();
+            auto xid = window->get_xid();
+            std::ostringstream oss;
+            auto new_name = name;
+            std::replace(new_name.begin(), new_name.end(), ' ', '-');
+            std::replace(new_name.begin(), new_name.end(), ':', '-');
+            oss << new_name << "_" << xid << ".png";
+
+            g_print("save screentshot: name: %s xid: %" PRIu64 " pixmap: %" PRIu64 " width: %d height: %d\n",
+                    name.c_str(),
+                    xid,
+                    pixmap,
+                    std::get<2>(geometry),
+                    std::get<3>(geometry));
+
+            if (pixmap)
+            {
+                XWindowAttributes attrs;
+                XGetWindowAttributes(display, xid, &attrs);
+                auto surface = Cairo::XlibSurface::create(display, pixmap, attrs.visual, attrs.width, attrs.height);
+                surface->write_to_png(oss.str());
+            }
+        }
+    }
+
     return TRUE;
 }
 
@@ -216,7 +267,7 @@ int main(int argc, char **argv)
 
     timing_print(NULL);
 
-    g_timeout_add_seconds(10, timing_print, NULL);
+    // g_timeout_add_seconds(10, timing_print, NULL);
 
     kit.run();
 

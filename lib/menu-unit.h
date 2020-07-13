@@ -17,11 +17,11 @@ namespace Kiran
 {
 class MenuUnit
 {
-   public:
+public:
     virtual void init() = 0;
     virtual void flush(const AppVec &apps) = 0;
 
-   private:
+private:
     gint type;
 };
 

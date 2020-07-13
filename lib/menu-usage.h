@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 19:44:16
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-11 19:43:29
+ * @LastEditTime : 2020-06-22 08:46:34
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/menu-usage.h
  */
@@ -28,7 +28,7 @@ class MenuUsage : public MenuUnit
         int32_t last_seen;
     };
 
-   public:
+public:
     MenuUsage();
     virtual ~MenuUsage();
 
@@ -43,7 +43,7 @@ class MenuUsage : public MenuUnit
     //signal accessor:
     sigc::signal<void()> &signal_app_changed() { return this->app_changed_; }
 
-   private:
+private:
     void on_session_status_changed(uint32_t status);
     void session_proxy_signal(const Glib::ustring &sender_name, const Glib::ustring &signal_name, const Glib::VariantContainerBase &parameters);
     long get_system_time(void);
@@ -54,10 +54,10 @@ class MenuUsage : public MenuUnit
     void increment_usage_for_app_at_time(const std::string &desktop_id, int32_t time);
     void active_window_changed(std::shared_ptr<Window> prev_active_window, std::shared_ptr<Window> cur_active_window);
 
-   protected:
+protected:
     sigc::signal<void()> app_changed_;
 
-   private:
+private:
     Glib::RefPtr<Gio::Settings> settings_;
 
     std::map<uint32_t, UsageData> app_usages_;

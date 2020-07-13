@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-10 17:15:59
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-12 12:43:02
+ * @LastEditTime : 2020-07-09 14:16:29
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/core_worker.cpp
  */
@@ -13,20 +13,24 @@ namespace Kiran
 {
 void init_backend_system()
 {
-    WindowManager::global_init();
+    ScreenManager::global_init();
+
+    WindowManager::global_init(ScreenManager::get_instance());
 
     AppManager::global_init(WindowManager::get_instance());
 
     WorkspaceManager::global_init();
 
-    MenuSkeleton::global_init();
+    MenuSkeleton::global_init(AppManager::get_instance());
 
-    ScreenManager::global_init();
+    TaskBarSkeleton::global_init(AppManager::get_instance());
+
+    ScreenManager::get_instance()->force_update();
 }
 
 void deinit_backend_system()
 {
-    ScreenManager::global_deinit();
+    TaskBarSkeleton::global_deinit();
 
     MenuSkeleton::global_deinit();
 
@@ -35,6 +39,8 @@ void deinit_backend_system()
     AppManager::global_deinit();
 
     WindowManager::global_deinit();
+
+    ScreenManager::global_deinit();
 }
 
 }  // namespace Kiran

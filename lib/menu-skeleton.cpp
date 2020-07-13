@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 19:59:56
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-10 17:23:29
+ * @LastEditTime : 2020-07-13 08:33:06
  * @Description  : 开始菜单类
  * @FilePath     : /kiran-menu-2.0/lib/menu-skeleton.cpp
  */
@@ -14,18 +14,12 @@
 
 namespace Kiran
 {
-static void flush_menu_skeleton(GAppInfoMonitor *gappinfomonitor,
-                                gpointer user_data)
-{
-    MenuSkeleton *self = (MenuSkeleton *)(user_data);
-    self->flush();
-}
-
-MenuSkeleton::MenuSkeleton() : usage_(new MenuUsage()),
-                               favorite_(new MenuFavorite()),
-                               search_(new MenuSearch()),
-                               category_(new MenuCategory()),
-                               new_(new MenuNew())
+MenuSkeleton::MenuSkeleton(AppManager *app_manager) : app_manager_(app_manager),
+                                                      usage_(new MenuUsage()),
+                                                      favorite_(new MenuFavorite()),
+                                                      search_(new MenuSearch()),
+                                                      category_(new MenuCategory()),
+                                                      new_(new MenuNew())
 {
 }
 
@@ -34,9 +28,9 @@ MenuSkeleton::~MenuSkeleton()
 }
 
 MenuSkeleton *MenuSkeleton::instance_ = nullptr;
-void MenuSkeleton::global_init()
+void MenuSkeleton::global_init(AppManager *app_manager)
 {
-    instance_ = new MenuSkeleton();
+    instance_ = new MenuSkeleton(app_manager);
     instance_->init();
 }
 
@@ -53,17 +47,12 @@ void MenuSkeleton::init()
     this->category_->init();
     this->new_->init();
 
-    GAppInfoMonitor *monitor = g_app_info_monitor_get();
-    g_signal_connect(monitor, "changed", G_CALLBACK(flush_menu_skeleton), this);
-    flush_menu_skeleton(monitor, this);
-
-    AppManager::get_instance()->signal_app_installed().connect(sigc::mem_fun(this, &MenuSkeleton::app_installed));
-    AppManager::get_instance()->signal_app_uninstalled().connect(sigc::mem_fun(this, &MenuSkeleton::app_uninstalled));
+    app_manager_->signal_desktop_app_changed().connect(sigc::mem_fun(this, &MenuSkeleton::desktop_app_changed));
+    app_manager_->signal_app_installed().connect(sigc::mem_fun(this, &MenuSkeleton::app_installed));
+    app_manager_->signal_app_uninstalled().connect(sigc::mem_fun(this, &MenuSkeleton::app_uninstalled));
 
     this->new_->signal_new_app_changed().connect(sigc::mem_fun(this, &MenuSkeleton::new_app_changed));
-
     this->usage_->signal_app_changed().connect(sigc::mem_fun(this, &MenuSkeleton::frequent_usage_app_changed));
-
     this->favorite_->signal_app_added().connect(sigc::mem_fun(this, &MenuSkeleton::favorite_app_added));
     this->favorite_->signal_app_deleted().connect(sigc::mem_fun(this, &MenuSkeleton::favorite_app_deleted));
 }
@@ -77,7 +66,7 @@ AppVec MenuSkeleton::search_app(const std::string &keyword, bool ignore_case)
 
 #define RETURN_VAL_IF_INVALID_DESKTOP_ID(desktop_id, ret)                                        \
     {                                                                                            \
-        auto app = AppManager::get_instance()->lookup_app(desktop_id);                           \
+        auto app = app_manager_->lookup_app(desktop_id);                                         \
         if (!app)                                                                                \
         {                                                                                        \
             g_warning("<%s> not found the %s in AppManager.", __FUNCTION__, desktop_id.c_str()); \
@@ -204,16 +193,6 @@ std::shared_ptr<MenuUnit> MenuSkeleton::get_unit(MenuUnitType unit_type)
     }
 }
 
-void MenuSkeleton::flush()
-{
-    AppManager::get_instance()->load_apps();
-    auto apps = AppManager::get_instance()->get_should_show_apps();
-    this->favorite_->flush(apps);
-    this->category_->flush(apps);
-
-    this->app_changed_.emit();
-}
-
 AppVec MenuSkeleton::trans_ids_to_apps(const std::vector<std::string> &desktop_ids)
 {
     std::vector<std::shared_ptr<App>> apps;
@@ -227,6 +206,15 @@ AppVec MenuSkeleton::trans_ids_to_apps(const std::vector<std::string> &desktop_i
         }
     }
     return apps;
+}
+
+void MenuSkeleton::desktop_app_changed()
+{
+    auto apps = app_manager_->get_should_show_apps();
+    this->favorite_->flush(apps);
+    this->category_->flush(apps);
+
+    this->app_changed_.emit();
 }
 
 void MenuSkeleton::app_installed(AppVec apps)

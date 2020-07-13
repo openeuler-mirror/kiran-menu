@@ -5,21 +5,21 @@ if(COMMAND cmake_policy)
 endif(COMMAND cmake_policy)
 
 pkg_search_module(GTKMM REQUIRED gtkmm-3.0)
+pkg_search_module(CAIROMM REQUIRED cairomm-1.0)
 
 set(DEP_LIBDIR ${GTKMM_LIBDIR})
 
-set(TEST_MENU_UNIT test-menu-unit)
+set(TEST_APPS test-apps)
+set(TEST_UNIT test-unit)
 set(TEST_MENU_SIGNAL test-menu-signal)
 set(TEST_DISPLAY test-display)
 set(TEST_LAUNCH_ACTION test-launch-action)
 
-add_executable(${TEST_MENU_UNIT}
-    "test-all-apps.cpp"
-    "test-app-category.cpp"
-    "test-app-favorite.cpp"
-    "test-app-frequent.cpp"
-    "test-app-search.cpp"
-    "test-menu-unit.cpp")
+add_executable(${TEST_APPS}
+    "test-all-apps.cpp")
+
+add_executable(${TEST_UNIT}
+    "test-unit.cpp")
 
 add_executable(${TEST_MENU_SIGNAL}
     "test-menu-signal.cpp")
@@ -30,13 +30,14 @@ add_executable(${TEST_DISPLAY}
 add_executable(${TEST_LAUNCH_ACTION}
     "test-launch-action.cpp")
 
-list (APPEND TESTS ${TEST_MENU_UNIT} ${TEST_MENU_SIGNAL} ${TEST_DISPLAY} ${TEST_LAUNCH_ACTION})
+list (APPEND TESTS ${TEST_APPS} ${TEST_UNIT} ${TEST_MENU_SIGNAL} ${TEST_DISPLAY} ${TEST_LAUNCH_ACTION})
 
 foreach(TEST_ITEM IN ITEMS ${TESTS})
 
     target_include_directories(${TEST_ITEM} PRIVATE
         ${PROJECT_SOURCE_DIR}
-        ${GTKMM_INCLUDE_DIRS})
+        ${GTKMM_INCLUDE_DIRS}
+        ${CAIROMM_INCLUDE_DIRS})
 
     target_compile_options(${TEST_ITEM} PRIVATE
         -L${DEP_LIBDIR}
@@ -44,7 +45,8 @@ foreach(TEST_ITEM IN ITEMS ${TESTS})
 
     target_link_libraries(${TEST_ITEM} PRIVATE
         kiran-menu-backend
-        ${GTKMM_LIBRARIES})
+        ${GTKMM_LIBRARIES}
+        ${CAIROMM_LIBRARIES})
 
     add_test(menu_test ${TEST_ITEM})
 endforeach()

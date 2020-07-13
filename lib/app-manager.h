@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 17:21:54
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-12 09:56:16
+ * @LastEditTime : 2020-07-09 11:33:04
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app-manager.h
  */
@@ -17,7 +17,7 @@ namespace Kiran
 {
 class AppManager
 {
-   public:
+public:
     virtual ~AppManager();
 
     static AppManager *get_instance() { return instance_; };
@@ -25,10 +25,6 @@ class AppManager
     static void global_init(WindowManager *window_manager);
 
     static void global_deinit() { delete instance_; };
-
-    void init();
-
-    void load_apps();
 
     // 获取所有App列表(每个App对应一个desktop文件)
     AppVec get_apps();
@@ -45,12 +41,14 @@ class AppManager
     // 通过窗口对象获取App
     std::shared_ptr<App> lookup_app_with_window(std::shared_ptr<Window> window);
 
-    // 通过已启动的应用程序的xid(对应group leader window的xid)获取App
+    // 通过WnckApplication的xid获取App
     std::shared_ptr<App> lookup_app_with_xid(uint64_t xid);
 
     // 获取所有App的desktop_id，并根据desktop文件的Name字段进行排序
     std::vector<std::string> get_all_sorted_apps();
 
+    // desktop应用列表发生变化信号
+    sigc::signal<void> &signal_desktop_app_changed() { return this->app_desktop_changed_; }
     // App安装时的信号
     sigc::signal<void, AppVec> &signal_app_installed() { return this->app_installed_; }
     // App卸载时的信号
@@ -58,11 +56,14 @@ class AppManager
     // 应用程序状态发生变化
     sigc::signal<void, std::shared_ptr<App>, AppAction> &signal_app_action_changed() { return this->signal_app_action_changed_; }
 
-   private:
+private:
     AppManager(WindowManager *window_manager);
 
-   private:
+    void init();
+
+private:
     std::shared_ptr<App> get_app_from_sandboxed_app(std::shared_ptr<Window> window);
+    std::shared_ptr<App> get_app_from_gapplication_id(std::shared_ptr<Window> window);
     std::shared_ptr<App> get_app_from_window_wmclass(std::shared_ptr<Window> window);
     std::shared_ptr<App> lookup_app_with_wmclass(const std::string &wmclass);
     std::shared_ptr<App> lookup_app_with_desktop_wmclass(const std::string &wmclass);
@@ -70,6 +71,12 @@ class AppManager
     std::shared_ptr<App> get_app_from_env(std::shared_ptr<Window> window);
     std::shared_ptr<App> get_app_from_desktop(std::shared_ptr<Window> window);
     std::shared_ptr<App> get_app_from_window_group(std::shared_ptr<Window> window);
+
+    void load_desktop_apps();
+    void clear_desktop_apps();
+
+    // desktop应用变化的信号处理
+    static void desktop_app_changed(GAppInfoMonitor *gappinfomonitor, gpointer user_data);
 
     // 启动一个应用时的信号处理
     static void app_opened(WnckScreen *screen, WnckApplication *wnck_application, gpointer user_data);
@@ -87,20 +94,21 @@ class AppManager
     void app_close_all_windows(std::shared_ptr<App> app);
     // void app_open_new_window(std::shared_ptr<App> app);
 
-   protected:
+protected:
+    sigc::signal<void> app_desktop_changed_;
     sigc::signal<void, AppVec> app_installed_;
     sigc::signal<void, AppVec> app_uninstalled_;
     sigc::signal<void, std::shared_ptr<App>, AppAction> signal_app_action_changed_;
 
-   private:
+private:
     static AppManager *instance_;
 
     WindowManager *window_manager_;
 
-    std::map<int32_t, std::shared_ptr<App>> apps_;
-    std::map<std::string, std::shared_ptr<App>> wmclass_apps_;
+    std::map<std::string, std::shared_ptr<App>> apps_;
+    std::map<std::string, std::weak_ptr<App>> wmclass_apps_;
 
-    std::map<uint64_t, std::weak_ptr<App>> xid_to_app_;
+    std::map<uint64_t, std::weak_ptr<App>> wnck_apps_;
 };
 
 }  // namespace Kiran

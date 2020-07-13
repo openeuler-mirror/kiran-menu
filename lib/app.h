@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:33
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-12 13:45:28
+ * @LastEditTime : 2020-07-09 09:25:12
  * @Description  : 维护APP的一些基本信息
  * @FilePath     : /kiran-menu-2.0/lib/app.h
  */
@@ -27,9 +27,12 @@ using AppVec = std::vector<std::shared_ptr<Kiran::App>>;
 
 enum class AppKind
 {
-    FLATPAK,
-    DESKTOP,
+    // 未知类型，正常情况不应该出现
     UNKNOWN,
+    // 可以对应到desktop文件
+    DESKTOP,
+    // 无法对应到desktop文件，这里会伪造一个不存在的desktop_id，格式为"fake_${xid}"
+    FAKE_DESKTOP,
 };
 
 enum class AppStatus
@@ -55,9 +58,13 @@ enum class AppAction : uint32_t
 
 class App : public std::enable_shared_from_this<App>
 {
-   public:
+public:
+    App() = delete;
     App(const App &) = delete;
+    // 通过desktop_id创建App
     App(const std::string &desktop_id);
+    // 通过WnckApplication的xid创建App
+    App(uint64_t xid);
     virtual ~App();
 
     // 获取desktop文件中的Name字段值
@@ -74,12 +81,17 @@ class App : public std::enable_shared_from_this<App>
     const std::string &get_exec() { return this->exec_; }
     // 获取desktop文件的文件全路径
     const std::string &get_file_name() { return this->file_name_; };
+    // 获取应用类型
+    AppKind get_kind() { return this->kind_; }
 
     // 获取desktop文件中的Categories字段值
     std::string get_categories();
 
-    // 获取actions列表名，例如"Open a New Window", "Open a New Private Window"
+    // 获取actions列表名，例如 "new-window"，"new-private-window"
     std::vector<std::string> get_actions();
+
+    // 获取action的名字，改名字可用于用户交互显示，例如"Open a New Window/新建窗口", "Open a New Private Window/新建隐私浏览窗口"
+    std::string get_action_name(const std::string &action);
 
     // 获取desktop文件中设置的图标
     const Glib::RefPtr<Gio::Icon> get_icon();
@@ -92,13 +104,16 @@ class App : public std::enable_shared_from_this<App>
     // 获取当前App对应的已打开的窗口列表
     WindowVec get_windows();
 
+    // 获取任务栏中显示的窗口列表
+    WindowVec get_taskbar_windows();
+
     // 关闭当前App对应的所有窗口
     void close_all_windows();
 
     // 启动应用，成功返回true，失败返回false
     bool launch();
 
-    // 通过action_name启动应用，例如"Open a New Window", "Open a New Private Window"
+    // 通过action_name启动应用，例如"new-window"，"new-private-window"
     void launch_action(const std::string &action_name);
 
     // 添加WnckApplication的xid，一个xid对应一个启动的应用，一个App可能启动多个应用
@@ -106,7 +121,7 @@ class App : public std::enable_shared_from_this<App>
     // 删除xid
     void del_wnck_app_by_xid(uint64_t xid);
 
-   protected:
+protected:
     // 通过调用App::launch启动应用成功的信号
     sigc::signal<void, std::shared_ptr<App>> signal_launched() { return this->launched_; }
     // 通过调用App::launch启动应用失败的信号
@@ -116,20 +131,18 @@ class App : public std::enable_shared_from_this<App>
     // 打开一个新窗口信号
     // sigc::signal<void, std::shared_ptr<App>> signal_open_new_window() { return this->open_new_window_; }
 
-   private:
-    void init_app_kind();
-
+private:
     void expand_macro(char macro, GString *exec);
     bool expand_application_parameters(int *argc, char ***argv, GError **error);
     bool launch_flatpak(GError **error);
 
-   protected:
+protected:
     sigc::signal<void, std::shared_ptr<App>> launched_;
     sigc::signal<void, std::shared_ptr<App>> launch_failed_;
     sigc::signal<void, std::shared_ptr<App>> close_all_windows_;
     // sigc::signal<void, std::shared_ptr<App>> open_new_window_;
 
-   private:
+private:
     std::string desktop_id_;
 
     std::string file_name_;
@@ -150,9 +163,7 @@ class App : public std::enable_shared_from_this<App>
 
     Glib::RefPtr<Gio::DesktopAppInfo> desktop_app_;
 
-    std::set<uint64_t> xids_for_wnck_app_;
-
-    std::set<uint64_t> windows_;
+    std::set<uint64_t> wnck_apps_;
 
     friend class AppManager;
 };

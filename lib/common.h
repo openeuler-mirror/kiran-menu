@@ -2,9 +2,9 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 16:04:39
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-03 17:58:56
+ * @LastEditTime : 2020-07-13 08:32:49
  * @Description  :
- * @FilePath     : /kiran-menu-2.0/lib/menu-common.h
+ * @FilePath     : /kiran-menu-2.0/lib/common.h
  */
 
 #pragma once
@@ -13,13 +13,17 @@
 
 namespace Kiran
 {
-#define KIRAN_MENU_SCHEMA "com.unikylin.Kiran.StartMenu"
+#define KIRAN_MENU_SCHEMA "com.unikylin.kiran.startmenu"
 
 #define MENU_KEY_FAVORITE_APPS "favorite-apps"
 
 #define MENU_KEY_FREQUENT_APPS "frequent-apps"
 
 #define MENU_KEY_NEW_APPS "new-apps"
+
+#define KIRAN_TASKBAR_SCHEMA "com.unikylin.kiran.taskbar"
+
+#define TASKBAR_KEY_FIXED_APPS "fixed-apps"
 
 std::list<int32_t> read_as_to_list_quark(Glib::RefPtr<Gio::Settings> settings,
                                          const std::string &key);

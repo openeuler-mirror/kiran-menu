@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 17:30:32
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 10:25:49
+ * @LastEditTime : 2020-06-22 08:47:02
  * @Description  : 管理菜单中的APP的分类
  * @FilePath     : /kiran-menu-2.0/lib/menu-category.h
  */
@@ -15,7 +15,7 @@ namespace Kiran
 {
 class MenuCategory : public MenuUnit
 {
-   public:
+public:
     MenuCategory();
     virtual ~MenuCategory();
 
@@ -35,11 +35,11 @@ class MenuCategory : public MenuUnit
 
     std::map<std::string, std::vector<std::string>> get_all();
 
-   private:
+private:
     void store_categories();
     std::shared_ptr<Category> find_category(const std::string &category_name);
 
-   private:
+private:
     std::string file_path_;
 
     std::vector<std::shared_ptr<Category>> categories_;

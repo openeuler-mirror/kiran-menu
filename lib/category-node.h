@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-30 17:29:00
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 09:25:47
+ * @LastEditTime : 2020-06-22 08:47:21
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/category-node.h
  */
@@ -35,7 +35,7 @@ enum class CategoryNodeType
 
 class CategoryNode : public std::enable_shared_from_this<CategoryNode>
 {
-   public:
+public:
     CategoryNode(CategoryNodeType type);
     virtual ~CategoryNode();
 
@@ -54,7 +54,7 @@ class CategoryNode : public std::enable_shared_from_this<CategoryNode>
 
     std::shared_ptr<CategoryNode> steal();
 
-   private:
+private:
     std::weak_ptr<CategoryNode> prev_;
     std::shared_ptr<CategoryNode> next_;
     std::weak_ptr<CategoryNode> parent_;

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 20:35:20
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-11 19:44:50
+ * @LastEditTime : 2020-07-09 11:50:41
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/menu-usage.cpp
  */
@@ -11,9 +11,9 @@
 #include <libwnck/libwnck.h>
 
 #include "lib/app-manager.h"
+#include "lib/common.h"
 #include "lib/helper.h"
 #include "lib/math-helper.h"
-#include "lib/menu-common.h"
 
 namespace Kiran
 {

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:51
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-12 10:07:04
+ * @LastEditTime : 2020-07-09 10:25:44
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window.cpp
  */
@@ -11,6 +11,7 @@
 
 #include "lib/app-manager.h"
 #include "lib/app.h"
+#include "lib/helper.h"
 #include "lib/workspace-manager.h"
 
 namespace Kiran
@@ -24,7 +25,8 @@ std::shared_ptr<Window> Window::create(WnckWindow* wnck_window)
 
 Window::Window(WnckWindow* wnck_window) : wnck_window_(wnck_window),
                                           last_workspace_number_(-1),
-                                          last_is_pinned_(false)
+                                          last_is_pinned_(false),
+                                          pixmap_(0)
 {
     g_signal_connect(this->wnck_window_, "workspace-changed", G_CALLBACK(Window::workspace_changed), NULL);
 }
@@ -35,22 +37,17 @@ Window::~Window()
 
 std::string Window::get_name()
 {
-    return wnck_window_get_name(this->wnck_window_);
+    RET_WRAP_NULL(wnck_window_get_name(this->wnck_window_));
 }
 
 std::string Window::get_icon_name()
 {
-    return wnck_window_get_icon_name(this->wnck_window_);
+    RET_WRAP_NULL(wnck_window_get_icon_name(this->wnck_window_));
 }
 
 GdkPixbuf* Window::get_icon()
 {
     return wnck_window_get_icon(this->wnck_window_);
-}
-
-GdkPixbuf* Window::get_mini_icon()
-{
-    return wnck_window_get_mini_icon(this->wnck_window_);
 }
 
 std::shared_ptr<App> Window::get_app()
@@ -94,12 +91,12 @@ std::shared_ptr<Window> Window::get_transient()
 
 std::string Window::get_class_group_name()
 {
-    return wnck_window_get_class_group_name(this->wnck_window_);
+    RET_WRAP_NULL(wnck_window_get_class_group_name(this->wnck_window_));
 }
 
 std::string Window::get_class_instance_name()
 {
-    return wnck_window_get_class_instance_name(this->wnck_window_);
+    RET_WRAP_NULL(wnck_window_get_class_instance_name(this->wnck_window_));
 }
 
 int32_t Window::get_pid()
@@ -122,10 +119,9 @@ bool Window::is_above()
     return wnck_window_is_above(this->wnck_window_);
 }
 
-void Window::activate()
+void Window::activate(uint32_t timestamp)
 {
-    uint64_t now = Glib::DateTime::create_now_local().to_unix();
-    wnck_window_activate(this->wnck_window_, (uint32_t)now);
+    wnck_window_activate(this->wnck_window_, timestamp);
 }
 
 void Window::minimize()
@@ -158,10 +154,21 @@ void Window::move_to_workspace(std::shared_ptr<Workspace> workspace)
     wnck_window_move_to_workspace(this->wnck_window_, workspace->workspace_);
 }
 
+uint64_t Window::get_window_group()
+{
+    return wnck_window_get_group_leader(this->wnck_window_);
+}
 void Window::close()
 {
     uint64_t now = Glib::DateTime::create_now_local().to_unix();
     wnck_window_close(this->wnck_window_, now);
+}
+
+std::tuple<int, int, int, int> Window::get_geometry()
+{
+    int x, y, w, h;
+    wnck_window_get_geometry(this->wnck_window_, &x, &y, &w, &h);
+    return std::make_tuple(x, y, w, h);
 }
 
 std::shared_ptr<Workspace> Window::get_workspace()
