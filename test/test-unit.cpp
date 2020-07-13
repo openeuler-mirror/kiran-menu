@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-08 15:17:35
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-09 15:13:30
+ * @LastEditTime : 2020-07-13 08:47:26
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-unit.cpp
  */
@@ -202,7 +202,7 @@ void test_fixed_apps(gconstpointer data)
     }
 
     // insert all apps to fixed app
-    auto all_apps = app_manager->get_should_show_apps();
+    auto all_apps = app_manager->get_apps();
 
     gboolean call_success;
     for (int i = 0; i < all_apps.size(); ++i)
