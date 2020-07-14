@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-07-09 11:03:43
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-13 08:34:12
+ * @LastEditTime : 2020-07-14 09:44:53
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/taskbar-skeleton.cpp
  */
@@ -31,6 +31,8 @@ void TaskBarSkeleton::global_init(AppManager *app_manager)
 
 void TaskBarSkeleton::init()
 {
+    this->desktop_app_changed();
+
     this->app_manager_->signal_desktop_app_changed().connect(sigc::mem_fun(this, &TaskBarSkeleton::desktop_app_changed));
 
     this->settings_->signal_changed(TASKBAR_KEY_FIXED_APPS).connect(sigc::mem_fun(this, &TaskBarSkeleton::app_changed));
@@ -52,6 +54,10 @@ bool TaskBarSkeleton::add_fixed_app(const std::string &desktop_id)
             this->fixed_app_added_.emit(add_apps);
             return write_list_quark_to_as(this->settings_, TASKBAR_KEY_FIXED_APPS, this->fixed_apps_);
         }
+        else
+        {
+            g_debug("<%s> not found desktop_id: %s.", __FUNCTION__, desktop_id.c_str());
+        }
     }
     return false;
 }
@@ -72,6 +78,10 @@ bool TaskBarSkeleton::del_fixed_app(const std::string &desktop_id)
             AppVec delete_apps = {app};
             this->fixed_app_deleted_.emit(delete_apps);
             return write_list_quark_to_as(this->settings_, TASKBAR_KEY_FIXED_APPS, this->fixed_apps_);
+        }
+        else
+        {
+            g_debug("<%s> not found desktop_id: %s.", __FUNCTION__, desktop_id.c_str());
         }
     }
     return false;

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-08 15:17:35
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-13 08:47:26
+ * @LastEditTime : 2020-07-14 09:58:29
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-unit.cpp
  */
@@ -161,11 +161,12 @@ void test_frequent_apps(gconstpointer data)
 
 void test_search_apps(gconstpointer data)
 {
+    auto app_manager = Kiran::AppManager::get_instance();
     auto menu_skeleton = Kiran::MenuSkeleton::get_instance();
 
     g_print("\n---------------------------------------------\n");
 
-    auto all_apps = menu_skeleton->get_all_sorted_apps();
+    auto all_apps = app_manager->get_should_show_apps();
 
     if (all_apps.size() > 0)
     {
@@ -228,6 +229,7 @@ void test_fixed_apps(gconstpointer data)
             g_assert_true(call_success);
         }
     }
+    g_assert_true(taskbar_skeleton->get_fixed_apps().size() <= 1);
 
     // check fixed app
     {
@@ -280,5 +282,8 @@ int main(int argc, char **argv)
     g_test_add_data_func("/test-taskbar/test-fixed-apps", NULL,
                          test_fixed_apps);
 
-    return g_test_run();
+    g_test_run();
+
+    kit.run();
+    return 0;
 }
