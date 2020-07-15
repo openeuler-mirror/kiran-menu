@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<schemalist>
-  <schema id="com.unikylin.kiran.taskbar" path="/com/unikylin/kiran/taskbar/">
-    <key name="fixed-apps" type="as">
-      <default>['caja-browser.desktop', 'firefox.desktop', 'mate-terminal.desktop', 'org.gnome.Software.desktop']</default>
-    </key>
-  </schema>
-</schemalist>
