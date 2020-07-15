@@ -5,14 +5,19 @@
 #include <X11/X.h>
 #include <X11/extensions/Xcomposite.h>
 #include "window.h"
+#include "kiran-window-context-menu.h"
+
 
 #include <sigc++/sigc++.h>
 
 class KiranWindowPreviewer : public Gtk::EventBox
 {
+    friend GdkFilterReturn target_event_filter (GdkXEvent *xevent,
+                      GdkEvent *event,
+                      gpointer data);
 public:
     KiranWindowPreviewer(const std::shared_ptr<Kiran::Window> &window);
-    ~KiranWindowPreviewer();
+    virtual ~KiranWindowPreviewer() override;
 
     bool draw_snapshot(const Cairo::RefPtr<Cairo::Context> &cr);
     sigc::signal<void> signal_close();
@@ -25,12 +30,12 @@ protected:
                                            int& natural_width) const override;
 
 
-    virtual void on_realize() override;
     virtual bool on_enter_notify_event(GdkEventCrossing *crossing_event) override;
     virtual bool on_leave_notify_event(GdkEventCrossing *crossing_event) override;
     virtual bool on_button_press_event(GdkEventButton *button_event) override;
 
     void on_composite_changed();
+    void init_ui();
 
 
 private:
@@ -41,6 +46,7 @@ private:
     Gtk::Label title_label;
     Gtk::Button close_btn;
     Gtk::DrawingArea snapshot_area;
+    KiranWindowContextMenu *context_menu;
 
     sigc::signal<void> m_signal_close;
 };

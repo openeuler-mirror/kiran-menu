@@ -1,0 +1,18 @@
+[Applet Factory]
+Id=KiranAppletFactory
+InProcess=false
+Location=@CMAKE_INSTALL_PREFIX@/lib/mate-panel/kiran-applet
+Name=Kiran Applet Factory
+Description=Factory for Kiran Applets on mate panel
+
+[KiranMenuApplet]
+Name=Kiran Start Menu
+Description=Kiran Start Menu
+Icon=user-info
+MateComponentId=OAFIID:KiranMenuApplet;
+
+[KiranTasklistApplet]
+Name=Kiran Task list and switch applet
+Description=Kiran task list and switch applet
+Icon=user-info
+MateComponentId=OAFIID:KiranMenuApplet;

@@ -517,8 +517,6 @@ void KiranMenuWindow::add_sidebar_buttons()
 void KiranMenuWindow::load_all_apps()
 {
     Gtk::Box *all_apps_box;
-    category_names = backend->get_category_names();
-
 
     builder->get_widget<Gtk::Box>("all-apps-box", all_apps_box);
 
@@ -527,8 +525,11 @@ void KiranMenuWindow::load_all_apps()
     KiranHelper::remove_all_for_container(*all_apps_box);
 
     //删除空的应用分类
+    category_names = backend->get_category_names();
     auto start = std::remove_if(category_names.begin(), category_names.end(),
 		    [this](const std::string &name) -> bool {
+		    	if (this->backend->get_category_apps(name).size() == 0)
+				g_message("%s: Remove empty category '%s'\n", __FUNCTION__, name.data());
 		        return (this->backend->get_category_apps(name).size() == 0);
 		    });
     category_names.erase(start, category_names.end());

@@ -27,6 +27,7 @@ public:
     void remove_window_previewer(const std::shared_ptr<Kiran::Window> &window);
     uint32_t get_previewer_num();
 
+    sigc::signal<void> signal_opened();
 
 protected:
     virtual void get_preferred_height_vfunc(int &minimum_height, int &natural_height) const override;
@@ -34,8 +35,13 @@ protected:
     virtual void adjust_size();
     virtual bool on_enter_notify_event(GdkEventCrossing *crossing_event) override;
     virtual bool on_leave_notify_event(GdkEventCrossing *crossing_event) override;
+    //virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
+    virtual void on_show() override;
 
     virtual void on_child_remove();
+
+
+    virtual void set_rgba_visual();
 
 
 private:
@@ -50,6 +56,7 @@ private:
     Gtk::Widget *relative_to;
     Gtk::PositionType position;
     std::map<unsigned long, KiranWindowPreviewer*> win_previewers;
+    sigc::signal<void> m_signal_opened;
 
     void load_windows_list();
 };

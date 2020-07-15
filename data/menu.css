@@ -254,24 +254,149 @@ button.kiran-expand-button:focus{
     border-image: none;
 }
 
-window.test {
-    background: red;
+.kiran-tasklist-button {
+    background: #0c0c0c;
 }
-
-.tasklist-widget {
-    background: green;
-}
-
 .kiran-tasklist-button:hover{
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.2);
 }
 
-.window-previewer:hover {
+.window-previewer.vertical:hover, .window-previewer.horizontal:hover {
     border: 1px solid gray;
-    border-radius: 5px;
+    border-radius: 6px;
+    border-color: rgba(46,179,255, 0.6);
 }
 
 .window-previewer {
+    border-radius: 6px;
+    min-width: 200px;
+    background: rgba(0, 0, 0, 0.85);
+    color: #ffffff;
+}
+
+.window-previewer.vertical {
     border: 1px solid transparent;
+}
+
+.window-previewer.horizontal {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    min-height: 140px;
+}
+
+
+window.app-previewer {
+    background: transparent;
+    border: none;
+}
+
+window.app-previewer scrolledwindow, window.app-previewer viewport {
+    background: transparent;
+    border: none;
+}
+
+button.previewer-close-btn{
+    border: none;
+    box-shadow: none;
+    border-image: none;
+    background-position: center;
+    background-repeat: no-repeat no-repeat;
+    padding: 0px;
+}
+
+button.previewer-close-btn {
+    background-image: url("/kiran-tasklist/icon/close_normal");
+}
+
+button.previewer-close-btn:hover{
+    background-image: url("/kiran-tasklist/icon/close_prelight");
+    padding: 0px;
+}
+
+button.previewer-close-btn:active {
+    background-image: url("/kiran-tasklist/icon/close_active");
+    padding: 0px;
+}
+
+menu.previewer-context-menu menuitem {
+    color: white;
+    background: transparent;
+    min-height: 28px;
+    padding-left: 12px;
+    padding-right: 12px;
+
+    border-width: 0px;
+    border-right-width: 2px;
+    border-color: transparent;
+}
+
+menu.previewer-context-menu menuitem:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-width: 0px;
+    border-right-width: 2px;
+    border-color: #3ca8ea;
+}
+
+menu.previewer-context-menu {
+    background: rgba(0, 0, 0, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+scrollbar {
+    -GtkScrollbar-has-backward-stepper: 0;
+    -GtkScrollbar-has-forward-stepper: 0;
+}
+
+scrollbar.horizontal, scrollbar.vertical{
+    border: none;
+    background: transparent;
+    border-image: none;
+}
+
+scrollbar.horizontal {
+    min-height:5px;
+}
+
+scrollbar.vertical {
+    min-width:5px;
+}
+
+
+scrollbar.horizontal trough, scrollbar.vertical trough {
+   background: transparent;
+   border-image: none;
+   border: none;
+}
+
+scrollbar.horizontal button, scrollbar.horizontal button {
+    min-height: 0px;
+    min-width: 0px;
+    background: transparent;
+    border: none;
+}
+
+scrollbar.horizontal slider, scrollbar.vertical slider {
+    background: rgba(0, 0, 0, 0.8);
+    border-image: none;
+    border-width: 1px;
+    border-radius: 5px;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+scrollbar.horizontal slider {
+    min-width: 40px;
+    min-height: 5px;
+}
+
+scrollbar.vertical slider {
+    min-width: 5px;
+    min-height: 40px;
+}
+
+scrollbar.horizontal slider:active, scrollbar.horizontal slider:hover, scrollbar.vertical slider:active, scrollbar.vertical slider:hover{
+    background-color: rgba(255, 255, 255, 0.2);
+    border-width: 1px;
     border-radius: 5px;
 }

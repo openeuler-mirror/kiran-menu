@@ -22,5 +22,11 @@
     <file alias="icon/menu">images/menu.png</file>
     <file alias="icon/favorite">images/favorite.png</file>
     <file alias="icon/list">images/list.png</file>
+   </gresource>
+   <gresource prefix="/kiran-tasklist/">
+    <file alias="icon/executable">images/executable.svg</file>
+    <file alias="icon/close_normal">images/close_normal.png</file>
+    <file alias="icon/close_prelight">images/close_prelight.png</file>
+    <file alias="icon/close_active">images/close_active.png</file>
   </gresource>
 </gresources>

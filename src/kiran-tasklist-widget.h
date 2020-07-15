@@ -10,7 +10,7 @@
 #include "app-manager.h"
 #include "kiranhelper.h"
 
-class KiranTasklistWidget : public Gtk::Grid
+class KiranTasklistWidget : public Gtk::Box
 {
 
 public:
@@ -34,6 +34,20 @@ public:
 
     //根据applet所在面板的排列方向更新应用按钮排列方向
     void update_orientation();
+
+protected:
+
+
+    virtual void get_preferred_width_vfunc(int &min_width, int &natural_width) const override;
+    virtual void get_preferred_height_vfunc(int &min_height, int &natural_height) const override;
+
+    virtual void on_size_allocate(Gtk::Allocation &alloction) override;
+
+    virtual void load_applications();
+
+    virtual void on_fixed_apps_added(const Kiran::AppVec &apps);
+    virtual void on_fixed_apps_removed(const Kiran::AppVec &apps);
+    virtual void on_previewer_window_opened();
 
 private:
     MatePanelApplet *applet;

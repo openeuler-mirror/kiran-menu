@@ -19,6 +19,14 @@ public:
     static void ungrab_input(Gtk::Widget &widget);
 
     static bool window_is_ignored(KiranWindowPointer window);
+
+    static bool app_is_in_favorite(const std::shared_ptr<Kiran::App> &app);
+    static bool add_app_to_favorite(const std::shared_ptr<Kiran::App> &app);
+    static bool remove_app_from_favorite(const std::shared_ptr<Kiran::App> &app);
+
+    static bool app_is_in_fixed_list(const std::shared_ptr<Kiran::App> &app);
+    static bool add_app_to_fixed_list(const std::shared_ptr<Kiran::App> &app);
+    static bool remove_app_from_fixed_list(const std::shared_ptr<Kiran::App> &app);
 };
 
 #endif // KIRANHELPER_H

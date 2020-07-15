@@ -5,9 +5,10 @@ KiranAppPreviewer::KiranAppPreviewer():
     Gtk::Window(Gtk::WINDOW_POPUP),
     need_display(true),
     position(Gtk::POS_TOP),
-    relative_to(NULL),
+    relative_to(nullptr),
     is_idle(true)
 {
+    set_rgba_visual();
     scroll_window.set_propagate_natural_height(true);
     scroll_window.set_propagate_natural_width(true);
 
@@ -15,24 +16,27 @@ KiranAppPreviewer::KiranAppPreviewer():
     //signal_composited_changed().connect(sigc::mem_fun(*this, &KiranAppPreviewer::set_position));
 
     scroll_window.add(box);
-    add(scroll_window);
     scroll_window.show_all();
+    add(scroll_window);
 
     set_decorated(false);
     set_skip_taskbar_hint(true);
     set_skip_pager_hint(true);
     set_no_show_all(true);
 
-    box.set_margin_top(10);
-    box.set_margin_bottom(10);
-    box.set_margin_start(10);
-    box.set_margin_end(10);
-    box.set_spacing(10);
+    box.set_margin_start(5);
+    box.set_margin_end(5);
+    box.set_margin_top(5);
+    box.set_margin_bottom(5);
+    box.set_spacing(4);
     box.signal_remove().connect(
                 [this](Gtk::Widget *widget) -> void {
                     if (this->box.get_children().size() == 0)
                         this->hide();
                 });
+
+    get_style_context()->add_class("app-previewer");
+    //set_size_request(500, 500);
 }
 
 
@@ -84,7 +88,7 @@ void KiranAppPreviewer::reposition()
         relative_window->get_origin(parent_x, parent_y);
         parent_allocation = relative_to->get_allocation();
 
-        g_message("parent %p, geometry: (%d, %d), offset(%d, %d), size %d x %d, previewer size %d x %d\n",
+        g_debug("parent %p, geometry: (%d, %d), offset(%d, %d), size %d x %d, previewer size %d x %d\n",
                   relative_to,
                   parent_x, parent_y,
                   parent_allocation.get_x(),
@@ -121,45 +125,53 @@ void KiranAppPreviewer::reposition()
 
         do {
             //检查位置是否超出当前显示器的工作区范围
-            Gdk::Rectangle rect;
+            Gdk::Rectangle workarea;
             auto display = get_display();
-
             auto monitor = display->get_monitor_at_window(
-                        Glib::RefPtr<Gdk::Window>::cast_dynamic(get_window()));
+                        Glib::RefPtr<Gdk::Window>::cast_dynamic(relative_window));
 
-            monitor->get_workarea(rect);
-            if (new_x < rect.get_x())
-                new_x = rect.get_x();
-            else if (new_x > rect.get_x() + rect.get_width())
-                new_x = rect.get_x() + rect.get_width();
+            monitor->get_workarea(workarea);
+            g_debug("%s: workarea (%d, %d), %d x %d, position %d x %d\n", __FUNCTION__,
+                    workarea.get_x(), workarea.get_y(),
+                    workarea.get_width(), workarea.get_height(),
+                    new_x, new_y);
+            if (new_x < workarea.get_x())
+                new_x = workarea.get_x();
+            else if (new_x > workarea.get_x() + workarea.get_width())
+                new_x = workarea.get_x() + workarea.get_width();
 
-            if (new_y < rect.get_y())
-                new_y = rect.get_y();
-            else if (new_y > rect.get_y() + rect.get_height())
-                new_y = rect.get_y() + rect.get_height();
+            if (new_y < workarea.get_y())
+                new_y = workarea.get_y();
+            else if (new_y > workarea.get_y() + workarea.get_height())
+                new_y = workarea.get_y() + workarea.get_height();
 
         } while (0);
 
-        g_message("move previewer to (%d, %d)\n", new_x, new_y);
-        move(new_x + 2, new_y);
+        g_debug("move previewer to (%d, %d)\n", new_x, new_y);
+        move(new_x, new_y);
     }
 }
 
 void KiranAppPreviewer::get_preferred_height_vfunc(int &minimum_height, int &natural_height) const
 {
-    int tmp1, tmp2;
-    Gdk::Rectangle rect;
+    Gdk::Rectangle workarea;
+    Gtk::Requisition min_size, natural_size;
+    int min_width, natural_width;
 
-    box.get_preferred_height(minimum_height, natural_height);
+    scroll_window.get_preferred_size(min_size, natural_size);
     auto monitor = box.get_display()->get_monitor_at_window(
                 Glib::RefPtr<Gdk::Window>::cast_const(this->get_window()));
 
-    //monitor->get_geometry(rect);
-    monitor->get_workarea(rect);
-    if (natural_height > 500) {
+    monitor->get_workarea(workarea);
+    if (natural_size.height > workarea.get_height()) {
         //如果box的大小超过了当前显示器大小，使用滚动窗口大小，因为滚动窗口的natural_size包含了滚动条的size
-        //scroll_window.get_preferred_height(minimum_height, natural_height);
-        natural_height = 500;
+        natural_height = workarea.get_height();
+    } else {
+        natural_height = natural_size.height;
+
+        scroll_window.get_hscrollbar()->get_preferred_width(min_width, natural_width);
+        if (workarea.get_width() < natural_size.width) //需要额外加上滚动条的尺寸
+            natural_height += natural_width;
     }
 
     minimum_height = natural_height;
@@ -167,18 +179,25 @@ void KiranAppPreviewer::get_preferred_height_vfunc(int &minimum_height, int &nat
 
 void KiranAppPreviewer::get_preferred_width_vfunc(int &minimum_width, int &natural_width) const
 {
-    int tmp1, tmp2;
+    Gdk::Rectangle workarea;
+    Gtk::Requisition min_size, natural_size;
 
-    //scroll_window.get_vscrollbar()->get_preferred_width(tmp1, tmp2);
-    //g_message("vscrollbar width %d, %d\n", minimum_width, natural_width);
+    scroll_window.get_preferred_size(min_size, natural_size);
 
-    //box.get_preferred_width(minimum_width, natural_width);
-    //g_message("box width %d, %d\n", minimum_width, natural_width);
-    scroll_window.get_preferred_width(minimum_width, natural_width);
-    //g_message("scrollwindow width %d, %d\n", minimum_width, natural_width);
+    auto monitor = box.get_display()->get_monitor_at_window(
+                Glib::RefPtr<Gdk::Window>::cast_const(this->get_window()));
+    monitor->get_workarea(workarea);
+    if (workarea.get_width() < natural_size.width)
+        natural_width = workarea.get_width();
+    else {
+        int min_height, natural_height;
 
-    //minimum_width += tmp1 + 5;
-    //natural_width += tmp2 + 5;
+        natural_width = natural_size.width;
+        scroll_window.get_hscrollbar()->get_preferred_height(min_height, natural_height);
+        if (workarea.get_height() < natural_size.height) //需要额外加上滚动条的尺寸
+            natural_width += natural_height;
+    }
+    minimum_width = natural_width;
 }
 
 void KiranAppPreviewer::adjust_size()
@@ -203,24 +222,67 @@ bool KiranAppPreviewer::on_enter_notify_event(GdkEventCrossing *crossing_event)
 
 bool KiranAppPreviewer::on_leave_notify_event(GdkEventCrossing *crossing_event)
 {
+    int width, height;
+
+    width = get_window()->get_width();
+    height = get_window()->get_height();
+    if (crossing_event->x > 0 && crossing_event->x < width &&
+            crossing_event->y > 0 && crossing_event->y < height) {
+        //鼠标仍旧在窗口范围内
+        return false;
+    }
+
     set_idle(true);
     //schedule for hiding previewer
-    Glib::signal_idle().connect(
+    Glib::signal_timeout().connect(
                 [this]() -> bool {
                     if (this->get_idle())
                         this->hide();
                     return false;
-                });
+                }, 300);
     return false;
 }
 
+/*
+bool KiranAppPreviewer::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
+{
+    Gtk::Widget *child = get_child();
+
+    cr->save();
+    cr->set_operator(Cairo::OPERATOR_CLEAR);
+    //cr->set_source_rgb(0.0, 1.0, 0.0);
+    cr->paint();
+    cr->restore();
+
+    propagate_draw(*child, cr);
+    return false;
+}
+*/
+
 void KiranAppPreviewer::on_child_remove()
 {
-    g_message("after remove, %d children last\n", box.get_children().size());
+    g_debug("after remove, %d children last\n", box.get_children().size());
     if (!box.get_children().size()) {
         //如果当前app没有已打开的窗口，隐藏预览窗口
         hide();
     }
+}
+
+void KiranAppPreviewer::on_show()
+{
+    Gtk::Window::on_show();
+
+    signal_opened().emit();
+}
+
+void KiranAppPreviewer::set_rgba_visual()
+{
+    //FIXME, 使用default_screen是否合适??
+    auto visual = get_screen()->get_rgba_visual();
+    if (!visual)
+        g_warning("no rgba visual found\n");
+    else
+        gtk_widget_set_visual(reinterpret_cast<GtkWidget*>(this->gobj()), visual->gobj());
 }
 
 void KiranAppPreviewer::load_windows_list()
@@ -228,6 +290,7 @@ void KiranAppPreviewer::load_windows_list()
     win_previewers.clear();
     for (auto child: box.get_children()) {
         box.remove(*child);
+        delete child;
     }
     for (auto window: this->app->get_taskbar_windows()) {
         add_window_previewer(window);
@@ -283,6 +346,11 @@ void KiranAppPreviewer::remove_window_previewer(const std::shared_ptr<Kiran::Win
 
 uint32_t KiranAppPreviewer::get_previewer_num() {
     return win_previewers.size();
+}
+
+sigc::signal<void> KiranAppPreviewer::signal_opened()
+{
+    return m_signal_opened;
 }
 
 

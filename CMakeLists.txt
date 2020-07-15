@@ -1,7 +1,7 @@
 
 cmake_minimum_required(VERSION 3.0)
 
-project(kiran-menu VERSION 2.0)
+project(kiran-applet VERSION 2.0)
 
 
 find_package(PkgConfig)
