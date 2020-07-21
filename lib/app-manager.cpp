@@ -580,10 +580,12 @@ void AppManager::load_desktop_apps()
         for (auto iter = registered_apps.begin(); iter != registered_apps.end(); ++iter)
         {
             auto desktop_id = (*iter)->get_id();
+            auto app = lookup_app(desktop_id);
 
-            if (old_apps.find(desktop_id) == old_apps.end() && (*iter)->should_show())
+            if (app &&
+                app->should_show() &&
+                old_apps.find(desktop_id) == old_apps.end())
             {
-                auto app = lookup_app(desktop_id);
                 new_installed_apps.push_back(app);
             }
         }
