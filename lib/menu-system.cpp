@@ -78,8 +78,11 @@ void MenuSystem::flush(const AppVec &apps)
             auto desktop_id = (*iter)->get_id();
             Glib::Quark quark(desktop_id);
             std::shared_ptr<App> app(new App(desktop_id));
-            this->apps_[quark.id()] = app;
-            app->signal_launched().connect(sigc::mem_fun(this, &MenuSystem::app_launched));
+            if (!app->get_x_kiran_no_display())
+            {
+                this->apps_[quark.id()] = app;
+                app->signal_launched().connect(sigc::mem_fun(this, &MenuSystem::app_launched));
+            }
         }
     }
 
@@ -96,10 +99,10 @@ void MenuSystem::flush(const AppVec &apps)
 
             auto desktop_id = (*iter)->get_id();
             Glib::Quark quark(desktop_id);
+            auto app = lookup_app(desktop_id);
 
-            if (old_apps.find(quark.id()) == old_apps.end())
+            if (old_apps.find(quark.id()) == old_apps.end() && app)
             {
-                auto app = lookup_app(desktop_id);
                 new_installed_apps.push_back(app);
 
                 if (std::find(this->new_apps_.begin(), this->new_apps_.end(), quark.id()) == this->new_apps_.end())

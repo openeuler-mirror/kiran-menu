@@ -40,6 +40,7 @@ class App : public std::enable_shared_from_this<App>
     const std::string &get_desktop_id() { return this->desktop_id_; }
     const std::string &get_exec() { return this->exec_; }
     const std::string &get_file_name() { return this->file_name_; };
+    bool get_x_kiran_no_display() { return this->x_kiran_no_display_; };
     AppKind get_kind() { return this->kind_; };
 
     std::string get_categories();
@@ -83,6 +84,8 @@ class App : public std::enable_shared_from_this<App>
     std::string icon_name_;
 
     std::string path_;
+
+    bool x_kiran_no_display_;
 
     AppKind kind_;
 

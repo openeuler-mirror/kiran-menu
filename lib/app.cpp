@@ -38,6 +38,8 @@ App::App(const std::string &desktop_id)
 
     this->path_ = GET_STRING("Path");
 
+    this->x_kiran_no_display_ = this->desktop_app_->get_boolean("X-KIRAN-NoDisplay");
+
     init_app_kind();
 
 #undef GET_STRING
