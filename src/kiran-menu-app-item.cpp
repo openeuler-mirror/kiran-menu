@@ -3,6 +3,7 @@
 #include <iostream>
 #include <glibmm/i18n.h>
 #include <sys/stat.h>
+#include "global.h"
 
 #define MENU_ITEM_COUNT G_N_ELEMENTS(item_labels)
 

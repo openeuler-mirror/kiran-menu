@@ -4,6 +4,7 @@
 #include "kiran-search-entry.h"
 #include "kiranhelper.h"
 #include "kiran-menu-avatar-widget.h"
+#include "global.h"
 
 
 #include <unistd.h>
