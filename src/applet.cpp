@@ -47,6 +47,8 @@ kiran_menu_applet_fill (MatePanelApplet *applet,
     bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
     textdomain (GETTEXT_PACKAGE);
 
+    mate_panel_applet_set_flags (applet, MATE_PANEL_APPLET_EXPAND_MINOR);
+
     Gtk::Main::init_gtkmm_internals();
 
     if (!load_resources())
