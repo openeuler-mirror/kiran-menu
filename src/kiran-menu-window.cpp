@@ -850,7 +850,7 @@ void KiranMenuWindow::set_display_mode(MenuDisplayMode mode)
     else
         load_user_info();
 
-    reload_apps_data();
+    Glib::signal_idle().connect_once(sigc::mem_fun(*this, &KiranMenuWindow::reload_apps_data));
 }
 
 
