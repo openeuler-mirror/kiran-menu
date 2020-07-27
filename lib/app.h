@@ -159,6 +159,8 @@ private:
 
     std::string path_;
 
+    bool x_kiran_no_display_;
+
     AppKind kind_;
 
     Glib::RefPtr<Gio::DesktopAppInfo> desktop_app_;

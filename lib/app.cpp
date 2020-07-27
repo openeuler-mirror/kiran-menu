@@ -41,6 +41,8 @@ App::App(const std::string &desktop_id) : kind_(AppKind::DESKTOP),
 
     this->path_ = GET_STRING("Path");
 
+    this->x_kiran_no_display_ = this->desktop_app_->get_boolean("X-KIRAN-NoDisplay");
+
 #undef GET_STRING
 #undef GET_LOCALE_STRING
 }
@@ -100,7 +102,7 @@ std::string App::get_startup_wm_class()
 bool App::should_show()
 {
     RETURN_VAL_IF_FALSE(this->desktop_app_, false);
-    return this->desktop_app_->should_show();
+    return (this->desktop_app_->should_show() && !this->x_kiran_no_display_);
 }
 
 WindowVec App::get_windows()

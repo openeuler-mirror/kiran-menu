@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 19:59:56
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-13 08:33:06
+ * @LastEditTime : 2020-07-14 09:38:40
  * @Description  : 开始菜单类
  * @FilePath     : /kiran-menu-2.0/lib/menu-skeleton.cpp
  */
@@ -46,6 +46,8 @@ void MenuSkeleton::init()
     this->search_->init();
     this->category_->init();
     this->new_->init();
+
+    this->desktop_app_changed();
 
     app_manager_->signal_desktop_app_changed().connect(sigc::mem_fun(this, &MenuSkeleton::desktop_app_changed));
     app_manager_->signal_app_installed().connect(sigc::mem_fun(this, &MenuSkeleton::app_installed));

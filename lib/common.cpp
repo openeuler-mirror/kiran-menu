@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-09 11:40:36
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-09 11:50:11
+ * @LastEditTime : 2020-07-14 09:59:29
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/common.cpp
  */
@@ -37,6 +37,7 @@ bool write_list_quark_to_as(Glib::RefPtr<Gio::Settings> settings,
         Glib::ustring desktop_id = query_quark;
         new_value.push_back(desktop_id);
     }
+    // g_print("key: %s value: %d\n", key.c_str(), new_value.size());
     return settings->set_string_array(key, new_value);
 }
 
