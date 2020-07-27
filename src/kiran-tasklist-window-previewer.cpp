@@ -232,6 +232,8 @@ void KiranWindowPreviewer::init_ui()
         auto real_pixbuf = icon_pixbuf->scale_simple(16, 16, Gdk::INTERP_BILINEAR);
         icon_image.set(real_pixbuf);
     }
+
+    set_tooltip_text(s_window->get_name());
     title_label.set_text(s_window->get_name());
     title_label.set_ellipsize(Pango::ELLIPSIZE_END);
     title_label.set_hexpand(true);
