@@ -119,6 +119,16 @@ bool Window::is_above()
     return wnck_window_is_above(this->wnck_window_);
 }
 
+bool Window::is_skip_pager()
+{
+    return wnck_window_is_skip_pager(this->wnck_window_);
+}
+
+bool Window::is_skip_taskbar()
+{
+    return wnck_window_is_skip_tasklist(this->wnck_window_);
+}
+
 void Window::activate(uint32_t timestamp)
 {
     WnckWindowState state = wnck_window_get_state(wnck_window_);

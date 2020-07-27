@@ -211,6 +211,13 @@ void KiranTasklistWidget::on_active_window_changed(KiranWindowPointer previous,
 void KiranTasklistWidget::on_window_opened(KiranWindowPointer window)
 {
     g_debug("window '%s' opened\n", window->get_name().data());
+
+    /**
+     * 如果窗口设置了不在工作区或任务栏上显示，就直接跳过
+     */ 
+    if (window->is_skip_taskbar() || window->is_skip_pager())
+        return;
+
     auto app = window->get_app();
     if (!app) {
         g_warning("no app found for new window '%s'\n", window->get_name().data());

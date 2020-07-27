@@ -136,6 +136,8 @@ WindowVec App::get_taskbar_windows()
 {
     auto windows = get_windows();
     auto iter = std::remove_if(windows.begin(), windows.end(), [](std::shared_ptr<Kiran::Window> window) {
+        if (window->is_skip_pager() || window->is_skip_taskbar())
+            return true;
         return window->get_window_type() != WNCK_WINDOW_NORMAL && window->get_window_type() != WNCK_WINDOW_DIALOG;
     });
     windows.erase(iter, windows.end());

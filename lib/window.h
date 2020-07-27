@@ -73,6 +73,9 @@ public:
     // 窗口是否置顶
     bool is_above();
 
+    bool is_skip_pager();
+    bool is_skip_taskbar();
+
     // 激活窗口
     void activate(uint32_t timestamp);
 
