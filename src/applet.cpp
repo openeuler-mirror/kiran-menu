@@ -47,8 +47,6 @@ kiran_menu_applet_fill (MatePanelApplet *applet,
 {
     static int backend_inited = false;
 
-    g_message("loading  applet, iid '%s'\n", iid);
-
     if (strcmp(iid, "KiranMenuApplet") && strcmp(iid, "KiranTasklistApplet")) {
         g_warning("not match id\n");
         return FALSE;
@@ -65,12 +63,13 @@ kiran_menu_applet_fill (MatePanelApplet *applet,
 	backend_inited = true;
     }
 
+    if (!load_resources(APPLET_RESOURCE_PATH))
+        return FALSE;
+
+    load_css_styles("/kiran-applet/applet.css");
+
     if (!strcmp(iid, "KiranMenuApplet")) {
         //开始菜单插件
-        if (!load_resources(MENU_RESOURCE_PATH))
-            return FALSE;
-
-        load_css_styles("/kiran-menu/menu.css");
 
         auto button = new KiranMenuAppletButton(applet);
         gtk_container_add(GTK_CONTAINER(applet), GTK_WIDGET(button->gobj()));
@@ -78,11 +77,6 @@ kiran_menu_applet_fill (MatePanelApplet *applet,
         int flags;
 
         //窗口切换预览插件
-        if (!load_resources("/tmp/menu.gresource"))
-            return FALSE;
-
-        load_css_styles("/kiran-menu/menu.css");
-
         g_message("loading tasklist applet\n");
         KiranTasklistWidget *button = Gtk::manage(new KiranTasklistWidget(applet));
         flags = MATE_PANEL_APPLET_HAS_HANDLE | MATE_PANEL_APPLET_EXPAND_MINOR | MATE_PANEL_APPLET_EXPAND_MAJOR;

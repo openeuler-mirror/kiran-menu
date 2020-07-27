@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <gresources>
+  <gresource prefix="/kiran-applet/">
+    <file alias="applet.css">data/applet.css</file>
+  </gresource>
   <gresource prefix="/kiran-menu/">
     <file alias="action/arrow-left">images/arrow-left.png</file>
     <file alias="action/arrow-right">images/arrow-right.png</file>
@@ -10,7 +13,6 @@
     <file alias="sidebar/monitor">images/task-monitor.png</file>
     <file alias="sidebar/lock">images/lock.png</file>
     <file alias="sidebar/power">images/power.png</file>
-    <file alias="menu.css">data/menu.css</file>
     <file alias="ui/menu">data/menu.ui.xml</file>
     <file alias="icon/logo">images/logo.png</file>
     <file alias="icon/avatar">images/avatar_default.png</file>

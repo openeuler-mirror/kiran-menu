@@ -6,10 +6,10 @@ configure_file(org.mate.panel.applet.KiranAppletFactory.service.in org.mate.pane
 message("-- Checking for program 'glib-compile-resources'")
 find_program(COMPILE_RESOURCE NAMES "glib-compile-resources")
 
-add_custom_target(menu.gresource ALL 
-    ${COMPILE_RESOURCE} ${PROJECT_SOURCE_DIR}/data/menu.gresource.xml --target menu.gresource --sourcedir ${PROJECT_SOURCE_DIR})
+add_custom_target(kiran-applet.gresource ALL 
+    ${COMPILE_RESOURCE} ${PROJECT_SOURCE_DIR}/data/applet.gresource.xml --target kiran-applet.gresource --sourcedir ${PROJECT_SOURCE_DIR})
 
-install(FILES ${PROJECT_BINARY_DIR}/data/menu.gresource
+install(FILES ${PROJECT_BINARY_DIR}/data/kiran-applet.gresource
 	DESTINATION "${CMAKE_INSTALL_PREFIX}/share/${CMAKE_PROJECT_NAME}")
 
 install(FILES ${PROJECT_BINARY_DIR}/data/org.mate.panel.KiranApplet.mate-panel-applet
