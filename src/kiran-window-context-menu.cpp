@@ -19,7 +19,7 @@ void KiranWindowContextMenu::refresh()
     KiranHelper::remove_all_for_container(*this);
 
     item = Gtk::manage(new Gtk::MenuItem(_("Maximize")));
-    /*
+    
     item->signal_activate().connect(
                 [this]() -> void {
                     if (!this->win.expired()) {
@@ -32,7 +32,6 @@ void KiranWindowContextMenu::refresh()
                         window->maximize();
                     }
                 });
-		*/
     append(*item);
 
     item = Gtk::manage(new Gtk::MenuItem(_("Minimize")));
@@ -44,7 +43,6 @@ void KiranWindowContextMenu::refresh()
     append(*item);
 
     item = Gtk::manage(new Gtk::MenuItem(_("Restore")));
-    /*
     item->signal_activate().connect(
                 [this]() -> void {
                     if (!this->win.expired()) {
@@ -60,7 +58,6 @@ void KiranWindowContextMenu::refresh()
                     }
 
                 });
-		*/
     append(*item);
 
     check_item = Gtk::manage(new Gtk::CheckMenuItem(_("Always keep on top")));
@@ -71,7 +68,7 @@ void KiranWindowContextMenu::refresh()
                         if (check_item->get_active())
                             window->make_above();
                         else {
-                           // window->unmake_above();
+                            window->make_unabove();
                         }
                     }
 

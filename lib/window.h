@@ -78,15 +78,19 @@ public:
 
     // 使窗口最小化
     void minimize();
+    void unminimize(uint32_t timestamp);
+    bool is_minimized();
 
     // 使窗口最大化
     void maximize();
+    bool is_maximized();
 
     // 还原窗口大小
     void unmaximize();
 
     // 窗口置顶
     void make_above();
+    void make_unabove();
 
     // 判断窗口是否为激活状态
     bool is_active();

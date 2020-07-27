@@ -121,12 +121,42 @@ bool Window::is_above()
 
 void Window::activate(uint32_t timestamp)
 {
-    wnck_window_activate(this->wnck_window_, timestamp);
+    WnckWindowState state = wnck_window_get_state(wnck_window_);
+
+    if (state & WNCK_WINDOW_STATE_MINIMIZED)
+    {
+        wnck_window_activate_transient(this->wnck_window_, timestamp);
+    }
+    else if (wnck_window_is_active(wnck_window_) ||
+             wnck_window_is_most_recently_activated(wnck_window_) ||
+             wnck_window_transient_is_most_recently_activated(wnck_window_))
+    {
+        wnck_window_minimize(wnck_window_);
+    }
+    else
+    {
+        wnck_window_activate_transient(this->wnck_window_, timestamp);
+    }
+}
+
+void Window::unminimize(uint32_t timestamp)
+{
+    wnck_window_unminimize(this->wnck_window_, timestamp);
+}
+
+bool Window::is_minimized()
+{
+    return wnck_window_is_minimized(this->wnck_window_);
 }
 
 void Window::minimize()
 {
     wnck_window_minimize(this->wnck_window_);
+}
+
+bool Window::is_maximized()
+{
+    return wnck_window_is_maximized(this->wnck_window_);
 }
 
 void Window::maximize()
@@ -142,6 +172,11 @@ void Window::unmaximize()
 void Window::make_above()
 {
     wnck_window_make_above(this->wnck_window_);
+}
+
+void Window::make_unabove()
+{
+    wnck_window_unmake_above(this->wnck_window_);
 }
 
 bool Window::is_active()
