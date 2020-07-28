@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 17:21:54
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-09 11:33:04
+ * @LastEditTime : 2020-07-28 14:50:21
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app-manager.h
  */
@@ -28,6 +28,9 @@ public:
 
     // 获取所有App列表(每个App对应一个desktop文件)
     AppVec get_apps();
+
+    // 获取制定类型的App列表
+    AppVec get_apps_by_kind(AppKind kind);
 
     // 获取可以在菜单中显示的App列表
     AppVec get_should_show_apps();

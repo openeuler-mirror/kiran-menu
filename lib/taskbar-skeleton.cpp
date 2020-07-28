@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-07-09 11:03:43
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-14 09:44:53
+ * @LastEditTime : 2020-07-28 14:48:30
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/taskbar-skeleton.cpp
  */
@@ -118,7 +118,7 @@ AppVec TaskBarSkeleton::get_fixed_apps()
 
 void TaskBarSkeleton::desktop_app_changed()
 {
-    auto apps = this->app_manager_->get_should_show_apps();
+    auto apps = this->app_manager_->get_apps_by_kind(AppKind::DESKTOP);
 
     std::set<int32_t> app_set;
 
