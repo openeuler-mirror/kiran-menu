@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 21:42:15
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-14 09:36:46
+ * @LastEditTime : 2020-07-28 13:54:09
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app-manager.cpp
  */
@@ -560,7 +560,20 @@ void AppManager::load_desktop_apps()
     for (auto iter = registered_apps.begin(); iter != registered_apps.end(); ++iter)
     {
         auto desktop_id = (*iter)->get_id();
-        std::shared_ptr<App> app(new App(desktop_id));
+        std::shared_ptr<App> app;
+        auto old_iter = old_apps.find(desktop_id);
+        if (old_iter != old_apps.end())
+        {
+            app = old_iter->second;
+            app->update_from_desktop_file();
+        }
+        else
+        {
+            app = std::make_shared<App>(desktop_id);
+            app->signal_launched().connect(sigc::mem_fun(this, &AppManager::app_launched));
+            app->signal_close_all_windows().connect(sigc::mem_fun(this, &AppManager::app_close_all_windows));
+        }
+
         this->apps_[desktop_id] = app;
 
         auto wm_class = app->get_startup_wm_class();
@@ -568,9 +581,6 @@ void AppManager::load_desktop_apps()
         {
             this->wmclass_apps_[app->get_startup_wm_class()] = app;
         }
-        app->signal_launched().connect(sigc::mem_fun(this, &AppManager::app_launched));
-        app->signal_close_all_windows().connect(sigc::mem_fun(this, &AppManager::app_close_all_windows));
-        // app->signal_open_new_window().connect(sigc::mem_fun(this, &AppManager::app_open_new_window));
     }
 
     // new installed apps

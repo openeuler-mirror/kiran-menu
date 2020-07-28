@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:38
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-09 10:50:20
+ * @LastEditTime : 2020-07-28 13:49:22
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app.cpp
  */
@@ -20,7 +20,27 @@ namespace Kiran
 App::App(const std::string &desktop_id) : kind_(AppKind::DESKTOP),
                                           desktop_id_(desktop_id)
 {
-    this->desktop_app_ = Gio::DesktopAppInfo::create(desktop_id);
+    this->update_from_desktop_file();
+}
+
+App::App(uint64_t xid) : kind_(AppKind::FAKE_DESKTOP)
+{
+    std::ostringstream oss;
+    oss << "fake_" << xid;
+    this->desktop_id_ = oss.str();
+
+    add_wnck_app_by_xid(xid);
+}
+
+App::~App()
+{
+}
+
+void App::update_from_desktop_file()
+{
+    g_return_if_fail(this->kind_ == AppKind::DESKTOP);
+
+    this->desktop_app_ = Gio::DesktopAppInfo::create(this->desktop_id_);
 
     g_return_if_fail(this->desktop_app_);
 
@@ -45,19 +65,6 @@ App::App(const std::string &desktop_id) : kind_(AppKind::DESKTOP),
 
 #undef GET_STRING
 #undef GET_LOCALE_STRING
-}
-
-App::App(uint64_t xid) : kind_(AppKind::FAKE_DESKTOP)
-{
-    std::ostringstream oss;
-    oss << "fake_" << xid;
-    this->desktop_id_ = oss.str();
-
-    add_wnck_app_by_xid(xid);
-}
-
-App::~App()
-{
 }
 
 std::string App::get_categories()

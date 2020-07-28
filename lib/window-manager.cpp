@@ -48,7 +48,7 @@ void WindowManager::init()
     auto context = Glib::MainContext::get_default();
     if (context)
     {
-        context->signal_idle().connect(sigc::mem_fun(this, &WindowManager::update_window_snapshot));
+        // context->signal_idle().connect(sigc::mem_fun(this, &WindowManager::update_window_snapshot));
     }
     else
     {
