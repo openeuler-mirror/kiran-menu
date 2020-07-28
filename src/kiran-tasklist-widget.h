@@ -35,6 +35,8 @@ public:
     //根据applet所在面板的排列方向更新应用按钮排列方向
     void update_orientation();
 
+    void reload_app_buttons();
+
 protected:
 
 

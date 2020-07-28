@@ -2,6 +2,7 @@
 #include <window-manager.h>
 #include <window.h>
 #include "taskbar-skeleton.h"
+#include "menu-skeleton.h"
 
 #define PREVIEWER_ANIMATION_TIMEOUT 400
 
@@ -57,6 +58,9 @@ KiranTasklistWidget::KiranTasklistWidget(MatePanelApplet *applet_):
                 sigc::mem_fun(*this, &KiranTasklistWidget::on_fixed_apps_added));
     backend->signal_fixed_app_deleted().connect(
                 sigc::mem_fun(*this, &KiranTasklistWidget::on_fixed_apps_removed));
+
+    auto menu_backend = Kiran::MenuSkeleton::get_instance();
+    menu_backend->signal_app_changed().connect(sigc::mem_fun(*this, &KiranTasklistWidget::reload_app_buttons));
 
     g_signal_connect(applet, "change-size", G_CALLBACK(on_applet_size_change), this);
     g_signal_connect(applet, "size-allocate", G_CALLBACK(on_applet_size_allocate), this);
@@ -398,6 +402,20 @@ void KiranTasklistWidget::on_size_allocate(Gtk::Allocation &allocation)
     Gtk::Box::on_size_allocate(allocation);;
 }
 
+void KiranTasklistWidget::reload_app_buttons()
+{
+    g_message("%s: reloading apps\n", __FUNCTION__);
+    for (auto iter: app_buttons) {
+	auto app = iter.first;
+	auto button = iter.second;
+
+	delete button;
+    } 
+
+    app_buttons.clear();
+    load_applications();
+}
+
 /**
  * @brief KiranTasklistWidget::load_applications
  *        加载并显示应用按钮，具体包括常驻任务栏应用和已打开应用
@@ -418,8 +436,10 @@ void KiranTasklistWidget::load_applications()
     g_debug("%s: loading running apps ...\n", __FUNCTION__);
     apps = manager->get_running_apps();
     for (auto app: apps) {
-        if (find_app_button(app))
+        if (find_app_button(app)) {
+	    g_debug("button for app '%s' already exists, skip ...\n");
             continue;
+	}
 
         //如果应用的窗口都不需要在任务栏显示，就不在任务栏上显示应用按钮
         if (app->get_taskbar_windows().size() == 0)
