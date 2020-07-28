@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:33
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-09 09:25:12
+ * @LastEditTime : 2020-07-28 13:48:54
  * @Description  : 维护APP的一些基本信息
  * @FilePath     : /kiran-menu-2.0/lib/app.h
  */
@@ -66,6 +66,8 @@ public:
     // 通过WnckApplication的xid创建App
     App(uint64_t xid);
     virtual ~App();
+
+    void update_from_desktop_file();
 
     // 获取desktop文件中的Name字段值
     const std::string &get_name() { return this->name_; }
