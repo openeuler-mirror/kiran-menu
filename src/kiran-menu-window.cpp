@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <glibmm/i18n.h>
+#include "global.h"
 
 #define NEW_APPS_MAX_SIZE 3
 
