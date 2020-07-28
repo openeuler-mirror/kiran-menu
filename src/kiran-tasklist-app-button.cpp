@@ -137,32 +137,34 @@ bool KiranTasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
     cr->save();
     try {
         Glib::RefPtr<Gdk::Pixbuf> pixbuf;
-
+	int scale = get_scale_factor();
         if (gicon)
         {
             //将应用图标转换为pixbuf
             std::string icon_desc = gicon->to_string();
 
-            if (icon_desc[0] == '/')
-                pixbuf = Gdk::Pixbuf::create_from_file(icon_desc, icon_size, icon_size);
+            if (icon_desc[0] == '/') {
+                pixbuf = Gdk::Pixbuf::create_from_file(icon_desc, icon_size * scale, icon_size * scale);
+	    }
             else
             {
 
                 pixbuf = icon_theme->load_icon(gicon->to_string(),
                                                icon_size,
-                                               get_scale_factor(),
+                                               scale,
                                                Gtk::ICON_LOOKUP_FORCE_SIZE);
             }
         } else {
             //未能找到对应应用的图标，使用内置的默认图标
             pixbuf = Gdk::Pixbuf::create_from_resource("/kiran-tasklist/icon/executable",
-                                                        icon_size,
-                                                        icon_size);
+                                                        icon_size * scale,
+                                                        icon_size * scale);
         }
 
+	cr->scale(1.0/scale, 1.0/scale);
         Gdk::Cairo::set_source_pixbuf(cr, pixbuf,
-                                      (allocation.get_width() - icon_size)/2.0,
-                                      (allocation.get_height() - icon_size - 4)/2.0);
+                                      (allocation.get_width() - icon_size)/2.0 * scale,
+                                      (allocation.get_height() - icon_size - 4)/2.0 * scale);
         cr->paint();
         cr->restore();
 
