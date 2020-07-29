@@ -270,11 +270,16 @@ button.kiran-expand-button:focus{
 }
 
 .kiran-tasklist-button {
-    background: #0c0c0c;
+    background: transparent;
 }
 .kiran-tasklist-button:hover{
     background: rgba(255, 255, 255, 0.2);
 }
+
+.kiran-tasklist-button:active{
+    background: rgba(255, 255, 255, 0.35);
+}
+
 
 .window-previewer.vertical:hover, .window-previewer.horizontal:hover {
     border: 1px solid gray;
