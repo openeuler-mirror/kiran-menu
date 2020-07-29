@@ -4,6 +4,21 @@
     font-family: "Noto Sans CJK SC";
 }
 
+button.toggle.kiran-menu-applet-button {
+    background: transparent;
+    box-shadow: none;
+}
+
+button.toggle.kiran-menu-applet-button:active {
+    background: rgba(255, 255, 255, 0.35);
+    box-shadow: none;
+}
+
+button.toggle.kiran-menu-applet-button:prelight {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: none;
+}
+
 .kiran-app-item {
     background: transparent;
     color: #ffffff;
