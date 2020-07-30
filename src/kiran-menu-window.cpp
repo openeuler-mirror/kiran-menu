@@ -360,14 +360,14 @@ bool KiranMenuWindow::on_map_event(GdkEventAny *any_event)
     //应用列表滚动到开始位置
     switch_to_apps_overview(0, false);
 
+    on_search_stop();
+    search_entry->set_text("");
+
     //紧凑模式下默认显示收藏夹
     if (display_mode == DISPLAY_MODE_COMPACT)
         switch_to_compact_favorites_view(false);
-
-    on_search_stop();
-    search_entry->set_text("");
-    search_entry->grab_focus();
-
+    else
+        search_entry->grab_focus();
     return true;
 }
 
@@ -417,20 +417,31 @@ bool KiranMenuWindow::on_configure_event(GdkEventConfigure *configure_event)
 
 bool KiranMenuWindow::on_key_press_event(GdkEventKey *key_event)
 {
-    if (key_event->keyval == GDK_KEY_Escape) {
-        if (overview_stack->get_visible_child_name() == "category-overview-page") {
+    if (overview_stack->get_visible_child_name() == "apps-overview-page") {
+        if (appview_stack->get_visible_child_name() == "all-apps-page") {
+            // 当前位于应用列表页面
+            if (key_event->keyval == GDK_KEY_Escape) {
+                //按下ESC键隐藏开始菜单窗口
+                hide();
+                return true;
+            }
+
+            if (search_entry->handle_event(key_event) == GDK_EVENT_STOP) {
+                //优先搜索框处理
+                g_debug("key event handled by search entry\n");
+                return true;
+            }
+        } else {
+            if (key_event->keyval == GDK_KEY_Escape) {
+                //ESC Key, 当前处于搜索结果页面，需要返回应用列表页面
+                appview_stack->set_visible_child("all-apps-page", Gtk::STACK_TRANSITION_TYPE_NONE);
+                return true;
+            }
+        }
+    } else {
+        if (key_event->keyval == GDK_KEY_Escape) {
             //当前处于分类选择视图, 返回应用视图
             overview_stack->set_visible_child("apps-overview-page", Gtk::STACK_TRANSITION_TYPE_NONE);
-            return true;
-        }
-
-        if (appview_stack->get_visible_child_name() == "search-results-page") {
-            //当前处于搜索结果页面，需要返回应用列表页面
-            appview_stack->set_visible_child("all-apps-page", Gtk::STACK_TRANSITION_TYPE_NONE);
-            return true;
-        } else {
-            //隐藏开始菜单窗口
-            hide();
             return true;
         }
     }
@@ -488,6 +499,7 @@ void KiranMenuWindow::add_app_tab(const char *icon_resource,
     button->signal_clicked().connect(
                 [this, page]() -> void{
                     this->overview_stack->set_visible_child(page, Gtk::STACK_TRANSITION_TYPE_CROSSFADE);
+                    this->search_entry->grab_focus();
                 });
 
     compact_tab_box->add(*button);
