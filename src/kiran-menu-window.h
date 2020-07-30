@@ -26,6 +26,9 @@ public:
     //设置开始菜单显示模式(紧凑或扩展）
     void set_display_mode(MenuDisplayMode mode);
 
+    //启动搜索结果中的指定应用项
+    void activate_search_result(KiranMenuAppItem *item);
+
 protected:
     virtual bool on_map_event(GdkEventAny *any_event) override;
     virtual bool on_unmap_event(GdkEventAny *any_event) override;
@@ -93,6 +96,8 @@ private:
     KiranMenuAppItem *create_app_item(std::shared_ptr<Kiran::App> app,
                                   Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL);
     KiranMenuCategoryItem *create_category_item(const std::string &name, bool clickable=true);
+
+    sigc::connection search_activate_slot;
 };
 
 #endif // KIRANMENUWINDOW_H
