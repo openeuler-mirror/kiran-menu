@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:51
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-08-04 08:59:16
+ * @LastEditTime : 2020-08-04 09:10:15
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window.cpp
  */
@@ -10,7 +10,6 @@
 #include "lib/window.h"
 
 #include <X11/extensions/Xcomposite.h>
-#include <gdk-pixbuf/gdk-pixdata.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
 
