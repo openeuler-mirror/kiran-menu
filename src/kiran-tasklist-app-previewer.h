@@ -48,7 +48,7 @@ private:
     Gtk::ScrolledWindow scroll_window;
     Gtk::Box box;
     Glib::RefPtr<Gdk::Screen> screen;
-    std::shared_ptr<Kiran::App> app;
+    std::weak_ptr<Kiran::App> app;
 
     bool need_display;
     bool is_idle;

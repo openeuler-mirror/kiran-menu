@@ -31,9 +31,11 @@ KiranTasklistAppButton::KiranTasklistAppButton(const std::shared_ptr<Kiran::App>
     context->add_class("kiran-tasklist-button");
     add_events(Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
     set_has_window(true);
+    set_above_child(true);
+    set_visible_window(true);
 
     if (app_->get_taskbar_windows().size() == 0)
-        set_tooltip_text(app->get_locale_name());
+        set_tooltip_text(app_->get_locale_name());
 }
 
 KiranTasklistAppButton::~KiranTasklistAppButton()
@@ -120,14 +122,19 @@ bool KiranTasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
 {
     Gtk::Allocation allocation;
     auto context = get_style_context();
-    auto gicon = app->get_icon();
-    auto icon_theme = Gtk::IconTheme::get_default();
+    int scale = get_scale_factor();
+    Glib::RefPtr<Gdk::Pixbuf> pixbuf;
+    auto app_ = get_app();
 
+    if (!app_) {
+        g_warning("%s: app already expired!!\n", __FUNCTION__);
+        return false;
+    }
 
     allocation = get_allocation();
     context->set_state(get_state_flags());
 
-    if (kiran_app_is_active(app)) {
+    if (kiran_app_is_active(app_)) {
         cr->set_source_rgba(1.0, 1.0, 1.0, 0.3);
         cr->paint();
     } else {
@@ -136,8 +143,8 @@ bool KiranTasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
 
     cr->save();
     try {
-        Glib::RefPtr<Gdk::Pixbuf> pixbuf;
-	int scale = get_scale_factor();
+        auto gicon = app_->get_icon();
+
         if (gicon)
         {
             //将应用图标转换为pixbuf
@@ -148,83 +155,69 @@ bool KiranTasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
 	    }
             else
             {
-
+                auto icon_theme = Gtk::IconTheme::get_default();
                 pixbuf = icon_theme->load_icon(gicon->to_string(),
                                                icon_size,
                                                scale,
                                                Gtk::ICON_LOOKUP_FORCE_SIZE);
             }
-        } else {
-            //未能找到对应应用的图标，使用内置的默认图标
-            pixbuf = Gdk::Pixbuf::create_from_resource("/kiran-tasklist/icon/executable",
-                                                        icon_size * scale,
-                                                        icon_size * scale);
-        }
-
-	cr->scale(1.0/scale, 1.0/scale);
-        Gdk::Cairo::set_source_pixbuf(cr, pixbuf,
-                                      (allocation.get_width() - icon_size)/2.0 * scale,
-                                      (allocation.get_height() - icon_size - 4)/2.0 * scale);
-        cr->paint();
-        cr->restore();
-
-        if (kiran_app_is_active(app)) {
-            Gdk::RGBA color("#3ca8ea");
-
-            Gdk::Cairo::set_source_rgba(cr, color);
-            cr->rectangle(0, allocation.get_height() - ACTIVE_INDICATOR_HEIGHT,
-                          allocation.get_width(), ACTIVE_INDICATOR_HEIGHT);
-            cr->fill();
-        }
-        else if (app->get_taskbar_windows().size() != 0) {
-            Gdk::RGBA color("#3ca8ea");
-
-            Gdk::Cairo::set_source_rgba(cr, color);
-
-            cr->arc(allocation.get_width()/2.0, allocation.get_height() - ACTIVE_INDICATOR_HEIGHT/2.0,
-                    ACTIVE_INDICATOR_HEIGHT/2.0, 0, 2 * M_PI);
-            cr->fill();
         }
     } catch (const Glib::Error &e) {
         std::cerr<<"Error occured while trying to load app icon: "<<e.what()<<std::endl;
+        pixbuf.clear();
+    }
+
+    if (!pixbuf)
+    {
+        //未能找到对应应用的图标，使用内置的默认图标
+        pixbuf = Gdk::Pixbuf::create_from_resource("/kiran-tasklist/icon/executable",
+                                                   icon_size * scale,
+                                                   icon_size * scale);
+    }
+
+    cr->scale(1.0 / scale, 1.0 / scale);
+    Gdk::Cairo::set_source_pixbuf(cr, pixbuf,
+                                  (allocation.get_width() - icon_size) / 2.0 * scale,
+                                  (allocation.get_height() - icon_size - 4) / 2.0 * scale);
+    cr->paint();
+    cr->restore();
+
+    if (kiran_app_is_active(app_))
+    {
+        Gdk::RGBA color("#3ca8ea");
+
+        Gdk::Cairo::set_source_rgba(cr, color);
+        cr->rectangle(0, allocation.get_height() - ACTIVE_INDICATOR_HEIGHT,
+                      allocation.get_width(), ACTIVE_INDICATOR_HEIGHT);
+        cr->fill();
+    }
+    else if (app_->get_taskbar_windows().size() != 0)
+    {
+        Gdk::RGBA color("#3ca8ea");
+
+        Gdk::Cairo::set_source_rgba(cr, color);
+
+        cr->arc(allocation.get_width() / 2.0, allocation.get_height() - ACTIVE_INDICATOR_HEIGHT / 2.0,
+                ACTIVE_INDICATOR_HEIGHT / 2.0, 0, 2 * M_PI);
+        cr->fill();
     }
 
     return false;
 }
 
-void KiranTasklistAppButton::on_realize()
-{
-    Gtk::Allocation allocation;
-    GdkWindowAttr attrs;
-    int mask = GDK_WA_X | GDK_WA_Y;
-    set_realized(true);
-
-    allocation = get_allocation();
-
-    memset(&attrs, 0, sizeof(attrs));
-    attrs.width = allocation.get_width();
-    attrs.height = allocation.get_height();
-    attrs.x = allocation.get_x();
-    attrs.y = allocation.get_y();
-    attrs.window_type = GDK_WINDOW_CHILD;
-    attrs.event_mask = GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK |
-            GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK;
-    attrs.wclass = GDK_INPUT_OUTPUT;
-
-    window = Gdk::Window::create(this->get_parent_window(), &attrs, mask);
-
-    set_window(window);
-    register_window(window);
-}
-
 bool KiranTasklistAppButton::on_button_press_event(GdkEventButton *button_event)
 {
-    auto windows_list = app->get_taskbar_windows();
+    auto app_  = get_app();
+
+    if (!app_) {
+        g_warning("%s: app already expired", __FUNCTION__);
+        return false;
+    }
 
     if (gdk_event_triggers_context_menu((GdkEvent*)button_event)) {
         if (!context_menu) {
             Gtk::MenuItem *item = nullptr;
-            context_menu = new KiranAppContextMenu(app);
+            context_menu = new KiranAppContextMenu(app_);
 
         } else {
             //刷新右键菜单内容，因为收藏夹等选项可能需要更新
@@ -242,43 +235,30 @@ bool KiranTasklistAppButton::on_button_press_event(GdkEventButton *button_event)
         });
         return true;
     }
+    set_state_flags(Gtk::STATE_FLAG_ACTIVE, false);
 
+    auto windows_list = app_->get_taskbar_windows();
     if (windows_list.size() == 0) {
         //无已打开窗口，打开新的应用窗口(仅针对常驻任务栏应用)
-        app->launch();
-        return false;
+        app_->launch();
+        return true;
     }
 
-    //遍历窗口列表
-    std::vector<KiranWindowPointer>::iterator iter =
-             std::upper_bound(windows_list.begin(), windows_list.end(), last_raised.lock(),
-                     [](KiranWindowPointer w1, KiranWindowPointer w2) -> bool {
-                        if (!w1)
-                            return true;
-                        if (!w2)
-                            return false;
-
-                        return w1->get_xid() > w2->get_xid();
-                     });
-
-    if (iter != windows_list.end()) {
-        //设置新的活动窗口
-        last_raised = *iter;
-    }
-    else {
-        //没有ID比当前窗口还大的窗口，默认使用该应用的第一个窗口
+    if (windows_list.size() == 1)
+    {
         auto first = windows_list.at(0);
-        if (last_raised.lock() == first) {
-            //当前应用只有一个窗口，而且是当前窗口，那么将当前窗口最小化
-
-            first->activate(button_event->time);
-            return false;
-        } else
-            last_raised = first;
+        //当前应用只有一个窗口，不需要显示预览窗口，返回true
+        g_message("%s: event time %lu\n", __PRETTY_FUNCTION__, button_event->time);
+        first->activate(button_event->time);
+        return true;
     }
 
-    last_raised.lock()->activate(button_event->time);
+    return false;
+}
 
+bool KiranTasklistAppButton::on_button_release_event(GdkEventButton *button_event)
+{
+    set_state_flags(get_state_flags() & ~Gtk::STATE_FLAG_ACTIVE, true);
     return false;
 }
 
@@ -304,7 +284,7 @@ void KiranTasklistAppButton::refresh() {
 
 const std::shared_ptr<Kiran::App> KiranTasklistAppButton::get_app()
 {
-    return app;
+    return app.lock();
 }
 
 sigc::signal<void,Gtk::Orientation> KiranTasklistAppButton::signal_orient_changed()

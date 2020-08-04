@@ -55,7 +55,7 @@ void KiranAppPreviewer::set_idle(bool idle)
 
 const std::shared_ptr<Kiran::App> KiranAppPreviewer::get_app() const
 {
-    return app;
+    return app.lock();
 }
 
 bool KiranAppPreviewer::get_idle() const
@@ -287,12 +287,20 @@ void KiranAppPreviewer::set_rgba_visual()
 
 void KiranAppPreviewer::load_windows_list()
 {
+    auto app_ = get_app();
+
     win_previewers.clear();
+
+    if (!app_) {
+        g_warning("%s: app already expired\n", __FUNCTION__);
+        return;
+    }
+
     for (auto child: box.get_children()) {
         box.remove(*child);
         delete child;
     }
-    for (auto window: this->app->get_taskbar_windows()) {
+    for (auto window: app_->get_taskbar_windows()) {
         add_window_previewer(window);
     }
     box.show_all();

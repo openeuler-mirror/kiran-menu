@@ -37,6 +37,8 @@ public:
 
     void reload_app_buttons();
 
+    void toggle_previewer(KiranTasklistAppButton *target);
+
 protected:
 
 
