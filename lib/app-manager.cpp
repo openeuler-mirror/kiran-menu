@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 21:42:15
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-28 13:54:09
+ * @LastEditTime : 2020-07-28 14:48:08
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app-manager.cpp
  */
@@ -43,6 +43,20 @@ std::vector<std::shared_ptr<App>> AppManager::get_apps()
     for (auto iter = this->apps_.begin(); iter != this->apps_.end(); ++iter)
     {
         apps.push_back(iter->second);
+    }
+    return apps;
+}
+
+AppVec AppManager::get_apps_by_kind(AppKind kind)
+{
+    std::vector<std::shared_ptr<App>> apps;
+
+    for (auto iter = this->apps_.begin(); iter != this->apps_.end(); ++iter)
+    {
+        if (iter->second->get_kind() == kind)
+        {
+            apps.push_back(iter->second);
+        }
     }
     return apps;
 }

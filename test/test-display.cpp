@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-11 09:30:42
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-09 10:33:22
+ * @LastEditTime : 2020-08-03 16:02:02
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-display.cpp
  */
@@ -110,6 +110,7 @@ gboolean timing_print(gpointer user_data)
             g_print("   is_pinned:              %d\n", window->is_pinned());
             g_print("   is_above:               %d\n", window->is_above());
             g_print("   is_active:              %d\n", window->is_active());
+            g_print("   is_shade:               %d\n", window->is_shaded());
             g_print("   app_id:                 %s\n", app ? app->get_desktop_id().c_str() : "null");
 
             g_print("\n\n");
@@ -213,10 +214,10 @@ gboolean timing_print(gpointer user_data)
             auto name = window->get_name();
             auto xid = window->get_xid();
             std::ostringstream oss;
-            auto new_name = name;
-            std::replace(new_name.begin(), new_name.end(), ' ', '-');
-            std::replace(new_name.begin(), new_name.end(), ':', '-');
-            oss << new_name << "_" << xid << ".png";
+            // auto new_name = name;
+            // std::replace(new_name.begin(), new_name.end(), ' ', '-');
+            // std::replace(new_name.begin(), new_name.end(), ':', '-');
+            oss << xid << ".png";
 
             g_print("save screentshot: name: %s xid: %" PRIu64 " pixmap: %" PRIu64 " width: %d height: %d\n",
                     name.c_str(),
@@ -267,7 +268,7 @@ int main(int argc, char **argv)
 
     timing_print(NULL);
 
-    // g_timeout_add_seconds(10, timing_print, NULL);
+    g_timeout_add_seconds(10, timing_print, NULL);
 
     kit.run();
 
