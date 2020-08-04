@@ -13,6 +13,7 @@ namespace Kiran
 {
 ScreenManager::ScreenManager()
 {
+    wnck_set_client_type(WNCK_CLIENT_TYPE_PAGER);
     this->screen_ = wnck_screen_get_default();
 }
 
