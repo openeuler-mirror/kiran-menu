@@ -196,54 +196,6 @@ viewport {
     background: transparent;
 }
 
-scrollbar {
-    -GtkScrollbar-has-backward-stepper: 0;
-    -GtkScrollbar-has-forward-stepper: 0;
-}
-
-scrollbar.vertical{
-    border: none;
-    background: transparent;
-    border-image: none;
-    min-width:5px;
-}
-
-scrollbar.vertical trough {
-   background: transparent;
-   border-image: none;
-   border: none;
-}
-
-scrollbar.vertical button {
-    min-height: 0px;
-    min-width: 0px;
-    background: transparent;
-    border: none;
-}
-
-scrollbar.vertical slider {
-    background: rgba(255, 255, 255, 0.15);
-    border-image: none;
-    border-width: 1px;
-    border-radius: 5px;
-    border-color: rgba(255, 255, 255, 0.1);
-
-    min-width: 5px;
-    min-height: 40px;
-}
-
-scrollbar.vertical slider:active, scrollbar.vertical slider:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    border-width: 1px;
-    border-radius: 5px;
-}
-
-scrollbar.vertical button.up scrollbar.vertical button.down {
-    background: transparent;
-    background-image: none;
-    border: none;
-}
-
 label.search-empty-prompt {
     font-size: 18px;
     color: #8b8b8b;
@@ -398,11 +350,11 @@ scrollbar.horizontal button, scrollbar.horizontal button {
 }
 
 scrollbar.horizontal slider, scrollbar.vertical slider {
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(255, 255, 255, 0.2);
     border-image: none;
     border-width: 1px;
     border-radius: 5px;
-    border-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(0, 0, 0, 0.2);
 }
 
 scrollbar.horizontal slider {
@@ -416,7 +368,8 @@ scrollbar.vertical slider {
 }
 
 scrollbar.horizontal slider:active, scrollbar.horizontal slider:hover, scrollbar.vertical slider:active, scrollbar.vertical slider:hover{
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.3);
     border-width: 1px;
     border-radius: 5px;
+    border-color: rgba(0, 0, 0, 0.8);
 }
