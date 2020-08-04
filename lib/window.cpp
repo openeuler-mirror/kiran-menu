@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:51
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-08-04 08:49:53
+ * @LastEditTime : 2020-08-04 08:59:16
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window.cpp
  */
@@ -340,7 +340,6 @@ void Window::geometry_changed(WnckWindow* wnck_window,
         if (std::get<2>(geometry) != std::get<2>(window->last_geometry_) ||
             std::get<3>(geometry) != std::get<3>(window->last_geometry_))
         {
-            g_print("geometry_changed.\n");
             if (!window->load_pixmap_)
             {
                 auto timeout = Glib::MainContext::get_default()->signal_timeout();
