@@ -19,6 +19,25 @@ KiranAppPreviewer::KiranAppPreviewer():
     scroll_window.show_all();
     add(scroll_window);
 
+    scroll_window.signal_scroll_event().connect(
+                    [this](GdkEventScroll *event) -> bool {
+                        /**
+                         * FIXME
+                         * 将滚动事件传递给滚动条，不知道为何没有自动传递滚动事件
+                         */
+                        Gtk::Scrollbar *scrollbar;
+
+                        if (this->box.get_orientation() == Gtk::ORIENTATION_HORIZONTAL)
+                            scrollbar = this->scroll_window.get_hscrollbar();
+                        else
+                            scrollbar = this->scroll_window.get_vscrollbar();
+
+                        if (scrollbar->is_visible())
+                            gtk_propagate_event(GTK_WIDGET(scrollbar->gobj()),
+                                            (GdkEvent*)event);
+                        return false;
+                    });
+
     set_decorated(false);
     set_skip_taskbar_hint(true);
     set_skip_pager_hint(true);
