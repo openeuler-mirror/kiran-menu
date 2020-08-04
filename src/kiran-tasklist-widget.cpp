@@ -105,6 +105,17 @@ void KiranTasklistWidget::add_app_button(const KiranAppPointer &app)
                     false));
 
 
+    //鼠标点击时开关预览窗口
+    button->signal_button_press_event().connect(
+        [button, this](GdkEventButton *event) -> bool {
+            if (gdk_event_triggers_context_menu((GdkEvent*)event))
+                return false;
+
+            this->toggle_previewer(button);
+            return false;
+        });
+
+
     //鼠标离开应用按钮时，隐藏预览窗口
     button->signal_leave_notify_event().connect(
                 sigc::bind_return<bool>(
@@ -118,6 +129,25 @@ void KiranTasklistWidget::add_app_button(const KiranAppPointer &app)
     app_buttons.insert(std::make_pair(app, button));
     g_debug("Add app button '%s'(%p)\n", app->get_name().data(), app.get());
 
+}
+
+void KiranTasklistWidget::toggle_previewer(KiranTasklistAppButton *button)
+{
+    auto target_app = button->get_app();
+    auto previewer_app = previewer->get_app();
+
+    if (!target_app) {
+        g_warning("%s: target app expired\n", __FUNCTION__);
+        return;
+    }
+
+    if (previewer_app && previewer_app == target_app && previewer->is_visible())
+    {
+        g_message("previewer app and target app match\n");
+        hide_previewer();
+        return;
+    } else
+        move_previewer(button);
 }
 
 /**
@@ -261,11 +291,14 @@ void KiranTasklistWidget::on_window_closed(KiranWindowPointer window)
          * 检查对应的应用是否有剩余窗口，如果没有，就删除该应用按钮
          */
         if (app->get_taskbar_windows().size() == 0) {
-            //TODO 需要检查是否属于常驻任务栏的应用
+            //检查是否属于常驻任务栏的应用
             if (!KiranHelper::app_is_in_fixed_list(app))
                 remove_app_button(app);
-            else
+            else {
+                app_button->set_has_tooltip(false);
+                app_button->set_tooltip_text(app->get_name());
                 app_button->refresh();
+	    }
         } else
             app_button->set_has_tooltip(false);
     }
@@ -281,12 +314,15 @@ void KiranTasklistWidget::move_previewer(KiranTasklistAppButton *target_button)
 {
     Gtk::PositionType pos = Gtk::POS_BOTTOM;
 
-    if (target_button->get_app()->get_taskbar_windows().size() == 0) {
+    auto target_app = target_button->get_app();
+    auto previewer_app = previewer->get_app();
+
+    if (!target_app || target_app->get_taskbar_windows().size() == 0) {
+        g_debug("target app expired or has no windows\n");
         return;
     }
 
     previewer->set_idle(false);
-    previewer->set_app(target_button->get_app());
 
     if (applet) {
         switch (mate_panel_applet_get_orient(applet))
@@ -307,11 +343,18 @@ void KiranTasklistWidget::move_previewer(KiranTasklistAppButton *target_button)
     }
 
     Glib::signal_timeout().connect_once([this, target_button, pos]() -> void {
+        auto target_app = target_button->get_app();
+        auto previewer_app = this->previewer->get_app();
+        if (previewer_app == target_app && previewer->is_visible()) {
+            //当前预览的应用和目标应用是同一应用
+            return;
+        }
         if (this->previewer->get_idle() || target_button->get_context_menu_opened()) {
             //如果目标应用按钮的右键菜单已经打开，就没有必要再显示预览窗口
             g_message("previewer idle or button menu opened\n");
             return;
         }
+        this->previewer->set_app(target_app);
         this->previewer->set_relative_to(target_button, pos);
         this->previewer->show();
     }, PREVIEWER_ANIMATION_TIMEOUT);

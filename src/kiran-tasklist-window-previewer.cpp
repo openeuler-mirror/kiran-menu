@@ -47,6 +47,7 @@ bool KiranWindowPreviewer::draw_snapshot(const Cairo::RefPtr<Cairo::Context> &cr
 
         XGetWindowAttributes(xdisplay, xid, &attrs);
         if (drawable == None) {
+	    g_warning("Failed to get pixmap for window 0x%x\n", xid);
             if (attrs.map_state == IsViewable) {
                 //无法从XComposite扩展获取到窗口截图，调用Xlib接口获取预览（仅针对非最小化的窗口)
                 drawable = xid;
@@ -72,7 +73,7 @@ bool KiranWindowPreviewer::draw_snapshot(const Cairo::RefPtr<Cairo::Context> &cr
 
 
         auto surface = Cairo::XlibSurface::create(xdisplay,
-                                                  xid,
+                                                  drawable,
                                                   attrs.visual,
                                                   attrs.width,
                                                   attrs.height);

@@ -35,15 +35,15 @@ protected:
 
     virtual void on_size_allocate(Gtk::Allocation &allocation) override;
     virtual bool on_draw(const::Cairo::RefPtr<Cairo::Context> &cr) override;
-    virtual void on_realize() override;
     virtual bool on_button_press_event(GdkEventButton *button_event) override;
+    virtual bool on_button_release_event(GdkEventButton *button_event) override;
 
     virtual bool on_enter_notify_event(GdkEventCrossing *crossing_event) override;
     virtual bool on_leave_notify_event(GdkEventCrossing *crossing_event) override;
 
 
 private:
-    std::shared_ptr<Kiran::App> app;              //关联的app对象
+    std::weak_ptr<Kiran::App> app;              //关联的app对象
     Gtk::DrawingArea drawing_area;
     Glib::RefPtr<Gdk::Window> window;             //事件窗口
 

@@ -20,6 +20,8 @@ KiranMenuAppletButton::KiranMenuAppletButton(MatePanelApplet *panel_applet)
                               width, height);
                     this->on_toggled();
                 });
+
+    get_style_context()->add_class("kiran-menu-applet-button");
 }
 
 KiranMenuAppletButton::~KiranMenuAppletButton()
