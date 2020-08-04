@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 21:42:15
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-28 14:48:08
+ * @LastEditTime : 2020-08-04 17:25:04
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app-manager.cpp
  */
@@ -705,7 +705,8 @@ void AppManager::app_opened(WnckScreen *screen, WnckApplication *wnck_applicatio
                 wnck_application_get_name(wnck_application),
                 xwindow);
 
-        app = std::make_shared<App>(xwindow);
+        app = App::create_fake();
+        app->add_wnck_app_by_xid(xwindow);
         app_manager->wnck_apps_[xwindow] = app;
         auto &desktop_id = app->get_desktop_id();
 
@@ -750,7 +751,9 @@ void AppManager::app_closed(WnckScreen *screen, WnckApplication *wnck_applicatio
         app_manager->wnck_apps_.erase(iter);
     }
 
-    if (app && app->get_kind() == AppKind::FAKE_DESKTOP)
+    if (app &&
+        app->get_kind() == AppKind::FAKE_DESKTOP &&
+        app->get_wnck_app_count() == 0)
     {
         auto iter = app_manager->apps_.find(app->get_desktop_id());
         if (iter != app_manager->apps_.end())
