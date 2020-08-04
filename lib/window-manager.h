@@ -2,12 +2,14 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:27:28
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-22 08:38:35
+ * @LastEditTime : 2020-08-04 08:47:01
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window-manager.h
  */
 
 #pragma once
+
+#include <gdkmm.h>
 
 #include "lib/screen-manager.h"
 #include "lib/window.h"
@@ -56,12 +58,7 @@ public:
 private:
     WindowManager(ScreenManager *screen_manager);
 
-    void load_windows();
-
-    void force_update_window();
-
-    // 更新窗口预览图
-    bool update_window_snapshot();
+    static GdkFilterReturn event_filter(GdkXEvent *xevent, GdkEvent *event, gpointer data);
 
     // 处理窗口打开信号
     static void window_opened(WnckScreen *screen, WnckWindow *wnck_window, gpointer user_data);

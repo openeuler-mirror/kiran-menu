@@ -2,12 +2,17 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:51
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-09 10:25:44
+ * @LastEditTime : 2020-08-04 08:49:53
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window.cpp
  */
 
 #include "lib/window.h"
+
+#include <X11/extensions/Xcomposite.h>
+#include <gdk-pixbuf/gdk-pixdata.h>
+#include <gdk/gdk.h>
+#include <gdk/gdkx.h>
 
 #include "lib/app-manager.h"
 #include "lib/app.h"
@@ -24,15 +29,32 @@ std::shared_ptr<Window> Window::create(WnckWindow* wnck_window)
 }
 
 Window::Window(WnckWindow* wnck_window) : wnck_window_(wnck_window),
+                                          gdk_window_(NULL),
                                           last_workspace_number_(-1),
                                           last_is_pinned_(false),
-                                          pixmap_(0)
+                                          pixmap_(None),
+                                          last_geometry_(0, 0, 0, 0)
 {
     g_signal_connect(this->wnck_window_, "workspace-changed", G_CALLBACK(Window::workspace_changed), NULL);
+    g_signal_connect(this->wnck_window_, "geometry-changed", G_CALLBACK(Window::geometry_changed), NULL);
+    this->update_window_pixmap();
 }
 
 Window::~Window()
 {
+    auto display = gdk_x11_get_default_xdisplay();
+    g_return_if_fail(display);
+
+    if (this->pixmap_)
+    {
+        XFreePixmap(display, this->pixmap_);
+        this->pixmap_ = None;
+    }
+
+    if (this->load_pixmap_)
+    {
+        this->load_pixmap_.disconnect();
+    }
 }
 
 std::string Window::get_name()
@@ -179,6 +201,11 @@ void Window::unmaximize()
     wnck_window_unmaximize(this->wnck_window_);
 }
 
+bool Window::is_shaded()
+{
+    return wnck_window_is_shaded(this->wnck_window_);
+}
+
 void Window::make_above()
 {
     wnck_window_make_above(this->wnck_window_);
@@ -209,7 +236,7 @@ void Window::close()
     wnck_window_close(this->wnck_window_, now);
 }
 
-std::tuple<int, int, int, int> Window::get_geometry()
+WinwowGeometry Window::get_geometry()
 {
     int x, y, w, h;
     wnck_window_get_geometry(this->wnck_window_, &x, &y, &w, &h);
@@ -291,6 +318,76 @@ void Window::workspace_changed(WnckWindow* wnck_window, gpointer user_data)
     {
         window->flush_workspace();
     }
+}
+
+void Window::geometry_changed(WnckWindow* wnck_window,
+                              gpointer user_data)
+{
+    auto window = WindowManager::get_instance()->lookup_window(wnck_window);
+    g_return_if_fail(window);
+
+    auto display = gdk_x11_get_default_xdisplay();
+    auto gdk_screen = gdk_screen_get_default();
+
+    g_return_if_fail(display);
+    g_return_if_fail(gdk_screen);
+
+    auto geometry = window->get_geometry();
+    if (gdk_screen_is_composited(gdk_screen))
+    {
+        auto xid = window->get_xid();
+
+        if (std::get<2>(geometry) != std::get<2>(window->last_geometry_) ||
+            std::get<3>(geometry) != std::get<3>(window->last_geometry_))
+        {
+            g_print("geometry_changed.\n");
+            if (!window->load_pixmap_)
+            {
+                auto timeout = Glib::MainContext::get_default()->signal_timeout();
+                window->load_pixmap_ = timeout.connect(sigc::mem_fun(window.get(), &Window::update_window_pixmap), 200);
+            }
+        }
+    }
+    else
+    {
+        g_warning("the extension composite is unsupported.\n");
+    }
+
+    window->last_geometry_ = geometry;
+}
+
+void Window::process_events(GdkXEvent* xevent, GdkEvent* event)
+{
+    auto x_event = (XEvent*)xevent;
+
+    if (x_event->type == MapNotify)
+    {
+        this->update_window_pixmap();
+    }
+}
+
+bool Window::update_window_pixmap()
+{
+    auto display = gdk_x11_get_default_xdisplay();
+    g_return_val_if_fail(display, false);
+
+    auto gdk_display = gdk_x11_lookup_xdisplay(display);
+    g_return_val_if_fail(gdk_display, false);
+
+    if (this->pixmap_)
+    {
+        XFreePixmap(display, this->pixmap_);
+        this->pixmap_ = None;
+    }
+
+    gdk_x11_display_error_trap_push(gdk_display);
+    this->pixmap_ = XCompositeNameWindowPixmap(display, this->get_xid());
+
+    if (gdk_x11_display_error_trap_pop(gdk_display))
+    {
+        this->pixmap_ = None;
+    }
+    return false;
 }
 
 }  // namespace Kiran
