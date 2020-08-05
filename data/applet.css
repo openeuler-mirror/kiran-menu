@@ -1,4 +1,6 @@
 @define-color placeholder_text_color #c8c8c8;
+@define-color tasklist_app_indicator_color #3ca8ea;
+@define-color tasklist_app_active_color rgba(255, 255, 255, 0.3);
 
 * {
     font-family: "Noto Sans CJK SC";

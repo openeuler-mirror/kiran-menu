@@ -116,6 +116,7 @@ bool KiranTasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
     int scale = get_scale_factor();
     Glib::RefPtr<Gdk::Pixbuf> pixbuf;
     auto app_ = get_app();
+    Gdk::RGBA indicator_color("#3ca8ea"), active_color("rgba(255, 255, 255, 0.3)");
 
     if (!app_) {
         g_warning("%s: app already expired!!\n", __FUNCTION__);
@@ -125,11 +126,37 @@ bool KiranTasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
     allocation = get_allocation();
     context->set_state(get_state_flags());
 
+    /**
+     * 从样式中加载活动窗口背景色和指示器颜色
+     */
+    if (!context->lookup_color("tasklist_app_active_color", active_color)) {
+        g_warning("%s: failed to load color 'tasklist_app_active_color'", __func__);
+    }
+
+    if (!context->lookup_color("tasklist_app_indicator_color", indicator_color)) {
+        g_warning("%s: failed to load color 'tasklist_app_indicator_color'", __func__);
+    }
+
     if (kiran_app_is_active(app_)) {
-        cr->set_source_rgba(1.0, 1.0, 1.0, 0.3);
+        Gdk::Cairo::set_source_rgba(cr, active_color);
         cr->paint();
+
+        Gdk::Cairo::set_source_rgba(cr, indicator_color);
+        cr->rectangle(0, allocation.get_height() - ACTIVE_INDICATOR_HEIGHT,
+                      allocation.get_width(), ACTIVE_INDICATOR_HEIGHT);
+        cr->fill();
     } else {
         context->render_background(cr, 0, 0, allocation.get_width(), allocation.get_height());
+        if (app_->get_taskbar_windows().size() != 0)
+        {
+            Gdk::Cairo::set_source_rgba(cr, indicator_color);
+            cr->arc(allocation.get_width() / 2.0,
+		     allocation.get_height() - ACTIVE_INDICATOR_HEIGHT / 2.0,
+                    ACTIVE_INDICATOR_HEIGHT / 2.0,
+                    0,
+                    2 * M_PI);
+            cr->fill();
+        }
     }
 
     cr->save();
@@ -173,25 +200,6 @@ bool KiranTasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
     cr->paint();
     cr->restore();
 
-    if (kiran_app_is_active(app_))
-    {
-        Gdk::RGBA color("#3ca8ea");
-
-        Gdk::Cairo::set_source_rgba(cr, color);
-        cr->rectangle(0, allocation.get_height() - ACTIVE_INDICATOR_HEIGHT,
-                      allocation.get_width(), ACTIVE_INDICATOR_HEIGHT);
-        cr->fill();
-    }
-    else if (app_->get_taskbar_windows().size() != 0)
-    {
-        Gdk::RGBA color("#3ca8ea");
-
-        Gdk::Cairo::set_source_rgba(cr, color);
-
-        cr->arc(allocation.get_width() / 2.0, allocation.get_height() - ACTIVE_INDICATOR_HEIGHT / 2.0,
-                ACTIVE_INDICATOR_HEIGHT / 2.0, 0, 2 * M_PI);
-        cr->fill();
-    }
 
     return false;
 }
