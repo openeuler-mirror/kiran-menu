@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:33
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-28 13:48:54
+ * @LastEditTime : 2020-08-04 17:33:27
  * @Description  : 维护APP的一些基本信息
  * @FilePath     : /kiran-menu-2.0/lib/app.h
  */
@@ -31,7 +31,7 @@ enum class AppKind
     UNKNOWN,
     // 可以对应到desktop文件
     DESKTOP,
-    // 无法对应到desktop文件，这里会伪造一个不存在的desktop_id，格式为"fake_${xid}"
+    // 无法对应到desktop文件，这里会伪造一个不存在的desktop_id，格式为"fake_${fake_id_count_}"
     FAKE_DESKTOP,
 };
 
@@ -59,13 +59,13 @@ enum class AppAction : uint32_t
 class App : public std::enable_shared_from_this<App>
 {
 public:
-    App() = delete;
+    App(){};
     App(const App &) = delete;
     // 通过desktop_id创建App
     App(const std::string &desktop_id);
-    // 通过WnckApplication的xid创建App
-    App(uint64_t xid);
     virtual ~App();
+
+    static std::shared_ptr<App> create_fake();
 
     void update_from_desktop_file();
 
@@ -118,10 +118,12 @@ public:
     // 通过action_name启动应用，例如"new-window"，"new-private-window"
     void launch_action(const std::string &action_name);
 
-    // 添加WnckApplication的xid，一个xid对应一个启动的应用，一个App可能启动多个应用
-    void add_wnck_app_by_xid(uint64_t xid);
-    // 删除xid
-    void del_wnck_app_by_xid(uint64_t xid);
+    // 添加WnckApplication的xid
+    void add_wnck_app_by_xid(uint64_t xid) { wnck_apps_.insert(xid); };
+    // 删除WnckApplication的xid
+    void del_wnck_app_by_xid(uint64_t xid) { wnck_apps_.erase(xid); };
+    // 获取WnckApplication数量
+    int32_t get_wnck_app_count() { return this->wnck_apps_.size(); }
 
 protected:
     // 通过调用App::launch启动应用成功的信号
@@ -168,6 +170,8 @@ private:
     Glib::RefPtr<Gio::DesktopAppInfo> desktop_app_;
 
     std::set<uint64_t> wnck_apps_;
+
+    static int32_t fake_id_count_;
 
     friend class AppManager;
 };
