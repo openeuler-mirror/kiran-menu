@@ -8,10 +8,18 @@
 
 void on_applet_size_change(MatePanelApplet *applet, gint size, gpointer userdata)
 {
-    Gtk::Container *widget = static_cast<Gtk::Container*>(userdata);
+    KiranTasklistWidget *widget;
 
-    g_debug("applet size changed, resize now\n");
-    widget->queue_resize();
+    widget = static_cast<KiranTasklistWidget*>(userdata);
+    widget->handle_applet_size_change(size);
+}
+
+void on_applet_orient_change(MatePanelApplet *applet, gint orient, gpointer userdata)
+{
+    KiranTasklistWidget *widget;
+
+    widget = static_cast<KiranTasklistWidget*>(userdata);
+    widget->handle_applet_orient_change(orient);
 }
 
 void on_applet_size_allocate(MatePanelApplet *applet, GdkRectangle *rect, gpointer userdata)
@@ -63,6 +71,7 @@ KiranTasklistWidget::KiranTasklistWidget(MatePanelApplet *applet_):
     menu_backend->signal_app_changed().connect(sigc::mem_fun(*this, &KiranTasklistWidget::reload_app_buttons));
 
     g_signal_connect(applet, "change-size", G_CALLBACK(on_applet_size_change), this);
+    g_signal_connect(applet, "change-orient", G_CALLBACK(on_applet_orient_change), this);
     g_signal_connect(applet, "size-allocate", G_CALLBACK(on_applet_size_allocate), this);
 
     //响应预览窗口打开信号
@@ -92,7 +101,6 @@ void KiranTasklistWidget::add_app_button(const KiranAppPointer &app)
         return;
 
     auto button = Gtk::manage(new KiranTasklistAppButton(app));
-    button->set_orientation(get_orientation());
     button->show_all();
 #if 1
     //鼠标进入应用按钮时，显示预览窗口
@@ -122,7 +130,7 @@ void KiranTasklistWidget::add_app_button(const KiranAppPointer &app)
                     sigc::hide(sigc::mem_fun(*this, &KiranTasklistWidget::hide_previewer)),
                     false));
 #endif
-    add(*button);
+    pack_start(*button, Gtk::PACK_SHRINK);
     button->show_all();
 
     //建立app和应用按钮之间的映射
@@ -334,10 +342,10 @@ void KiranTasklistWidget::move_previewer(KiranTasklistAppButton *target_button)
             pos = Gtk::POS_TOP;
             break;
         case MATE_PANEL_APPLET_ORIENT_LEFT:
-            pos = Gtk::POS_RIGHT;
+            pos = Gtk::POS_LEFT;
             break;
         case MATE_PANEL_APPLET_ORIENT_RIGHT:
-            pos = Gtk::POS_LEFT;
+            pos = Gtk::POS_RIGHT;
             break;
         }
     }
@@ -400,12 +408,7 @@ void KiranTasklistWidget::get_preferred_width_vfunc(int &min_width, int &natural
 
     natural_width = 0;
     if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
-        int min, natural;
-        for (auto child: get_children()) {
-            child->get_preferred_width(min, natural);
-            natural_width += natural;
-        }
-        min_width = natural_width;
+        Gtk::Box::get_preferred_width_vfunc(min_width, natural_width);
     } else {
         min_width = natural_width = applet_size;
     }
@@ -419,11 +422,7 @@ void KiranTasklistWidget::get_preferred_height_vfunc(int &min_height, int &natur
     if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
         min_height = natural_height = applet_size;
     } else {
-        int min, natural;
-        for (auto child: get_children()) {
-            child->get_preferred_height(min, natural);
-            natural_height += natural;
-        }
+        Gtk::Box::get_preferred_height_vfunc(min_height, natural_height);
     }
 }
 void KiranTasklistWidget::on_size_allocate(Gtk::Allocation &allocation)
@@ -534,4 +533,16 @@ void KiranTasklistWidget::on_previewer_window_opened()
         auto button = data.second;
         button->on_previewer_opened();
     }
+}
+
+void KiranTasklistWidget::handle_applet_size_change(int size)
+{
+    queue_resize();
+}
+
+void KiranTasklistWidget::handle_applet_orient_change(int orient)
+{
+
+    update_orientation();
+    queue_resize();
 }

@@ -38,6 +38,8 @@ public:
     void reload_app_buttons();
 
     void toggle_previewer(KiranTasklistAppButton *target);
+    void handle_applet_size_change(int size);
+    void handle_applet_orient_change(int orient);
 
 protected:
 

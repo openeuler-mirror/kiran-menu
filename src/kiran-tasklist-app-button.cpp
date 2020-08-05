@@ -21,7 +21,6 @@ static bool kiran_app_is_active(const std::shared_ptr<Kiran::App> &app)
 
 KiranTasklistAppButton::KiranTasklistAppButton(const std::shared_ptr<Kiran::App> &app_):
     app(app_),
-    orient(Gtk::ORIENTATION_HORIZONTAL),
     menu_opened(false),
     context_menu(nullptr)
 {
@@ -44,20 +43,6 @@ KiranTasklistAppButton::~KiranTasklistAppButton()
         delete context_menu;
 }
 
-void KiranTasklistAppButton::set_orientation(Gtk::Orientation orient_)
-{
-    orient = orient_;
-    if (orient == Gtk::ORIENTATION_HORIZONTAL) {
-        set_hexpand(false);
-        set_vexpand(true);
-        set_valign(Gtk::ALIGN_FILL);
-    } else {
-        set_hexpand(true);
-        set_vexpand(false);
-        set_halign(Gtk::ALIGN_FILL);
-    }
-}
-
 void KiranTasklistAppButton::on_previewer_opened()
 {
     if (menu_opened) {
@@ -68,7 +53,7 @@ void KiranTasklistAppButton::on_previewer_opened()
 
 Gtk::SizeRequestMode KiranTasklistAppButton::get_request_mode_vfunc() const
 {
-    if (orient == Gtk::ORIENTATION_HORIZONTAL)
+    if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL)
         return Gtk::SIZE_REQUEST_WIDTH_FOR_HEIGHT;
     else
         return Gtk::SIZE_REQUEST_HEIGHT_FOR_WIDTH;
@@ -76,41 +61,47 @@ Gtk::SizeRequestMode KiranTasklistAppButton::get_request_mode_vfunc() const
 
 void KiranTasklistAppButton::get_preferred_width_vfunc(int &minimum_width, int &natural_width) const
 {
-    Gtk::Allocation allocation;
+    if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
+        int minimum_height, natural_height;
 
-    allocation = get_parent()->get_allocation();
-    if (orient == Gtk::ORIENTATION_HORIZONTAL) {
-        minimum_width = natural_width = allocation.get_height();
-    } else
-        minimum_width = natural_width = allocation.get_width();
+        get_preferred_height(minimum_height, natural_height); 
+        get_preferred_width_for_height(natural_height, minimum_width, natural_width);
+    } else {
+        //使用父控件的高度设置
+        get_parent()->get_preferred_width(minimum_width, natural_width);
+    }
+    g_message("%s: width %d\n", __func__, natural_width);
 }
 
 void KiranTasklistAppButton::get_preferred_height_vfunc(int &minimum_height, int &natural_height) const
 {
-    Gtk::Allocation allocation;
+    if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
+        //使用父控件的高度设置
+        get_parent()->get_preferred_height(minimum_height, natural_height);
+    } else {
+        int minimum_width, natural_width;
 
-    allocation = get_parent()->get_allocation();
-    if (orient == Gtk::ORIENTATION_VERTICAL) {
-        minimum_height = natural_height = allocation.get_width();
-    } else
-        minimum_height = natural_height = allocation.get_height();
+        get_preferred_width(minimum_width, natural_width);
+        get_preferred_height_for_width(natural_width, minimum_height, natural_height);
+    }
+    g_message("%s: height %d\n", __func__, natural_height);
 }
 
 void KiranTasklistAppButton::get_preferred_width_for_height_vfunc(int height, int &minimum_width, int &natural_width) const
 {
-    minimum_width = natural_width = height;
+    minimum_width = natural_width = height + 8;
 }
 
 void KiranTasklistAppButton::get_preferred_height_for_width_vfunc(int width, int &minimum_height, int &natural_height) const
 {
-    minimum_height = natural_height = width;
+    minimum_height = natural_height = width + 8;
 }
 
 void KiranTasklistAppButton::on_size_allocate(Gtk::Allocation &allocation)
 {
     Gtk::EventBox::on_size_allocate(allocation);
 
-    if (orient == Gtk::ORIENTATION_VERTICAL) {
+    if (get_orientation() == Gtk::ORIENTATION_VERTICAL) {
         icon_size = allocation.get_width() - 8;
 
     } else {
@@ -287,11 +278,15 @@ const std::shared_ptr<Kiran::App> KiranTasklistAppButton::get_app()
     return app.lock();
 }
 
-sigc::signal<void,Gtk::Orientation> KiranTasklistAppButton::signal_orient_changed()
-{
-    return m_signal_orient_changed;
-}
 bool KiranTasklistAppButton::get_context_menu_opened()
 {
     return menu_opened;
+}
+
+Gtk::Orientation KiranTasklistAppButton::get_orientation() const
+{
+    const Gtk::Box *parent = static_cast<const Gtk::Box*>(get_parent());
+
+    //使用父控件容器的排列方向
+    return parent->get_orientation();
 }
