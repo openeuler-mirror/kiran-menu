@@ -19,6 +19,12 @@ KiranAppPreviewer::KiranAppPreviewer():
     scroll_window.show_all();
     add(scroll_window);
 
+
+    scroll_window.set_margin_top(5);
+    scroll_window.set_margin_bottom(5);
+    scroll_window.set_margin_start(5);
+    scroll_window.set_margin_end(5);
+
     scroll_window.signal_scroll_event().connect(
                     [this](GdkEventScroll *event) -> bool {
                         /**
@@ -43,10 +49,6 @@ KiranAppPreviewer::KiranAppPreviewer():
     set_skip_pager_hint(true);
     set_no_show_all(true);
 
-    box.set_margin_start(5);
-    box.set_margin_end(5);
-    box.set_margin_top(5);
-    box.set_margin_bottom(5);
     box.set_spacing(4);
     box.signal_remove().connect(
                 [this](Gtk::Widget *widget) -> void {
@@ -155,12 +157,12 @@ void KiranAppPreviewer::reposition()
                     workarea.get_width(), workarea.get_height(),
                     new_x, new_y);
             if (new_x < workarea.get_x())
-                new_x = workarea.get_x();
+                new_x = workarea.get_x() + 5;
             else if (new_x > workarea.get_x() + workarea.get_width())
                 new_x = workarea.get_x() + workarea.get_width();
 
             if (new_y < workarea.get_y())
-                new_y = workarea.get_y();
+                new_y = workarea.get_y() + 5;
             else if (new_y > workarea.get_y() + workarea.get_height())
                 new_y = workarea.get_y() + workarea.get_height();
 
@@ -206,8 +208,9 @@ void KiranAppPreviewer::get_preferred_width_vfunc(int &minimum_width, int &natur
     auto monitor = box.get_display()->get_monitor_at_window(
                 Glib::RefPtr<Gdk::Window>::cast_const(this->get_window()));
     monitor->get_workarea(workarea);
-    if (workarea.get_width() < natural_size.width)
-        natural_width = workarea.get_width();
+    if (workarea.get_width() < natural_size.width + 10) {
+        natural_width = workarea.get_width() - 10;
+    }
     else {
         int min_height, natural_height;
 

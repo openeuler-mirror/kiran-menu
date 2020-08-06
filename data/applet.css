@@ -16,7 +16,7 @@ button.toggle.kiran-menu-applet-button:active {
     box-shadow: none;
 }
 
-button.toggle.kiran-menu-applet-button:prelight {
+button.toggle.kiran-menu-applet-button:hover {
     background: rgba(255, 255, 255, 0.2);
     box-shadow: none;
 }
@@ -146,20 +146,6 @@ separator#sidebar-separator {
     background-color: red;
 }
 
-menuitem {
-    color: white;
-    background: transparent;
-}
-
-menuitem:hover {
-    background: rgba(255, 255, 255, 0.15);
-}
-
-menu {
-    background: #1f1f1f;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-}
-
 entry.kiran-search-entry {
     margin-left: 10px;
     margin-right: 10px;
@@ -238,14 +224,15 @@ button.kiran-expand-button:focus{
 
 .window-previewer.vertical:hover, .window-previewer.horizontal:hover {
     border: 1px solid gray;
-    border-radius: 6px;
+    border-radius: 0px;
     border-color: rgba(46,179,255, 0.6);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .window-previewer {
     border-radius: 6px;
     min-width: 200px;
-    background: rgba(0, 0, 0, 0.85);
+    background: transparent;
     color: #ffffff;
 }
 
@@ -254,14 +241,17 @@ button.kiran-expand-button:focus{
 }
 
 .window-previewer.horizontal {
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    /*border: 1px solid rgba(255, 255, 255, 0.2);*/
+    border: 1px solid transparent;
     min-height: 140px;
 }
 
 
 window.app-previewer {
-    background: transparent;
-    border: none;
+    /*background: transparent;*/
+    background: rgba(0, 0, 0, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0px;
 }
 
 window.app-previewer scrolledwindow, window.app-previewer viewport {
@@ -297,7 +287,7 @@ button.previewer-close-btn:active {
     padding: 0px;
 }
 
-menu.previewer-context-menu {
+menu.previewer-context-menu, menu.power-menu {
     background: rgba(0, 0, 0, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 8px;
@@ -305,7 +295,7 @@ menu.previewer-context-menu {
     padding-bottom: 10px;
 }
 
-menu.previewer-context-menu menuitem {
+menu.previewer-context-menu menuitem, menu.power-menu menuitem {
     color: white;
     background: transparent;
     min-height: 28px;
@@ -318,7 +308,7 @@ menu.previewer-context-menu menuitem {
     border-style: solid;
 }
 
-menu.previewer-context-menu menuitem:hover {
+menu.previewer-context-menu menuitem:hover, menu.power-menu menuitem:hover {
     background: rgba(255, 255, 255, 0.15);
     border-width: 0px;
     border-right-width: 4px;
@@ -340,6 +330,8 @@ scrollbar.horizontal, scrollbar.vertical{
 
 scrollbar.horizontal {
     min-height:5px;
+    margin-top: 3px;
+    margin-bottom: 3px;
 }
 
 scrollbar.vertical {

@@ -36,6 +36,7 @@ KiranMenuPowerMenu::KiranMenuPowerMenu()
     reboot_item.signal_activate().connect(sigc::mem_fun(*this, &KiranMenuPowerMenu::hide_menu_window));
     shutdown_item.signal_activate().connect(sigc::mem_fun(*this, &KiranMenuPowerMenu::hide_menu_window));
 
+    get_style_context()->add_class("power-menu");
 }
 
 KiranMenuPowerMenu::~KiranMenuPowerMenu()
