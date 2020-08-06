@@ -46,6 +46,7 @@ private:
     std::weak_ptr<Kiran::App> app;              //关联的app对象
     Gtk::DrawingArea drawing_area;
     Glib::RefPtr<Gdk::Window> window;             //事件窗口
+    Gtk::StyleProperty<int> indicator_size_property; //绘制指示器的尺寸
 
     KiranAppContextMenu *context_menu;                      //右键菜单
 

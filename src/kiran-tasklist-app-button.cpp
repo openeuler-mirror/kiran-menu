@@ -3,8 +3,6 @@
 #include <iostream>
 #include <algorithm>
 
-#define ACTIVE_INDICATOR_HEIGHT 4
-
 static bool kiran_app_is_active(const std::shared_ptr<Kiran::App> &app)
 {
     auto window_manager = Kiran::WindowManager::get_instance();
@@ -20,14 +18,14 @@ static bool kiran_app_is_active(const std::shared_ptr<Kiran::App> &app)
 }
 
 KiranTasklistAppButton::KiranTasklistAppButton(const std::shared_ptr<Kiran::App> &app_):
+    Glib::ObjectBase("KiranTasklistAppButton"),
+    indicator_size_property(*this, "indicator-size", G_MAXINT32),
     app(app_),
     menu_opened(false),
     context_menu(nullptr)
 {
     add(drawing_area);
 
-    auto context = get_style_context();
-    context->add_class("kiran-tasklist-button");
     add_events(Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
     set_has_window(true);
     set_above_child(true);
@@ -35,6 +33,8 @@ KiranTasklistAppButton::KiranTasklistAppButton(const std::shared_ptr<Kiran::App>
 
     if (app_->get_taskbar_windows().size() == 0)
         set_tooltip_text(app_->get_locale_name());
+
+    get_style_context()->add_class("kiran-tasklist-button");
 }
 
 KiranTasklistAppButton::~KiranTasklistAppButton()
@@ -115,13 +115,16 @@ bool KiranTasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
     auto context = get_style_context();
     int scale = get_scale_factor();
     Glib::RefPtr<Gdk::Pixbuf> pixbuf;
-    auto app_ = get_app();
     Gdk::RGBA indicator_color("#3ca8ea"), active_color("rgba(255, 255, 255, 0.3)");
+    int indicator_size = indicator_size_property.get_value();
 
+    auto app_ = get_app();
     if (!app_) {
         g_warning("%s: app already expired!!\n", __FUNCTION__);
         return false;
     }
+
+    g_debug("indicator size %d\n", indicator_size);
 
     allocation = get_allocation();
     context->set_state(get_state_flags());
@@ -141,24 +144,30 @@ bool KiranTasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
         Gdk::Cairo::set_source_rgba(cr, active_color);
         cr->paint();
 
+	//绘制窗口激活状态指示器
         Gdk::Cairo::set_source_rgba(cr, indicator_color);
-        cr->rectangle(0, allocation.get_height() - ACTIVE_INDICATOR_HEIGHT,
-                      allocation.get_width(), ACTIVE_INDICATOR_HEIGHT);
+        cr->rectangle(0, allocation.get_height() - indicator_size,
+                      allocation.get_width(), indicator_size);
         cr->fill();
     } else {
         context->render_background(cr, 0, 0, allocation.get_width(), allocation.get_height());
+
+	//绘制已打开窗口指示器
         if (app_->get_taskbar_windows().size() != 0)
         {
             Gdk::Cairo::set_source_rgba(cr, indicator_color);
             cr->arc(allocation.get_width() / 2.0,
-		     allocation.get_height() - ACTIVE_INDICATOR_HEIGHT / 2.0,
-                    ACTIVE_INDICATOR_HEIGHT / 2.0,
+		     allocation.get_height() - indicator_size / 2.0,
+                    indicator_size / 2.0,
                     0,
                     2 * M_PI);
             cr->fill();
         }
     }
 
+    /**
+     * 绘制应用图标
+     */
     cr->save();
     try {
         auto gicon = app_->get_icon();

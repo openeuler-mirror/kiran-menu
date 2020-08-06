@@ -225,6 +225,7 @@ button.kiran-expand-button:focus{
 
 .kiran-tasklist-button {
     background: transparent;
+    -gtkmm__CustomObject_KiranTasklistAppButton-indicator-size: 4px;
 }
 .kiran-tasklist-button:hover{
     background: rgba(255, 255, 255, 0.2);
