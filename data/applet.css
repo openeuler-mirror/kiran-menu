@@ -279,7 +279,12 @@ button.previewer-close-btn{
 }
 
 button.previewer-close-btn {
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
     background-image: url("/kiran-tasklist/icon/close_normal");
+    min-width: 16px;
+    min-height: 16px;
 }
 
 button.previewer-close-btn:hover{
