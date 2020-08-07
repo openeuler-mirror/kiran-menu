@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-09 15:56:04
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-09 09:53:52
+ * @LastEditTime : 2020-08-07 14:17:39
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/workspace.cpp
  */
@@ -34,6 +34,11 @@ std::string Workspace::get_name()
 void Workspace::change_name(const std::string &name)
 {
     return wnck_workspace_change_name(this->workspace_, name.c_str());
+}
+
+void Workspace::activate(uint32_t timestamp)
+{
+    wnck_workspace_activate(this->workspace_, timestamp);
 }
 
 WindowVec Workspace::get_windows()

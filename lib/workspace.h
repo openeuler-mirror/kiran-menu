@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-09 15:55:52
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-11 16:52:46
+ * @LastEditTime : 2020-08-07 14:06:48
  * @Description  : 该类是对WnckWorkspace的封装，大部分接口和wnck_window_xxxx相同。
  * @FilePath     : /kiran-menu-2.0/lib/workspace.h
  */
@@ -36,6 +36,9 @@ public:
 
     // 修改工作区名字
     void change_name(const std::string &name);
+
+    // 激活工作区
+    void activate(uint32_t timestamp);
 
     // 获取工作空间中的窗口
     WindowVec get_windows();

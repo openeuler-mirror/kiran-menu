@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-11 09:30:42
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-08-03 16:02:02
+ * @LastEditTime : 2020-08-07 14:42:12
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-display.cpp
  */
@@ -49,26 +49,26 @@ void app_action_changed(std::shared_ptr<Kiran::App> app, Kiran::AppAction action
 {
     switch (action)
     {
-        case Kiran::AppAction::APP_OPENED:
-            g_print("signal: app '%s' is opened.\n", app->get_desktop_id().c_str());
-            // g_print("signal: app '%s' is opened. xid: %" PRIu64 " pid: %" PRIu64 "\n",
-            //         app->get_desktop_id().c_str(),
-            //         app->get_xid(),
-            //         app->get_pid());
-            break;
-        case Kiran::AppAction::APP_CLOSED:
-            g_print("signal: app '%s' is closed.\n", app->get_desktop_id().c_str());
+    case Kiran::AppAction::APP_OPENED:
+        g_print("signal: app '%s' is opened.\n", app->get_desktop_id().c_str());
+        // g_print("signal: app '%s' is opened. xid: %" PRIu64 " pid: %" PRIu64 "\n",
+        //         app->get_desktop_id().c_str(),
+        //         app->get_xid(),
+        //         app->get_pid());
+        break;
+    case Kiran::AppAction::APP_CLOSED:
+        g_print("signal: app '%s' is closed.\n", app->get_desktop_id().c_str());
 
-            // g_print("signal: app '%s' is closed. xid: %" PRIu64 " pid: %" PRIu64 "\n",
-            //         app->get_desktop_id().c_str(),
-            //         app->get_xid(),
-            //         app->get_pid());
-            break;
-        case Kiran::AppAction::APP_WINDOW_CHANGED:
-            g_print("signal: the window of the app '%s' is changed\n", app->get_desktop_id().c_str());
-            break;
-        case Kiran::AppAction::APP_ALL_WINDOWS_CLOSED:
-            g_print("signal: the all windows of the app '%s' is closed\n", app->get_desktop_id().c_str());
+        // g_print("signal: app '%s' is closed. xid: %" PRIu64 " pid: %" PRIu64 "\n",
+        //         app->get_desktop_id().c_str(),
+        //         app->get_xid(),
+        //         app->get_pid());
+        break;
+    case Kiran::AppAction::APP_WINDOW_CHANGED:
+        g_print("signal: the window of the app '%s' is changed\n", app->get_desktop_id().c_str());
+        break;
+    case Kiran::AppAction::APP_ALL_WINDOWS_CLOSED:
+        g_print("signal: the all windows of the app '%s' is closed\n", app->get_desktop_id().c_str());
     }
 }
 
@@ -80,6 +80,15 @@ void workspace_created(std::shared_ptr<Kiran::Workspace> workspace)
 void workspace_destroyed(std::shared_ptr<Kiran::Workspace> workspace)
 {
     g_print("signal: workspace '%s' is destroyed\n", workspace->get_name().c_str());
+}
+
+void active_workspace_changed(std::shared_ptr<Kiran::Workspace> prev_active_workspace, std::shared_ptr<Kiran::Workspace> cur_active_workspace)
+{
+    g_print("signal: active workspace change. prev: '%s' prev_index: %d cur: '%s' cur_index: %d\n",
+            prev_active_workspace ? prev_active_workspace->get_name().c_str() : "null",
+            prev_active_workspace ? prev_active_workspace->get_number() : 0,
+            cur_active_workspace ? cur_active_workspace->get_name().c_str() : "null",
+            cur_active_workspace ? cur_active_workspace->get_number() : 0);
 }
 
 gboolean timing_print(gpointer user_data)
@@ -175,7 +184,7 @@ gboolean timing_print(gpointer user_data)
 
         auto workspace_manager = Kiran::WorkspaceManager::get_instance();
 
-        workspace_manager->change_workspace_count(2);
+        // workspace_manager->change_workspace_count(2);
         auto workspaces = workspace_manager->get_workspaces();
 
         g_print("total workspace number: %d\n", workspaces.size());
@@ -183,7 +192,7 @@ gboolean timing_print(gpointer user_data)
         for (int i = 0; i < workspaces.size(); ++i)
         {
             auto workspace = workspaces[i];
-            g_print("workspace_name: %s\n", workspace->get_name().c_str());
+            g_print("workspace_name: %s index: %d\n", workspace->get_name().c_str(), workspace->get_number());
 
             auto windows = workspace->get_windows();
             for (int j = 0; j < windows.size(); ++j)
@@ -196,6 +205,11 @@ gboolean timing_print(gpointer user_data)
             }
             g_print("\n\n");
         }
+
+        // static int switch_workspace_id = 0;
+        // switch_workspace_id = (switch_workspace_id + 1) % workspaces.size();
+        // auto workspace = workspace_manager->get_workspace(switch_workspace_id);
+        // workspace->activate(0);
     }
 
     /*------------------------------------------- save the screenshot of all windows --------------------------------------*/
@@ -263,8 +277,7 @@ int main(int argc, char **argv)
 
     workspace_manager->signal_workspace_created().connect(&workspace_created);
     workspace_manager->signal_workspace_destroyed().connect(&workspace_destroyed);
-
-    // Kiran::ScreenManager::global_init();
+    workspace_manager->signal_active_workspace_changed().connect(&active_workspace_changed);
 
     timing_print(NULL);
 
