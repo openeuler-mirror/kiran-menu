@@ -2,8 +2,9 @@
 #define KIRANMENUPOWERMENU_H
 
 #include <gtkmm.h>
+#include "kiran-opacity-menu.h"
 
-class KiranMenuPowerMenu : public Gtk::Menu
+class KiranMenuPowerMenu : public KiranOpacityMenu
 {
 public:
     KiranMenuPowerMenu();

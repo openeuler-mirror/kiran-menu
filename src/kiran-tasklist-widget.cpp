@@ -2,15 +2,24 @@
 #include <window-manager.h>
 #include <window.h>
 #include "taskbar-skeleton.h"
+#include "menu-skeleton.h"
 
 #define PREVIEWER_ANIMATION_TIMEOUT 400
 
 void on_applet_size_change(MatePanelApplet *applet, gint size, gpointer userdata)
 {
-    Gtk::Container *widget = static_cast<Gtk::Container*>(userdata);
+    KiranTasklistWidget *widget;
 
-    g_debug("applet size changed, resize now\n");
-    widget->queue_resize();
+    widget = static_cast<KiranTasklistWidget*>(userdata);
+    widget->handle_applet_size_change(size);
+}
+
+void on_applet_orient_change(MatePanelApplet *applet, gint orient, gpointer userdata)
+{
+    KiranTasklistWidget *widget;
+
+    widget = static_cast<KiranTasklistWidget*>(userdata);
+    widget->handle_applet_orient_change(orient);
 }
 
 void on_applet_size_allocate(MatePanelApplet *applet, GdkRectangle *rect, gpointer userdata)
@@ -58,7 +67,11 @@ KiranTasklistWidget::KiranTasklistWidget(MatePanelApplet *applet_):
     backend->signal_fixed_app_deleted().connect(
                 sigc::mem_fun(*this, &KiranTasklistWidget::on_fixed_apps_removed));
 
+    auto menu_backend = Kiran::MenuSkeleton::get_instance();
+    menu_backend->signal_app_changed().connect(sigc::mem_fun(*this, &KiranTasklistWidget::reload_app_buttons));
+
     g_signal_connect(applet, "change-size", G_CALLBACK(on_applet_size_change), this);
+    g_signal_connect(applet, "change-orient", G_CALLBACK(on_applet_orient_change), this);
     g_signal_connect(applet, "size-allocate", G_CALLBACK(on_applet_size_allocate), this);
 
     //响应预览窗口打开信号
@@ -88,7 +101,6 @@ void KiranTasklistWidget::add_app_button(const KiranAppPointer &app)
         return;
 
     auto button = Gtk::manage(new KiranTasklistAppButton(app));
-    button->set_orientation(get_orientation());
     button->show_all();
 #if 1
     //鼠标进入应用按钮时，显示预览窗口
@@ -101,19 +113,49 @@ void KiranTasklistWidget::add_app_button(const KiranAppPointer &app)
                     false));
 
 
+    //鼠标点击时开关预览窗口
+    button->signal_button_press_event().connect(
+        [button, this](GdkEventButton *event) -> bool {
+            if (gdk_event_triggers_context_menu((GdkEvent*)event))
+                return false;
+
+            this->toggle_previewer(button);
+            return false;
+        });
+
+
     //鼠标离开应用按钮时，隐藏预览窗口
     button->signal_leave_notify_event().connect(
                 sigc::bind_return<bool>(
                     sigc::hide(sigc::mem_fun(*this, &KiranTasklistWidget::hide_previewer)),
                     false));
 #endif
-    add(*button);
+    pack_start(*button, Gtk::PACK_SHRINK);
     button->show_all();
 
     //建立app和应用按钮之间的映射
     app_buttons.insert(std::make_pair(app, button));
     g_debug("Add app button '%s'(%p)\n", app->get_name().data(), app.get());
 
+}
+
+void KiranTasklistWidget::toggle_previewer(KiranTasklistAppButton *button)
+{
+    auto target_app = button->get_app();
+    auto previewer_app = previewer->get_app();
+
+    if (!target_app) {
+        g_warning("%s: target app expired\n", __FUNCTION__);
+        return;
+    }
+
+    if (previewer_app && previewer_app == target_app && previewer->is_visible())
+    {
+        g_message("previewer app and target app match\n");
+        hide_previewer();
+        return;
+    } else
+        move_previewer(button);
 }
 
 /**
@@ -257,11 +299,14 @@ void KiranTasklistWidget::on_window_closed(KiranWindowPointer window)
          * 检查对应的应用是否有剩余窗口，如果没有，就删除该应用按钮
          */
         if (app->get_taskbar_windows().size() == 0) {
-            //TODO 需要检查是否属于常驻任务栏的应用
+            //检查是否属于常驻任务栏的应用
             if (!KiranHelper::app_is_in_fixed_list(app))
                 remove_app_button(app);
-            else
+            else {
+                app_button->set_has_tooltip(false);
+                app_button->set_tooltip_text(app->get_name());
                 app_button->refresh();
+	    }
         } else
             app_button->set_has_tooltip(false);
     }
@@ -277,12 +322,15 @@ void KiranTasklistWidget::move_previewer(KiranTasklistAppButton *target_button)
 {
     Gtk::PositionType pos = Gtk::POS_BOTTOM;
 
-    if (target_button->get_app()->get_taskbar_windows().size() == 0) {
+    auto target_app = target_button->get_app();
+    auto previewer_app = previewer->get_app();
+
+    if (!target_app || target_app->get_taskbar_windows().size() == 0) {
+        g_debug("target app expired or has no windows\n");
         return;
     }
 
     previewer->set_idle(false);
-    previewer->set_app(target_button->get_app());
 
     if (applet) {
         switch (mate_panel_applet_get_orient(applet))
@@ -294,20 +342,27 @@ void KiranTasklistWidget::move_previewer(KiranTasklistAppButton *target_button)
             pos = Gtk::POS_TOP;
             break;
         case MATE_PANEL_APPLET_ORIENT_LEFT:
-            pos = Gtk::POS_RIGHT;
+            pos = Gtk::POS_LEFT;
             break;
         case MATE_PANEL_APPLET_ORIENT_RIGHT:
-            pos = Gtk::POS_LEFT;
+            pos = Gtk::POS_RIGHT;
             break;
         }
     }
 
     Glib::signal_timeout().connect_once([this, target_button, pos]() -> void {
+        auto target_app = target_button->get_app();
+        auto previewer_app = this->previewer->get_app();
+        if (previewer_app == target_app && previewer->is_visible()) {
+            //当前预览的应用和目标应用是同一应用
+            return;
+        }
         if (this->previewer->get_idle() || target_button->get_context_menu_opened()) {
             //如果目标应用按钮的右键菜单已经打开，就没有必要再显示预览窗口
             g_message("previewer idle or button menu opened\n");
             return;
         }
+        this->previewer->set_app(target_app);
         this->previewer->set_relative_to(target_button, pos);
         this->previewer->show();
     }, PREVIEWER_ANIMATION_TIMEOUT);
@@ -353,12 +408,7 @@ void KiranTasklistWidget::get_preferred_width_vfunc(int &min_width, int &natural
 
     natural_width = 0;
     if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
-        int min, natural;
-        for (auto child: get_children()) {
-            child->get_preferred_width(min, natural);
-            natural_width += natural;
-        }
-        min_width = natural_width;
+        Gtk::Box::get_preferred_width_vfunc(min_width, natural_width);
     } else {
         min_width = natural_width = applet_size;
     }
@@ -372,11 +422,7 @@ void KiranTasklistWidget::get_preferred_height_vfunc(int &min_height, int &natur
     if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
         min_height = natural_height = applet_size;
     } else {
-        int min, natural;
-        for (auto child: get_children()) {
-            child->get_preferred_height(min, natural);
-            natural_height += natural;
-        }
+        Gtk::Box::get_preferred_height_vfunc(min_height, natural_height);
     }
 }
 void KiranTasklistWidget::on_size_allocate(Gtk::Allocation &allocation)
@@ -396,6 +442,20 @@ void KiranTasklistWidget::on_size_allocate(Gtk::Allocation &allocation)
             natural.height);
 
     Gtk::Box::on_size_allocate(allocation);;
+}
+
+void KiranTasklistWidget::reload_app_buttons()
+{
+    g_message("%s: reloading apps\n", __FUNCTION__);
+    for (auto iter: app_buttons) {
+	auto app = iter.first;
+	auto button = iter.second;
+
+	delete button;
+    } 
+
+    app_buttons.clear();
+    load_applications();
 }
 
 /**
@@ -418,8 +478,10 @@ void KiranTasklistWidget::load_applications()
     g_debug("%s: loading running apps ...\n", __FUNCTION__);
     apps = manager->get_running_apps();
     for (auto app: apps) {
-        if (find_app_button(app))
+        if (find_app_button(app)) {
+	    g_debug("button for app '%s' already exists, skip ...\n");
             continue;
+	}
 
         //如果应用的窗口都不需要在任务栏显示，就不在任务栏上显示应用按钮
         if (app->get_taskbar_windows().size() == 0)
@@ -471,4 +533,16 @@ void KiranTasklistWidget::on_previewer_window_opened()
         auto button = data.second;
         button->on_previewer_opened();
     }
+}
+
+void KiranTasklistWidget::handle_applet_size_change(int size)
+{
+    queue_resize();
+}
+
+void KiranTasklistWidget::handle_applet_orient_change(int orient)
+{
+
+    update_orientation();
+    queue_resize();
 }

@@ -19,15 +19,36 @@ KiranAppPreviewer::KiranAppPreviewer():
     scroll_window.show_all();
     add(scroll_window);
 
+
+    scroll_window.set_margin_top(5);
+    scroll_window.set_margin_bottom(5);
+    scroll_window.set_margin_start(5);
+    scroll_window.set_margin_end(5);
+
+    scroll_window.signal_scroll_event().connect(
+                    [this](GdkEventScroll *event) -> bool {
+                        /**
+                         * FIXME
+                         * 将滚动事件传递给滚动条，不知道为何没有自动传递滚动事件
+                         */
+                        Gtk::Scrollbar *scrollbar;
+
+                        if (this->box.get_orientation() == Gtk::ORIENTATION_HORIZONTAL)
+                            scrollbar = this->scroll_window.get_hscrollbar();
+                        else
+                            scrollbar = this->scroll_window.get_vscrollbar();
+
+                        if (scrollbar->is_visible())
+                            gtk_propagate_event(GTK_WIDGET(scrollbar->gobj()),
+                                            (GdkEvent*)event);
+                        return false;
+                    });
+
     set_decorated(false);
     set_skip_taskbar_hint(true);
     set_skip_pager_hint(true);
     set_no_show_all(true);
 
-    box.set_margin_start(5);
-    box.set_margin_end(5);
-    box.set_margin_top(5);
-    box.set_margin_bottom(5);
     box.set_spacing(4);
     box.signal_remove().connect(
                 [this](Gtk::Widget *widget) -> void {
@@ -55,7 +76,7 @@ void KiranAppPreviewer::set_idle(bool idle)
 
 const std::shared_ptr<Kiran::App> KiranAppPreviewer::get_app() const
 {
-    return app;
+    return app.lock();
 }
 
 bool KiranAppPreviewer::get_idle() const
@@ -136,12 +157,12 @@ void KiranAppPreviewer::reposition()
                     workarea.get_width(), workarea.get_height(),
                     new_x, new_y);
             if (new_x < workarea.get_x())
-                new_x = workarea.get_x();
+                new_x = workarea.get_x() + 5;
             else if (new_x > workarea.get_x() + workarea.get_width())
                 new_x = workarea.get_x() + workarea.get_width();
 
             if (new_y < workarea.get_y())
-                new_y = workarea.get_y();
+                new_y = workarea.get_y() + 5;
             else if (new_y > workarea.get_y() + workarea.get_height())
                 new_y = workarea.get_y() + workarea.get_height();
 
@@ -187,8 +208,9 @@ void KiranAppPreviewer::get_preferred_width_vfunc(int &minimum_width, int &natur
     auto monitor = box.get_display()->get_monitor_at_window(
                 Glib::RefPtr<Gdk::Window>::cast_const(this->get_window()));
     monitor->get_workarea(workarea);
-    if (workarea.get_width() < natural_size.width)
-        natural_width = workarea.get_width();
+    if (workarea.get_width() < natural_size.width + 10) {
+        natural_width = workarea.get_width() - 10;
+    }
     else {
         int min_height, natural_height;
 
@@ -287,12 +309,20 @@ void KiranAppPreviewer::set_rgba_visual()
 
 void KiranAppPreviewer::load_windows_list()
 {
+    auto app_ = get_app();
+
     win_previewers.clear();
+
+    if (!app_) {
+        g_warning("%s: app already expired\n", __FUNCTION__);
+        return;
+    }
+
     for (auto child: box.get_children()) {
         box.remove(*child);
         delete child;
     }
-    for (auto window: this->app->get_taskbar_windows()) {
+    for (auto window: app_->get_taskbar_windows()) {
         add_window_previewer(window);
     }
     box.show_all();

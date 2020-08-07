@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:46
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-09 10:25:52
+ * @LastEditTime : 2020-08-04 08:49:45
  * @Description  : 该类是对WnckWindow的封装，大部分接口和wnck_window_xxxx相同。
  * @FilePath     : /kiran-menu-2.0/lib/window.h
  */
@@ -21,6 +21,7 @@ class Window;
 class Workspace;
 
 using WindowVec = std::vector<std::shared_ptr<Kiran::Window>>;
+using WinwowGeometry = std::tuple<int, int, int, int>;
 
 class Window : public std::enable_shared_from_this<Window>
 {
@@ -41,7 +42,7 @@ public:
     GdkPixbuf* get_icon();
 
     // 获取窗口预览图的pixmap
-    Pixmap get_pixmap() { return this->pixmap_; }
+    Pixmap get_pixmap() { return this->pixmap_; };
 
     // 获取与该窗口关联的App对象
     std::shared_ptr<App> get_app();
@@ -91,6 +92,9 @@ public:
     // 还原窗口大小
     void unmaximize();
 
+    //
+    bool is_shaded();
+
     // 窗口置顶
     void make_above();
     void make_unabove();
@@ -108,7 +112,7 @@ public:
     void close();
 
     // 获取窗口位置和大小
-    std::tuple<int, int, int, int> get_geometry();
+    WinwowGeometry get_geometry();
 
     // 获取当前所在的工作区。如果窗口为pin状态或者不在任何工作区，则返回空
     std::shared_ptr<Workspace> get_workspace();
@@ -119,17 +123,23 @@ private:
     void flush_workspace();
 
     static void workspace_changed(WnckWindow* wnck_window, gpointer user_data);
-
-    void set_pixmap(Pixmap pixmap) { this->pixmap_ = pixmap; }
+    static void geometry_changed(WnckWindow* wnck_window, gpointer user_data);
+    void process_events(GdkXEvent* xevent, GdkEvent* event);
+    bool update_window_pixmap();
 
 private:
     WnckWindow* wnck_window_;
+    GdkWindow* gdk_window_;
 
     int32_t last_workspace_number_;
 
     bool last_is_pinned_;
 
     Pixmap pixmap_;
+
+    sigc::connection load_pixmap_;
+
+    WinwowGeometry last_geometry_;
 
     // 因为在应用程序关闭的时候，无法
     // uint64_t window_group_;

@@ -35,6 +35,12 @@ public:
     //根据applet所在面板的排列方向更新应用按钮排列方向
     void update_orientation();
 
+    void reload_app_buttons();
+
+    void toggle_previewer(KiranTasklistAppButton *target);
+    void handle_applet_size_change(int size);
+    void handle_applet_orient_change(int orient);
+
 protected:
 
 

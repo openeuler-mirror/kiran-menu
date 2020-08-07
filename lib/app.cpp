@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:38
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-28 13:49:22
+ * @LastEditTime : 2020-08-04 17:21:18
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app.cpp
  */
@@ -23,17 +23,20 @@ App::App(const std::string &desktop_id) : kind_(AppKind::DESKTOP),
     this->update_from_desktop_file();
 }
 
-App::App(uint64_t xid) : kind_(AppKind::FAKE_DESKTOP)
-{
-    std::ostringstream oss;
-    oss << "fake_" << xid;
-    this->desktop_id_ = oss.str();
-
-    add_wnck_app_by_xid(xid);
-}
-
 App::~App()
 {
+}
+
+int32_t App::fake_id_count_ = 0;
+std::shared_ptr<App> App::create_fake()
+{
+    auto app = std::make_shared<App>();
+    app->kind_ = AppKind::FAKE_DESKTOP;
+
+    std::ostringstream oss;
+    oss << "fake_" << ++App::fake_id_count_;
+    app->desktop_id_ = oss.str();
+    return app;
 }
 
 void App::update_from_desktop_file()
@@ -214,21 +217,6 @@ void App::launch_action(const std::string &action_name)
     this->desktop_app_->launch_action(action_name);
     // there is no way to detect failures that occur while using this function
     // this->launched_.emit(this->shared_from_this());
-}
-
-void App::add_wnck_app_by_xid(uint64_t xid)
-{
-    wnck_apps_.insert(xid);
-
-    if (this->kind_ == AppKind::FAKE_DESKTOP && wnck_apps_.size() > 1)
-    {
-        g_warning("the fake app is related by multiply wnck applications.");
-    }
-}
-
-void App::del_wnck_app_by_xid(uint64_t xid)
-{
-    wnck_apps_.erase(xid);
 }
 
 typedef struct
