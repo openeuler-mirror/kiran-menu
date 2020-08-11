@@ -12,6 +12,7 @@ set(DEP_LIBDIR ${GTKMM_LIBDIR})
 set(TEST_APPS test-apps)
 set(TEST_UNIT test-unit)
 set(TEST_MENU_SIGNAL test-menu-signal)
+set(TEST_TASKBAR_SIGNAL test-taskbar-signal)
 set(TEST_DISPLAY test-display)
 set(TEST_LAUNCH_ACTION test-launch-action)
 
@@ -24,13 +25,16 @@ add_executable(${TEST_UNIT}
 add_executable(${TEST_MENU_SIGNAL}
     "test-menu-signal.cpp")
 
+add_executable(${TEST_TASKBAR_SIGNAL}
+    "test-taskbar-signal.cpp")
+
 add_executable(${TEST_DISPLAY}
     "test-display.cpp")
 
 add_executable(${TEST_LAUNCH_ACTION}
     "test-launch-action.cpp")
 
-list (APPEND TESTS ${TEST_APPS} ${TEST_UNIT} ${TEST_MENU_SIGNAL} ${TEST_DISPLAY} ${TEST_LAUNCH_ACTION})
+list (APPEND TESTS ${TEST_APPS} ${TEST_UNIT} ${TEST_MENU_SIGNAL} ${TEST_TASKBAR_SIGNAL} ${TEST_DISPLAY} ${TEST_LAUNCH_ACTION})
 
 foreach(TEST_ITEM IN ITEMS ${TESTS})
 
