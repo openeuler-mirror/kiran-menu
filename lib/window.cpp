@@ -153,9 +153,13 @@ bool Window::is_skip_taskbar()
 void Window::activate(uint32_t timestamp)
 {
     WnckWindowState state = wnck_window_get_state(wnck_window_);
+    auto workspace = get_workspace();
+    auto current_workspace = WorkspaceManager::get_instance()->get_active_workspace();
 
     if (state & WNCK_WINDOW_STATE_MINIMIZED)
     {
+        if (workspace != current_workspace)
+            workspace->activate(timestamp);
         wnck_window_activate_transient(this->wnck_window_, timestamp);
     }
     else if (wnck_window_is_active(wnck_window_) ||
@@ -166,6 +170,8 @@ void Window::activate(uint32_t timestamp)
     }
     else
     {
+        if (workspace != current_workspace)
+            workspace->activate(timestamp);
         wnck_window_activate_transient(this->wnck_window_, timestamp);
     }
 }
