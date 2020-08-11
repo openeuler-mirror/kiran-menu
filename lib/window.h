@@ -116,6 +116,8 @@ public:
 
     // 获取当前所在的工作区。如果窗口为pin状态或者不在任何工作区，则返回空
     std::shared_ptr<Workspace> get_workspace();
+    void set_on_visible_workspace(bool on);
+    bool get_on_visible_workspace();
 
 private:
     Window(WnckWindow* window);

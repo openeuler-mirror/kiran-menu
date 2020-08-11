@@ -394,4 +394,17 @@ bool Window::update_window_pixmap()
     return false;
 }
 
+void Window::set_on_visible_workspace(bool on)
+{
+    if (on)
+        wnck_window_pin(this->wnck_window_);
+    else
+        wnck_window_unpin(this->wnck_window_);
+}
+
+bool Window::get_on_visible_workspace()
+{
+    return wnck_window_is_pinned(this->wnck_window_);
+}
+
 }  // namespace Kiran
