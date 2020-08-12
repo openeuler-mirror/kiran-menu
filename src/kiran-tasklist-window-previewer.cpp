@@ -199,7 +199,7 @@ bool KiranWindowPreviewer::on_button_press_event(GdkEventButton *button_event)
     }
 
     if (!this->window.expired())
-        this->window.lock()->activate(button_event->time);
+        this->window.lock()->activate(0);
     else
         g_warning("%s: window already deleted!!!\n", __PRETTY_FUNCTION__);
 

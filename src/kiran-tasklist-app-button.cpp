@@ -257,7 +257,7 @@ bool KiranTasklistAppButton::on_button_press_event(GdkEventButton *button_event)
         auto first = windows_list.at(0);
         //当前应用只有一个窗口，不需要显示预览窗口，返回true
         g_message("%s: event time %lu\n", __PRETTY_FUNCTION__, button_event->time);
-        first->activate(button_event->time);
+        first->activate(0);
         return true;
     }
 
