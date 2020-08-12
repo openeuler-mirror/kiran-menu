@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-07-09 11:03:43
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-28 14:48:30
+ * @LastEditTime : 2020-08-11 17:37:00
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/taskbar-skeleton.cpp
  */
@@ -187,7 +187,7 @@ void TaskBarSkeleton::app_changed(const Glib::ustring &key)
             auto app = this->app_manager_->lookup_app(desktop_id.raw());
             if (app)
             {
-                delete_apps.push_back(app);
+                add_apps.push_back(app);
             }
         }
     }
