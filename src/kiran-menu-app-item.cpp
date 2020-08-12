@@ -27,6 +27,59 @@ KiranMenuAppItem::KiranMenuAppItem(const std::shared_ptr<Kiran::App> &app_, int 
     }
 
     set_tooltip_text(app_->get_locale_comment());
+
+    init_drag_and_drop();
+}
+
+const std::shared_ptr<Kiran::App> KiranMenuAppItem::get_app() const
+{
+    return app.lock();
+}
+
+void KiranMenuAppItem::init_drag_and_drop()
+{
+    std::vector<Gtk::TargetEntry> targets;
+    Gtk::TargetEntry target("text/uri-list");
+
+    targets.push_back(target);
+    drag_source_set(targets, Gdk::BUTTON1_MASK, Gdk::ACTION_COPY);
+
+    this->signal_drag_begin().connect(
+        [this](const Glib::RefPtr<Gdk::DragContext> &context) -> void {
+            /**
+             * 设置拖动操作的Icon
+             */
+            auto app = this->get_app();
+            gtk_drag_set_icon_gicon(context->gobj(), app->get_icon()->gobj(), 0, 0);
+        });
+
+    this->signal_drag_data_get().connect(
+        [this](const Glib::RefPtr<Gdk::DragContext> &context, Gtk::SelectionData &selection, guint info, guint timestamp) -> void {
+            /**
+             * 将app对应的desktop文件路径传递给目的控件 
+             */
+            auto app = this->get_app();
+            if (!app) {
+                g_warning("init_drag_and_drop: app alreay expired\n");
+                return;
+            }
+            Glib::ustring uri = Glib::filename_to_uri(app->get_file_name()) + "\r\n";
+
+            selection.set(8, (const guint8*)uri.data(), uri.length());
+        });
+
+    this->signal_drag_end().connect(
+        [this](const Glib::RefPtr<Gdk::DragContext> &context) -> void {
+            // 让开始菜单窗口重新获取输入焦点
+            Gtk::Container *toplevel = this->get_toplevel();
+            KiranHelper::grab_input(*toplevel);
+        });
+
+    this->signal_drag_failed().connect(
+        [this](const Glib::RefPtr<Gdk::DragContext> &context, Gtk::DragResult result) -> bool {
+            g_debug("drag failed, result %d\n", (int)result);
+            return true;
+        });
 }
 
 bool KiranMenuAppItem::on_button_press_event(GdkEventButton *button_event)
@@ -35,11 +88,15 @@ bool KiranMenuAppItem::on_button_press_event(GdkEventButton *button_event)
         //鼠标右键点击，显示上下文菜单
         create_context_menu();
         context_menu.popup_at_pointer((GdkEvent*)button_event);
-        return false;
     }
+    return false;
+}
 
-    //鼠标左键点击启动app
-    launch_app();
+bool KiranMenuAppItem::on_button_release_event(GdkEventButton *button_event)
+{
+    if (button_event->button == 1)
+        //鼠标左键点击启动app
+        launch_app();
     return false;
 }
 
