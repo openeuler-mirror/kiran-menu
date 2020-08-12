@@ -6,8 +6,13 @@
 #include <locale.h>
 #include "config.h"
 #include "kiranpower.h"
+#include <X11/Xlib.h>
+#include <gtk/gtkx.h>
 
 #define GETTEXT_PACKAGE "kiran-menu"
+
+static Atom atom_mate_panel_action_kiran_menu  = None;
+static Atom atom_mate_panel_action  = None;
 
 bool load_resources() {
     try {
@@ -30,6 +35,26 @@ bool load_resources() {
     }
 
     return true;
+}
+
+static GdkFilterReturn key_event_filter(GdkXEvent *xevent, GdkEvent *event, gpointer data)
+{
+    XEvent *x_event = (XEvent *)xevent;
+    Gtk::ToggleButton *button = (Gtk::ToggleButton *)data;
+
+    if (x_event->type == ClientMessage)
+    {
+        g_message("got client message\n");
+
+        if (x_event->xclient.message_type == atom_mate_panel_action &&
+            x_event->xclient.data.l[0] == atom_mate_panel_action_kiran_menu)
+        {
+            g_message("it is kiran menu event\n");
+            button->set_active(!button->get_active());
+        }
+    }
+
+    return GDK_FILTER_CONTINUE;
 }
 
 #ifndef TEST
@@ -57,6 +82,24 @@ kiran_menu_applet_fill (MatePanelApplet *applet,
     auto button = new KiranMenuAppletButton(applet);
     gtk_container_add(GTK_CONTAINER(applet), GTK_WIDGET(button->gobj()));
     gtk_widget_show_all(GTK_WIDGET(applet));
+
+    do {
+        Display *xdisplay = nullptr;
+
+        xdisplay = gdk_x11_get_default_xdisplay();
+
+        atom_mate_panel_action_kiran_menu =
+            XInternAtom(xdisplay,
+                        "_MATE_PANEL_ACTION_KIRAN_MENU",
+                        FALSE);
+
+        atom_mate_panel_action =
+            XInternAtom(xdisplay,
+                        "_MATE_PANEL_ACTION",
+                        FALSE);
+
+        gdk_window_add_filter(nullptr, key_event_filter, button);
+    } while (0);
 
     return TRUE;
 }
