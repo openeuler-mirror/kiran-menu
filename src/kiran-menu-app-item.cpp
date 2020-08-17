@@ -243,6 +243,12 @@ void KiranMenuAppItem::launch_app()
         g_warning("%s: app already expired\n", __FUNCTION__);
         return;
     }
-    app.lock()->launch();
+
+    /**
+     * 需要先发出信号，然后再启动。
+     * 否则在新应用launch()调用时，后台会触发新安装应用列表变化信号,
+     * 当前对象会被销毁，导致无法正常发出启动信号
+     */
     signal_launched().emit();
+    app.lock()->launch();
 }
