@@ -28,7 +28,7 @@ install(FILES "com.unikylin.Kiran.StartMenu.profile.gschema.xml"
 )
 
 install(FILES "com.unikylin.Kiran.MenuCategory.xml" 
-    DESTINATION  ${CMAKE_INSTALL_PREFIX}/share/kiran-menu/
+    DESTINATION  ${CMAKE_INSTALL_PREFIX}/share/kiran-applet/
 )
 
 
