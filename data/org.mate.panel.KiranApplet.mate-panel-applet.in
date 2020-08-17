@@ -7,12 +7,16 @@ Description=Factory for Kiran Applets on mate panel
 
 [KiranMenuApplet]
 Name=Kiran Start Menu
+Name[zh_CN]=Kiran开始菜单
 Description=Kiran Start Menu
+Description[zh_CN]=Kiran开始菜单
 Icon=user-info
 MateComponentId=OAFIID:KiranMenuApplet;
 
 [KiranTasklistApplet]
 Name=Kiran Task list and switch applet
+Name[zh_CN]=Kiran应用窗口切换插件
 Description=Kiran task list and switch applet
+Description=[zh_CN]=Kiran应用窗口切换插件
 Icon=user-info
 MateComponentId=OAFIID:KiranMenuApplet;
