@@ -1,5 +1,10 @@
 #include "kiran-opacity-menu.h"
 
+KiranOpacityMenu::KiranOpacityMenu()
+{
+    get_style_context()->add_class("opacity-menu");
+}
+
 bool KiranOpacityMenu::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
 {
     auto window = get_window();

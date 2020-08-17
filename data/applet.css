@@ -287,7 +287,7 @@ button.previewer-close-btn:active {
     padding: 0px;
 }
 
-menu.previewer-context-menu, menu.power-menu {
+menu.opacity-menu {
     background: rgba(0, 0, 0, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 8px;
@@ -295,7 +295,7 @@ menu.previewer-context-menu, menu.power-menu {
     padding-bottom: 10px;
 }
 
-menu.previewer-context-menu menuitem, menu.power-menu menuitem {
+menu.opacity-menu menuitem{
     color: white;
     background: transparent;
     min-height: 28px;
@@ -308,7 +308,7 @@ menu.previewer-context-menu menuitem, menu.power-menu menuitem {
     border-style: solid;
 }
 
-menu.previewer-context-menu menuitem:hover, menu.power-menu menuitem:hover {
+menu.opacity-menu menuitem:hover {
     background: rgba(255, 255, 255, 0.15);
     border-width: 0px;
     border-right-width: 4px;

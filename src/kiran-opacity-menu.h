@@ -6,7 +6,7 @@
 class KiranOpacityMenu : public Gtk::Menu
 {
 public:
-    KiranOpacityMenu() = default;
+    KiranOpacityMenu();
     virtual ~KiranOpacityMenu() = default;
 
 protected:

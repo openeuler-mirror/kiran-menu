@@ -3,6 +3,7 @@
 
 #include "kiran-menu-list-item.h"
 #include "menu-skeleton.h"
+#include "kiran-opacity-menu.h"
 
 class KiranMenuAppItem : public KiranMenuListItem
 {
@@ -25,7 +26,7 @@ protected:
     bool add_app_to_desktop();
 
 private:
-    Gtk::Menu context_menu;
+    KiranOpacityMenu context_menu;
     Gtk::MenuItem *items;
     std::weak_ptr<Kiran::App> app;
 
