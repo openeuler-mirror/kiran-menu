@@ -88,45 +88,44 @@ bool KiranMenuAppItem::on_button_press_event(GdkEventButton *button_event)
         //鼠标右键点击，显示上下文菜单
         create_context_menu();
         context_menu.popup_at_pointer((GdkEvent*)button_event);
+	return false;
     }
-    return false;
+
+    return KiranMenuListItem::on_button_press_event(button_event);
 }
 
-bool KiranMenuAppItem::on_button_release_event(GdkEventButton *button_event)
+void KiranMenuAppItem::on_clicked()
 {
-    if (button_event->button == 1)
-        //鼠标左键点击启动app
-        launch_app();
-    return false;
+    /**
+     * 启动应用
+     */
+    launch_app();
 }
 
 bool KiranMenuAppItem::on_key_press_event(GdkEventKey *key_event)
 {
-    switch(key_event->keyval) {
-    case GDK_KEY_Menu:
-        do {
-            Gtk::Allocation allocation;
 
-            allocation = get_allocation();
-            allocation.set_x(0);
-            allocation.set_y(0);
+    if (key_event->keyval == GDK_KEY_Menu)
+    {
+        Gtk::Allocation allocation;
 
+        allocation = get_allocation();
+        if (get_has_window()) {
             //重新创建右键菜单，以确保收藏夹相关的选项能及时更新
-            create_context_menu();
-            context_menu.popup_at_rect(get_window(), allocation,
-                                       Gdk::GRAVITY_CENTER,
-                                       Gdk::GRAVITY_NORTH_WEST,
-                                       (GdkEvent*)key_event);
-        } while (0);
-        break;
-    case GDK_KEY_Return:
-        launch_app();
-        break;
-    default:
-        break;
-    }
+             allocation.set_x(0);
+             allocation.set_y(0);
+        }
 
-    return false;
+        //重新创建右键菜单，以确保收藏夹相关的选项能及时更新
+        create_context_menu();
+        context_menu.popup_at_rect(get_window(), allocation,
+                                   Gdk::GRAVITY_CENTER,
+                                   Gdk::GRAVITY_NORTH_WEST,
+                                   (GdkEvent *)key_event);
+ 
+        return false;
+    }
+    return KiranMenuListItem::on_key_press_event(key_event);
 }
 
 void KiranMenuAppItem::create_context_menu()

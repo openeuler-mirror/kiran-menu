@@ -21,23 +21,38 @@ button.toggle.kiran-menu-applet-button:hover {
     box-shadow: none;
 }
 
-.kiran-app-item {
+button.kiran-app-item, button.kiran-category-item {
     background: transparent;
     color: #ffffff;
     border-width: 0px;
     border-right-width: 3px;
     border-style: solid;
     border-color: transparent;
+    border-radius: 0px;
+    border-image: none;
+    outline: none;
+    box-shadow: none;
+}
+
+button.kiran-app-item {
     min-height: 40px;
     padding: 0px;
     padding-left: 25px;
-    border-image: none;
-    outline: none;
-
     -gtkmm__CustomObject_KiranMenuAppItem-icon-spacing: 12px;
 }
 
-.kiran-app-entry {
+button.kiran-category-item {
+    min-height: 40px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+
+    padding: 0px;
+    padding-left: 12px;
+
+    -gtkmm__CustomObject_KiranMenuCategoryItem-icon-spacing: 12px;
+}
+
+button.kiran-app-entry {
     min-height: 100px;
     min-width: 88px;
     border: none;
@@ -53,35 +68,20 @@ button.toggle.kiran-menu-applet-button:hover {
     outline: none;
 }
 
-.kiran-app-entry:hover {
+button.kiran-app-entry:hover {
     background: rgba(255, 255, 255, 0.1);
 }
 
 
-.kiran-category-item {
-    background-color: transparent;
-    border-width: 0px;
-    border-right-width: 3px;
-    border-color: transparent;
-    min-height: 40px;
-    color: white;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    padding-left: 12px;
-    border-image: none;
-    outline: none;
-
-    -gtkmm__CustomObject_KiranMenuCategoryItem-icon-spacing: 12px;
-}
-
-
-.kiran-app-item:hover, .kiran-category-item:hover {
+button.kiran-app-item:hover, button.kiran-category-item:hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: #4cb5ff;
     border-style: solid;
+    border-width: 0px;
+    border-right-width: 3px;
 }
 
-.kiran-app-item:focus, .kiran-category-item:focus, .kiran-app-entry:focus {
+button.kiran-app-item:focus, button.kiran-category-item:focus, button.kiran-app-entry:focus {
     outline-offset: -2px;
     outline-style: dotted;
     outline-color: #ffffff;
