@@ -7,14 +7,13 @@
 
 namespace Gtk {
 
-	template <class T, class... T_Args>
-	T* make_managed(T_Args&&... args)
-	{
-		return manage(new T(std::forward<T_Args>(args)...));
-	}
+template<class T, class... T_Args>
+T* make_managed(T_Args&&... args)
+{
+  return manage(new T(std::forward<T_Args>(args)...));
+}
 
 };
-
 #endif
 
 #endif

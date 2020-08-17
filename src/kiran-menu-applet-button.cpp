@@ -73,17 +73,19 @@ bool KiranMenuAppletButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
     Gtk::Allocation allocation;
     Glib::RefPtr<Gdk::Pixbuf> pixbuf;
     auto context = get_style_context();
+	int scale = get_scale_factor();
 
-    pixbuf = icon_pixbuf->scale_simple(icon_size, icon_size, Gdk::INTERP_BILINEAR);
+    pixbuf = Gdk::Pixbuf::create_from_resource("/kiran-menu/icon/logo", icon_size * scale, icon_size * scale);
     allocation = get_allocation();
 
     context->set_state(get_state_flags());
     context->render_background(cr, 0, 0, allocation.get_width(), allocation.get_height());
 
+    cr->scale(1.0/scale, 1.0/scale);
     //将图标绘制在按钮的正中心位置
     Gdk::Cairo::set_source_pixbuf(cr, pixbuf,
-                                  (allocation.get_width() - pixbuf->get_width())/2.0,
-                                  (allocation.get_height() - pixbuf->get_height())/2.0);
+                                  (allocation.get_width() * scale - pixbuf->get_width())/2.0,
+                                  (allocation.get_height() * scale - pixbuf->get_height())/2.0);
     cr->paint();
     return false;
 }

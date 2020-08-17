@@ -4,6 +4,7 @@
 #include "kiran-search-entry.h"
 #include "kiranhelper.h"
 #include "kiran-menu-avatar-widget.h"
+#include "global.h"
 
 
 #include <unistd.h>
@@ -105,6 +106,8 @@ KiranMenuWindow::KiranMenuWindow(Gtk::WindowType window_type):
 
 KiranMenuWindow::~KiranMenuWindow()
 {
+    if (search_activate_slot)
+        search_activate_slot.disconnect();
     delete user_info;
 }
 
@@ -119,6 +122,10 @@ void KiranMenuWindow::reload_apps_data()
     load_frequent_apps();
     load_all_apps();
     load_favorite_apps();
+
+	//app列表发生变化，搜索结果已无效
+    if (search_activate_slot)
+        search_activate_slot.disconnect();
 }
 
 void KiranMenuWindow::on_realize()
@@ -180,6 +187,11 @@ bool KiranMenuWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
  */
 void KiranMenuWindow::on_search_change()
 {
+
+    //移除之前搜索框按下Enter时的回调函数	
+    if (search_activate_slot)
+        search_activate_slot.disconnect();
+
     if (search_entry->get_text_length() == 0) {
         //搜索内容为空，返回到应用列表页面
         on_search_stop();
@@ -204,6 +216,11 @@ void KiranMenuWindow::on_search_change()
             auto app_item = create_app_item(*iter);
 
             search_results_box->add(*app_item);
+            if (iter == apps_list.begin()) {
+                //在搜索框中回车启动搜索结果列表中的第一个应用程序
+                search_activate_slot = search_entry->signal_activate().connect(
+                                sigc::bind<KiranMenuAppItem*>(sigc::mem_fun(*this, &KiranMenuWindow::activate_search_result), app_item));
+            }
         }
     } else {
         //搜索结果为空
@@ -216,11 +233,21 @@ void KiranMenuWindow::on_search_change()
     search_results_box->show_all();
 }
 
+void KiranMenuWindow::activate_search_result(KiranMenuAppItem *item)
+{
+    if (appview_stack->get_visible_child_name() != "search-results-page")
+        return;
+
+    item->launch_app();
+}
+
 /**
  * @brief 回调函数： 当搜索框中按下ESC键时调用。该函数只是返回到应用列表页面
  */
 void KiranMenuWindow::on_search_stop()
 {
+    if (search_activate_slot)
+        search_activate_slot.disconnect();
     //返回应用列表页面
     appview_stack->set_visible_child("all-apps-page", Gtk::STACK_TRANSITION_TYPE_NONE);
 }
@@ -333,14 +360,14 @@ bool KiranMenuWindow::on_map_event(GdkEventAny *any_event)
     //应用列表滚动到开始位置
     switch_to_apps_overview(0, false);
 
+    on_search_stop();
+    search_entry->set_text("");
+
     //紧凑模式下默认显示收藏夹
     if (display_mode == DISPLAY_MODE_COMPACT)
         switch_to_compact_favorites_view(false);
-
-    on_search_stop();
-    search_entry->set_text("");
-    search_entry->grab_focus();
-
+    else
+        search_entry->grab_focus();
     return true;
 }
 
@@ -390,20 +417,31 @@ bool KiranMenuWindow::on_configure_event(GdkEventConfigure *configure_event)
 
 bool KiranMenuWindow::on_key_press_event(GdkEventKey *key_event)
 {
-    if (key_event->keyval == GDK_KEY_Escape) {
-        if (overview_stack->get_visible_child_name() == "category-overview-page") {
+    if (overview_stack->get_visible_child_name() == "apps-overview-page") {
+        if (appview_stack->get_visible_child_name() == "all-apps-page") {
+            // 当前位于应用列表页面
+            if (key_event->keyval == GDK_KEY_Escape) {
+                //按下ESC键隐藏开始菜单窗口
+                hide();
+                return true;
+            }
+
+            if (search_entry->handle_event(key_event) == GDK_EVENT_STOP) {
+                //优先搜索框处理
+                g_debug("key event handled by search entry\n");
+                return true;
+            }
+        } else {
+            if (key_event->keyval == GDK_KEY_Escape) {
+                //ESC Key, 当前处于搜索结果页面，需要返回应用列表页面
+                appview_stack->set_visible_child("all-apps-page", Gtk::STACK_TRANSITION_TYPE_NONE);
+                return true;
+            }
+        }
+    } else {
+        if (key_event->keyval == GDK_KEY_Escape) {
             //当前处于分类选择视图, 返回应用视图
             overview_stack->set_visible_child("apps-overview-page", Gtk::STACK_TRANSITION_TYPE_NONE);
-            return true;
-        }
-
-        if (appview_stack->get_visible_child_name() == "search-results-page") {
-            //当前处于搜索结果页面，需要返回应用列表页面
-            appview_stack->set_visible_child("all-apps-page", Gtk::STACK_TRANSITION_TYPE_NONE);
-            return true;
-        } else {
-            //隐藏开始菜单窗口
-            hide();
             return true;
         }
     }
@@ -461,6 +499,7 @@ void KiranMenuWindow::add_app_tab(const char *icon_resource,
     button->signal_clicked().connect(
                 [this, page]() -> void{
                     this->overview_stack->set_visible_child(page, Gtk::STACK_TRANSITION_TYPE_CROSSFADE);
+                    this->search_entry->grab_focus();
                 });
 
     compact_tab_box->add(*button);
@@ -850,7 +889,7 @@ void KiranMenuWindow::set_display_mode(MenuDisplayMode mode)
     else
         load_user_info();
 
-    reload_apps_data();
+    Glib::signal_idle().connect_once(sigc::mem_fun(*this, &KiranMenuWindow::reload_apps_data));
 }
 
 

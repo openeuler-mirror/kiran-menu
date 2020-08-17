@@ -6,12 +6,17 @@
 #include <locale.h>
 #include "config.h"
 #include "kiranpower.h"
+#include <X11/Xlib.h>
+#include <gtk/gtkx.h>
 
 #include "kiran-tasklist-widget.h"
 #include "app-manager.h"
 #include "core_worker.h"
 
 #define GETTEXT_PACKAGE "kiran-applet"
+
+static Atom atom_mate_panel_action_kiran_menu  = None;
+static Atom atom_mate_panel_action  = None;
 
 bool load_resources(const std::string &resource_file) {
     try {
@@ -40,6 +45,26 @@ bool load_css_styles(const char *name)
     return true;
 }
 
+static GdkFilterReturn key_event_filter(GdkXEvent *xevent, GdkEvent *event, gpointer data)
+{
+    XEvent *x_event = (XEvent *)xevent;
+    Gtk::ToggleButton *button = (Gtk::ToggleButton *)data;
+
+    if (x_event->type == ClientMessage)
+    {
+        g_message("got client message\n");
+
+        if (x_event->xclient.message_type == atom_mate_panel_action &&
+            x_event->xclient.data.l[0] == atom_mate_panel_action_kiran_menu)
+        {
+            g_message("it is kiran menu event\n");
+            button->set_active(!button->get_active());
+        }
+    }
+
+    return GDK_FILTER_CONTINUE;
+}
+
 static gboolean
 kiran_menu_applet_fill (MatePanelApplet *applet,
            const gchar *iid,
@@ -57,6 +82,8 @@ kiran_menu_applet_fill (MatePanelApplet *applet,
     bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
     textdomain (GETTEXT_PACKAGE);
 
+    mate_panel_applet_set_flags (applet, MATE_PANEL_APPLET_EXPAND_MINOR);
+
     Gtk::Main::init_gtkmm_internals();
     if (!backend_inited) {
     	Kiran::init_backend_system();
@@ -73,6 +100,22 @@ kiran_menu_applet_fill (MatePanelApplet *applet,
 
         auto button = new KiranMenuAppletButton(applet);
         gtk_container_add(GTK_CONTAINER(applet), GTK_WIDGET(button->gobj()));
+        do {
+            Display *xdisplay = nullptr;
+
+            xdisplay = gdk_x11_get_default_xdisplay();
+            atom_mate_panel_action_kiran_menu =
+                XInternAtom(xdisplay,
+                        "_MATE_PANEL_ACTION_KIRAN_MENU",
+                        FALSE);
+
+            atom_mate_panel_action =
+                XInternAtom(xdisplay,
+                        "_MATE_PANEL_ACTION",
+                        FALSE);
+
+            gdk_window_add_filter(nullptr, key_event_filter, button);
+        } while (0);
     } else {
         int flags;
 
@@ -86,6 +129,7 @@ kiran_menu_applet_fill (MatePanelApplet *applet,
     }
 
     gtk_widget_show_all(GTK_WIDGET(applet));
+
 
     return TRUE;
 }
