@@ -22,6 +22,7 @@ private:
     Gtk::MenuItem shutdown_item;
     Gtk::MenuItem reboot_item;
     Gtk::MenuItem logout_item;
+    Gtk::MenuItem switchuser_item;
 };
 
 #endif // KIRANMENUPOWERMENU_H

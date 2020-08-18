@@ -9,8 +9,9 @@
 #define LOGIN_MANAGER_PATH "/org/freedesktop/login1"
 #define LOGIN_MANAGER_INTERFACE "org.freedesktop.login1.Manager"
 
-#define LOGOUT_MODE_INTERACTIVE 0
-#define LOGOUT_MODE_NOW 1
+#define DISPLAY_MANAGER_DBUS "org.freedesktop.DisplayManager"
+#define DISPLAY_MANAGER_SEAT_PATH "/org/freedesktop/DisplayManager/Seat0"
+#define DISPLAY_MANAGER_INTERFACE "org.freedesktop.DisplayManager.Seat"
 
 
 bool KiranPower::suspend()
@@ -80,10 +81,10 @@ bool KiranPower::reboot()
     }
 }
 
-bool KiranPower::logout()
+bool KiranPower::logout(int mode)
 {
     try {
-        Glib::Variant<uint> variant = Glib::Variant<uint>::create(LOGOUT_MODE_INTERACTIVE);
+        Glib::Variant<uint> variant = Glib::Variant<uint>::create(mode);
         Glib::VariantContainerBase container = Glib::VariantContainerBase::create_tuple(variant);
         Glib::RefPtr<Gio::DBus::Proxy> proxy = Gio::DBus::Proxy::create_for_bus_sync(Gio::DBus::BUS_TYPE_SESSION,
                                                   SESSION_MANAGER_DBUS,
@@ -137,5 +138,21 @@ bool KiranPower::can_hibernate()
         //如果获取失败，就假设其可以挂起，由挂起操作调用时做检查
         std::cerr<<"Failed to query CanSuspend: "<<e.what().data()<<std::endl;
         return true;
+    }
+}
+
+bool KiranPower::switch_user()
+{
+    try {
+        Glib::RefPtr<Gio::DBus::Proxy> proxy = Gio::DBus::Proxy::create_for_bus_sync(Gio::DBus::BUS_TYPE_SYSTEM,
+                                                  DISPLAY_MANAGER_DBUS,
+                                                  DISPLAY_MANAGER_SEAT_PATH,
+                                                  DISPLAY_MANAGER_INTERFACE);
+
+        proxy->call_sync("SwitchToGreeter", Glib::VariantContainerBase(), 300);
+        return true;
+    } catch (const Gio::DBus::Error &e) {
+        std::cout<<"Failed to request SwitchToGreeter method: "<<e.what().data()<<std::endl;
+        return false;
     }
 }
