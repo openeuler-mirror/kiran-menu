@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 21:42:15
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-08-04 17:25:04
+ * @LastEditTime : 2020-08-17 20:24:14
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app-manager.cpp
  */
@@ -129,6 +129,9 @@ std::shared_ptr<App> AppManager::lookup_app_with_window(std::shared_ptr<Window> 
     RETURN_VAL_IF_TRUE(app, app);
 
     app = get_app_from_gapplication_id(window);
+    RETURN_VAL_IF_TRUE(app, app);
+
+    app = get_app_from_cmdline(window);
     RETURN_VAL_IF_TRUE(app, app);
 
     app = get_app_from_window_wmclass(window);
@@ -348,6 +351,49 @@ std::shared_ptr<App> AppManager::get_app_from_gapplication_id(std::shared_ptr<Wi
     return nullptr;
 }
 
+std::shared_ptr<App> AppManager::get_app_from_cmdline(std::shared_ptr<Window> window)
+{
+    std::shared_ptr<App> app;
+    auto pid = window->get_pid();
+
+    if (!pid)
+    {
+        return nullptr;
+    }
+
+    std::ostringstream oss;
+    oss << "/proc/" << pid << "/cmdline";
+
+    auto file_path = oss.str();
+    g_autofree char *file_contents = NULL;
+    gsize file_size = 0;
+
+    auto file = Gio::File::create_for_path(file_path);
+
+    RETURN_VAL_IF_TRUE(!file, nullptr);
+
+    try
+    {
+        if (!file->load_contents(file_contents, file_size))
+        {
+            return nullptr;
+        }
+    }
+    catch (const Glib::Exception &e)
+    {
+        return nullptr;
+    }
+
+    auto cmdline = std::string(file_contents, file_size);
+
+    auto split_cmdline = str_split(cmdline, " ");
+    RETURN_VAL_IF_TRUE(split_cmdline.size() == 0, nullptr);
+
+    auto basename = Glib::path_get_basename(split_cmdline[0]);
+
+    return lookup_app_with_unrefine_name(basename);
+}
+
 std::shared_ptr<App> AppManager::get_app_from_window_wmclass(std::shared_ptr<Window> window)
 {
     std::shared_ptr<App> app;
@@ -363,10 +409,10 @@ std::shared_ptr<App> AppManager::get_app_from_window_wmclass(std::shared_ptr<Win
     app = lookup_app_with_wmclass(wm_class);
     RETURN_VAL_IF_TRUE(app, app);
 
-    app = lookup_app_with_desktop_wmclass(wm_class_instance);
+    app = lookup_app_with_unrefine_name(wm_class_instance);
     RETURN_VAL_IF_TRUE(app, app);
 
-    app = lookup_app_with_desktop_wmclass(wm_class);
+    app = lookup_app_with_unrefine_name(wm_class);
     RETURN_VAL_IF_TRUE(app, app);
 
     return nullptr;
@@ -387,31 +433,37 @@ std::shared_ptr<App> AppManager::lookup_app_with_wmclass(const std::string &wmcl
     }
 }
 
-std::shared_ptr<App> AppManager::lookup_app_with_desktop_wmclass(const std::string &wmclass)
+std::shared_ptr<App> AppManager::lookup_app_with_unrefine_name(const std::string &name)
 {
-    RETURN_VAL_IF_TRUE(wmclass.length() == 0, nullptr);
+    RETURN_VAL_IF_TRUE(name.length() == 0, nullptr);
 
     std::shared_ptr<App> app;
 
-    std::string basename = wmclass + std::string(".desktop");
-    app = lookup_app_with_heuristic_basename(basename);
+    std::string basename = name + std::string(".desktop");
+    app = lookup_app_with_heuristic_name(basename);
     RETURN_VAL_IF_TRUE(app, app);
 
-    std::string mainname = get_mainname(wmclass);
-    basename = mainname + std::string(".desktop");
-    app = lookup_app_with_heuristic_basename(basename);
-    RETURN_VAL_IF_TRUE(app, app);
+    std::string mainname = get_mainname(name);
+    if (mainname != name)
+    {
+        basename = mainname + std::string(".desktop");
+        app = lookup_app_with_heuristic_name(basename);
+        RETURN_VAL_IF_TRUE(app, app);
+    }
 
-    std::string lower_wmclass = str_tolower(wmclass);
+    std::string lower_wmclass = str_tolower(name);
     std::replace(lower_wmclass.begin(), lower_wmclass.end(), ' ', '-');
-    basename = lower_wmclass + std::string(".desktop");
-    app = lookup_app_with_heuristic_basename(basename);
-    RETURN_VAL_IF_TRUE(app, app);
+    if (lower_wmclass != name)
+    {
+        basename = lower_wmclass + std::string(".desktop");
+        app = lookup_app_with_heuristic_name(basename);
+        RETURN_VAL_IF_TRUE(app, app);
+    }
 
     return nullptr;
 }
 
-std::shared_ptr<App> AppManager::lookup_app_with_heuristic_basename(const std::string &name)
+std::shared_ptr<App> AppManager::lookup_app_with_heuristic_name(const std::string &name)
 {
     std::shared_ptr<App> app;
 
@@ -536,9 +588,6 @@ std::shared_ptr<App> AppManager::get_app_from_window_group(std::shared_ptr<Windo
         {
             continue;
         }
-
-        app = get_app_from_sandboxed_app(*iter);
-        RETURN_VAL_IF_TRUE(app, app);
 
         app = get_app_from_gapplication_id(window);
         RETURN_VAL_IF_TRUE(app, app);

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 17:21:54
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-28 14:50:21
+ * @LastEditTime : 2020-08-17 20:21:34
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app-manager.h
  */
@@ -67,10 +67,11 @@ private:
 private:
     std::shared_ptr<App> get_app_from_sandboxed_app(std::shared_ptr<Window> window);
     std::shared_ptr<App> get_app_from_gapplication_id(std::shared_ptr<Window> window);
+    std::shared_ptr<App> get_app_from_cmdline(std::shared_ptr<Window> window);
     std::shared_ptr<App> get_app_from_window_wmclass(std::shared_ptr<Window> window);
     std::shared_ptr<App> lookup_app_with_wmclass(const std::string &wmclass);
-    std::shared_ptr<App> lookup_app_with_desktop_wmclass(const std::string &wmclass);
-    std::shared_ptr<App> lookup_app_with_heuristic_basename(const std::string &name);
+    std::shared_ptr<App> lookup_app_with_unrefine_name(const std::string &name);
+    std::shared_ptr<App> lookup_app_with_heuristic_name(const std::string &name);
     std::shared_ptr<App> get_app_from_env(std::shared_ptr<Window> window);
     std::shared_ptr<App> get_app_from_desktop(std::shared_ptr<Window> window);
     std::shared_ptr<App> get_app_from_window_group(std::shared_ptr<Window> window);
