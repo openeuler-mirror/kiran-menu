@@ -22,6 +22,9 @@ protected:
     virtual void on_clicked() override;
     virtual void init_drag_and_drop();
 
+    bool pin_app_to_taskbar();
+    bool unpin_app_from_taskbar();
+
     void create_context_menu();
     bool add_app_to_desktop();
 
@@ -34,6 +37,7 @@ private:
     sigc::signal <void> m_signal_launched;
 
     bool is_in_favorite();
+    bool is_fixed_on_taskbar();
 
 };
 

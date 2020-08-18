@@ -4,6 +4,7 @@
 #include <glibmm/i18n.h>
 #include <sys/stat.h>
 #include "global.h"
+#include <taskbar-skeleton.h>
 
 #define MENU_ITEM_COUNT G_N_ELEMENTS(item_labels)
 
@@ -164,12 +165,46 @@ void KiranMenuAppItem::create_context_menu()
                         }
                     });
     }
+    context_menu.append(*item);
+
+    if (is_fixed_on_taskbar()) {
+        item = Gtk::make_managed<Gtk::MenuItem>(_("Unpin from taskbar"));
+        item->signal_activate().connect(sigc::hide_return(sigc::mem_fun(*this, &KiranMenuAppItem::unpin_app_from_taskbar)));
+    } else {
+        item = Gtk::make_managed<Gtk::MenuItem>(_("Pin to taskbar"));
+        item->signal_activate().connect(sigc::hide_return(sigc::mem_fun(*this, &KiranMenuAppItem::pin_app_to_taskbar)));
+    }
 
     context_menu.append(*item);
 
     if (!context_menu.get_attach_widget())
         context_menu.attach_to_widget(*this);
     context_menu.show_all();
+}
+
+bool KiranMenuAppItem::pin_app_to_taskbar()
+{
+    auto app = this->app.lock();
+    auto backend = Kiran::TaskBarSkeleton::get_instance();
+
+    if (!app) {
+        g_warning("%s: app already expired\n", __FUNCTION__);
+        return false;
+    }
+
+    return backend->add_fixed_app(app->get_desktop_id());
+}
+bool KiranMenuAppItem::unpin_app_from_taskbar()
+{
+    auto app = this->app.lock();
+    auto backend = Kiran::TaskBarSkeleton::get_instance();
+
+    if (!app) {
+        g_warning("%s: app already expired\n", __FUNCTION__);
+        return false;
+    }
+
+    return backend->del_fixed_app(app->get_desktop_id());
 }
 
 bool KiranMenuAppItem::add_app_to_desktop()
@@ -212,6 +247,17 @@ bool KiranMenuAppItem::is_in_favorite()
 
     if (!app || backend->lookup_favorite_app(app->get_desktop_id()) == nullptr)
         return false;
+    return true;
+}
+
+bool KiranMenuAppItem::is_fixed_on_taskbar()
+{
+    auto app = this->app.lock();
+    auto backend = Kiran::TaskBarSkeleton::get_instance();
+
+    if (!app || backend->lookup_fixed_app(app->get_desktop_id()) == nullptr)
+        return false;
+
     return true;
 }
 
