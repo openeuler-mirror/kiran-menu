@@ -168,7 +168,7 @@ void KiranMenuAppItem::create_context_menu()
     context_menu.append(*item);
 
     if (is_fixed_on_taskbar()) {
-        item = Gtk::make_managed<Gtk::MenuItem>(_("Unpin from taskbar"));
+        item = Gtk::make_managed<Gtk::MenuItem>(_("Unpin to taskbar"));
         item->signal_activate().connect(sigc::hide_return(sigc::mem_fun(*this, &KiranMenuAppItem::unpin_app_from_taskbar)));
     } else {
         item = Gtk::make_managed<Gtk::MenuItem>(_("Pin to taskbar"));

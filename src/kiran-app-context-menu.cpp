@@ -35,7 +35,7 @@ void KiranAppContextMenu::refresh()
         append(*item);
     }
 
-    item = Gtk::manage(new Gtk::MenuItem(_("Close All Windows")));
+    item = Gtk::manage(new Gtk::MenuItem(_("Close all windows")));
     item->signal_activate().connect(
                 [this]() -> void {
                     if (!this->app.expired())

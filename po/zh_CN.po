@@ -155,3 +155,41 @@ msgstr "收藏夹列表为空"
 
 msgid "No frequently used apps!"
 msgstr "暂无常用应用信息"
+
+msgid "Switch user"
+msgstr "切换用户"
+
+msgid "Pin to taskbar"
+msgstr "固定到任务栏"
+
+msgid "Unpin to taskbar"
+msgstr "取消固定到任务栏"
+
+msgid "Close all windows"
+msgstr "关闭所有窗口"
+
+msgid "Maximize"
+msgstr "最大化"
+
+msgid "Minimize"
+msgstr "最小化"
+
+msgid "Restore"
+msgstr "恢复"
+
+msgid "Always on top"
+msgstr "常居顶端"
+
+msgid "Only on this workspace"
+msgstr "仅在此工作区显示"
+
+msgid "Always on visible workspace"
+msgstr "总在可见工作区"
+
+msgid "Move to another workspace"
+msgstr "移动到其它工作区"
+
+msgid "Close Window"
+msgstr "关闭"
+
+
