@@ -279,10 +279,11 @@ void KiranMenuWindow::switch_to_category_overview(const std::string &selected_ca
         category_overview_box->add(*item);
     }
 
-    if (selected_item)
-        selected_item->grab_focus();
     overview_stack->set_transition_type(Gtk::STACK_TRANSITION_TYPE_CROSSFADE);
     overview_stack->set_visible_child("category-overview-page");
+
+    if (selected_item)
+        selected_item->grab_focus();
 }
 
 /**
@@ -329,6 +330,8 @@ void KiranMenuWindow::switch_to_apps_overview(double position, bool animation)
 
     transition = animation?Gtk::STACK_TRANSITION_TYPE_CROSSFADE:Gtk::STACK_TRANSITION_TYPE_NONE;
 
+    //切换到应用程序列表
+    overview_stack->set_visible_child("apps-overview-page", transition);
     if (position >= 0) {
         builder->get_widget<Gtk::Viewport>("all-apps-viewport", all_apps_viewport);
 
@@ -336,8 +339,6 @@ void KiranMenuWindow::switch_to_apps_overview(double position, bool animation)
         adjustment->set_value(position);
     }
 
-    //切换到应用程序列表
-    overview_stack->set_visible_child("apps-overview-page", transition);
 }
 
 void KiranMenuWindow::switch_to_compact_favorites_view(bool animation)
