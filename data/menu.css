@@ -50,6 +50,8 @@ button.kiran-app-entry {
     padding-bottom: 10px;
     border-image: none;
     outline: none;
+    background: transparent;
+    color: #ffffff;
 }
 
 button.kiran-app-entry:hover {
