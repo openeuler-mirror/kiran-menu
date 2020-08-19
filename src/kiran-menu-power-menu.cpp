@@ -7,11 +7,13 @@
 
 KiranMenuPowerMenu::KiranMenuPowerMenu()
 {
-    switchuser_item = Gtk::make_managed<Gtk::MenuItem>(_("Switch user"));
-    switchuser_item->signal_activate().connect(sigc::hide_return(
-        sigc::ptr_fun(&KiranPower::switch_user)));
+    if (KiranPower::can_switchuser()) {
+        switchuser_item = Gtk::make_managed<Gtk::MenuItem>(_("Switch user"));
+        switchuser_item->signal_activate().connect(sigc::hide_return(
+            sigc::ptr_fun(&KiranPower::switch_user)));
 
-    append(*switchuser_item);
+        append(*switchuser_item);
+    }
 
     logout_item = Gtk::make_managed<Gtk::MenuItem>(_("Logout"));
     logout_item->signal_activate().connect(sigc::hide_return(

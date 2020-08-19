@@ -156,3 +156,18 @@ bool KiranPower::switch_user()
         return false;
     }
 }
+
+bool KiranPower::can_switchuser()
+{
+    bool result = false;
+
+    try {
+        auto settings = Gio::Settings::create("org.mate.session");
+
+        result = settings->get_boolean("logout-prompt");
+    } catch (const Glib::Exception &e)
+    {
+        result = false;
+    }
+    return result;
+}

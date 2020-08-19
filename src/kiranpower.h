@@ -18,6 +18,7 @@ bool switch_user();
 
 bool can_suspend();
 bool can_hibernate();
+bool can_switchuser();
 
 }
 
