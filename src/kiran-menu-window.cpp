@@ -545,6 +545,7 @@ void KiranMenuWindow::add_sidebar_buttons()
     compact_tab_box->add(*separator);
 
     add_app_button("/kiran-menu/sidebar/home-dir", _("Home Directory"), "caja");
+    add_app_button("/kiran-menu/sidebar/monitor", _("System monitor"), "mate-system-monitor");
     add_app_button("/kiran-menu/sidebar/settings", _("Control center"), "mate-control-center");
     add_app_button("/kiran-menu/sidebar/lock", _("Lock Screen"), "mate-screensaver-command -l");
     side_box->add(*power_btn);
