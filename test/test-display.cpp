@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-11 09:30:42
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-08-07 14:42:12
+ * @LastEditTime : 2020-09-07 16:48:42
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-display.cpp
  */
@@ -43,6 +43,35 @@ void active_window_changed(std::shared_ptr<Kiran::Window> prev_active_window, st
             prev_active_window ? prev_active_window->get_xid() : 0,
             cur_active_window ? cur_active_window->get_name().c_str() : "null",
             cur_active_window ? cur_active_window->get_xid() : 0);
+}
+
+void window_name_changed(std::weak_ptr<Kiran::Window> window)
+{
+    if (!window.expired())
+    {
+        g_print("signal: the name of the window '%s' is changed. xid: %" PRIu64 "\n",
+                window.lock()->get_name().c_str(),
+                window.lock()->get_xid());
+    }
+    else
+    {
+        g_print("signal: the name of the window 'null' is changed.\n");
+    }
+}
+
+void window_workspace_changed(std::shared_ptr<Kiran::Workspace> prev, std::shared_ptr<Kiran::Workspace> cur, std::weak_ptr<Kiran::Window> window)
+{
+    if (!window.expired())
+    {
+        g_print("signal: the workspace of the window '%s' is changed. prev workspace: %d, cur workspace: %d.\n",
+                window.lock()->get_name().c_str(),
+                prev ? prev->get_number() : -1,
+                cur ? cur->get_number() : -1);
+    }
+    else
+    {
+        g_print("signal: the workspace of the window 'null' is changed.\n");
+    }
 }
 
 void app_action_changed(std::shared_ptr<Kiran::App> app, Kiran::AppAction action)
@@ -264,10 +293,16 @@ int main(int argc, char **argv)
     Kiran::init_backend_system();
 
     auto window_manager = Kiran::WindowManager::get_instance();
-
     window_manager->signal_window_opened().connect(&window_opened);
     window_manager->signal_window_closed().connect(&window_closed);
     window_manager->signal_active_window_changed().connect(&active_window_changed);
+
+    auto windows = window_manager->get_windows();
+    for (const auto &window : windows)
+    {
+        window->signal_name_changed().connect(sigc::bind(&window_name_changed, window));
+        window->signal_workspace_changed().connect(sigc::bind(&window_workspace_changed, window));
+    }
 
     auto app_manager = Kiran::AppManager::get_instance();
 

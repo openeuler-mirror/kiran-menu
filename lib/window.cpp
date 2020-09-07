@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:51
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-08-04 09:10:15
+ * @LastEditTime : 2020-09-07 16:56:56
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window.cpp
  */
@@ -34,6 +34,7 @@ Window::Window(WnckWindow* wnck_window) : wnck_window_(wnck_window),
                                           pixmap_(None),
                                           last_geometry_(0, 0, 0, 0)
 {
+    g_signal_connect(this->wnck_window_, "name-changed", G_CALLBACK(Window::name_changed), NULL);
     g_signal_connect(this->wnck_window_, "workspace-changed", G_CALLBACK(Window::workspace_changed), NULL);
     g_signal_connect(this->wnck_window_, "geometry-changed", G_CALLBACK(Window::geometry_changed), NULL);
     this->update_window_pixmap();
@@ -261,9 +262,6 @@ void Window::flush_workspace()
 
     if (workspace)
     {
-        // add window
-        workspace->add_window(this->shared_from_this());
-
         // remove window
         int32_t current_number = workspace->get_number();
         if (this->last_workspace_number_ != current_number)
@@ -282,6 +280,10 @@ void Window::flush_workspace()
                 }
             }
         }
+
+        // add window
+        workspace->add_window(this->shared_from_this());
+
         // update status variable
         this->last_workspace_number_ = current_number;
         this->last_is_pinned_ = false;
@@ -314,6 +316,14 @@ void Window::flush_workspace()
     }
 }
 
+void Window::name_changed(WnckWindow* wnck_window, gpointer user_data)
+{
+    auto window = WindowManager::get_instance()->lookup_window(wnck_window);
+    g_return_if_fail(window);
+
+    window->name_changed_.emit();
+}
+
 void Window::workspace_changed(WnckWindow* wnck_window, gpointer user_data)
 {
     g_return_if_fail(wnck_window != NULL);
@@ -321,7 +331,10 @@ void Window::workspace_changed(WnckWindow* wnck_window, gpointer user_data)
     auto window = WindowManager::get_instance()->lookup_window(wnck_window);
     if (window)
     {
+        auto last_workspace = WorkspaceManager::get_instance()->get_workspace(window->last_workspace_number_);
+        auto cur_workspace = window->get_workspace();
         window->flush_workspace();
+        window->workspace_changed_.emit(last_workspace, cur_workspace);
     }
 }
 

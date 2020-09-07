@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:46
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-08-04 08:49:45
+ * @LastEditTime : 2020-09-07 15:53:36
  * @Description  : 该类是对WnckWindow的封装，大部分接口和wnck_window_xxxx相同。
  * @FilePath     : /kiran-menu-2.0/lib/window.h
  */
@@ -119,13 +119,20 @@ public:
     void set_on_visible_workspace(bool on);
     bool get_on_visible_workspace();
 
+    // 窗口标题发生变化信号
+    sigc::signal<void> signal_name_changed() { return this->name_changed_; }
+    // 工作区变化信号。两个参数分别代表之前的工作区和当前的工作区，如果指针为nullptr，说明窗口不属于任意工作区或者窗口是pin状态
+    sigc::signal<void, std::shared_ptr<Workspace>, std::shared_ptr<Workspace>> signal_workspace_changed() { return this->workspace_changed_; }
+
 private:
     Window(WnckWindow* window);
 
     void flush_workspace();
 
+    static void name_changed(WnckWindow* wnck_window, gpointer user_data);
     static void workspace_changed(WnckWindow* wnck_window, gpointer user_data);
     static void geometry_changed(WnckWindow* wnck_window, gpointer user_data);
+
     void process_events(GdkXEvent* xevent, GdkEvent* event);
     bool update_window_pixmap();
 
@@ -143,8 +150,8 @@ private:
 
     WinwowGeometry last_geometry_;
 
-    // 因为在应用程序关闭的时候，无法
-    // uint64_t window_group_;
+    sigc::signal<void> name_changed_;
+    sigc::signal<void, std::shared_ptr<Workspace>, std::shared_ptr<Workspace>> workspace_changed_;
 
     friend class WindowManager;
 };
