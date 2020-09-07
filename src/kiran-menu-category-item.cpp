@@ -22,24 +22,12 @@ KiranMenuCategoryItem::KiranMenuCategoryItem(const std::string &name,
 void KiranMenuCategoryItem::set_clickable(bool clickable)
 {
     this->clickable = clickable;
-    if (clickable)
-        add_events(Gdk::BUTTON_PRESS_MASK);
-    else {
-        Gdk::EventMask events = get_events();
-        //不再关注鼠标点击事件
-        set_events(events &  ~Gdk::BUTTON_PRESS_MASK);
-    }
     set_can_focus(true);
 }
 
 const std::string &KiranMenuCategoryItem::get_category_name()
 {
     return category_name;
-}
-
-sigc::signal<void> KiranMenuCategoryItem::signal_clicked()
-{
-    return m_signal_clicked;
 }
 
 void KiranMenuCategoryItem::set_category_name(const std::string &name)
@@ -55,18 +43,14 @@ bool KiranMenuCategoryItem::on_button_press_event(GdkEventButton *button_event)
         return false;
     }
 
-    m_signal_clicked.emit();
-    return false;
+    return KiranMenuListItem::on_button_press_event(button_event);
 }
 
 bool KiranMenuCategoryItem::on_key_press_event(GdkEventKey *key_event)
 {
     if (!clickable)
         return false;
-    if (key_event->keyval == GDK_KEY_Return)
-        m_signal_clicked.emit();
-
-    return false;
+    return KiranMenuListItem::on_key_press_event(key_event);
 }
 
 bool KiranMenuCategoryItem::on_enter_notify_event(GdkEventCrossing *crossing_event)
@@ -84,4 +68,3 @@ bool KiranMenuCategoryItem::on_leave_notify_event(GdkEventCrossing *crossing_eve
 
     return KiranMenuListItem::on_leave_notify_event(crossing_event);
 }
-

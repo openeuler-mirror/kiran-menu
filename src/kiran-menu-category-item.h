@@ -8,7 +8,6 @@ class KiranMenuCategoryItem : public KiranMenuListItem
 public:
     KiranMenuCategoryItem(const std::string &name, bool clickable);
     const std::string &get_category_name();
-    sigc::signal<void> signal_clicked();
 
 protected:
     virtual bool on_button_press_event(GdkEventButton *button_event) override;
@@ -23,7 +22,6 @@ private:
     gboolean clickable;
     std::string category_name;
 
-    sigc::signal<void> m_signal_clicked;
     const static std::string icon_resource;
 };
 

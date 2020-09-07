@@ -3,7 +3,7 @@
 
 #include <gtkmm.h>
 
-class KiranMenuListItem : public Gtk::EventBox
+class KiranMenuListItem : public Gtk::Button
 {
 public:
     KiranMenuListItem(int icon_size,
@@ -28,13 +28,7 @@ public:
     void init_ui();
 
 protected:
-    virtual bool on_enter_notify_event(GdkEventCrossing *crossing_event) override;
-    virtual bool on_leave_notify_event(GdkEventCrossing *crossing_event) override;
-    virtual void on_size_allocate(Gtk::Allocation &allocation) override;
     virtual void on_style_updated() override;
-
-    virtual bool on_focus_in_event(GdkEventFocus *focus_event) override;
-    virtual bool on_focus_out_event(GdkEventFocus *gdk_event) override;
     virtual bool on_draw(const::Cairo::RefPtr<Cairo::Context> &cr) override;
 
     void    on_orient_changed();

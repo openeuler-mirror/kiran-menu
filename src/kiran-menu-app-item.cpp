@@ -27,6 +27,59 @@ KiranMenuAppItem::KiranMenuAppItem(const std::shared_ptr<Kiran::App> &app_, int 
     }
 
     set_tooltip_text(app_->get_locale_comment());
+
+    init_drag_and_drop();
+}
+
+const std::shared_ptr<Kiran::App> KiranMenuAppItem::get_app() const
+{
+    return app.lock();
+}
+
+void KiranMenuAppItem::init_drag_and_drop()
+{
+    std::vector<Gtk::TargetEntry> targets;
+    Gtk::TargetEntry target("text/uri-list");
+
+    targets.push_back(target);
+    drag_source_set(targets, Gdk::BUTTON1_MASK, Gdk::ACTION_COPY);
+
+    this->signal_drag_begin().connect(
+        [this](const Glib::RefPtr<Gdk::DragContext> &context) -> void {
+            /**
+             * 设置拖动操作的Icon
+             */
+            auto app = this->get_app();
+            gtk_drag_set_icon_gicon(context->gobj(), app->get_icon()->gobj(), 0, 0);
+        });
+
+    this->signal_drag_data_get().connect(
+        [this](const Glib::RefPtr<Gdk::DragContext> &context, Gtk::SelectionData &selection, guint info, guint timestamp) -> void {
+            /**
+             * 将app对应的desktop文件路径传递给目的控件 
+             */
+            auto app = this->get_app();
+            if (!app) {
+                g_warning("init_drag_and_drop: app alreay expired\n");
+                return;
+            }
+            Glib::ustring uri = Glib::filename_to_uri(app->get_file_name()) + "\r\n";
+
+            selection.set(8, (const guint8*)uri.data(), uri.length());
+        });
+
+    this->signal_drag_end().connect(
+        [this](const Glib::RefPtr<Gdk::DragContext> &context) -> void {
+            // 让开始菜单窗口重新获取输入焦点
+            Gtk::Container *toplevel = this->get_toplevel();
+            KiranHelper::grab_input(*toplevel);
+        });
+
+    this->signal_drag_failed().connect(
+        [this](const Glib::RefPtr<Gdk::DragContext> &context, Gtk::DragResult result) -> bool {
+            g_debug("drag failed, result %d\n", (int)result);
+            return true;
+        });
 }
 
 bool KiranMenuAppItem::on_button_press_event(GdkEventButton *button_event)
@@ -35,41 +88,44 @@ bool KiranMenuAppItem::on_button_press_event(GdkEventButton *button_event)
         //鼠标右键点击，显示上下文菜单
         create_context_menu();
         context_menu.popup_at_pointer((GdkEvent*)button_event);
-        return false;
+	return false;
     }
 
-    //鼠标左键点击启动app
+    return KiranMenuListItem::on_button_press_event(button_event);
+}
+
+void KiranMenuAppItem::on_clicked()
+{
+    /**
+     * 启动应用
+     */
     launch_app();
-    return false;
 }
 
 bool KiranMenuAppItem::on_key_press_event(GdkEventKey *key_event)
 {
-    switch(key_event->keyval) {
-    case GDK_KEY_Menu:
-        do {
-            Gtk::Allocation allocation;
 
-            allocation = get_allocation();
-            allocation.set_x(0);
-            allocation.set_y(0);
+    if (key_event->keyval == GDK_KEY_Menu)
+    {
+        Gtk::Allocation allocation;
 
+        allocation = get_allocation();
+        if (get_has_window()) {
             //重新创建右键菜单，以确保收藏夹相关的选项能及时更新
-            create_context_menu();
-            context_menu.popup_at_rect(get_window(), allocation,
-                                       Gdk::GRAVITY_CENTER,
-                                       Gdk::GRAVITY_NORTH_WEST,
-                                       (GdkEvent*)key_event);
-        } while (0);
-        break;
-    case GDK_KEY_Return:
-        launch_app();
-        break;
-    default:
-        break;
-    }
+             allocation.set_x(0);
+             allocation.set_y(0);
+        }
 
-    return false;
+        //重新创建右键菜单，以确保收藏夹相关的选项能及时更新
+        create_context_menu();
+        context_menu.popup_at_rect(get_window(), allocation,
+                                   Gdk::GRAVITY_CENTER,
+                                   Gdk::GRAVITY_NORTH_WEST,
+                                   (GdkEvent *)key_event);
+ 
+        return false;
+    }
+    return KiranMenuListItem::on_key_press_event(key_event);
 }
 
 void KiranMenuAppItem::create_context_menu()
@@ -187,6 +243,12 @@ void KiranMenuAppItem::launch_app()
         g_warning("%s: app already expired\n", __FUNCTION__);
         return;
     }
-    app.lock()->launch();
+
+    /**
+     * 需要先发出信号，然后再启动。
+     * 否则在新应用launch()调用时，后台会触发新安装应用列表变化信号,
+     * 当前对象会被销毁，导致无法正常发出启动信号
+     */
     signal_launched().emit();
+    app.lock()->launch();
 }

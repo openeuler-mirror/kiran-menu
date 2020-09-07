@@ -13,9 +13,13 @@ public:
     virtual void set_orientation(Gtk::Orientation orient) override;
     void launch_app();
 
+    const std::shared_ptr<Kiran::App> get_app() const;
+
 protected:
     virtual bool on_button_press_event(GdkEventButton *button_event) override;
     virtual bool on_key_press_event(GdkEventKey *key_event) override;
+    virtual void on_clicked() override;
+    virtual void init_drag_and_drop();
 
     void create_context_menu();
     bool add_app_to_desktop();
