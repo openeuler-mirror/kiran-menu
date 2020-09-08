@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:33
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-08-04 17:33:27
+ * @LastEditTime : 2020-09-08 14:47:04
  * @Description  : 维护APP的一些基本信息
  * @FilePath     : /kiran-menu-2.0/lib/app.h
  */
@@ -134,11 +134,6 @@ protected:
     sigc::signal<void, std::shared_ptr<App>> signal_close_all_windows() { return this->close_all_windows_; }
     // 打开一个新窗口信号
     // sigc::signal<void, std::shared_ptr<App>> signal_open_new_window() { return this->open_new_window_; }
-
-private:
-    void expand_macro(char macro, GString *exec);
-    bool expand_application_parameters(int *argc, char ***argv, GError **error);
-    bool launch_flatpak(GError **error);
 
 protected:
     sigc::signal<void, std::shared_ptr<App>> launched_;

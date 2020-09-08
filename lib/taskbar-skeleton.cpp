@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-07-09 11:03:43
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-08-11 17:37:00
+ * @LastEditTime : 2020-09-08 15:59:04
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/taskbar-skeleton.cpp
  */
@@ -10,6 +10,8 @@
 #include "lib/taskbar-skeleton.h"
 
 #include "lib/common.h"
+#include "lib/log.h"
+
 namespace Kiran
 {
 TaskBarSkeleton::TaskBarSkeleton(AppManager *app_manager) : app_manager_(app_manager)
@@ -40,6 +42,8 @@ void TaskBarSkeleton::init()
 
 bool TaskBarSkeleton::add_fixed_app(const std::string &desktop_id)
 {
+    SETTINGS_PROFILE("id: %s.", desktop_id.c_str());
+
     Glib::Quark quark(desktop_id);
 
     auto iter = std::find(this->fixed_apps_.begin(), this->fixed_apps_.end(), quark.id());
@@ -56,7 +60,7 @@ bool TaskBarSkeleton::add_fixed_app(const std::string &desktop_id)
         }
         else
         {
-            g_debug("<%s> not found desktop_id: %s.", __FUNCTION__, desktop_id.c_str());
+            LOG_DEBUG("not found desktop_id: %s.", desktop_id.c_str());
         }
     }
     return false;
@@ -64,6 +68,8 @@ bool TaskBarSkeleton::add_fixed_app(const std::string &desktop_id)
 
 bool TaskBarSkeleton::del_fixed_app(const std::string &desktop_id)
 {
+    SETTINGS_PROFILE("id: %s.", desktop_id.c_str());
+
     Glib::Quark quark(desktop_id);
 
     auto iter = std::find(this->fixed_apps_.begin(), this->fixed_apps_.end(), quark.id());
@@ -81,7 +87,7 @@ bool TaskBarSkeleton::del_fixed_app(const std::string &desktop_id)
         }
         else
         {
-            g_debug("<%s> not found desktop_id: %s.", __FUNCTION__, desktop_id.c_str());
+            LOG_DEBUG("not found desktop_id: %s.", desktop_id.c_str());
         }
     }
     return false;
@@ -118,6 +124,8 @@ AppVec TaskBarSkeleton::get_fixed_apps()
 
 void TaskBarSkeleton::desktop_app_changed()
 {
+    SETTINGS_PROFILE("");
+
     auto apps = this->app_manager_->get_apps_by_kind(AppKind::DESKTOP);
 
     std::set<int32_t> app_set;
@@ -157,6 +165,8 @@ void TaskBarSkeleton::desktop_app_changed()
 
 void TaskBarSkeleton::app_changed(const Glib::ustring &key)
 {
+    SETTINGS_PROFILE("key: %s.", key.c_str());
+
     auto new_fixed_apps = read_as_to_list_quark(this->settings_, TASKBAR_KEY_FIXED_APPS);
 
     AppVec add_apps;

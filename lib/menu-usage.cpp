@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 20:35:20
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-09 11:50:41
+ * @LastEditTime : 2020-09-08 15:58:22
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/menu-usage.cpp
  */
@@ -12,7 +12,7 @@
 
 #include "lib/app-manager.h"
 #include "lib/common.h"
-#include "lib/helper.h"
+#include "lib/log.h"
 #include "lib/math-helper.h"
 
 namespace Kiran
@@ -194,7 +194,7 @@ bool MenuUsage::read_usages_from_settings()
 
             if (child_base.get_type().get_string() != "{sv}")
             {
-                g_warning("the element format for frequen-apps in gsettings must be {sv}. but now it's %s\n", child_base.get_type().get_string().c_str());
+                LOG_WARNING("the element format for frequen-apps in gsettings must be {sv}. but now it's %s\n", child_base.get_type().get_string().c_str());
                 return false;
             }
 
@@ -219,7 +219,7 @@ bool MenuUsage::read_usages_from_settings()
     }
     catch (std::bad_cast &bc)
     {
-        g_warning("failed to read frequent-apps: %s\n", bc.what());
+        LOG_WARNING("failed to read frequent-apps: %s\n", bc.what());
         return false;
     }
 

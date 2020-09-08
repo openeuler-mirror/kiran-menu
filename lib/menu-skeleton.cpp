@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 19:59:56
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-14 09:38:40
+ * @LastEditTime : 2020-09-08 15:58:07
  * @Description  : 开始菜单类
  * @FilePath     : /kiran-menu-2.0/lib/menu-skeleton.cpp
  */
@@ -10,6 +10,7 @@
 #include "lib/menu-skeleton.h"
 
 #include "lib/app-manager.h"
+#include "lib/log.h"
 #include "lib/window-manager.h"
 
 namespace Kiran
@@ -66,19 +67,19 @@ AppVec MenuSkeleton::search_app(const std::string &keyword, bool ignore_case)
     return match_apps;
 }
 
-#define RETURN_VAL_IF_INVALID_DESKTOP_ID(desktop_id, ret)                                        \
-    {                                                                                            \
-        auto app = app_manager_->lookup_app(desktop_id);                                         \
-        if (!app)                                                                                \
-        {                                                                                        \
-            g_warning("<%s> not found the %s in AppManager.", __FUNCTION__, desktop_id.c_str()); \
-            return ret;                                                                          \
-        }                                                                                        \
-        if (!(app->should_show()))                                                               \
-        {                                                                                        \
-            g_warning("<%s> the %s cannot show in menu.", __FUNCTION__, desktop_id.c_str());     \
-            return ret;                                                                          \
-        }                                                                                        \
+#define RETURN_VAL_IF_INVALID_DESKTOP_ID(desktop_id, ret)                       \
+    {                                                                           \
+        auto app = app_manager_->lookup_app(desktop_id);                        \
+        if (!app)                                                               \
+        {                                                                       \
+            LOG_WARNING("not found the %s in AppManager.", desktop_id.c_str()); \
+            return ret;                                                         \
+        }                                                                       \
+        if (!(app->should_show()))                                              \
+        {                                                                       \
+            LOG_WARNING("the %s cannot show in menu.", desktop_id.c_str());     \
+            return ret;                                                         \
+        }                                                                       \
     }
 
 bool MenuSkeleton::add_favorite_app(const std::string &desktop_id)
@@ -180,18 +181,18 @@ std::shared_ptr<MenuUnit> MenuSkeleton::get_unit(MenuUnitType unit_type)
 {
     switch (unit_type)
     {
-        case MenuUnitType::KIRAN_MENU_TYPE_CATEGORY:
-            return this->category_;
-        case MenuUnitType::KIRAN_MENU_TYPE_FAVORITE:
-            return this->favorite_;
-        case MenuUnitType::KIRAN_MENU_TYPE_SEARCH:
-            return this->search_;
-        case MenuUnitType::KIRAN_MENU_TYPE_NEW:
-            return this->new_;
-        case MenuUnitType::KIRAN_MENU_TYPE_USAGE:
-            return this->usage_;
-        default:
-            return nullptr;
+    case MenuUnitType::KIRAN_MENU_TYPE_CATEGORY:
+        return this->category_;
+    case MenuUnitType::KIRAN_MENU_TYPE_FAVORITE:
+        return this->favorite_;
+    case MenuUnitType::KIRAN_MENU_TYPE_SEARCH:
+        return this->search_;
+    case MenuUnitType::KIRAN_MENU_TYPE_NEW:
+        return this->new_;
+    case MenuUnitType::KIRAN_MENU_TYPE_USAGE:
+        return this->usage_;
+    default:
+        return nullptr;
     }
 }
 
