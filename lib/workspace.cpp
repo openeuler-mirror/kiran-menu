@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-09 15:56:04
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-08-07 14:17:39
+ * @LastEditTime : 2020-09-08 11:46:23
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/workspace.cpp
  */
@@ -88,12 +88,23 @@ void Workspace::flush_windows()
 
 void Workspace::add_window(std::shared_ptr<Window> window)
 {
-    this->windows_.insert(window->get_xid());
+    auto xid = window->get_xid();
+    if (this->windows_.find(xid) == this->windows_.end())
+    {
+        this->windows_.insert(window->get_xid());
+        this->windows_changed_.emit();
+    }
 }
 
 void Workspace::remove_window(std::shared_ptr<Window> window)
 {
-    this->windows_.erase(window->get_xid());
+    auto xid = window->get_xid();
+
+    if (this->windows_.find(xid) != this->windows_.end())
+    {
+        this->windows_.erase(window->get_xid());
+        this->windows_changed_.emit();
+    }
 }
 
 }  // namespace Kiran

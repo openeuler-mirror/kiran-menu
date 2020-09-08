@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-11 09:30:42
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-09-07 16:48:42
+ * @LastEditTime : 2020-09-08 14:05:53
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-display.cpp
  */
@@ -118,6 +118,13 @@ void active_workspace_changed(std::shared_ptr<Kiran::Workspace> prev_active_work
             prev_active_workspace ? prev_active_workspace->get_number() : 0,
             cur_active_workspace ? cur_active_workspace->get_name().c_str() : "null",
             cur_active_workspace ? cur_active_workspace->get_number() : 0);
+}
+
+void workspace_windows_changed(std::shared_ptr<Kiran::Workspace> workspace)
+{
+    g_print("signal: windows in workspace <%d,%s> is changed.",
+            workspace->get_number(),
+            workspace->get_name().c_str());
 }
 
 gboolean timing_print(gpointer user_data)
@@ -297,8 +304,7 @@ int main(int argc, char **argv)
     window_manager->signal_window_closed().connect(&window_closed);
     window_manager->signal_active_window_changed().connect(&active_window_changed);
 
-    auto windows = window_manager->get_windows();
-    for (const auto &window : windows)
+    for (const auto &window : window_manager->get_windows())
     {
         window->signal_name_changed().connect(sigc::bind(&window_name_changed, window));
         window->signal_workspace_changed().connect(sigc::bind(&window_workspace_changed, window));
@@ -314,7 +320,15 @@ int main(int argc, char **argv)
     workspace_manager->signal_workspace_destroyed().connect(&workspace_destroyed);
     workspace_manager->signal_active_workspace_changed().connect(&active_workspace_changed);
 
+    for (const auto &workspace : workspace_manager->get_workspaces())
+    {
+        workspace->signal_windows_changes().connect(sigc::bind(&workspace_windows_changed, workspace));
+    }
+
     timing_print(NULL);
+
+    auto window = window_manager->get_window(67108867);
+    window->pin();
 
     g_timeout_add_seconds(10, timing_print, NULL);
 

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-09 15:55:52
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-08-07 14:06:48
+ * @LastEditTime : 2020-09-08 13:36:12
  * @Description  : 该类是对WnckWorkspace的封装，大部分接口和wnck_window_xxxx相同。
  * @FilePath     : /kiran-menu-2.0/lib/workspace.h
  */
@@ -43,6 +43,9 @@ public:
     // 获取工作空间中的窗口
     WindowVec get_windows();
 
+    // 工作区中的窗口列表发生变化的信号
+    sigc::signal<void> signal_windows_changes() { return this->windows_changed_; };
+
 private:
     void flush_windows();
 
@@ -56,6 +59,9 @@ private:
 
     std::set<uint64_t> windows_;
 
+    sigc::signal<void> windows_changed_;
+
     friend class Window;
+    friend class WorkspaceManager;
 };
 }  // namespace Kiran

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-10 17:15:59
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-09 14:16:29
+ * @LastEditTime : 2020-09-08 14:05:45
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/core_worker.cpp
  */
@@ -19,7 +19,7 @@ void init_backend_system()
 
     AppManager::global_init(WindowManager::get_instance());
 
-    WorkspaceManager::global_init();
+    WorkspaceManager::global_init(WindowManager::get_instance());
 
     MenuSkeleton::global_init(AppManager::get_instance());
 

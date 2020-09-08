@@ -2,25 +2,18 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-09 15:56:17
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-08-07 13:59:17
+ * @LastEditTime : 2020-09-08 12:01:05
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/workspace-manager.h
  */
 
 #pragma once
 
+#include "lib/window-manager.h"
 #include "lib/workspace.h"
 
 namespace Kiran
 {
-// struct LessWorkspace
-// {
-//     bool operator()(const std::shared_ptr<Workspace> &x, const std::shared_ptr<Workspace> &y) const
-//     {
-//         return x->get_number() < y->get_number();
-//     }
-// };
-
 class WorkspaceManager
 {
 public:
@@ -28,7 +21,7 @@ public:
 
     static WorkspaceManager *get_instance() { return instance_; };
 
-    static void global_init();
+    static void global_init(WindowManager *window_manager);
 
     static void global_deinit() { delete instance_; };
 
@@ -57,10 +50,14 @@ public:
     sigc::signal<void, std::shared_ptr<Workspace>, std::shared_ptr<Workspace>> &signal_active_workspace_changed() { return this->active_workspace_changed_; }
 
 private:
-    WorkspaceManager();
+    WorkspaceManager(WindowManager *window_manager);
 
     void load_workspaces();
 
+    // 处理窗口被打开的信号
+    void window_opened(std::shared_ptr<Window> window);
+    // 处理窗口关闭的信号
+    void window_closed(std::shared_ptr<Window> window);
     // 处理工作区被创建的信号
     static void workspace_created(WnckScreen *screen, WnckWorkspace *wnck_workspace, gpointer user_data);
     // 处理工作区被销毁的信号
@@ -70,6 +67,8 @@ private:
 
 private:
     static WorkspaceManager *instance_;
+
+    WindowManager *window_manager_;
 
     sigc::signal<void, std::shared_ptr<Workspace>> workspace_created_;
     sigc::signal<void, std::shared_ptr<Workspace>> workspace_destroyed_;

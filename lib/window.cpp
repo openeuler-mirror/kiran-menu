@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:51
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-09-07 16:56:56
+ * @LastEditTime : 2020-09-08 14:03:13
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window.cpp
  */
@@ -20,13 +20,6 @@
 
 namespace Kiran
 {
-std::shared_ptr<Window> Window::create(WnckWindow* wnck_window)
-{
-    std::shared_ptr<Window> window(new Window(wnck_window));
-    window->flush_workspace();
-    return window;
-}
-
 Window::Window(WnckWindow* wnck_window) : wnck_window_(wnck_window),
                                           gdk_window_(NULL),
                                           last_workspace_number_(-1),
@@ -34,6 +27,13 @@ Window::Window(WnckWindow* wnck_window) : wnck_window_(wnck_window),
                                           pixmap_(None),
                                           last_geometry_(0, 0, 0, 0)
 {
+    auto workspace = this->get_workspace();
+    if (workspace)
+    {
+        this->last_workspace_number_ = workspace->get_number();
+    }
+    this->last_is_pinned_ = this->is_pinned();
+
     g_signal_connect(this->wnck_window_, "name-changed", G_CALLBACK(Window::name_changed), NULL);
     g_signal_connect(this->wnck_window_, "workspace-changed", G_CALLBACK(Window::workspace_changed), NULL);
     g_signal_connect(this->wnck_window_, "geometry-changed", G_CALLBACK(Window::geometry_changed), NULL);
@@ -210,6 +210,16 @@ void Window::unmaximize()
 bool Window::is_shaded()
 {
     return wnck_window_is_shaded(this->wnck_window_);
+}
+
+void Window::pin()
+{
+    return wnck_window_pin(this->wnck_window_);
+}
+
+void Window::unpin()
+{
+    return wnck_window_unpin(this->wnck_window_);
 }
 
 void Window::make_above()

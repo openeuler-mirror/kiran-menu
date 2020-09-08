@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-09 15:56:39
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-08-07 14:34:51
+ * @LastEditTime : 2020-09-08 13:55:27
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/workspace-manager.cpp
  */
@@ -13,9 +13,10 @@
 
 namespace Kiran
 {
-WorkspaceManager::WorkspaceManager() : created_handler_(0),
-                                       destroyed_handler_(0),
-                                       active_changed_handler_(0)
+WorkspaceManager::WorkspaceManager(WindowManager *window_manager) : window_manager_(window_manager),
+                                                                    created_handler_(0),
+                                                                    destroyed_handler_(0),
+                                                                    active_changed_handler_(0)
 {
 }
 
@@ -40,15 +41,18 @@ WorkspaceManager::~WorkspaceManager()
 }
 
 WorkspaceManager *WorkspaceManager::instance_ = nullptr;
-void WorkspaceManager::global_init()
+void WorkspaceManager::global_init(WindowManager *window_manager)
 {
-    instance_ = new WorkspaceManager();
+    instance_ = new WorkspaceManager(window_manager);
     instance_->init();
 }
 
 void WorkspaceManager::init()
 {
     load_workspaces();
+
+    this->window_manager_->signal_window_opened().connect(sigc::mem_fun(this, &WorkspaceManager::window_opened));
+    this->window_manager_->signal_window_closed().connect(sigc::mem_fun(this, &WorkspaceManager::window_closed));
 
     auto screen = wnck_screen_get_default();
     g_return_if_fail(screen != NULL);
@@ -144,6 +148,44 @@ void WorkspaceManager::load_workspaces()
     }
 }
 
+void WorkspaceManager::window_opened(std::shared_ptr<Window> window)
+{
+    if (window->is_pinned())
+    {
+        for (const auto &workspace : this->workspaces_)
+        {
+            workspace.second->add_window(window);
+        }
+    }
+    else
+    {
+        auto workspace = window->get_workspace();
+        if (workspace)
+        {
+            workspace->add_window(window);
+        }
+    }
+}
+
+void WorkspaceManager::window_closed(std::shared_ptr<Window> window)
+{
+    if (window->is_pinned())
+    {
+        for (const auto &workspace : this->workspaces_)
+        {
+            workspace.second->remove_window(window);
+        }
+    }
+    else
+    {
+        auto workspace = window->get_workspace();
+        if (workspace)
+        {
+            workspace->remove_window(window);
+        }
+    }
+}
+
 void WorkspaceManager::workspace_created(WnckScreen *screen, WnckWorkspace *wnck_workspace, gpointer user_data)
 {
     auto workspace_manager = (WorkspaceManager *)user_data;
@@ -166,6 +208,15 @@ void WorkspaceManager::workspace_created(WnckScreen *screen, WnckWorkspace *wnck
                   iter->second->get_name().c_str(),
                   workspace->get_name().c_str());
         iter->second = workspace;
+    }
+
+    // 添加pin窗口到工作区
+    for (const auto &window : WindowManager::get_instance()->get_windows())
+    {
+        if (window->is_pinned())
+        {
+            workspace->add_window(window);
+        }
     }
     workspace_manager->workspace_created_.emit(workspace);
 }

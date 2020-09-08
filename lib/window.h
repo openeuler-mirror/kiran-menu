@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:46
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-09-07 15:53:36
+ * @LastEditTime : 2020-09-08 13:58:20
  * @Description  : 该类是对WnckWindow的封装，大部分接口和wnck_window_xxxx相同。
  * @FilePath     : /kiran-menu-2.0/lib/window.h
  */
@@ -28,6 +28,7 @@ class Window : public std::enable_shared_from_this<Window>
 public:
     Window() = delete;
     Window(const Window& window) = delete;
+    Window(WnckWindow* window);
     virtual ~Window();
 
     static std::shared_ptr<Window> create(WnckWindow* wnck_window);
@@ -95,6 +96,12 @@ public:
     //
     bool is_shaded();
 
+    // 使窗口在所有工作区可见
+    void pin();
+
+    // 取消窗口在所有工作区可见
+    void unpin();
+
     // 窗口置顶
     void make_above();
     void make_unabove();
@@ -125,8 +132,6 @@ public:
     sigc::signal<void, std::shared_ptr<Workspace>, std::shared_ptr<Workspace>> signal_workspace_changed() { return this->workspace_changed_; }
 
 private:
-    Window(WnckWindow* window);
-
     void flush_workspace();
 
     static void name_changed(WnckWindow* wnck_window, gpointer user_data);
