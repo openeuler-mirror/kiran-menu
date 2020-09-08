@@ -2,14 +2,14 @@
  * @Author       : tangjie02
  * @Date         : 2020-05-07 09:43:21
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 09:51:20
+ * @LastEditTime : 2020-09-08 15:57:21
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/category.cpp
  */
 
 #include "lib/category.h"
 
-#include "lib/helper.h"
+#include "lib/log.h"
 
 namespace Kiran
 {
@@ -18,31 +18,31 @@ Category::Category(std::shared_ptr<CategoryNode> node) : repeat_(true),
 {
     if (node->get_type() != CategoryNodeType::CATEGORY_NODE_TYPE_CATEGORY)
     {
-        g_warning("KiranCategory init need the node which type must be CATEGORY_NODE_TYPE_CATEGORY.");
+        LOG_WARNING("KiranCategory init need the node which type must be CATEGORY_NODE_TYPE_CATEGORY.");
     }
 
     for (auto iter = this->node_->get_children(); iter; iter = iter->get_next())
     {
         switch (iter->get_type())
         {
-            case CategoryNodeType::CATEGORY_NODE_TYPE_NAME:
-                this->name_ = iter->get_content();
-                break;
-            case CategoryNodeType::CATEGORY_NODE_TYPE_ICON:
-                this->icon_ = iter->get_content();
-                break;
-            case CategoryNodeType::CATEGORY_NODE_TYPE_REPEAT:
-            {
-                if (iter->get_content() == "true")
-                {
-                    this->repeat_ = true;
-                }
-                else if (iter->get_content() == "false")
-                {
-                    this->repeat_ = false;
-                }
-            }
+        case CategoryNodeType::CATEGORY_NODE_TYPE_NAME:
+            this->name_ = iter->get_content();
             break;
+        case CategoryNodeType::CATEGORY_NODE_TYPE_ICON:
+            this->icon_ = iter->get_content();
+            break;
+        case CategoryNodeType::CATEGORY_NODE_TYPE_REPEAT:
+        {
+            if (iter->get_content() == "true")
+            {
+                this->repeat_ = true;
+            }
+            else if (iter->get_content() == "false")
+            {
+                this->repeat_ = false;
+            }
+        }
+        break;
         }
     }
 }
@@ -246,54 +246,54 @@ bool Category::match_rule(std::shared_ptr<CategoryNode> node, std::shared_ptr<Ap
 
     switch (node->get_type())
     {
-        case CategoryNodeType::CATEGORY_NODE_TYPE_DESKTOP_CATEGORY:
-            return match_desktop_category(node, app);
+    case CategoryNodeType::CATEGORY_NODE_TYPE_DESKTOP_CATEGORY:
+        return match_desktop_category(node, app);
 
-        case CategoryNodeType::CATEGORY_NODE_TYPE_DESKTOP_ID:
-            return match_desktop_id(node, app);
+    case CategoryNodeType::CATEGORY_NODE_TYPE_DESKTOP_ID:
+        return match_desktop_id(node, app);
 
-        case CategoryNodeType::CATEGORY_NODE_TYPE_ALL:
-            return true;
+    case CategoryNodeType::CATEGORY_NODE_TYPE_ALL:
+        return true;
 
-        default:
+    default:
+    {
+        bool match_finish = false;
+        for (auto iter = node->get_children(); iter && !match_finish; iter = iter->get_next())
         {
-            bool match_finish = false;
-            for (auto iter = node->get_children(); iter && !match_finish; iter = iter->get_next())
+            bool sub_result = match_rule(iter, app);
+            // first match result
+            if (iter == node->get_children())
             {
-                bool sub_result = match_rule(iter, app);
-                // first match result
-                if (iter == node->get_children())
-                {
-                    match_result = sub_result;
-                }
-
-                switch (node->get_type())
-                {
-                    case CategoryNodeType::CATEGORY_NODE_TYPE_LOGIC:
-                    case CategoryNodeType::CATEGORY_NODE_TYPE_OR:
-                    case CategoryNodeType::CATEGORY_NODE_TYPE_INCLUDE:
-                    case CategoryNodeType::CATEGORY_NODE_TYPE_EXCLUDE:
-                        match_result = (match_result | sub_result);
-                        if (match_result)
-                        {
-                            match_finish = true;
-                        }
-                        break;
-                    case CategoryNodeType::CATEGORY_NODE_TYPE_AND:
-                        match_result = (match_result & sub_result);
-                        if (!match_result)
-                        {
-                            match_finish = true;
-                        }
-                        break;
-                    case CategoryNodeType::CATEGORY_NODE_TYPE_NOT:
-                        match_result = (!sub_result);
-                        match_finish = true;
-                        break;
-                }
+                match_result = sub_result;
             }
-            return match_result;
+
+            switch (node->get_type())
+            {
+            case CategoryNodeType::CATEGORY_NODE_TYPE_LOGIC:
+            case CategoryNodeType::CATEGORY_NODE_TYPE_OR:
+            case CategoryNodeType::CATEGORY_NODE_TYPE_INCLUDE:
+            case CategoryNodeType::CATEGORY_NODE_TYPE_EXCLUDE:
+                match_result = (match_result | sub_result);
+                if (match_result)
+                {
+                    match_finish = true;
+                }
+                break;
+            case CategoryNodeType::CATEGORY_NODE_TYPE_AND:
+                match_result = (match_result & sub_result);
+                if (!match_result)
+                {
+                    match_finish = true;
+                }
+                break;
+            case CategoryNodeType::CATEGORY_NODE_TYPE_NOT:
+                match_result = (!sub_result);
+                match_finish = true;
+                break;
+            }
         }
+        return match_result;
+    }
     }
 }  // namespace Kiran
 

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-11 09:30:42
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-09-08 14:05:53
+ * @LastEditTime : 2020-09-08 16:30:01
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-display.cpp
  */
@@ -20,111 +20,6 @@
 
 void sig_hander(int signo)
 {
-}
-
-void window_opened(std::shared_ptr<Kiran::Window> window)
-{
-    g_print("signal: window '%s' is opened. xid: %" PRIu64 "\n",
-            window->get_name().c_str(),
-            window->get_xid());
-}
-
-void window_closed(std::shared_ptr<Kiran::Window> window)
-{
-    g_print("signal: window '%s' is closed. xid: %" PRIu64 "\n",
-            window->get_name().c_str(),
-            window->get_xid());
-}
-
-void active_window_changed(std::shared_ptr<Kiran::Window> prev_active_window, std::shared_ptr<Kiran::Window> cur_active_window)
-{
-    g_print("signal: active window change. prev: '%s' prev_xid: %" PRIu64 " cur: '%s' cur_xid: %" PRIu64 "\n",
-            prev_active_window ? prev_active_window->get_name().c_str() : "null",
-            prev_active_window ? prev_active_window->get_xid() : 0,
-            cur_active_window ? cur_active_window->get_name().c_str() : "null",
-            cur_active_window ? cur_active_window->get_xid() : 0);
-}
-
-void window_name_changed(std::weak_ptr<Kiran::Window> window)
-{
-    if (!window.expired())
-    {
-        g_print("signal: the name of the window '%s' is changed. xid: %" PRIu64 "\n",
-                window.lock()->get_name().c_str(),
-                window.lock()->get_xid());
-    }
-    else
-    {
-        g_print("signal: the name of the window 'null' is changed.\n");
-    }
-}
-
-void window_workspace_changed(std::shared_ptr<Kiran::Workspace> prev, std::shared_ptr<Kiran::Workspace> cur, std::weak_ptr<Kiran::Window> window)
-{
-    if (!window.expired())
-    {
-        g_print("signal: the workspace of the window '%s' is changed. prev workspace: %d, cur workspace: %d.\n",
-                window.lock()->get_name().c_str(),
-                prev ? prev->get_number() : -1,
-                cur ? cur->get_number() : -1);
-    }
-    else
-    {
-        g_print("signal: the workspace of the window 'null' is changed.\n");
-    }
-}
-
-void app_action_changed(std::shared_ptr<Kiran::App> app, Kiran::AppAction action)
-{
-    switch (action)
-    {
-    case Kiran::AppAction::APP_OPENED:
-        g_print("signal: app '%s' is opened.\n", app->get_desktop_id().c_str());
-        // g_print("signal: app '%s' is opened. xid: %" PRIu64 " pid: %" PRIu64 "\n",
-        //         app->get_desktop_id().c_str(),
-        //         app->get_xid(),
-        //         app->get_pid());
-        break;
-    case Kiran::AppAction::APP_CLOSED:
-        g_print("signal: app '%s' is closed.\n", app->get_desktop_id().c_str());
-
-        // g_print("signal: app '%s' is closed. xid: %" PRIu64 " pid: %" PRIu64 "\n",
-        //         app->get_desktop_id().c_str(),
-        //         app->get_xid(),
-        //         app->get_pid());
-        break;
-    case Kiran::AppAction::APP_WINDOW_CHANGED:
-        g_print("signal: the window of the app '%s' is changed\n", app->get_desktop_id().c_str());
-        break;
-    case Kiran::AppAction::APP_ALL_WINDOWS_CLOSED:
-        g_print("signal: the all windows of the app '%s' is closed\n", app->get_desktop_id().c_str());
-    }
-}
-
-void workspace_created(std::shared_ptr<Kiran::Workspace> workspace)
-{
-    g_print("signal: workspace '%s' is created\n", workspace->get_name().c_str());
-}
-
-void workspace_destroyed(std::shared_ptr<Kiran::Workspace> workspace)
-{
-    g_print("signal: workspace '%s' is destroyed\n", workspace->get_name().c_str());
-}
-
-void active_workspace_changed(std::shared_ptr<Kiran::Workspace> prev_active_workspace, std::shared_ptr<Kiran::Workspace> cur_active_workspace)
-{
-    g_print("signal: active workspace change. prev: '%s' prev_index: %d cur: '%s' cur_index: %d\n",
-            prev_active_workspace ? prev_active_workspace->get_name().c_str() : "null",
-            prev_active_workspace ? prev_active_workspace->get_number() : 0,
-            cur_active_workspace ? cur_active_workspace->get_name().c_str() : "null",
-            cur_active_workspace ? cur_active_workspace->get_number() : 0);
-}
-
-void workspace_windows_changed(std::shared_ptr<Kiran::Workspace> workspace)
-{
-    g_print("signal: windows in workspace <%d,%s> is changed.",
-            workspace->get_number(),
-            workspace->get_name().c_str());
 }
 
 gboolean timing_print(gpointer user_data)
@@ -299,36 +194,7 @@ int main(int argc, char **argv)
 
     Kiran::init_backend_system();
 
-    auto window_manager = Kiran::WindowManager::get_instance();
-    window_manager->signal_window_opened().connect(&window_opened);
-    window_manager->signal_window_closed().connect(&window_closed);
-    window_manager->signal_active_window_changed().connect(&active_window_changed);
-
-    for (const auto &window : window_manager->get_windows())
-    {
-        window->signal_name_changed().connect(sigc::bind(&window_name_changed, window));
-        window->signal_workspace_changed().connect(sigc::bind(&window_workspace_changed, window));
-    }
-
-    auto app_manager = Kiran::AppManager::get_instance();
-
-    app_manager->signal_app_action_changed().connect(&app_action_changed);
-
-    auto workspace_manager = Kiran::WorkspaceManager::get_instance();
-
-    workspace_manager->signal_workspace_created().connect(&workspace_created);
-    workspace_manager->signal_workspace_destroyed().connect(&workspace_destroyed);
-    workspace_manager->signal_active_workspace_changed().connect(&active_workspace_changed);
-
-    for (const auto &workspace : workspace_manager->get_workspaces())
-    {
-        workspace->signal_windows_changes().connect(sigc::bind(&workspace_windows_changed, workspace));
-    }
-
     timing_print(NULL);
-
-    auto window = window_manager->get_window(67108867);
-    window->pin();
 
     g_timeout_add_seconds(10, timing_print, NULL);
 

@@ -2,14 +2,14 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-09 15:56:04
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-09-08 11:46:23
+ * @LastEditTime : 2020-09-08 15:41:44
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/workspace.cpp
  */
 
 #include "lib/workspace.h"
 
-#include "lib/helper.h"
+#include "lib/log.h"
 #include "window-manager.h"
 namespace Kiran
 {
@@ -33,11 +33,15 @@ std::string Workspace::get_name()
 
 void Workspace::change_name(const std::string &name)
 {
+    SETTINGS_PROFILE("name: %s.", name.c_str());
+
     return wnck_workspace_change_name(this->workspace_, name.c_str());
 }
 
 void Workspace::activate(uint32_t timestamp)
 {
+    SETTINGS_PROFILE("timestamp: %d.", timestamp);
+
     wnck_workspace_activate(this->workspace_, timestamp);
 }
 
@@ -60,6 +64,8 @@ WindowVec Workspace::get_windows()
 
 void Workspace::flush_windows()
 {
+    SETTINGS_PROFILE("");
+
     for (auto iter = this->windows_.begin(); iter != this->windows_.end();)
     {
         auto window = WindowManager::get_instance()->get_window(*iter);
@@ -88,6 +94,8 @@ void Workspace::flush_windows()
 
 void Workspace::add_window(std::shared_ptr<Window> window)
 {
+    SETTINGS_PROFILE("number: %d xid: %" PRIu64 ".", this->get_number(), window ? window->get_xid() : 0);
+
     auto xid = window->get_xid();
     if (this->windows_.find(xid) == this->windows_.end())
     {
@@ -98,6 +106,8 @@ void Workspace::add_window(std::shared_ptr<Window> window)
 
 void Workspace::remove_window(std::shared_ptr<Window> window)
 {
+    SETTINGS_PROFILE("number: %d xid: %" PRIu64 ".", this->get_number(), window ? window->get_xid() : 0);
+
     auto xid = window->get_xid();
 
     if (this->windows_.find(xid) != this->windows_.end())

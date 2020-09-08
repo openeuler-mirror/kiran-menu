@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:46
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-09-08 13:58:20
+ * @LastEditTime : 2020-09-08 15:49:10
  * @Description  : 该类是对WnckWindow的封装，大部分接口和wnck_window_xxxx相同。
  * @FilePath     : /kiran-menu-2.0/lib/window.h
  */
@@ -154,6 +154,10 @@ private:
     sigc::connection load_pixmap_;
 
     WinwowGeometry last_geometry_;
+
+    uint64_t name_changed_handler_;
+    uint64_t workspace_changed_handler_;
+    uint64_t geometry_changed_handler_;
 
     sigc::signal<void> name_changed_;
     sigc::signal<void, std::shared_ptr<Workspace>, std::shared_ptr<Workspace>> workspace_changed_;

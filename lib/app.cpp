@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-08 14:10:38
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-08-04 17:21:18
+ * @LastEditTime : 2020-09-08 15:09:58
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app.cpp
  */
@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "lib/helper.h"
+#include "lib/log.h"
 #include "lib/window-manager.h"
 
 namespace Kiran
@@ -36,11 +37,14 @@ std::shared_ptr<App> App::create_fake()
     std::ostringstream oss;
     oss << "fake_" << ++App::fake_id_count_;
     app->desktop_id_ = oss.str();
+    LOG_DEBUG("create fake app: %s.", app->desktop_id_.c_str());
     return app;
 }
 
 void App::update_from_desktop_file()
 {
+    SETTINGS_PROFILE("id: %s.", this->desktop_id_.c_str());
+
     g_return_if_fail(this->kind_ == AppKind::DESKTOP);
 
     this->desktop_app_ = Gio::DesktopAppInfo::create(this->desktop_id_);
@@ -124,7 +128,7 @@ WindowVec App::get_windows()
         auto wnck_app = wnck_application_get(xid);
         if (!wnck_app)
         {
-            g_warning("<%s> not found the wnck_application. xid: %" PRIu64 "\n", __FUNCTION__, xid);
+            LOG_WARNING("cannot find the wnck_application. xid: %" PRIu64 "\n", xid);
             continue;
         }
 
@@ -136,6 +140,12 @@ WindowVec App::get_windows()
             if (window)
             {
                 windows.push_back(window);
+            }
+            else
+            {
+                LOG_WARNING("failed to lookup window, id: %" PRIu64 ", name: %s",
+                            wnck_window_get_xid(wnck_window),
+                            wnck_window_get_name(wnck_window));
             }
         }
     }
@@ -156,15 +166,21 @@ WindowVec App::get_taskbar_windows()
 
 void App::close_all_windows()
 {
+    SETTINGS_PROFILE("");
+
     for (auto iter = this->wnck_apps_.begin(); iter != wnck_apps_.end(); ++iter)
     {
         auto xid = (*iter);
         auto wnck_app = wnck_application_get(xid);
         if (!wnck_app)
         {
-            g_warning("<%s> not found the wnck_application. xid: %" PRIu64 "\n", __FUNCTION__, xid);
+            LOG_WARNING("cannot find the wnck_application. xid: %" PRIu64 "\n", xid);
             continue;
         }
+
+        LOG_DEBUG("close these windows belong to wnck_app<%" PRIu64 ", %s>.",
+                  wnck_application_get_xid(wnck_app),
+                  wnck_application_get_name(wnck_app));
 
         auto wnck_windows = wnck_application_get_windows(wnck_app);
         for (auto l = wnck_windows; l != NULL; l = l->next)
@@ -175,6 +191,12 @@ void App::close_all_windows()
             {
                 window->close();
             }
+            else
+            {
+                LOG_WARNING("failed to lookup window, id: %" PRIu64 ", name: %s",
+                            wnck_window_get_xid(wnck_window),
+                            wnck_window_get_name(wnck_window));
+            }
         }
     }
     this->close_all_windows_.emit(this->shared_from_this());
@@ -182,6 +204,8 @@ void App::close_all_windows()
 
 bool App::launch()
 {
+    SETTINGS_PROFILE("id: %s.", this->desktop_id_.c_str());
+
     g_return_val_if_fail(this->desktop_app_, false);
 
     bool res = false;
@@ -205,185 +229,20 @@ bool App::launch()
     else
     {
         this->launch_failed_.emit(this->shared_from_this());
-        g_warning("Failed to launch: %s", error.c_str());
+        LOG_WARNING("failed to launch: %s", error.c_str());
     }
     return res;
 }
 
 void App::launch_action(const std::string &action_name)
 {
+    SETTINGS_PROFILE("id: %s.", this->desktop_id_.c_str());
+
     g_return_if_fail(this->desktop_app_);
 
     this->desktop_app_->launch_action(action_name);
     // there is no way to detect failures that occur while using this function
     // this->launched_.emit(this->shared_from_this());
-}
-
-typedef struct
-{
-    GSpawnChildSetupFunc user_setup;
-    gpointer user_setup_data;
-
-    char *pid_envvar;
-} ChildSetupData;
-
-void App::expand_macro(char macro, GString *exec)
-{
-    char *expanded = NULL;
-
-    g_return_if_fail(exec != NULL);
-
-    switch (macro)
-    {
-        case 'i':
-            if (this->icon_name_.length() > 0)
-            {
-                g_string_append(exec, "--icon ");
-                expanded = g_shell_quote(this->icon_name_.c_str());
-                g_string_append(exec, expanded);
-                g_free(expanded);
-            }
-            break;
-
-        case 'c':
-            if (this->locale_name_.length() > 0)
-            {
-                expanded = g_shell_quote(this->locale_name_.c_str());
-                g_string_append(exec, expanded);
-                g_free(expanded);
-            }
-            break;
-
-        case 'k':
-            if (this->file_name_.length() > 0)
-            {
-                expanded = g_shell_quote(this->file_name_.c_str());
-                g_string_append(exec, expanded);
-                g_free(expanded);
-            }
-            break;
-
-        case '%':
-            g_string_append_c(exec, '%');
-            break;
-    }
-}
-
-bool App::expand_application_parameters(int *argc,
-                                        char ***argv,
-                                        GError **error)
-{
-    const char *p = this->exec_.c_str();
-    GString *expanded_exec;
-    bool res;
-
-    if (this->exec_.length() == 0)
-    {
-        g_set_error_literal(error,
-                            G_IO_ERROR,
-                            G_IO_ERROR_FAILED,
-                            "Desktop file didn’t specify Exec field");
-        return false;
-    }
-
-    expanded_exec = g_string_new(NULL);
-
-    while (*p)
-    {
-        if (p[0] == '%' && p[1] != '\0')
-        {
-            expand_macro(p[1], expanded_exec);
-            p++;
-        }
-        else
-            g_string_append_c(expanded_exec, *p);
-
-        p++;
-    }
-    res = g_shell_parse_argv(expanded_exec->str, argc, argv, error);
-    g_string_free(expanded_exec, TRUE);
-    return res;
-}
-
-static void child_setup(gpointer user_data)
-{
-    gchar *pid_envvar = (gchar *)user_data;
-
-    if (pid_envvar)
-    {
-        pid_t pid = getpid();
-        char buf[20];
-        int i;
-
-        /* Write the pid into the space already reserved for it in the
-       * environment array. We can't use sprintf because it might
-       * malloc, so we do it by hand. It's simplest to write the pid
-       * out backwards first, then copy it over.
-       */
-        for (i = 0; pid; i++, pid /= 10)
-            buf[i] = (pid % 10) + '0';
-        for (i--; i >= 0; i--)
-            *(pid_envvar++) = buf[i];
-        *pid_envvar = '\0';
-    }
-}
-
-bool App::launch_flatpak(GError **error)
-{
-    bool completed = false;
-
-    char **argv, **envp;
-    int argc;
-    gchar *pid_envvar;
-
-    argv = NULL;
-    envp = g_get_environ();
-
-    GPid pid;
-    GList *iter;
-
-    if (!expand_application_parameters(&argc, &argv, error))
-        goto out;
-
-    if (this->file_name_.size() > 0)
-    {
-        envp = g_environ_setenv(envp,
-                                "GIO_LAUNCHED_DESKTOP_FILE",
-                                this->file_name_.c_str(),
-                                TRUE);
-        envp = g_environ_setenv(envp,
-                                "GIO_LAUNCHED_DESKTOP_FILE_PID",
-                                "XXXXXXXXXXXXXXXXXXXX", /* filled in child_setup */
-                                TRUE);
-        pid_envvar = (char *)g_environ_getenv(envp, "GIO_LAUNCHED_DESKTOP_FILE_PID");
-    }
-    else
-    {
-        pid_envvar = NULL;
-    }
-
-    if (!g_spawn_async(this->path_.c_str(),
-                       argv,
-                       envp,
-                       G_SPAWN_SEARCH_PATH,
-                       child_setup,
-                       pid_envvar,
-                       &pid,
-                       error))
-    {
-        goto out;
-    }
-
-    g_strfreev(argv);
-    argv = NULL;
-
-    completed = true;
-
-out:
-    g_strfreev(argv);
-    g_strfreev(envp);
-
-    return completed;
 }
 
 }  // namespace Kiran
