@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:51
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-09-08 16:37:10
+ * @LastEditTime : 2020-09-09 10:39:17
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window.cpp
  */
@@ -294,6 +294,13 @@ WinwowGeometry Window::get_geometry()
 {
     int x, y, w, h;
     wnck_window_get_geometry(this->wnck_window_, &x, &y, &w, &h);
+    return std::make_tuple(x, y, w, h);
+}
+
+WinwowGeometry Window::get_client_window_geometry()
+{
+    int x, y, w, h;
+    wnck_window_get_client_window_geometry(this->wnck_window_, &x, &y, &w, &h);
     return std::make_tuple(x, y, w, h);
 }
 

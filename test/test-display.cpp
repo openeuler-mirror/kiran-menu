@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-11 09:30:42
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-09-08 16:30:01
+ * @LastEditTime : 2020-09-09 10:43:27
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-display.cpp
  */
@@ -156,6 +156,7 @@ gboolean timing_print(gpointer user_data)
             auto window = windows[i];
             auto pixmap = window->get_pixmap();
             auto geometry = window->get_geometry();
+            auto client_geometry = window->get_client_window_geometry();
             auto name = window->get_name();
             auto xid = window->get_xid();
             std::ostringstream oss;
@@ -164,12 +165,14 @@ gboolean timing_print(gpointer user_data)
             // std::replace(new_name.begin(), new_name.end(), ':', '-');
             oss << xid << ".png";
 
-            g_print("save screentshot: name: %s xid: %" PRIu64 " pixmap: %" PRIu64 " width: %d height: %d\n",
+            g_print("save screentshot: name: %s xid: %" PRIu64 " pixmap: %" PRIu64 " width: %d height: %d client_width: %d client_height: %d\n",
                     name.c_str(),
                     xid,
                     pixmap,
                     std::get<2>(geometry),
-                    std::get<3>(geometry));
+                    std::get<3>(geometry),
+                    std::get<2>(client_geometry),
+                    std::get<3>(client_geometry));
 
             if (pixmap)
             {

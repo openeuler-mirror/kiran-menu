@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:46
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-09-08 15:49:10
+ * @LastEditTime : 2020-09-09 10:42:07
  * @Description  : 该类是对WnckWindow的封装，大部分接口和wnck_window_xxxx相同。
  * @FilePath     : /kiran-menu-2.0/lib/window.h
  */
@@ -118,8 +118,9 @@ public:
     // 关闭窗口
     void close();
 
-    // 获取窗口位置和大小
+    // 获取窗口位置和大小，get_geometry函数包含窗口管理器添加边框的大小，如果需要获取(未被窗口管理器处理过的)实际大小，可以使用get_client_window_geometry
     WinwowGeometry get_geometry();
+    WinwowGeometry get_client_window_geometry();
 
     // 获取当前所在的工作区。如果窗口为pin状态或者不在任何工作区，则返回空
     std::shared_ptr<Workspace> get_workspace();
