@@ -290,14 +290,14 @@ void Window::close()
     wnck_window_close(this->wnck_window_, now);
 }
 
-WinwowGeometry Window::get_geometry()
+WindowGeometry Window::get_geometry()
 {
     int x, y, w, h;
     wnck_window_get_geometry(this->wnck_window_, &x, &y, &w, &h);
     return std::make_tuple(x, y, w, h);
 }
 
-WinwowGeometry Window::get_client_window_geometry()
+WindowGeometry Window::get_client_window_geometry()
 {
     int x, y, w, h;
     wnck_window_get_client_window_geometry(this->wnck_window_, &x, &y, &w, &h);

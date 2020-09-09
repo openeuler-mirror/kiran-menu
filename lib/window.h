@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:46
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-09-09 10:42:07
+ * @LastEditTime : 2020-09-09 10:47:27
  * @Description  : 该类是对WnckWindow的封装，大部分接口和wnck_window_xxxx相同。
  * @FilePath     : /kiran-menu-2.0/lib/window.h
  */
@@ -21,7 +21,7 @@ class Window;
 class Workspace;
 
 using WindowVec = std::vector<std::shared_ptr<Kiran::Window>>;
-using WinwowGeometry = std::tuple<int, int, int, int>;
+using WindowGeometry = std::tuple<int, int, int, int>;
 
 class Window : public std::enable_shared_from_this<Window>
 {
@@ -119,8 +119,8 @@ public:
     void close();
 
     // 获取窗口位置和大小，get_geometry函数包含窗口管理器添加边框的大小，如果需要获取(未被窗口管理器处理过的)实际大小，可以使用get_client_window_geometry
-    WinwowGeometry get_geometry();
-    WinwowGeometry get_client_window_geometry();
+    WindowGeometry get_geometry();
+    WindowGeometry get_client_window_geometry();
 
     // 获取当前所在的工作区。如果窗口为pin状态或者不在任何工作区，则返回空
     std::shared_ptr<Workspace> get_workspace();
@@ -154,7 +154,7 @@ private:
 
     sigc::connection load_pixmap_;
 
-    WinwowGeometry last_geometry_;
+    WindowGeometry last_geometry_;
 
     uint64_t name_changed_handler_;
     uint64_t workspace_changed_handler_;
