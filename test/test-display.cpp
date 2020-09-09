@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-11 09:30:42
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-08-07 14:42:12
+ * @LastEditTime : 2020-09-09 10:43:27
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/test/test-display.cpp
  */
@@ -20,75 +20,6 @@
 
 void sig_hander(int signo)
 {
-}
-
-void window_opened(std::shared_ptr<Kiran::Window> window)
-{
-    g_print("signal: window '%s' is opened. xid: %" PRIu64 "\n",
-            window->get_name().c_str(),
-            window->get_xid());
-}
-
-void window_closed(std::shared_ptr<Kiran::Window> window)
-{
-    g_print("signal: window '%s' is closed. xid: %" PRIu64 "\n",
-            window->get_name().c_str(),
-            window->get_xid());
-}
-
-void active_window_changed(std::shared_ptr<Kiran::Window> prev_active_window, std::shared_ptr<Kiran::Window> cur_active_window)
-{
-    g_print("signal: active window change. prev: '%s' prev_xid: %" PRIu64 " cur: '%s' cur_xid: %" PRIu64 "\n",
-            prev_active_window ? prev_active_window->get_name().c_str() : "null",
-            prev_active_window ? prev_active_window->get_xid() : 0,
-            cur_active_window ? cur_active_window->get_name().c_str() : "null",
-            cur_active_window ? cur_active_window->get_xid() : 0);
-}
-
-void app_action_changed(std::shared_ptr<Kiran::App> app, Kiran::AppAction action)
-{
-    switch (action)
-    {
-    case Kiran::AppAction::APP_OPENED:
-        g_print("signal: app '%s' is opened.\n", app->get_desktop_id().c_str());
-        // g_print("signal: app '%s' is opened. xid: %" PRIu64 " pid: %" PRIu64 "\n",
-        //         app->get_desktop_id().c_str(),
-        //         app->get_xid(),
-        //         app->get_pid());
-        break;
-    case Kiran::AppAction::APP_CLOSED:
-        g_print("signal: app '%s' is closed.\n", app->get_desktop_id().c_str());
-
-        // g_print("signal: app '%s' is closed. xid: %" PRIu64 " pid: %" PRIu64 "\n",
-        //         app->get_desktop_id().c_str(),
-        //         app->get_xid(),
-        //         app->get_pid());
-        break;
-    case Kiran::AppAction::APP_WINDOW_CHANGED:
-        g_print("signal: the window of the app '%s' is changed\n", app->get_desktop_id().c_str());
-        break;
-    case Kiran::AppAction::APP_ALL_WINDOWS_CLOSED:
-        g_print("signal: the all windows of the app '%s' is closed\n", app->get_desktop_id().c_str());
-    }
-}
-
-void workspace_created(std::shared_ptr<Kiran::Workspace> workspace)
-{
-    g_print("signal: workspace '%s' is created\n", workspace->get_name().c_str());
-}
-
-void workspace_destroyed(std::shared_ptr<Kiran::Workspace> workspace)
-{
-    g_print("signal: workspace '%s' is destroyed\n", workspace->get_name().c_str());
-}
-
-void active_workspace_changed(std::shared_ptr<Kiran::Workspace> prev_active_workspace, std::shared_ptr<Kiran::Workspace> cur_active_workspace)
-{
-    g_print("signal: active workspace change. prev: '%s' prev_index: %d cur: '%s' cur_index: %d\n",
-            prev_active_workspace ? prev_active_workspace->get_name().c_str() : "null",
-            prev_active_workspace ? prev_active_workspace->get_number() : 0,
-            cur_active_workspace ? cur_active_workspace->get_name().c_str() : "null",
-            cur_active_workspace ? cur_active_workspace->get_number() : 0);
 }
 
 gboolean timing_print(gpointer user_data)
@@ -225,6 +156,7 @@ gboolean timing_print(gpointer user_data)
             auto window = windows[i];
             auto pixmap = window->get_pixmap();
             auto geometry = window->get_geometry();
+            auto client_geometry = window->get_client_window_geometry();
             auto name = window->get_name();
             auto xid = window->get_xid();
             std::ostringstream oss;
@@ -233,12 +165,14 @@ gboolean timing_print(gpointer user_data)
             // std::replace(new_name.begin(), new_name.end(), ':', '-');
             oss << xid << ".png";
 
-            g_print("save screentshot: name: %s xid: %" PRIu64 " pixmap: %" PRIu64 " width: %d height: %d\n",
+            g_print("save screentshot: name: %s xid: %" PRIu64 " pixmap: %" PRIu64 " width: %d height: %d client_width: %d client_height: %d\n",
                     name.c_str(),
                     xid,
                     pixmap,
                     std::get<2>(geometry),
-                    std::get<3>(geometry));
+                    std::get<3>(geometry),
+                    std::get<2>(client_geometry),
+                    std::get<3>(client_geometry));
 
             if (pixmap)
             {
@@ -262,22 +196,6 @@ int main(int argc, char **argv)
     Gtk::Main kit(argc, argv);
 
     Kiran::init_backend_system();
-
-    auto window_manager = Kiran::WindowManager::get_instance();
-
-    window_manager->signal_window_opened().connect(&window_opened);
-    window_manager->signal_window_closed().connect(&window_closed);
-    window_manager->signal_active_window_changed().connect(&active_window_changed);
-
-    auto app_manager = Kiran::AppManager::get_instance();
-
-    app_manager->signal_app_action_changed().connect(&app_action_changed);
-
-    auto workspace_manager = Kiran::WorkspaceManager::get_instance();
-
-    workspace_manager->signal_workspace_created().connect(&workspace_created);
-    workspace_manager->signal_workspace_destroyed().connect(&workspace_destroyed);
-    workspace_manager->signal_active_workspace_changed().connect(&active_workspace_changed);
 
     timing_print(NULL);
 

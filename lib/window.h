@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:46
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-08-04 08:49:45
+ * @LastEditTime : 2020-09-09 10:47:27
  * @Description  : 该类是对WnckWindow的封装，大部分接口和wnck_window_xxxx相同。
  * @FilePath     : /kiran-menu-2.0/lib/window.h
  */
@@ -21,13 +21,14 @@ class Window;
 class Workspace;
 
 using WindowVec = std::vector<std::shared_ptr<Kiran::Window>>;
-using WinwowGeometry = std::tuple<int, int, int, int>;
+using WindowGeometry = std::tuple<int, int, int, int>;
 
 class Window : public std::enable_shared_from_this<Window>
 {
 public:
     Window() = delete;
     Window(const Window& window) = delete;
+    Window(WnckWindow* window);
     virtual ~Window();
 
     static std::shared_ptr<Window> create(WnckWindow* wnck_window);
@@ -95,6 +96,12 @@ public:
     //
     bool is_shaded();
 
+    // 使窗口在所有工作区可见
+    void pin();
+
+    // 取消窗口在所有工作区可见
+    void unpin();
+
     // 窗口置顶
     void make_above();
     void make_unabove();
@@ -111,21 +118,27 @@ public:
     // 关闭窗口
     void close();
 
-    // 获取窗口位置和大小
-    WinwowGeometry get_geometry();
+    // 获取窗口位置和大小，get_geometry函数包含窗口管理器添加边框的大小，如果需要获取(未被窗口管理器处理过的)实际大小，可以使用get_client_window_geometry
+    WindowGeometry get_geometry();
+    WindowGeometry get_client_window_geometry();
 
     // 获取当前所在的工作区。如果窗口为pin状态或者不在任何工作区，则返回空
     std::shared_ptr<Workspace> get_workspace();
     void set_on_visible_workspace(bool on);
     bool get_on_visible_workspace();
 
-private:
-    Window(WnckWindow* window);
+    // 窗口标题发生变化信号
+    sigc::signal<void> signal_name_changed() { return this->name_changed_; }
+    // 工作区变化信号。两个参数分别代表之前的工作区和当前的工作区，如果指针为nullptr，说明窗口不属于任意工作区或者窗口是pin状态
+    sigc::signal<void, std::shared_ptr<Workspace>, std::shared_ptr<Workspace>> signal_workspace_changed() { return this->workspace_changed_; }
 
+private:
     void flush_workspace();
 
+    static void name_changed(WnckWindow* wnck_window, gpointer user_data);
     static void workspace_changed(WnckWindow* wnck_window, gpointer user_data);
     static void geometry_changed(WnckWindow* wnck_window, gpointer user_data);
+
     void process_events(GdkXEvent* xevent, GdkEvent* event);
     bool update_window_pixmap();
 
@@ -141,10 +154,14 @@ private:
 
     sigc::connection load_pixmap_;
 
-    WinwowGeometry last_geometry_;
+    WindowGeometry last_geometry_;
 
-    // 因为在应用程序关闭的时候，无法
-    // uint64_t window_group_;
+    uint64_t name_changed_handler_;
+    uint64_t workspace_changed_handler_;
+    uint64_t geometry_changed_handler_;
+
+    sigc::signal<void> name_changed_;
+    sigc::signal<void, std::shared_ptr<Workspace>, std::shared_ptr<Workspace>> workspace_changed_;
 
     friend class WindowManager;
 };

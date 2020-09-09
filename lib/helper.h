@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-09 22:54:02
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-07 13:34:49
+ * @LastEditTime : 2020-09-08 14:59:04
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/helper.h
  */
@@ -11,6 +11,7 @@
 
 #include <giomm.h>
 
+#include <cinttypes>
 #include <string>
 #include <vector>
 
@@ -55,6 +56,24 @@ namespace Kiran
         }                         \
         return _ret;              \
     }
+
+#define CONNECTION(text1, text2) text1##text2
+#define CONNECT(text1, text2) CONNECTION(text1, text2)
+
+class Defer
+{
+public:
+    Defer(std::function<void(std::string)> func, std::string fun_name) : func_(func),
+                                                                         fun_name_(fun_name) {}
+    ~Defer() { func_(fun_name_); }
+
+private:
+    std::function<void(std::string)> func_;
+    std::string fun_name_;
+};
+
+// helper macro for Defer class
+#define SCOPE_EXIT(block) Defer CONNECT(_defer_, __LINE__)([&](std::string _arg_function) block, __FUNCTION__)
 
 std::string str_trim(const std::string &str);
 

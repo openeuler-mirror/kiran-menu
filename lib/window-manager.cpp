@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:27:36
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-08-04 08:47:18
+ * @LastEditTime : 2020-09-08 16:05:23
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window-manager.cpp
  */
@@ -15,11 +15,14 @@
 
 #include <cinttypes>
 
-#include "lib/helper.h"
+#include "lib/log.h"
 
 namespace Kiran
 {
-WindowManager::WindowManager(ScreenManager *screen_manager) : screen_manager_(screen_manager)
+WindowManager::WindowManager(ScreenManager *screen_manager) : screen_manager_(screen_manager),
+                                                              window_opened_handler_(0),
+                                                              window_closed_handler_(0),
+                                                              active_window_changed_handler_(0)
 {
 }
 
@@ -29,6 +32,23 @@ WindowManager::~WindowManager()
     if (gdk_display)
     {
         gdk_window_remove_filter(NULL, &WindowManager::event_filter, this);
+    }
+
+    auto screen = wnck_screen_get_default();
+    if (screen)
+    {
+        if (this->window_opened_handler_)
+        {
+            g_signal_handler_disconnect(screen, this->window_opened_handler_);
+        }
+        if (this->window_closed_handler_)
+        {
+            g_signal_handler_disconnect(screen, this->window_closed_handler_);
+        }
+        if (this->active_window_changed_handler_)
+        {
+            g_signal_handler_disconnect(screen, this->active_window_changed_handler_);
+        }
     }
 }
 
@@ -44,9 +64,9 @@ void WindowManager::init()
     auto screen = wnck_screen_get_default();
     g_return_if_fail(screen != NULL);
 
-    g_signal_connect(screen, "window-opened", G_CALLBACK(WindowManager::window_opened), this);
-    g_signal_connect(screen, "window-closed", G_CALLBACK(WindowManager::window_closed), this);
-    g_signal_connect(screen, "active-window-changed", G_CALLBACK(WindowManager::active_window_changed), this);
+    this->window_opened_handler_ = g_signal_connect(screen, "window-opened", G_CALLBACK(WindowManager::window_opened), this);
+    this->window_closed_handler_ = g_signal_connect(screen, "window-closed", G_CALLBACK(WindowManager::window_closed), this);
+    this->active_window_changed_handler_ = g_signal_connect(screen, "active-window-changed", G_CALLBACK(WindowManager::active_window_changed), this);
 
     auto gdk_display = gdk_display_get_default();
     if (gdk_display)
@@ -87,8 +107,7 @@ WindowVec WindowManager::get_windows()
 
 std::shared_ptr<Window> WindowManager::create_temp_window(WnckWindow *wnck_window)
 {
-    auto window = Window::create(wnck_window);
-    return window;
+    return std::make_shared<Window>(wnck_window);
 }
 
 std::shared_ptr<Window> WindowManager::lookup_window(WnckWindow *wnck_window)
@@ -107,32 +126,9 @@ std::shared_ptr<Window> WindowManager::lookup_window(WnckWindow *wnck_window)
     }
     else
     {
-        g_debug("not found the wnck_window: %p, xid: %" PRIu64 ", the window maybe have just closed.\n", wnck_window, xid);
+        LOG_DEBUG("not found the wnck_window: %p, xid: %" PRIu64 ", the window maybe have just closed.\n", wnck_window, xid);
         return nullptr;
     }
-}
-
-std::shared_ptr<Window> WindowManager::lookup_and_create_window(WnckWindow *wnck_window)
-{
-    if (!wnck_window)
-    {
-        return nullptr;
-    }
-
-    auto xid = (uint64_t)wnck_window_get_xid(wnck_window);
-
-    auto iter = this->windows_.find(xid);
-    if (iter != this->windows_.end())
-    {
-        return iter->second;
-    }
-    else
-    {
-        auto window = Window::create(wnck_window);
-        this->windows_.emplace(xid, window);
-        return window;
-    }
-    return nullptr;
 }
 
 GdkFilterReturn WindowManager::event_filter(GdkXEvent *xevent, GdkEvent *event, gpointer data)
@@ -158,17 +154,20 @@ void WindowManager::window_opened(WnckScreen *screen, WnckWindow *wnck_window, g
     g_return_if_fail(window_manager == WindowManager::get_instance());
 
     auto xid = (uint64_t)wnck_window_get_xid(wnck_window);
+    auto name = wnck_window_get_name(wnck_window);
+
+    LOG_DEBUG("window is opened. xid: %" PRIu64 ", name: %s.", xid, name);
 
     auto iter = window_manager->windows_.find(xid);
     if (iter != window_manager->windows_.end())
     {
-        g_warning("the window already exists. name: %s xid: %" PRIu64 "\n",
-                  iter->second->get_name().c_str(),
-                  iter->second->get_xid());
+        LOG_WARNING("the window already exists. name: %s xid: %" PRIu64 "\n",
+                    iter->second->get_name().c_str(),
+                    iter->second->get_xid());
     }
     else
     {
-        auto window = Window::create(wnck_window);
+        auto window = std::make_shared<Window>(wnck_window);
         window_manager->windows_.emplace(xid, window);
         window_manager->window_opened_.emit(window);
     }
@@ -182,6 +181,9 @@ void WindowManager::window_closed(WnckScreen *screen, WnckWindow *wnck_window, g
     g_return_if_fail(window_manager == WindowManager::get_instance());
 
     auto xid = (uint64_t)wnck_window_get_xid(wnck_window);
+    auto name = wnck_window_get_name(wnck_window);
+
+    LOG_DEBUG("window is closed. xid: %" PRIu64 ", name: %s.", xid, name);
 
     auto iter = window_manager->windows_.find(xid);
     if (iter != window_manager->windows_.end())
@@ -192,9 +194,7 @@ void WindowManager::window_closed(WnckScreen *screen, WnckWindow *wnck_window, g
     }
     else
     {
-        g_warning("the window not exists. name: %s xid: %" PRIu64 "\n",
-                  wnck_window_get_name(wnck_window),
-                  wnck_window_get_xid(wnck_window));
+        LOG_WARNING("the window not exists. name: %s xid: %" PRIu64 "\n", name, xid);
     }
 }
 
@@ -206,6 +206,12 @@ void WindowManager::active_window_changed(WnckScreen *screen, WnckWindow *prev_w
 
     auto prev_window = window_manager->lookup_window(prev_wnck_window);
     auto cur_window = window_manager->get_active_window();
+
+    LOG_DEBUG("prev_xid: %" PRIu64 ", prev_name: %s, cur_xid: %" PRIu64 ", cur_name: %s.",
+              prev_window ? prev_window->get_xid() : 0,
+              prev_window ? prev_window->get_name().c_str() : "null",
+              cur_window ? cur_window->get_xid() : 0,
+              cur_window ? cur_window->get_name().c_str() : "null");
 
     window_manager->active_window_changed_.emit(prev_window, cur_window);
 }

@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:26:51
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-08-04 09:10:15
+ * @LastEditTime : 2020-09-09 10:39:17
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window.cpp
  */
@@ -15,27 +15,31 @@
 
 #include "lib/app-manager.h"
 #include "lib/app.h"
-#include "lib/helper.h"
+#include "lib/log.h"
 #include "lib/workspace-manager.h"
 
 namespace Kiran
 {
-std::shared_ptr<Window> Window::create(WnckWindow* wnck_window)
-{
-    std::shared_ptr<Window> window(new Window(wnck_window));
-    window->flush_workspace();
-    return window;
-}
-
 Window::Window(WnckWindow* wnck_window) : wnck_window_(wnck_window),
                                           gdk_window_(NULL),
                                           last_workspace_number_(-1),
                                           last_is_pinned_(false),
                                           pixmap_(None),
-                                          last_geometry_(0, 0, 0, 0)
+                                          last_geometry_(0, 0, 0, 0),
+                                          name_changed_handler_(0),
+                                          workspace_changed_handler_(0),
+                                          geometry_changed_handler_(0)
 {
-    g_signal_connect(this->wnck_window_, "workspace-changed", G_CALLBACK(Window::workspace_changed), NULL);
-    g_signal_connect(this->wnck_window_, "geometry-changed", G_CALLBACK(Window::geometry_changed), NULL);
+    auto workspace = this->get_workspace();
+    if (workspace)
+    {
+        this->last_workspace_number_ = workspace->get_number();
+    }
+    this->last_is_pinned_ = this->is_pinned();
+
+    this->name_changed_handler_ = g_signal_connect(this->wnck_window_, "name-changed", G_CALLBACK(Window::name_changed), NULL);
+    this->workspace_changed_handler_ = g_signal_connect(this->wnck_window_, "workspace-changed", G_CALLBACK(Window::workspace_changed), NULL);
+    this->geometry_changed_handler_ = g_signal_connect(this->wnck_window_, "geometry-changed", G_CALLBACK(Window::geometry_changed), NULL);
     this->update_window_pixmap();
 }
 
@@ -53,6 +57,24 @@ Window::~Window()
     if (this->load_pixmap_)
     {
         this->load_pixmap_.disconnect();
+    }
+
+    if (this->wnck_window_)
+    {
+        if (this->name_changed_handler_)
+        {
+            g_signal_handler_disconnect(this->wnck_window_, this->name_changed_handler_);
+        }
+
+        if (this->workspace_changed_handler_)
+        {
+            g_signal_handler_disconnect(this->wnck_window_, this->workspace_changed_handler_);
+        }
+
+        if (this->geometry_changed_handler_)
+        {
+            g_signal_handler_disconnect(this->wnck_window_, this->geometry_changed_handler_);
+        }
     }
 }
 
@@ -152,6 +174,8 @@ bool Window::is_skip_taskbar()
 
 void Window::activate(uint32_t timestamp)
 {
+    SETTINGS_PROFILE("xid: %" PRIu64 ", timestamp: %d.", this->get_xid(), timestamp);
+
     WnckWindowState state = wnck_window_get_state(wnck_window_);
     auto workspace = get_workspace();
     auto current_workspace = WorkspaceManager::get_instance()->get_active_workspace();
@@ -178,6 +202,7 @@ void Window::activate(uint32_t timestamp)
 
 void Window::unminimize(uint32_t timestamp)
 {
+    SETTINGS_PROFILE("xid: %" PRIu64 ", timestamp: %d.", this->get_xid(), timestamp);
     wnck_window_unminimize(this->wnck_window_, timestamp);
 }
 
@@ -188,6 +213,7 @@ bool Window::is_minimized()
 
 void Window::minimize()
 {
+    SETTINGS_PROFILE("xid: %" PRIu64 ".", this->get_xid());
     wnck_window_minimize(this->wnck_window_);
 }
 
@@ -198,11 +224,13 @@ bool Window::is_maximized()
 
 void Window::maximize()
 {
+    SETTINGS_PROFILE("xid: %" PRIu64 ".", this->get_xid());
     wnck_window_maximize(this->wnck_window_);
 }
 
 void Window::unmaximize()
 {
+    SETTINGS_PROFILE("xid: %" PRIu64 ".", this->get_xid());
     wnck_window_unmaximize(this->wnck_window_);
 }
 
@@ -211,13 +239,27 @@ bool Window::is_shaded()
     return wnck_window_is_shaded(this->wnck_window_);
 }
 
+void Window::pin()
+{
+    SETTINGS_PROFILE("xid: %" PRIu64 ".", this->get_xid());
+    return wnck_window_pin(this->wnck_window_);
+}
+
+void Window::unpin()
+{
+    SETTINGS_PROFILE("xid: %" PRIu64 ".", this->get_xid());
+    return wnck_window_unpin(this->wnck_window_);
+}
+
 void Window::make_above()
 {
+    SETTINGS_PROFILE("xid: %" PRIu64 ".", this->get_xid());
     wnck_window_make_above(this->wnck_window_);
 }
 
 void Window::make_unabove()
 {
+    SETTINGS_PROFILE("xid: %" PRIu64 ".", this->get_xid());
     wnck_window_unmake_above(this->wnck_window_);
 }
 
@@ -228,6 +270,10 @@ bool Window::is_active()
 
 void Window::move_to_workspace(std::shared_ptr<Workspace> workspace)
 {
+    SETTINGS_PROFILE("xid: %" PRIu64 ", number: %d.",
+                     this->get_xid(),
+                     workspace ? workspace->get_number() : -1);
+
     wnck_window_move_to_workspace(this->wnck_window_, workspace->workspace_);
 }
 
@@ -235,16 +281,26 @@ uint64_t Window::get_window_group()
 {
     return wnck_window_get_group_leader(this->wnck_window_);
 }
+
 void Window::close()
 {
+    SETTINGS_PROFILE("xid: %" PRIu64 ", name: %s.", this->get_xid(), this->get_name());
+
     uint64_t now = Glib::DateTime::create_now_local().to_unix();
     wnck_window_close(this->wnck_window_, now);
 }
 
-WinwowGeometry Window::get_geometry()
+WindowGeometry Window::get_geometry()
 {
     int x, y, w, h;
     wnck_window_get_geometry(this->wnck_window_, &x, &y, &w, &h);
+    return std::make_tuple(x, y, w, h);
+}
+
+WindowGeometry Window::get_client_window_geometry()
+{
+    int x, y, w, h;
+    wnck_window_get_client_window_geometry(this->wnck_window_, &x, &y, &w, &h);
     return std::make_tuple(x, y, w, h);
 }
 
@@ -257,13 +313,12 @@ std::shared_ptr<Workspace> Window::get_workspace()
 
 void Window::flush_workspace()
 {
+    SETTINGS_PROFILE("");
+
     auto workspace = get_workspace();
 
     if (workspace)
     {
-        // add window
-        workspace->add_window(this->shared_from_this());
-
         // remove window
         int32_t current_number = workspace->get_number();
         if (this->last_workspace_number_ != current_number)
@@ -282,6 +337,10 @@ void Window::flush_workspace()
                 }
             }
         }
+
+        // add window
+        workspace->add_window(this->shared_from_this());
+
         // update status variable
         this->last_workspace_number_ = current_number;
         this->last_is_pinned_ = false;
@@ -314,14 +373,36 @@ void Window::flush_workspace()
     }
 }
 
+void Window::name_changed(WnckWindow* wnck_window, gpointer user_data)
+{
+    auto window = WindowManager::get_instance()->lookup_window(wnck_window);
+    g_return_if_fail(window);
+
+    LOG_DEBUG("the name of the window %" PRIu64 " is changed. new_name: %s.", window->get_xid(), window->get_name().c_str());
+
+    window->name_changed_.emit();
+}
+
 void Window::workspace_changed(WnckWindow* wnck_window, gpointer user_data)
 {
     g_return_if_fail(wnck_window != NULL);
 
+    auto xid = wnck_window_get_xid(wnck_window);
+    auto name = wnck_window_get_name(wnck_window);
+
+    LOG_DEBUG("the workspace of the window is changed. xid: %" PRIu64 ", name: %s.", xid, name);
+
     auto window = WindowManager::get_instance()->lookup_window(wnck_window);
     if (window)
     {
+        auto last_workspace = WorkspaceManager::get_instance()->get_workspace(window->last_workspace_number_);
+        auto cur_workspace = window->get_workspace();
         window->flush_workspace();
+        window->workspace_changed_.emit(last_workspace, cur_workspace);
+    }
+    else
+    {
+        LOG_WARNING("cannot find the window for wnck window: %" PRIu64 ".", xid);
     }
 }
 
@@ -330,6 +411,10 @@ void Window::geometry_changed(WnckWindow* wnck_window,
 {
     auto window = WindowManager::get_instance()->lookup_window(wnck_window);
     g_return_if_fail(window);
+
+    LOG_DEBUG("the geometry of the window is changed. xid: %" PRIu64 ", window name: %s.",
+              window->get_xid(),
+              window->get_name().c_str());
 
     auto display = gdk_x11_get_default_xdisplay();
     auto gdk_screen = gdk_screen_get_default();
@@ -354,7 +439,7 @@ void Window::geometry_changed(WnckWindow* wnck_window,
     }
     else
     {
-        g_warning("the extension composite is unsupported.\n");
+        LOG_WARNING("the extension composite is unsupported.\n");
     }
 
     window->last_geometry_ = geometry;

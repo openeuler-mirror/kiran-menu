@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-06-08 16:27:28
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-08-04 08:47:01
+ * @LastEditTime : 2020-09-08 13:43:12
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/window-manager.h
  */
@@ -44,10 +44,6 @@ public:
     // 通过wnck_window查找对应的Window对象
     std::shared_ptr<Window> lookup_window(WnckWindow *wnck_window);
 
-    // 查找和创建Window对象，请确保wnck_window的window-closed信号发出前使用该函数。
-    // window-closed信号发送后wnck_window并不会马上销毁，可能还会调用active-window-changed信号，最后才会释放改wnck_window对象
-    std::shared_ptr<Window> lookup_and_create_window(WnckWindow *wnck_window);
-
     // 打开窗口信号
     sigc::signal<void, std::shared_ptr<Window>> &signal_window_opened() { return this->window_opened_; }
     // 关闭窗口信号
@@ -76,6 +72,10 @@ private:
     static WindowManager *instance_;
 
     ScreenManager *screen_manager_;
+
+    uint64_t window_opened_handler_;
+    uint64_t window_closed_handler_;
+    uint64_t active_window_changed_handler_;
 
     std::map<uint64_t, std::shared_ptr<Window>> windows_;
 };

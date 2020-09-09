@@ -2,7 +2,7 @@
  * @Author       : tangjie02
  * @Date         : 2020-04-30 17:28:47
  * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-09 12:05:28
+ * @LastEditTime : 2020-09-08 15:57:04
  * @Description  : 
  * @FilePath     : /kiran-menu-2.0/lib/category-reader.cpp
  */
@@ -12,7 +12,7 @@
 #include <sstream>
 
 #include "lib/category-node.h"
-#include "lib/helper.h"
+#include "lib/log.h"
 
 namespace Kiran
 {
@@ -88,29 +88,29 @@ void CategoryReader::on_end_element(ParseContext &context, const Glib::ustring &
 
     switch (this->last_->get_type())
     {
-        case CategoryNodeType::CATEGORY_NODE_TYPE_NAME:
-        case CategoryNodeType::CATEGORY_NODE_TYPE_ICON:
-        case CategoryNodeType::CATEGORY_NODE_TYPE_REPEAT:
-        case CategoryNodeType::CATEGORY_NODE_TYPE_DESKTOP_ID:
-        case CategoryNodeType::CATEGORY_NODE_TYPE_DESKTOP_CATEGORY:
-            if (this->last_->get_content().length() == 0)
-            {
-                throw_error(context,
-                            Glib::MarkupError::INVALID_CONTENT,
-                            "Element <%s> is required to contain text and was empty\n",
-                            element_name.c_str());
-            }
-            break;
-        case CategoryNodeType::CATEGORY_NODE_TYPE_CATEGORY:
-            if (!this->last_->has_child_of_type(CategoryNodeType::CATEGORY_NODE_TYPE_NAME))
-            {
-                throw_error(context,
-                            Glib::MarkupError::PARSE,
-                            "<category> elements are required to contain a <name> element\n");
-            }
-            break;
-        default:
-            break;
+    case CategoryNodeType::CATEGORY_NODE_TYPE_NAME:
+    case CategoryNodeType::CATEGORY_NODE_TYPE_ICON:
+    case CategoryNodeType::CATEGORY_NODE_TYPE_REPEAT:
+    case CategoryNodeType::CATEGORY_NODE_TYPE_DESKTOP_ID:
+    case CategoryNodeType::CATEGORY_NODE_TYPE_DESKTOP_CATEGORY:
+        if (this->last_->get_content().length() == 0)
+        {
+            throw_error(context,
+                        Glib::MarkupError::INVALID_CONTENT,
+                        "Element <%s> is required to contain text and was empty\n",
+                        element_name.c_str());
+        }
+        break;
+    case CategoryNodeType::CATEGORY_NODE_TYPE_CATEGORY:
+        if (!this->last_->has_child_of_type(CategoryNodeType::CATEGORY_NODE_TYPE_NAME))
+        {
+            throw_error(context,
+                        Glib::MarkupError::PARSE,
+                        "<category> elements are required to contain a <name> element\n");
+        }
+        break;
+    default:
+        break;
     }
 
     this->last_ = this->last_->get_parent();
@@ -120,41 +120,41 @@ void CategoryReader::on_text(ParseContext &context, const Glib::ustring &text)
 {
     switch (this->last_->get_type())
     {
-        case CategoryNodeType::CATEGORY_NODE_TYPE_NAME:
-        case CategoryNodeType::CATEGORY_NODE_TYPE_ICON:
-        case CategoryNodeType::CATEGORY_NODE_TYPE_DESKTOP_ID:
-        case CategoryNodeType::CATEGORY_NODE_TYPE_DESKTOP_CATEGORY:
-            this->last_->set_content(str_trim(text));
-            break;
-        case CategoryNodeType::CATEGORY_NODE_TYPE_REPEAT:
-            this->last_->set_content(str_trim(text));
-            if (this->last_->get_content() != "true" &&
-                this->last_->get_content() != "false")
-            {
-                throw_error(context,
-                            Glib::MarkupError::INVALID_CONTENT,
-                            "the text in <repeat> must be true or false.");
-                this->last_->set_content(std::string());
-            }
-            break;
+    case CategoryNodeType::CATEGORY_NODE_TYPE_NAME:
+    case CategoryNodeType::CATEGORY_NODE_TYPE_ICON:
+    case CategoryNodeType::CATEGORY_NODE_TYPE_DESKTOP_ID:
+    case CategoryNodeType::CATEGORY_NODE_TYPE_DESKTOP_CATEGORY:
+        this->last_->set_content(str_trim(text));
+        break;
+    case CategoryNodeType::CATEGORY_NODE_TYPE_REPEAT:
+        this->last_->set_content(str_trim(text));
+        if (this->last_->get_content() != "true" &&
+            this->last_->get_content() != "false")
+        {
+            throw_error(context,
+                        Glib::MarkupError::INVALID_CONTENT,
+                        "the text in <repeat> must be true or false.");
+            this->last_->set_content(std::string());
+        }
+        break;
 
-        case CategoryNodeType::CATEGORY_NODE_TYPE_ROOT:
-        case CategoryNodeType::CATEGORY_NODE_TYPE_CATEGORIES:
-        case CategoryNodeType::CATEGORY_NODE_TYPE_CATEGORY:
-        case CategoryNodeType::CATEGORY_NODE_TYPE_INCLUDE:
-        case CategoryNodeType::CATEGORY_NODE_TYPE_EXCLUDE:
-        case CategoryNodeType::CATEGORY_NODE_TYPE_ALL:
-        case CategoryNodeType::CATEGORY_NODE_TYPE_AND:
-        case CategoryNodeType::CATEGORY_NODE_TYPE_OR:
-        case CategoryNodeType::CATEGORY_NODE_TYPE_NOT:
-            if (!all_whitespace(text.c_str(), text.length()))
-            {
-                throw_error(context,
-                            Glib::MarkupError::PARSE,
-                            "No text is allowed inside element <%s>",
-                            context.get_element().c_str());
-            }
-            break;
+    case CategoryNodeType::CATEGORY_NODE_TYPE_ROOT:
+    case CategoryNodeType::CATEGORY_NODE_TYPE_CATEGORIES:
+    case CategoryNodeType::CATEGORY_NODE_TYPE_CATEGORY:
+    case CategoryNodeType::CATEGORY_NODE_TYPE_INCLUDE:
+    case CategoryNodeType::CATEGORY_NODE_TYPE_EXCLUDE:
+    case CategoryNodeType::CATEGORY_NODE_TYPE_ALL:
+    case CategoryNodeType::CATEGORY_NODE_TYPE_AND:
+    case CategoryNodeType::CATEGORY_NODE_TYPE_OR:
+    case CategoryNodeType::CATEGORY_NODE_TYPE_NOT:
+        if (!all_whitespace(text.c_str(), text.length()))
+        {
+            throw_error(context,
+                        Glib::MarkupError::PARSE,
+                        "No text is allowed inside element <%s>",
+                        context.get_element().c_str());
+        }
+        break;
     }
 }
 
@@ -167,19 +167,19 @@ std::shared_ptr<CategoryNode> CategoryReader::create_from_xml(const std::string 
     text = NULL;
     length = 0;
 
-    g_debug("Loading \"%s\" from disk\n", file_path.c_str());
+    LOG_DEBUG("Loading \"%s\" from disk\n", file_path.c_str());
 
     auto file = Gio::File::create_for_path(file_path);
 
     if (!file)
     {
-        g_warning("failed to create file: %s\n", file_path.c_str());
+        LOG_WARNING("failed to create file: %s\n", file_path.c_str());
         return nullptr;
     }
 
     if (!file->load_contents(text, length))
     {
-        g_warning("Failed to load \"%s\"\n", file_path.c_str());
+        LOG_WARNING("Failed to load \"%s\"\n", file_path.c_str());
         return nullptr;
     }
 
@@ -205,7 +205,7 @@ std::shared_ptr<CategoryNode> CategoryReader::create_from_xml(const std::string 
 
     if (error.length() > 0)
     {
-        g_warning("Error \"%s\" loading \"%s\"\n", error.c_str(), file_path.c_str());
+        LOG_WARNING("Error \"%s\" loading \"%s\"\n", error.c_str(), file_path.c_str());
     }
 
     return this->root_;
@@ -296,84 +296,84 @@ void CategoryReader::start_category_child_element(ParseContext &context,
 
     switch (shash(element_name))
     {
-        case "name"_hash:
+    case "name"_hash:
+    {
+        if (this->last_->has_child_of_type(CategoryNodeType::CATEGORY_NODE_TYPE_NAME))
         {
-            if (this->last_->has_child_of_type(CategoryNodeType::CATEGORY_NODE_TYPE_NAME))
-            {
-                throw_error(context,
-                            Glib::MarkupError::PARSE,
-                            "Multiple <name> elements in a <category> element is not allowed\n");
-                return;
-            }
-            push_node(CategoryNodeType::CATEGORY_NODE_TYPE_NAME);
-        }
-        break;
-        case "icon"_hash:
-        {
-            if (this->last_->has_child_of_type(CategoryNodeType::CATEGORY_NODE_TYPE_ICON))
-            {
-                throw_error(context,
-                            Glib::MarkupError::PARSE,
-                            "Multiple <icon> elements in a <category> element is not allowed\n");
-                return;
-            }
-            push_node(CategoryNodeType::CATEGORY_NODE_TYPE_ICON);
-        }
-        break;
-        case "repeat"_hash:
-        {
-            if (this->last_->has_child_of_type(CategoryNodeType::CATEGORY_NODE_TYPE_REPEAT))
-            {
-                throw_error(context,
-                            Glib::MarkupError::PARSE,
-                            "Multiple <repeat> elements in a <category> element is not allowed\n");
-                return;
-            }
-            push_node(CategoryNodeType::CATEGORY_NODE_TYPE_REPEAT);
-        }
-        break;
-        case "logic"_hash:
-        {
-            if (this->last_->has_child_of_type(CategoryNodeType::CATEGORY_NODE_TYPE_LOGIC))
-            {
-                throw_error(context,
-                            Glib::MarkupError::PARSE,
-                            "Multiple <logic> elements in a <category> element is not allowed\n");
-                return;
-            }
-            push_node(CategoryNodeType::CATEGORY_NODE_TYPE_LOGIC);
-        }
-        break;
-        case "include"_hash:
-        {
-            if (this->last_->has_child_of_type(CategoryNodeType::CATEGORY_NODE_TYPE_INCLUDE))
-            {
-                throw_error(context,
-                            Glib::MarkupError::PARSE,
-                            "Multiple <include> elements in a <category> element is not allowed\n");
-                return;
-            }
-            push_node(CategoryNodeType::CATEGORY_NODE_TYPE_INCLUDE);
-        }
-        break;
-        case "exclude"_hash:
-        {
-            if (this->last_->has_child_of_type(CategoryNodeType::CATEGORY_NODE_TYPE_EXCLUDE))
-            {
-                throw_error(context,
-                            Glib::MarkupError::PARSE,
-                            "Multiple <exclude> elements in a <category> element is not allowed\n");
-                return;
-            }
-            push_node(CategoryNodeType::CATEGORY_NODE_TYPE_EXCLUDE);
-        }
-        break;
-        default:
             throw_error(context,
-                        Glib::MarkupError::UNKNOWN_ELEMENT,
-                        "Element <%s> may not appear below <category>\n",
-                        element_name);
-            break;
+                        Glib::MarkupError::PARSE,
+                        "Multiple <name> elements in a <category> element is not allowed\n");
+            return;
+        }
+        push_node(CategoryNodeType::CATEGORY_NODE_TYPE_NAME);
+    }
+    break;
+    case "icon"_hash:
+    {
+        if (this->last_->has_child_of_type(CategoryNodeType::CATEGORY_NODE_TYPE_ICON))
+        {
+            throw_error(context,
+                        Glib::MarkupError::PARSE,
+                        "Multiple <icon> elements in a <category> element is not allowed\n");
+            return;
+        }
+        push_node(CategoryNodeType::CATEGORY_NODE_TYPE_ICON);
+    }
+    break;
+    case "repeat"_hash:
+    {
+        if (this->last_->has_child_of_type(CategoryNodeType::CATEGORY_NODE_TYPE_REPEAT))
+        {
+            throw_error(context,
+                        Glib::MarkupError::PARSE,
+                        "Multiple <repeat> elements in a <category> element is not allowed\n");
+            return;
+        }
+        push_node(CategoryNodeType::CATEGORY_NODE_TYPE_REPEAT);
+    }
+    break;
+    case "logic"_hash:
+    {
+        if (this->last_->has_child_of_type(CategoryNodeType::CATEGORY_NODE_TYPE_LOGIC))
+        {
+            throw_error(context,
+                        Glib::MarkupError::PARSE,
+                        "Multiple <logic> elements in a <category> element is not allowed\n");
+            return;
+        }
+        push_node(CategoryNodeType::CATEGORY_NODE_TYPE_LOGIC);
+    }
+    break;
+    case "include"_hash:
+    {
+        if (this->last_->has_child_of_type(CategoryNodeType::CATEGORY_NODE_TYPE_INCLUDE))
+        {
+            throw_error(context,
+                        Glib::MarkupError::PARSE,
+                        "Multiple <include> elements in a <category> element is not allowed\n");
+            return;
+        }
+        push_node(CategoryNodeType::CATEGORY_NODE_TYPE_INCLUDE);
+    }
+    break;
+    case "exclude"_hash:
+    {
+        if (this->last_->has_child_of_type(CategoryNodeType::CATEGORY_NODE_TYPE_EXCLUDE))
+        {
+            throw_error(context,
+                        Glib::MarkupError::PARSE,
+                        "Multiple <exclude> elements in a <category> element is not allowed\n");
+            return;
+        }
+        push_node(CategoryNodeType::CATEGORY_NODE_TYPE_EXCLUDE);
+    }
+    break;
+    default:
+        throw_error(context,
+                    Glib::MarkupError::UNKNOWN_ELEMENT,
+                    "Element <%s> may not appear below <category>\n",
+                    element_name);
+        break;
     }
 }
 
@@ -385,30 +385,30 @@ void CategoryReader::start_logic_child_element(ParseContext &context,
 
     switch (shash(element_name))
     {
-        case "desktop_id"_hash:
-            push_node(CategoryNodeType::CATEGORY_NODE_TYPE_DESKTOP_ID);
-            break;
-        case "desktop_category"_hash:
-            push_node(CategoryNodeType::CATEGORY_NODE_TYPE_DESKTOP_CATEGORY);
-            break;
-        case "all"_hash:
-            push_node(CategoryNodeType::CATEGORY_NODE_TYPE_ALL);
-            break;
-        case "and"_hash:
-            push_node(CategoryNodeType::CATEGORY_NODE_TYPE_AND);
-            break;
-        case "or"_hash:
-            push_node(CategoryNodeType::CATEGORY_NODE_TYPE_OR);
-            break;
-        case "not"_hash:
-            push_node(CategoryNodeType::CATEGORY_NODE_TYPE_NOT);
-            break;
-        default:
-            throw_error(context,
-                        Glib::MarkupError::UNKNOWN_ELEMENT,
-                        "Element <%s> may not appear in this context\n",
-                        element_name);
-            break;
+    case "desktop_id"_hash:
+        push_node(CategoryNodeType::CATEGORY_NODE_TYPE_DESKTOP_ID);
+        break;
+    case "desktop_category"_hash:
+        push_node(CategoryNodeType::CATEGORY_NODE_TYPE_DESKTOP_CATEGORY);
+        break;
+    case "all"_hash:
+        push_node(CategoryNodeType::CATEGORY_NODE_TYPE_ALL);
+        break;
+    case "and"_hash:
+        push_node(CategoryNodeType::CATEGORY_NODE_TYPE_AND);
+        break;
+    case "or"_hash:
+        push_node(CategoryNodeType::CATEGORY_NODE_TYPE_OR);
+        break;
+    case "not"_hash:
+        push_node(CategoryNodeType::CATEGORY_NODE_TYPE_NOT);
+        break;
+    default:
+        throw_error(context,
+                    Glib::MarkupError::UNKNOWN_ELEMENT,
+                    "Element <%s> may not appear in this context\n",
+                    element_name);
+        break;
     }
 }
 
