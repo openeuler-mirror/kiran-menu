@@ -1,6 +1,7 @@
 @define-color placeholder_text_color #c8c8c8;
 @define-color tasklist_app_indicator_color #3ca8ea;
 @define-color tasklist_app_active_color rgba(255, 255, 255, 0.3);
+@define-color thumbnail-hover-color #569CD6;
 
 * {
     font-family: "Noto Sans CJK SC";
@@ -377,4 +378,40 @@ scrollbar.horizontal slider:active, scrollbar.horizontal slider:hover, scrollbar
     border-width: 1px;
     border-radius: 5px;
     border-color: rgba(0, 0, 0, 0.8);
+}
+
+
+/* workspace */
+
+.workspace-list-box {
+    background: rgba(0, 0, 0, 0.7);
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.workspace-previewer {
+    color: #ffffff;
+    margin-top: 30px;
+}
+
+
+.workspace-thumbnail, .workspace-thumbnail:hover {
+    border: none;
+    border-image: none;
+    box-shadow: none;
+    border-radius: 0px;
+    background: transparent;
+    padding: 0px;
+}
+
+button.workspace-window-snapshot, button.workspace-window-snapshot:hover {
+    color: #ffffff;
+    border: none;
+    padding: 0px;
+    box-shadow: none;
+    border-image: none;
+    background: transparent;
+    text-shadow: -1px 1px 2px alpha(#000000, 0.6), 1px 1px 2px alpha(#000000, 0.6),
+                1px -1px 2px alpha(#000000, 0.6), -1px -1px 2px alpha(#000000, 0.6);
+    font-size: 13px;
 }

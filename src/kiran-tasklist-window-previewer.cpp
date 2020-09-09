@@ -17,6 +17,8 @@ KiranWindowPreviewer::KiranWindowPreviewer(const std::shared_ptr<Kiran::Window> 
     //如果窗口管理器混合模式关闭，我们需要隐藏窗口预览图，因为窗口预览图已经无法获取
     signal_composited_changed().connect(sigc::mem_fun(*this, &KiranWindowPreviewer::on_composite_changed));
 
+    g_message("init previewer instance");
+    //set_size_request(200, 120);
 }
 
 KiranWindowPreviewer::~KiranWindowPreviewer()
@@ -124,7 +126,7 @@ void KiranWindowPreviewer::get_preferred_width_vfunc(int &minimum_width, int &na
     minimum_width = g_value_get_int(&value);
     g_value_unset(&value);
 
-    natural_width = minimum_width;
+    natural_width = minimum_width = 100;
 }
 
 void KiranWindowPreviewer::get_preferred_height_vfunc(int &minimum_height, int &natural_height) const
@@ -144,6 +146,7 @@ void KiranWindowPreviewer::get_preferred_height_vfunc(int &minimum_height, int &
     if (natural_height < minimum_height)
         natural_height = minimum_height;
 
+    natural_height = minimum_height = 100;
 }
 
 bool KiranWindowPreviewer::on_enter_notify_event(GdkEventCrossing *crossing_event)

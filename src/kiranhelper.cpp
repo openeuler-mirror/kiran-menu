@@ -100,3 +100,43 @@ bool KiranHelper::remove_app_from_fixed_list(const std::shared_ptr<Kiran::App> &
 
     return backend->del_fixed_app(app->get_desktop_id());
 }
+
+bool KiranHelper::gdk_rectangle_contains_point(GdkRectangle *rect, GdkPoint *point)
+{
+    return (point->x >= rect->x && point->x <= rect->x + rect->width) &&
+            (point->y >= rect->y && point->y <= rect->y + rect->height);
+}
+
+void KiranHelper::cairo_draw_rounded_rect(const Cairo::RefPtr<Cairo::Context> &cr, Gdk::Rectangle &rect, double radius)
+{
+    cr->begin_new_sub_path();
+    cr->arc(rect.get_x() + radius, rect.get_y() + radius, radius, M_PI, 3 * M_PI/2);
+    cr->arc(rect.get_x() + rect.get_width() - radius,
+            rect.get_y() + radius,
+            radius,
+            -M_PI/2,
+            0);
+
+    cr->arc(rect.get_x() + rect.get_width() - radius,
+            rect.get_y() + rect.get_height() - radius,
+            radius,
+            0,
+            M_PI/2);
+    cr->arc(rect.get_x() + radius,
+            rect.get_y() + rect.get_height() - radius,
+            radius,
+            M_PI/2,
+            M_PI);
+
+    cr->line_to(rect.get_x(), rect.get_y() + radius);
+    cr->stroke();
+}
+
+
+void KiranHelper::geometry_to_rect(const Kiran::WindowGeometry &geometry, Gdk::Rectangle &rect)
+{
+    rect.set_x(std::get<0>(geometry));
+    rect.set_y(std::get<1>(geometry));
+    rect.set_width(std::get<2>(geometry));
+    rect.set_height(std::get<3>(geometry));
+}

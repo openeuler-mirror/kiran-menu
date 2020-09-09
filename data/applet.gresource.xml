@@ -2,6 +2,8 @@
 <gresources>
   <gresource prefix="/kiran-applet/">
     <file alias="applet.css">data/applet.css</file>
+    <file alias="ui/window-snapshot">data/window-snapshot.ui.xml</file>
+    <file alias="ui/workspace-applet-window">data/workspace-applet-window.ui.xml</file>
   </gresource>
   <gresource prefix="/kiran-menu/">
     <file alias="action/search">images/search.svg</file>
