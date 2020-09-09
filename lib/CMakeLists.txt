@@ -10,6 +10,8 @@ set (ALL_FILES ${CORE_H_FILES} ${CORE_CPP_FILES})
 
 add_library(${TARGET_NAME} ${ALL_FILES})
 
+pkg_search_module(GLIBMM REQUIRED glibmm-2.4)
+pkg_search_module(GIOMM REQUIRED giomm-2.4)
 pkg_search_module(GTHREAD REQUIRED gthread-2.0)
 pkg_search_module(WNCK3 REQUIRED libwnck-3.0)
 pkg_search_module(GDKMM3 REQUIRED gdkmm-3.0)
