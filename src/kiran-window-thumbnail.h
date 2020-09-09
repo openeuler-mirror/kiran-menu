@@ -22,6 +22,7 @@ protected:
 
     virtual bool draw_snapshot(Gtk::Widget *snapshot_area, const Cairo::RefPtr<Cairo::Context> &cr);
     virtual bool draw_close_button(Gtk::Widget *close_area, const Cairo::RefPtr<Cairo::Context> &cr);
+    virtual bool draw_icon_image(Gtk::Widget *icon_area, const Cairo::RefPtr<Cairo::Context> &cr);
 
     virtual void init_ui();
     virtual void update_title();
@@ -34,7 +35,7 @@ private:
 
     Gtk::Grid *layout;
     Gtk::Label *title_label;
-    Gtk::Image *icon_image;
+    Gtk::DrawingArea *icon_area;
     Gtk::DrawingArea *snapshot_area, *close_area;
 };
 

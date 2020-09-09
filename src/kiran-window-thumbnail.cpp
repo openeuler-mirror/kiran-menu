@@ -6,11 +6,12 @@ KiranWindowThumbnail::KiranWindowThumbnail(KiranWindowPointer &window_):
 {
     try {
         builder = Gtk::Builder::create_from_resource("/kiran-applet/ui/window-snapshot");
-        builder->get_widget<Gtk::Image>("icon-image", icon_image);
         builder->get_widget<Gtk::Label>("title-label", title_label);
         builder->get_widget<Gtk::Grid>("content-layout", layout);
+        builder->get_widget<Gtk::DrawingArea>("icon-area", icon_area);
         builder->get_widget<Gtk::DrawingArea>("close-area", close_area);
         builder->get_widget<Gtk::DrawingArea>("snapshot-area", snapshot_area);
+
     } catch (const Glib::Exception &e) {
         g_error("Error occured while trying to load ui file: %s\n", e.what().c_str());
         return;
@@ -175,8 +176,9 @@ bool KiranWindowThumbnail::draw_close_button(Gtk::Widget *close_area, const Cair
         //仅在鼠标经过窗口预览控件时显示关闭按钮
         std::string icon_name = "/kiran-tasklist/icon/close_normal";
         double x_offset, y_offset;
-        int surface_size;
+        int surface_size, scale_factor;
 
+        scale_factor = get_scale_factor();
         if (close_area->get_state_flags() & Gtk::STATE_FLAG_PRELIGHT)
             icon_name = "/kiran-tasklist/icon/close_prelight";
 
@@ -186,12 +188,13 @@ bool KiranWindowThumbnail::draw_close_button(Gtk::Widget *close_area, const Cair
         surface_size = MIN(allocation.get_width(), allocation.get_height());
         auto pixbuf = Gdk::Pixbuf::create_from_resource(icon_name);
 
-        pixbuf = pixbuf->scale_simple(surface_size, surface_size, Gdk::INTERP_BILINEAR);
+        pixbuf = pixbuf->scale_simple(surface_size * scale_factor, surface_size * scale_factor, Gdk::INTERP_BILINEAR);
 
         //居中绘制
         x_offset = (allocation.get_width() - surface_size)/2.0;
         y_offset = (allocation.get_height() - surface_size)/2.0;
-        Gdk::Cairo::set_source_pixbuf(cr, pixbuf, x_offset, y_offset);
+        cr->scale(1.0/scale_factor, 1.0/scale_factor);
+        Gdk::Cairo::set_source_pixbuf(cr, pixbuf, x_offset * scale_factor, y_offset * scale_factor);
         cr->paint();
     }
     return true;
@@ -199,18 +202,16 @@ bool KiranWindowThumbnail::draw_close_button(Gtk::Widget *close_area, const Cair
 
 void KiranWindowThumbnail::init_ui()
 {
+    GdkPixbuf *pixbuf = nullptr;
+
     snapshot_area->signal_draw().connect(
                 sigc::bind<0, Gtk::Widget*>(sigc::mem_fun(*this, &KiranWindowThumbnail::draw_snapshot), snapshot_area), false);
     close_area->signal_draw().connect(
                 sigc::bind<0, Gtk::Widget*>(sigc::mem_fun(*this, &KiranWindowThumbnail::draw_close_button), close_area), false);
 
-    auto pixbuf = window.lock()->get_icon();
-    if (pixbuf) {
-        icon_image->set(Glib::wrap(pixbuf, true)->scale_simple(24, 24, Gdk::INTERP_BILINEAR));
-    } else {
-        auto pixbuf = Gtk::IconTheme::get_default()->load_icon("gtk-missing", 24);
-        icon_image->set(pixbuf);
-    }
+    icon_area->signal_draw().connect(
+                sigc::bind<0, Gtk::Widget*>(sigc::mem_fun(*this, &KiranWindowThumbnail::draw_icon_image), icon_area), false);
+
     update_title();
 }
 
@@ -224,4 +225,16 @@ void KiranWindowThumbnail::update_title()
 void KiranWindowThumbnail::set_snapshot_size(int width, int height)
 {
     snapshot_area->set_size_request(width, height);
+}
+
+bool KiranWindowThumbnail::draw_icon_image(Gtk::Widget *icon_area, const Cairo::RefPtr<Cairo::Context> &cr)
+{
+    int scale_factor = get_scale_factor();
+    GdkPixbuf *pixbuf = window.lock()->get_icon();
+    auto icon = Glib::wrap(pixbuf, true)->scale_simple(24 * scale_factor, 24 * scale_factor, Gdk::INTERP_BILINEAR);
+
+    cr->scale(1.0/scale_factor, 1.0/scale_factor);
+    Gdk::Cairo::set_source_pixbuf(cr, icon, 0, 0);
+    cr->paint();
+    return false;
 }

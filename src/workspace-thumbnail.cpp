@@ -163,10 +163,11 @@ bool WorkspaceThumbnail::draw_snapshot(const Cairo::RefPtr<Cairo::Context> &cr)
     Cairo::ImageSurface *surface = nullptr;
     auto screen = get_screen();
     double surface_offset_x, surface_offset_y;
+    int scale_factor = get_scale_factor();
 
     if (!workspace)
         return false;
-\
+
     allocation = snapshot_area.get_allocation();
     //调用mate-desktop接口来获取桌面背景图片, 省去缩放等相关操作
     if (!bg_surface)
@@ -218,12 +219,14 @@ bool WorkspaceThumbnail::draw_snapshot(const Cairo::RefPtr<Cairo::Context> &cr)
         cr->translate(surface_offset_x, surface_offset_y);
         cr->scale(surface_scale, surface_scale);
 
+        /*window size from X server know nothing about scale*/
         if (drawable != None) {
             auto surface = Cairo::XlibSurface::create(xdisplay,
                                                   drawable,
                                                   attrs.visual,
                                                   attrs.width,
                                                   attrs.height);
+            cr->scale(1.0/scale_factor, 1.0/scale_factor);
             cr->set_source(surface, rect.get_x(), rect.get_y());
             cr->paint();
         } else {
@@ -232,11 +235,12 @@ bool WorkspaceThumbnail::draw_snapshot(const Cairo::RefPtr<Cairo::Context> &cr)
                 icon_pixbuf = Gtk::IconTheme::get_default()->load_icon(
                     "x-executable",
                     16,
-                    get_scale_factor(),
+                    scale_factor,
                     Gtk::ICON_LOOKUP_FORCE_SIZE);
             else
-                icon_pixbuf = icon_pixbuf->scale_simple(16, 16, Gdk::INTERP_BILINEAR);
+                icon_pixbuf = icon_pixbuf->scale_simple(16 * scale_factor, 16 * scale_factor, Gdk::INTERP_BILINEAR);
 
+            cr->scale(1.0/scale_factor, 1.0/scale_factor);
             cr->set_source_rgba(0.0, 0.0, 0.0, 0.5);
             cr->rectangle(rect.get_x(), rect.get_y(), rect.get_width(), rect.get_height());
             cr->fill();
@@ -248,6 +252,8 @@ bool WorkspaceThumbnail::draw_snapshot(const Cairo::RefPtr<Cairo::Context> &cr)
 
                 icon_offset_x = (rect.get_width() * surface_scale - icon_pixbuf->get_width()) / 2.0;
                 icon_offset_y = (rect.get_height() * surface_scale - icon_pixbuf->get_height()) / 2.0;
+                cr->translate(surface_offset_x, surface_offset_y);
+                cr->scale(1.0/scale_factor, 1.0/scale_factor);
                 Gdk::Cairo::set_source_pixbuf(cr,
                                               icon_pixbuf,
                                               rect.get_x() * surface_scale + icon_offset_x,

@@ -18,10 +18,11 @@ WorkspaceWindowThumbnail::WorkspaceWindowThumbnail(KiranWindowPointer &win_, dou
     init_drag_and_drop();
 
 
+    int scale_factor = get_scale_factor();
     window_width = WINDOW_WIDTH(win_);
     window_height = WINDOW_HEIGHT(win_);
-    set_snapshot_size(static_cast<int>(window_width  * scale),
-                      static_cast<int>(window_height * scale));
+    set_snapshot_size(static_cast<int>(window_width/scale_factor  * scale),
+                      static_cast<int>(window_height/scale_factor * scale));
 }
 
 WorkspaceWindowThumbnail::~WorkspaceWindowThumbnail()
@@ -40,6 +41,8 @@ bool WorkspaceWindowThumbnail::draw_snapshot(Gtk::Widget *area, const Cairo::Ref
     auto context = get_style_context();
     Gtk::Allocation allocation;
     auto window = get_window_();
+    Cairo::ImageSurface *source_surface = nullptr;
+    int scale_factor = get_scale_factor();
     
     if (!window) {
         g_warning("%s: window expired\n", __func__);
@@ -51,11 +54,18 @@ bool WorkspaceWindowThumbnail::draw_snapshot(Gtk::Widget *area, const Cairo::Ref
 
     allocation = area->get_allocation();
 
-    auto source_surface = new Cairo::ImageSurface(thumbnail_surface, false);
+    source_surface = new Cairo::ImageSurface(thumbnail_surface, false);
+
+    /**
+     * 绘制窗口缩略图时不缩放
+     */
+    cr->save();
+    cr->scale(1.0/scale_factor, 1.0/scale_factor);
     cr->set_source(Cairo::RefPtr<Cairo::Surface>(source_surface),
-                   (allocation.get_width() - thumbnail_width)/2.0,
-                   (allocation.get_height() - thumbnail_height)/2.0);
+                   (allocation.get_width() * scale_factor - thumbnail_width)/2.0,
+                   (allocation.get_height() * scale_factor - thumbnail_height)/2.0);
     cr->paint();
+    cr->restore();
 
     if (get_state_flags() & Gtk::STATE_FLAG_PRELIGHT) {
         //绘制边框
@@ -90,7 +100,7 @@ void WorkspaceWindowThumbnail::get_preferred_width_vfunc(int &min_width, int &na
     }
 
     min_width = 80;
-    natural_width =  static_cast<int>(window_width  * scale);
+    natural_width =  static_cast<int>(window_width/get_scale_factor()  * scale);
     if (natural_width < min_width)
         natural_width = min_width;
 }

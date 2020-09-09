@@ -3,12 +3,15 @@
 #include "kiranhelper.h"
 #include "window_arrange.h"
 #include <algorithm>
+#include "global.h"
 
 #define MIN_VIEW_WIDTH          80          //窗口截图的最小宽度
 #define MIN_VIEW_HEIGHT         150         //窗口截图的最小高度
 #define WIN_SIZE_UNIT           100
 #define ROW_SPACING             10          //每行窗口截图之间的竖直间隔
 #define COLUMN_SPACING          10          //每个窗口截图中间的水平间隔
+
+//FIXME 能否通过动态获取的方式来拿到窗口缩略图上方的title区域高度
 #define SNAPSHOT_EXTRA_HEIGHT   44          //窗口截图控件除缩略图部分外的额外高度
 
 WorkspaceWindowsOverview::WorkspaceWindowsOverview():
@@ -63,6 +66,7 @@ void WorkspaceWindowsOverview::reload()
     Kiran::WindowVec windows;
     int viewport_width, viewport_height;                    //显示区域的宽度和高度
     int rows = 1;                                           //窗口的显示行数
+    int scale_factor = get_scale_factor();
 
     KiranHelper::remove_all_for_container(layout, true);
     if (workspace.expired()) {
@@ -70,8 +74,8 @@ void WorkspaceWindowsOverview::reload()
         return;
     }
 
-    viewport_width = layout.get_allocated_width() - layout.get_margin_left() - layout.get_margin_right();
-    viewport_height = layout.get_allocated_height() - layout.get_margin_top() - layout.get_margin_bottom();
+    viewport_width = layout.get_allocated_width() * scale_factor - layout.get_margin_left() - layout.get_margin_right();
+    viewport_height = layout.get_allocated_height() * scale_factor - layout.get_margin_top() - layout.get_margin_bottom();
 
     /**
      * 过滤掉需要跳过工作区显示的窗口
@@ -141,7 +145,7 @@ void WorkspaceWindowsOverview::reload()
          * 确保该行最大高度的窗口缩放后也可以正常显示
          */
         x_scale = (viewport_width - (row.size() - 1) * ROW_SPACING) * 1.0/sum;
-        y_scale = (viewport_height - (rows - 1) * layout.get_spacing() - rows * SNAPSHOT_EXTRA_HEIGHT) *1.0/rows/max_height;
+        y_scale = (viewport_height - (rows - 1) * layout.get_spacing() - rows * SNAPSHOT_EXTRA_HEIGHT * get_scale_factor()) *1.0/rows/max_height;
         scale = std::min(x_scale, y_scale);
 
         g_message("row[%d], real scale %.2lf, x_scale %.2lf, y_scale %.2lf, max_height %d, sum %d\n",
@@ -200,7 +204,7 @@ int WorkspaceWindowsOverview::calculate_rows(std::vector<std::shared_ptr<Kiran::
         double x_scale, y_scale;
 
         x_scale = viewport_width * rows * 1.0/sum_width;        //宽度缩放比
-        y_scale = (viewport_height - (rows - 1) * (row_spacing + SNAPSHOT_EXTRA_HEIGHT)) * 1.0/(rows * max_height);    //高度缩放比
+        y_scale = (viewport_height - (rows - 1) * (row_spacing + SNAPSHOT_EXTRA_HEIGHT * get_scale_factor())) * 1.0/(rows * max_height);    //高度缩放比
 
         if (x_scale <= y_scale && min_width * x_scale > MIN_VIEW_WIDTH && min_height * x_scale > MIN_VIEW_HEIGHT) {
             found_ok = true;
