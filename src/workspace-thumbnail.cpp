@@ -2,6 +2,7 @@
 #include "window-manager.h"
 #include <gtk/gtkx.h>
 #include <cairomm/xlib_surface.h>
+#include "workspace-manager.h"
 
 WorkspaceThumbnail::WorkspaceThumbnail(KiranWorkspacePointer &workspace_) :
     Gtk::Box(Gtk::ORIENTATION_VERTICAL),
@@ -37,6 +38,20 @@ WorkspaceThumbnail::WorkspaceThumbnail(KiranWorkspacePointer &workspace_) :
                                                     return;
                                                 this->signal_selected().emit(this->workspace.lock()->get_number());
                                            });
+
+    snapshot_area.signal_button_press_event().connect(
+                [this](GdkEventButton *event) -> bool {
+        if (this->workspace.expired()) {
+            g_warning("workspace already expired");
+            return false;
+        }
+        if (event->type == GDK_2BUTTON_PRESS) {
+            /* Switch to workspace */
+            this->workspace.lock()->activate(0);
+            return true;
+        }
+        return false;
+    });
 
     init_drag_and_drop();
 }
