@@ -5,12 +5,15 @@
 #include "workspace-window-thumbnail.h"
 #include "workspace-windows-overview.h"
 #include "kiranhelper.h"
+#include <X11/Xlib.h>
 
 #define MATE_DESKTOP_USE_UNSTABLE_API
 #include <libmate-desktop/mate-bg.h>
+#include <gdk/gdkkeysyms.h>
 
 WorkspaceAppletWindow::WorkspaceAppletWindow():
-    current_workspace(-1)
+    applet(nullptr),
+    selected_workspace(-1)
 {
     builder = Gtk::Builder::create_from_resource("/kiran-applet/ui/workspace-applet-window");
 
@@ -24,6 +27,7 @@ WorkspaceAppletWindow::WorkspaceAppletWindow():
 
     set_app_paintable(true);
     set_skip_pager_hint(true);
+    set_skip_taskbar_hint(true);
     set_decorated(false);
 }
 
@@ -62,6 +66,29 @@ bool WorkspaceAppletWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
     return false;
 }
 
+bool WorkspaceAppletWindow::on_key_press_event(GdkEventKey *event)
+{
+    if (event->keyval == GDK_KEY_Escape) {
+        /**
+         * Close window if ESC key pressed
+         */
+        if (selected_workspace >= 0) {
+            auto workspace = Kiran::WorkspaceManager::get_instance()->get_workspace(selected_workspace);
+
+            if (workspace)
+                workspace->activate(0);
+            else
+                g_warning("workspace with number %d not found", selected_workspace);
+        }
+        if (applet)
+            hide();
+        else
+            close();
+        return true;
+    }
+    return Gtk::Window::on_key_press_event(event);
+}
+
 void WorkspaceAppletWindow::update_ui()
 {
     ws_list.empty();
@@ -89,6 +116,7 @@ void WorkspaceAppletWindow::update_ui()
                     //通知窗口列表预览控件重绘
                     auto workspace = area->get_workspace();
                     overview.set_workspace(workspace);
+                    selected_workspace = workspace->get_number();
                 }
             }
         });
