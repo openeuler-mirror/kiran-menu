@@ -197,6 +197,8 @@ bool WorkspaceThumbnail::draw_snapshot(const Cairo::RefPtr<Cairo::Context> &cr)
                    surface_offset_y);
     cr->paint();
 
+    cr->rectangle(surface_offset_x, surface_offset_y, surface_width, surface_height);
+    cr->clip();
 
 #if 1
 
@@ -280,6 +282,7 @@ bool WorkspaceThumbnail::draw_snapshot(const Cairo::RefPtr<Cairo::Context> &cr)
     }
 
 #endif
+    cr->reset_clip();
     if (is_current) {
         //FIXME, read color and border_width from css style
         /* 绘制选中后的边框 */
