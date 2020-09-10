@@ -19,6 +19,7 @@ protected:
 
     virtual void on_map() override;
     void update_workspace(int workspace_num);
+    void set_on_all_workspaces();
 
 private:
     MatePanelApplet *applet;

@@ -58,6 +58,7 @@ bool WorkspaceAppletWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
     cairo_surface_flush(surface);
     cairo_surface_destroy(surface);
 
+    //Draw dark shadow
     cairo_set_source_rgba(cr->cobj(), 0, 0, 0, 0.2);
     cairo_paint(cr->cobj());
 
@@ -134,6 +135,7 @@ void WorkspaceAppletWindow::on_map()
 {
     Glib::signal_idle().connect_once(sigc::mem_fun(*this, &WorkspaceAppletWindow::update_ui));
     Gtk::Window::on_map();
+    set_on_all_workspaces();
 }
 
 void WorkspaceAppletWindow::update_workspace(int workspace_num)
@@ -154,4 +156,35 @@ void WorkspaceAppletWindow::update_workspace(int workspace_num)
         auto workspace = thumbnail->get_workspace();
         overview.set_workspace(workspace);
     }
+}
+
+void WorkspaceAppletWindow::set_on_all_workspaces()
+{
+    XEvent ev;
+    GdkDisplay *display = get_display()->gobj();
+    XID xid = GDK_WINDOW_XID(get_window()->gobj());
+    Display *xdisplay = GDK_DISPLAY_XDISPLAY(display);
+    XID root = GDK_WINDOW_XID(get_screen()->get_root_window()->gobj());
+
+    ev.xclient.type = ClientMessage;
+    ev.xclient.serial = 0;
+    ev.xclient.send_event = True;
+    ev.xclient.display = xdisplay;
+    ev.xclient.window = xid;
+    ev.xclient.message_type = XInternAtom(xdisplay, "_NET_WM_DESKTOP", False);
+    ev.xclient.format = 32;
+    ev.xclient.data.l[0] = 0xffffffff;  //all desktops
+    ev.xclient.data.l[1] = 2;           //pager
+    ev.xclient.data.l[2] = 0;
+    ev.xclient.data.l[3] = 0;
+    ev.xclient.data.l[4] = 0;
+
+    gdk_x11_display_error_trap_push(display);
+
+    XSendEvent(xdisplay,
+               root,
+               False,
+               SubstructureRedirectMask | SubstructureNotifyMask,
+               &ev);
+    gdk_x11_display_error_trap_pop_ignored(display);
 }
