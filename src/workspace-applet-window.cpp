@@ -106,8 +106,7 @@ bool WorkspaceAppletWindow::on_key_press_event(GdkEventKey *event)
 
 void WorkspaceAppletWindow::update_ui()
 {
-    ws_list.empty();
-
+    ws_list.clear();
     KiranHelper::remove_all_for_container(*left_layout);
     auto active_ws = Kiran::WorkspaceManager::get_instance()->get_active_workspace();
 
@@ -140,6 +139,7 @@ void WorkspaceAppletWindow::update_ui()
             thumbnail_area->signal_selected().emit(workspace->get_number());
         thumbnail_area->show_all();
 
+        workspace->signal_windows_changes().clear();
         workspace->signal_windows_changes().connect(
                     sigc::bind<int>(sigc::mem_fun(*this, &WorkspaceAppletWindow::update_workspace), workspace->get_number()));
     }
