@@ -12,7 +12,6 @@
 #include <gdk/gdkkeysyms.h>
 
 WorkspaceAppletWindow::WorkspaceAppletWindow():
-    applet(nullptr),
     selected_workspace(-1)
 {
     builder = Gtk::Builder::create_from_resource("/kiran-applet/ui/workspace-applet-window");
@@ -29,6 +28,24 @@ WorkspaceAppletWindow::WorkspaceAppletWindow():
     set_skip_pager_hint(true);
     set_skip_taskbar_hint(true);
     set_decorated(false);
+}
+
+void WorkspaceAppletWindow::get_preferred_width_vfunc(int &min_width, int &natural_width) const
+{
+    Gdk::Rectangle geometry;
+    auto monitor = Gdk::Display::get_default()->get_primary_monitor();
+
+    monitor->get_geometry(geometry);
+    min_width = natural_width = geometry.get_width();
+}
+
+void WorkspaceAppletWindow::get_preferred_height_vfunc(int &min_height, int &natural_height) const
+{
+    Gdk::Rectangle geometry;
+    auto monitor = Gdk::Display::get_default()->get_primary_monitor();
+
+    monitor->get_geometry(geometry);
+    min_height = natural_height = geometry.get_height();
 }
 
 void WorkspaceAppletWindow::on_realize()
@@ -81,10 +98,7 @@ bool WorkspaceAppletWindow::on_key_press_event(GdkEventKey *event)
             else
                 g_warning("workspace with number %d not found", selected_workspace);
         }
-        if (applet)
-            hide();
-        else
-            close();
+        hide();
         return true;
     }
     return Gtk::Window::on_key_press_event(event);

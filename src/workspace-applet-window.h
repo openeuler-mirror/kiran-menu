@@ -12,6 +12,9 @@ public:
     WorkspaceAppletWindow();
 
 protected:
+    virtual void get_preferred_width_vfunc(int &min_width, int &natural_width) const override;
+    virtual void get_preferred_height_vfunc(int &min_height, int &natural_height) const override;
+
     virtual void on_realize() override;
     virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
     virtual bool on_key_press_event(GdkEventKey *key) override;
