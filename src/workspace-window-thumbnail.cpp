@@ -157,8 +157,8 @@ void WorkspaceWindowThumbnail::on_thumbnail_clicked()
 {
     auto window = get_window_();
     if (window) {
-        window->activate(0);
         get_toplevel()->hide();
+        window->activate(0);
     }
 }
 
