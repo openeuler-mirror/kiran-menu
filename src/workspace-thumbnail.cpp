@@ -1,8 +1,8 @@
 #include "workspace-thumbnail.h"
 #include "window-manager.h"
+#include "workspace-manager.h"
 #include <gtk/gtkx.h>
 #include <cairomm/xlib_surface.h>
-#include "workspace-manager.h"
 
 WorkspaceThumbnail::WorkspaceThumbnail(KiranWorkspacePointer &workspace_) :
     Gtk::Box(Gtk::ORIENTATION_VERTICAL),
@@ -48,6 +48,7 @@ WorkspaceThumbnail::WorkspaceThumbnail(KiranWorkspacePointer &workspace_) :
         if (event->type == GDK_2BUTTON_PRESS) {
             /* Switch to workspace */
             this->workspace.lock()->activate(0);
+            get_toplevel()->hide();
             return true;
         }
         return false;

@@ -156,8 +156,10 @@ void WorkspaceWindowThumbnail::on_close_button_clicked()
 void WorkspaceWindowThumbnail::on_thumbnail_clicked()
 {
     auto window = get_window_();
-    if (window)
+    if (window) {
         window->activate(0);
+        get_toplevel()->hide();
+    }
 }
 
 bool WorkspaceWindowThumbnail::generate_thumbnail()
