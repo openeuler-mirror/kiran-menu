@@ -28,4 +28,7 @@
     <file alias="icon/close_prelight">images/close_prelight.png</file>
     <file alias="icon/close_active">images/close_active.png</file>
   </gresource>
+  <gresource prefix="/kiran-workspace/">
+    <file alias="icon/button">images/workspace-switcher.svg</file>
+  </gresource>
 </gresources>

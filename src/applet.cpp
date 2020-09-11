@@ -12,6 +12,7 @@
 #include "kiran-tasklist-widget.h"
 #include "app-manager.h"
 #include "core_worker.h"
+#include "workspace-applet-button.h"
 
 #define GETTEXT_PACKAGE "kiran-applet"
 
@@ -72,7 +73,9 @@ kiran_menu_applet_fill (MatePanelApplet *applet,
 {
     static int backend_inited = false;
 
-    if (strcmp(iid, "KiranMenuApplet") && strcmp(iid, "KiranTasklistApplet")) {
+    if (strcmp(iid, "KiranMenuApplet") &&
+            strcmp(iid, "KiranTasklistApplet") &&
+            strcmp(iid, "KiranWorkspaceApplet")) {
         g_warning("not match id\n");
         return FALSE;
     }
@@ -116,7 +119,7 @@ kiran_menu_applet_fill (MatePanelApplet *applet,
 
             gdk_window_add_filter(nullptr, key_event_filter, button);
         } while (0);
-    } else {
+    } else if (!strcmp(iid, "KiranTasklistApplet"))  {
         int flags;
 
         //窗口切换预览插件
@@ -125,6 +128,9 @@ kiran_menu_applet_fill (MatePanelApplet *applet,
         flags = MATE_PANEL_APPLET_HAS_HANDLE | MATE_PANEL_APPLET_EXPAND_MINOR | MATE_PANEL_APPLET_EXPAND_MAJOR;
         mate_panel_applet_set_flags(applet, (MatePanelAppletFlags)flags);
 
+        gtk_container_add(GTK_CONTAINER(applet), GTK_WIDGET(button->gobj()));
+    } else if (!strcmp(iid, "KiranWorkspaceApplet")) {
+        WorkspaceAppletButton *button = Gtk::manage(new WorkspaceAppletButton(applet));
         gtk_container_add(GTK_CONTAINER(applet), GTK_WIDGET(button->gobj()));
     }
 
