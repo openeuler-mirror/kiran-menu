@@ -173,6 +173,10 @@ bool WorkspaceWindowThumbnail::generate_thumbnail()
     if (!window)
         return false;
 
+    if (thumbnail_surface != nullptr) {
+        cairo_surface_destroy(thumbnail_surface);
+    }
+
     wid = window->get_xid();
     display = get_display()->gobj();
     thumbnail_width = static_cast<int>(window_width * scale);
@@ -206,6 +210,7 @@ bool WorkspaceWindowThumbnail::generate_thumbnail()
             cairo_scale(cr, scale, scale);
             cairo_set_source_surface(cr, surface, 0, 0);
             cairo_paint(cr);
+            cairo_surface_destroy(surface);
         }
     } else {
         /**
