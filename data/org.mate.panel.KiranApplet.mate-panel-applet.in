@@ -17,7 +17,7 @@ MateComponentId=OAFIID:KiranMenuApplet;
 Name=Kiran Task list and switch applet
 Name[zh_CN]=Kiran应用窗口切换插件
 Description=Kiran task list and switch applet
-Description=[zh_CN]=Kiran应用窗口切换插件
+Description[zh_CN]=Kiran应用窗口切换插件
 Icon=user-info
 MateComponentId=OAFIID:KiranMenuApplet;
 
@@ -25,6 +25,6 @@ MateComponentId=OAFIID:KiranMenuApplet;
 Name=Kiran Workspace switching applet
 Name[zh_CN]=Kiran工作区切换插件
 Description=Kiran Workspace switching applet
-Description=[zh_CN]=Kiran工作区切换插件
+Description[zh_CN]=Kiran工作区切换插件
 Icon=user-info
 MateComponentId=OAFIID:KiranWorkspaceApplet;
