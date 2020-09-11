@@ -8,7 +8,8 @@ WorkspaceWindowThumbnail::WorkspaceWindowThumbnail(KiranWindowPointer &win_, dou
     KiranWindowThumbnail (win_),
     border_width(4),
     thumbnail_surface(nullptr),
-    scale(scale_)
+    scale(scale_),
+    show_thumbnail(true)
 {
     set_valign(Gtk::ALIGN_START);
     set_halign(Gtk::ALIGN_START);
@@ -126,15 +127,24 @@ void WorkspaceWindowThumbnail::on_drag_data_get(const Glib::RefPtr<Gdk::DragCont
 
 void WorkspaceWindowThumbnail::on_drag_begin(const Glib::RefPtr<Gdk::DragContext> &context)
 {
-#define DRAG_IMAGE_SCALE 0.5
+#define DRAG_THUMBNAIL_WIDTH 	250
+#define DRAG_THUMBNAIL_HEIGHT 	200
     //设置拖动的图标为半透明的窗口截图
-    auto target_surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32,
-                                               thumbnail_width * DRAG_IMAGE_SCALE,
-                                               thumbnail_height * DRAG_IMAGE_SCALE);
-    auto cr = Cairo::Context::create(target_surface);
-    auto source_surface = new Cairo::ImageSurface(thumbnail_surface, false);
+    Cairo::RefPtr<Cairo::ImageSurface> target_surface;
+    Cairo::ImageSurface *source_surface = nullptr;
+    Cairo::RefPtr<Cairo::Context> cr;
+    double x_scale, y_scale, scale;
 
-    cr->scale(DRAG_IMAGE_SCALE, DRAG_IMAGE_SCALE);
+    x_scale = DRAG_THUMBNAIL_WIDTH * 1.0/thumbnail_width;
+    y_scale = DRAG_THUMBNAIL_HEIGHT * 1.0/thumbnail_height;
+    scale = std::min(x_scale, y_scale);
+
+    source_surface = new Cairo::ImageSurface(thumbnail_surface, false);
+    target_surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32,
+                                               thumbnail_width * scale,
+                                               thumbnail_height * scale);
+    cr = Cairo::Context::create(target_surface);
+    cr->scale(scale, scale);
     cr->set_source(Cairo::RefPtr<Cairo::Surface>(source_surface), 0, 0);
     cr->paint_with_alpha(0.8);
     target_surface->flush();
@@ -143,6 +153,8 @@ void WorkspaceWindowThumbnail::on_drag_begin(const Glib::RefPtr<Gdk::DragContext
     target_surface->set_device_offset(0 - target_surface->get_width()/2.0,
                                       0 - target_surface->get_height()/2.0);
     context->set_icon(target_surface);
+    show_thumbnail = false;
+    queue_draw();
 }
 
 void WorkspaceWindowThumbnail::on_close_button_clicked()
@@ -233,6 +245,22 @@ void WorkspaceWindowThumbnail::init_drag_and_drop()
 
     targets.push_back(entry);
     drag_source_set(targets, Gdk::BUTTON1_MASK, Gdk::ACTION_MOVE);
+
+    signal_drag_failed().connect(sigc::mem_fun(*this, &WorkspaceWindowThumbnail::on_drag_failed));
 }
 
 
+bool WorkspaceWindowThumbnail::on_drag_failed(const Glib::RefPtr< Gdk::DragContext >& context, Gtk::DragResult result)
+{
+    show_thumbnail = true;
+    queue_draw();
+    return true;
+}
+
+bool WorkspaceWindowThumbnail::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
+{
+    if (!show_thumbnail)
+        return false;
+
+    return KiranWindowThumbnail::on_draw(cr);
+}

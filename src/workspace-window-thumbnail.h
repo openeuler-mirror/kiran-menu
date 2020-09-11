@@ -18,6 +18,7 @@ public:
 protected:
     virtual bool draw_snapshot(Gtk::Widget *area, const Cairo::RefPtr<Cairo::Context> &cr) override;
     virtual void get_preferred_width_vfunc(int &min_width, int &natural_width) const override;
+    virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
 
     virtual void on_drag_data_delete (const Glib::RefPtr< Gdk::DragContext >& context) override;
     virtual void on_drag_data_get(const Glib::RefPtr< Gdk::DragContext >& context, Gtk::SelectionData& selection_data, guint info, guint time) override;
@@ -29,6 +30,7 @@ protected:
     virtual bool generate_thumbnail();
 
     void init_drag_and_drop();
+    bool on_drag_failed(const Glib::RefPtr< Gdk::DragContext >& context, Gtk::DragResult result);
 
 private:
     double scale;
@@ -38,6 +40,7 @@ private:
     sigc::signal<void> m_signal_delete;
 
     int window_width, window_height;
+    bool show_thumbnail;
 };
 
 #endif // WORKSPACE_WINDOW_THUMBNAIL_INCLUDE_H
