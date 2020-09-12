@@ -297,6 +297,13 @@ bool WorkspaceThumbnail::draw_snapshot(const Cairo::RefPtr<Cairo::Context> &cr)
                       allocation.get_width() - border_width,
                       allocation.get_height() - border_width);
         cr->stroke();
+    } else {
+        cr->set_source_rgba(0.0, 0.0, 0.0, 0.3);
+        cr->rectangle(border_width,
+                      border_width,
+                      allocation.get_width() - border_width * 2,
+                      allocation.get_height() - border_width * 2);
+        cr->fill();
     }
 
     return false;
