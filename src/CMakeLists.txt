@@ -15,6 +15,7 @@ add_executable(kiran-menu-applet
         kiran-search-entry.cpp
         kiran-user-info.cpp
         kiran-menu-avatar-widget.cpp
+        workarea-monitor.cpp
 	applet.cpp
 )
 
