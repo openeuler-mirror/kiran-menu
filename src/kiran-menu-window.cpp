@@ -128,18 +128,56 @@ void KiranMenuWindow::reload_apps_data()
         search_activate_slot.disconnect();
 }
 
+void KiranMenuWindow::check_display_mode()
+{
+    set_display_mode(profile.get_display_mode());
+}
+
 void KiranMenuWindow::on_realize()
 {
     Glib::RefPtr<Gdk::Visual> rgba_visual;
     Gdk::Rectangle rect;
+    GtkWidget *widget = GTK_WIDGET(gobj());
     auto screen = Gdk::Screen::get_default();
-    auto monitor = screen->get_display()->get_primary_monitor();
 
     /*设置窗口的Visual为RGBA visual，确保窗口背景透明度可以正常绘制 */
     rgba_visual = screen->get_rgba_visual();
-    gtk_widget_set_visual(GTK_WIDGET(this->gobj()), rgba_visual->gobj());
+    gtk_widget_set_visual(widget, rgba_visual->gobj());
 
+
+    monitor = new WorkareaMonitor(screen);
+    monitor->signal_size_changed().connect(sigc::mem_fun(*this, &KiranMenuWindow::check_display_mode));
     Gtk::Window::on_realize();
+}
+
+void KiranMenuWindow::on_unrealize()
+{
+    delete monitor;
+    Gtk::Window::on_unrealize();
+}
+
+void KiranMenuWindow::get_preferred_height_vfunc(int &min_height, int &natural_height) const
+{
+    int min_height_from_css;
+    Glib::RefPtr<const Gdk::Monitor> monitor;
+    Gdk::Rectangle workarea;
+
+    monitor = Gdk::Display::get_default()->get_primary_monitor();
+    monitor->get_workarea(workarea);
+
+    Gtk::Window::get_preferred_height_vfunc(min_height, natural_height);
+
+    if (display_mode == DISPLAY_MODE_EXPAND)
+        min_height_from_css = expand_min_height_property.get_value();
+    else
+        min_height_from_css = compact_min_height_property.get_value();
+
+    /* min height should not be larger than monitor height */
+    min_height = std::max(min_height_from_css, min_height);
+    min_height = std::min(workarea.get_height(), min_height);
+
+    /* natural height can't be smaller than min height */
+    natural_height = std::max(min_height, natural_height);
 }
 
 void KiranMenuWindow::on_active_change()
@@ -819,43 +857,27 @@ bool KiranMenuWindow::promise_item_viewable(GdkEventFocus *event, Gtk::Widget *i
     return false;
 }
 
-void KiranMenuWindow::check_size()
-{
-    Gdk::Rectangle rect;
-    int compact_height, expand_height, min_height;
-    auto monitor = get_screen()->get_display()->get_primary_monitor();
-
-    monitor->get_workarea(rect);
-    compact_height = compact_min_height_property.get_value();
-    expand_height = expand_min_height_property.get_value();
-
-    if (display_mode == DISPLAY_MODE_COMPACT)
-        min_height = compact_height;
-    else
-        min_height = expand_height;
-
-    if (rect.get_height() < min_height)
-        min_height = rect.get_height();
-
-    set_size_request(-1, min_height);
-}
-
 void KiranMenuWindow::set_display_mode(MenuDisplayMode mode)
 {
     Gtk::Box *avatar_button;
     Gtk::Box *expand_panel, *compact_tab_box;
-    Gdk::Rectangle workarea;
-    int min_width, natural_width, min_height;
-    auto monitor = get_screen()->get_display()->get_primary_monitor();
+    int min_width, natural_width, min_height, natural_height;
+    Gdk::Rectangle rect;
+    Glib::RefPtr<Gdk::Monitor> monitor;
+    Glib::RefPtr<Gdk::Display> display;
 
-    monitor->get_workarea(workarea);
+    if (get_realized()) {
+        display = get_display();
+    } else
+        display = Gdk::Display::get_default();
 
-    //FIXME, read min size from css??
+    display_mode = mode;
+    monitor = display->get_primary_monitor();
+    monitor->get_workarea(rect);
+
     builder->get_widget("compact-avatar-box", avatar_button);
     builder->get_widget("expand-panel", expand_panel);
     builder->get_widget("compact-tab-box", compact_tab_box);
-
-    display_mode = mode;
 
     if(display_mode == DISPLAY_MODE_COMPACT) {
         //紧凑模式下隐藏右侧面板
@@ -863,26 +885,30 @@ void KiranMenuWindow::set_display_mode(MenuDisplayMode mode)
         expand_panel->set_visible(false);
         compact_tab_box->set_visible(true);
 
-        get_preferred_width(min_width, natural_width);
 
-        min_height = compact_min_height_property.get_value();
     } else {
+
         avatar_button->set_visible(false);
         expand_panel->set_visible(true);
         compact_tab_box->set_visible(false);
-
         get_preferred_width(min_width, natural_width);
-        min_height = expand_min_height_property.get_value();
+        g_debug("min-width: %d, workarea %d x %d",
+                  min_width,
+                  rect.get_width(),
+                  rect.get_height());
+
+        if (min_width > rect.get_width()) {
+            //TODO, add comments here
+            g_warning("%s: min width for expand mode exceeds monitor size, switch to compact mode now\n", __func__);
+            set_display_mode(DISPLAY_MODE_COMPACT);
+            return;
+        }
 
         load_date_info();
     }
-
-    g_message("min-height %d\n", min_height);
-    if (workarea.get_height() < min_height)
-        min_height = workarea.get_height();
-
-    resize(natural_width, min_height);
-
+    get_preferred_width(min_width, natural_width);
+    get_preferred_height(min_height, natural_height);
+    /* We have to wait for user information from dbus to be ready */
     if (!user_info->is_ready()) {
         user_info->signal_data_ready().connect(
                     sigc::mem_fun(*this, &KiranMenuWindow::load_user_info));
@@ -890,6 +916,8 @@ void KiranMenuWindow::set_display_mode(MenuDisplayMode mode)
     else
         load_user_info();
 
+    natural_height = std::min(natural_height, rect.get_height());
+    resize(natural_width, natural_height);
     Glib::signal_idle().connect_once(sigc::mem_fun(*this, &KiranMenuWindow::reload_apps_data));
 }
 

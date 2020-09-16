@@ -8,6 +8,7 @@
 #include "kiran-menu-profile.h"
 
 #include "menu-skeleton.h"
+#include "workarea-monitor.h"
 
 class KiranMenuWindow : public Gtk::Window
 {
@@ -25,6 +26,7 @@ public:
 
     //设置开始菜单显示模式(紧凑或扩展）
     void set_display_mode(MenuDisplayMode mode);
+    void check_display_mode();
 
     //启动搜索结果中的指定应用项
     void activate_search_result(KiranMenuAppItem *item);
@@ -36,7 +38,9 @@ protected:
     virtual bool on_key_press_event(GdkEventKey *key_event) override;
     virtual bool on_button_press_event(GdkEventButton *button_event) override;
     virtual bool on_configure_event(GdkEventConfigure* configure_event) override;
-    virtual void on_realize();
+    virtual void on_realize() override;
+    virtual void on_unrealize() override;
+    virtual void get_preferred_height_vfunc(int &min_width, int &natural_width) const override;
     void on_active_change();
 
     //virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
@@ -50,8 +54,6 @@ protected:
     void switch_to_compact_favorites_view(bool animation = true);
 
     bool promise_item_viewable(GdkEventFocus *event, Gtk::Widget *item);
-
-    void check_size();
 
 private:
     Glib::RefPtr<Gtk::Builder> builder;
@@ -98,6 +100,7 @@ private:
     KiranMenuCategoryItem *create_category_item(const std::string &name, bool clickable=true);
 
     sigc::connection search_activate_slot;
+    WorkareaMonitor *monitor;
 };
 
 #endif // KIRANMENUWINDOW_H

@@ -31,6 +31,7 @@ add_executable(kiran-applet
         window_arrange.cpp
         kiran-applet-button.cpp
         workspace-applet-button.cpp
+        workarea-monitor.cpp
 )
 
 install(TARGETS kiran-applet DESTINATION "${CMAKE_INSTALL_PREFIX}/libexec/mate-panel/")
