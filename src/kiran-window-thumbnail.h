@@ -10,6 +10,7 @@ class KiranWindowThumbnail: public Gtk::Button
 public:
     KiranWindowThumbnail(KiranWindowPointer &window_);
     KiranWindowPointer get_window_() const;
+    void set_spacing(int spacing);
 
 protected:
     virtual bool on_enter_notify_event(GdkEventCrossing* crossing_event) override;
@@ -28,6 +29,8 @@ protected:
     virtual void update_title();
 
     virtual void set_snapshot_size(int width, int height);
+
+    Gtk::Widget *get_snapshot_area();
 
 private:
     std::weak_ptr<Kiran::Window> window;

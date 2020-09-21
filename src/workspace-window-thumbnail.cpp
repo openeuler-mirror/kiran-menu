@@ -15,9 +15,11 @@ WorkspaceWindowThumbnail::WorkspaceWindowThumbnail(KiranWindowPointer &win_, dou
     set_halign(Gtk::ALIGN_START);
     set_hexpand(false);
     set_vexpand(false);
+    set_margin_top(10);
+    set_spacing(10);
+
     get_style_context()->add_class("workspace-window-snapshot");
     init_drag_and_drop();
-
 
     int scale_factor = get_scale_factor();
     window_width = WINDOW_WIDTH(win_);

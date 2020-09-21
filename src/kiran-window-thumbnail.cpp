@@ -39,6 +39,11 @@ KiranWindowPointer KiranWindowThumbnail::get_window_() const
     return window.lock();
 }
 
+void KiranWindowThumbnail::set_spacing(int spacing)
+{
+    layout->set_row_spacing(spacing);
+}
+
 bool KiranWindowThumbnail::on_enter_notify_event(GdkEventCrossing* crossing_event)
 {
     close_area->set_size_request(16, 16);
@@ -225,6 +230,11 @@ void KiranWindowThumbnail::update_title()
 void KiranWindowThumbnail::set_snapshot_size(int width, int height)
 {
     snapshot_area->set_size_request(width, height);
+}
+
+Gtk::Widget *KiranWindowThumbnail::get_snapshot_area()
+{
+    return snapshot_area;
 }
 
 bool KiranWindowThumbnail::draw_icon_image(Gtk::Widget *icon_area, const Cairo::RefPtr<Cairo::Context> &cr)
