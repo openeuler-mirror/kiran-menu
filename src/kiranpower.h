@@ -14,6 +14,7 @@ bool logout();
 
 bool can_suspend();
 bool can_hibernate();
+bool can_reboot();
 
 }
 

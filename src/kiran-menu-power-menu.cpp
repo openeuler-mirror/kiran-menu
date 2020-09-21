@@ -18,7 +18,9 @@ KiranMenuPowerMenu::KiranMenuPowerMenu()
 
     if (KiranPower::can_hibernate())
         append(hibernate_item);
-    append(reboot_item);
+
+    if (KiranPower::can_reboot())
+        append(reboot_item);
     append(shutdown_item);
 
 
