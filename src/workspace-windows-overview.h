@@ -17,6 +17,8 @@ protected:
     virtual void get_preferred_width_vfunc(int &min_width, int &natural_width) const override;
     virtual void get_preferred_height_vfunc(int &min_height, int &natural_height) const override;
 
+    virtual bool on_button_press_event(GdkEventButton *event) override;
+
 
 private:
     std::weak_ptr<Kiran::Workspace> workspace;

@@ -29,8 +29,9 @@ WorkspaceWindowsOverview::WorkspaceWindowsOverview():
     layout.set_margin_right(24);
     layout.set_margin_top(20);
     layout.set_margin_bottom(20);
-
     layout.set_spacing(10);
+
+    add_events(Gdk::BUTTON_PRESS_MASK);
 }
 
 void WorkspaceWindowsOverview::set_workspace(KiranWorkspacePointer &workspace_)
@@ -58,6 +59,13 @@ void WorkspaceWindowsOverview::get_preferred_height_vfunc(int &min_height, int &
     auto allocation = get_parent()->get_allocation();
 
     min_height = natural_height = allocation.get_height();
+}
+
+bool WorkspaceWindowsOverview::on_button_press_event(GdkEventButton *event)
+{
+    /*Hide window when clicked on blank area*/
+    this->get_toplevel()->hide();
+    return false;
 }
 
 void WorkspaceWindowsOverview::reload()
