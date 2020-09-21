@@ -23,8 +23,8 @@ public:
     void set_position(Gtk::PositionType pos, bool force = false);
 
     void reposition();
-    void add_window_previewer(const std::shared_ptr<Kiran::Window> &window, bool resize = false);
-    void remove_window_previewer(const std::shared_ptr<Kiran::Window> &window);
+    void add_window_previewer(std::shared_ptr<Kiran::Window> &window, bool resize = false);
+    void remove_window_previewer(std::shared_ptr<Kiran::Window> &window);
     uint32_t get_previewer_num();
 
     sigc::signal<void> signal_opened();

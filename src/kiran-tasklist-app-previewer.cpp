@@ -331,7 +331,7 @@ void KiranAppPreviewer::load_windows_list()
 /**
  *
  */
-void KiranAppPreviewer::add_window_previewer(const std::shared_ptr<Kiran::Window> &window, bool resize)
+void KiranAppPreviewer::add_window_previewer(std::shared_ptr<Kiran::Window> &window, bool resize)
 {
     if (window->get_window_type() != WNCK_WINDOW_NORMAL &&
         window->get_window_type() != WNCK_WINDOW_DIALOG)
@@ -344,7 +344,7 @@ void KiranAppPreviewer::add_window_previewer(const std::shared_ptr<Kiran::Window
     win_previewers.insert(data);
 
     previewer->signal_close().connect(
-                [window, this]() -> void {
+                [&window, this]() -> void {
                     //TODO 如何处理预览图移除后，鼠标移出预览窗口之外的问题?
                     this->remove_window_previewer(window);
                 });
@@ -357,7 +357,7 @@ void KiranAppPreviewer::add_window_previewer(const std::shared_ptr<Kiran::Window
     }
 }
 
-void KiranAppPreviewer::remove_window_previewer(const std::shared_ptr<Kiran::Window> &window)
+void KiranAppPreviewer::remove_window_previewer(std::shared_ptr<Kiran::Window> &window)
 {
     if (window->get_window_type() != WNCK_WINDOW_NORMAL &&
         window->get_window_type() != WNCK_WINDOW_DIALOG)

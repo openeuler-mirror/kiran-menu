@@ -225,25 +225,26 @@ button.kiran-expand-button:focus{
 }
 
 
-.window-previewer.vertical:hover, .window-previewer.horizontal:hover {
+button.window-previewer.vertical:hover, button.window-previewer.horizontal:hover, button.window-previewer:hover {
     border: 1px solid gray;
     border-radius: 0px;
     border-color: rgba(46,179,255, 0.6);
     background: rgba(255, 255, 255, 0.1);
 }
 
-.window-previewer {
+button.window-previewer {
     border-radius: 6px;
     min-width: 200px;
     background: transparent;
     color: #ffffff;
+    padding: 8px;
 }
 
-.window-previewer.vertical {
+button.window-previewer.vertical {
     border: 1px solid transparent;
 }
 
-.window-previewer.horizontal {
+button.window-previewer.horizontal {
     /*border: 1px solid rgba(255, 255, 255, 0.2);*/
     border: 1px solid transparent;
     min-height: 140px;
