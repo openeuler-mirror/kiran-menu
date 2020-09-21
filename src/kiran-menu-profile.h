@@ -6,7 +6,14 @@
 typedef enum {
     DISPLAY_MODE_COMPACT=0,
     DISPLAY_MODE_EXPAND,
+    DISPLAY_MODE_INVALID
 } MenuDisplayMode;
+
+typedef enum {
+    PAGE_FAVORITES = 0,
+    PAGE_ALL_APPS,
+    PAGE_INVALID
+} MenuDefaultPage;
 
 class KiranMenuProfile: public sigc::trackable
 {
@@ -15,12 +22,13 @@ public:
     sigc::signal<void, const Glib::ustring&> signal_changed();
 
 
-    Gdk::RGBA get_background_color();
     double get_opacity();
     MenuDisplayMode get_display_mode();
+    MenuDefaultPage get_default_page();
 
-    void set_background_color(const Gdk::RGBA &color);
     void set_opacity(double value);
+    void set_default_page(MenuDefaultPage new_page);
+    void set_display_mode(MenuDisplayMode new_mode);
 
     void on_settings_changed(const Glib::ustring &key);
 

@@ -18,7 +18,9 @@ KiranMenuWindow::KiranMenuWindow(Gtk::WindowType window_type):
     Glib::ObjectBase("KiranMenuWindow"),
     Gtk::Window(window_type),
     compact_min_height_property(*this, "compact-min-height", 0),
-    expand_min_height_property(*this, "expand-min-height", 0)
+    expand_min_height_property(*this, "expand-min-height", 0),
+    compact_apps_button(nullptr),
+    compact_favorites_button(nullptr)
 {
     Gtk::Box *search_box;
 
@@ -53,7 +55,7 @@ KiranMenuWindow::KiranMenuWindow(Gtk::WindowType window_type):
 
     profile.signal_changed().connect(
         [this](const Glib::ustring &key) -> void {
-            if (key == "display-mode") {
+            if (key != "opacity") {
                 this->set_display_mode(this->profile.get_display_mode());
             } else
                 this->queue_draw();
@@ -186,7 +188,6 @@ void KiranMenuWindow::on_active_change()
         KiranHelper::grab_input(*this);
 }
 
-/*
 bool KiranMenuWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
 {
     double opacity;
@@ -196,20 +197,14 @@ bool KiranMenuWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
     auto context = get_style_context();
 
     allocation = get_allocation();
-    background_color = profile.get_background_color();
+    background_color = context->get_background_color(get_state_flags());
     opacity = profile.get_opacity();
     cr->save();
-    if (is_composited()) {
-        //只有在composite启用的情况下，透明度才能绘制成功
 
-        //TODO, 从gsettings中读取透明度设置
-        background_color.set_alpha(opacity);
-        Gdk::Cairo::set_source_rgba(cr, background_color);
-        cr->set_operator(Cairo::OPERATOR_SOURCE);
-    } else {
-        background_color.set_alpha(1.0);
-        Gdk::Cairo::set_source_rgba(cr, background_color);
-    }
+    background_color.set_alpha(opacity);
+    Gdk::Cairo::set_source_rgba(cr, background_color);
+    cr->set_operator(Cairo::OPERATOR_SOURCE);
+
     cr->paint();
     cr->restore();
 
@@ -218,7 +213,7 @@ bool KiranMenuWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
     child = get_child();
     propagate_draw(*child, cr);
     return true;
-}*/
+}
 
 /**
  * @brief 回调函数: 当搜索框内容变化时调用
@@ -402,11 +397,10 @@ bool KiranMenuWindow::on_map_event(GdkEventAny *any_event)
     on_search_stop();
     search_entry->set_text("");
 
-    //紧凑模式下默认显示收藏夹
-    if (display_mode == DISPLAY_MODE_COMPACT)
-        switch_to_compact_favorites_view(false);
-    else
+    if (display_mode == DISPLAY_MODE_EXPAND || profile.get_default_page() == PAGE_ALL_APPS)
         search_entry->grab_focus();
+    else
+        compact_favorites_button->clicked();
     return true;
 }
 
@@ -516,7 +510,7 @@ void KiranMenuWindow::add_app_button(const char *icon_resource,
  * @param tooltip: 标签按钮的工具提示文本
  * @param page: 点击对应的标签按钮时，要显示的tab页名称
  */
-void KiranMenuWindow::add_app_tab(const char *icon_resource,
+Gtk::Button* KiranMenuWindow::create_page_button(const char *icon_resource,
                                   const char *tooltip,
                                   const char *page)
 {
@@ -541,7 +535,7 @@ void KiranMenuWindow::add_app_tab(const char *icon_resource,
                     this->search_entry->grab_focus();
                 });
 
-    compact_tab_box->add(*button);
+    return button;
 }
 
 /**
@@ -577,9 +571,15 @@ void KiranMenuWindow::add_sidebar_buttons()
     power_btn = Gtk::make_managed<KiranMenuPowerButton>();
     side_box->set_orientation(Gtk::ORIENTATION_VERTICAL);
 
-    add_app_tab("/kiran-menu/icon/favorite", _("Favorites"), "compact-favorites-page");
-    add_app_tab("/kiran-menu/icon/list", _("All applications"), "apps-overview-page");
+    compact_favorites_button = create_page_button("/kiran-menu/icon/favorite",
+                                                  _("Favorites"),
+                                                  "compact-favorites-page");
+    compact_apps_button = create_page_button("/kiran-menu/icon/list",
+                                             _("All applications"),
+                                             "apps-overview-page");
 
+    compact_tab_box->add(*compact_favorites_button);
+    compact_tab_box->add(*compact_apps_button);
     compact_tab_box->add(*separator);
 
     add_app_button("/kiran-menu/sidebar/home-dir", _("Home Directory"), "caja");
@@ -885,7 +885,13 @@ void KiranMenuWindow::set_display_mode(MenuDisplayMode mode)
         expand_panel->set_visible(false);
         compact_tab_box->set_visible(true);
 
-
+        if (profile.get_default_page() == PAGE_ALL_APPS) {
+            g_message("change to all apps page");
+            compact_apps_button->clicked();
+        } else {
+            g_message("change to favorites page");
+            compact_favorites_button->clicked();
+        }
     } else {
 
         avatar_button->set_visible(false);

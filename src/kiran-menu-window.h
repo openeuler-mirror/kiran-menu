@@ -43,7 +43,7 @@ protected:
     virtual void get_preferred_height_vfunc(int &min_width, int &natural_width) const override;
     void on_active_change();
 
-    //virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
+    virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
 
     void on_search_change();
     void on_search_stop();
@@ -66,6 +66,8 @@ private:
     Gtk::Box *favorite_apps_box, *frequent_apps_box;
     Gtk::Grid *category_overview_box, *search_results_box;
     Gtk::Box *compact_tab_box;
+    Gtk::Button *compact_apps_button;
+    Gtk::Button *compact_favorites_button;
 
     Gdk::Rectangle geometry;
 
@@ -84,7 +86,7 @@ private:
                         const char *tooltip,
                         const char *cmdline);
 
-    void add_app_tab(const char *icon_resource,
+    Gtk::Button* create_page_button(const char *icon_resource,
                      const char *tooltip,
                      const char *page);
     void create_empty_prompt_label(Gtk::Label* &label, const char *prompt_text);
