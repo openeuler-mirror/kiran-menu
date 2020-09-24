@@ -91,11 +91,6 @@ bool KiranWindowPreviewer::draw_snapshot(Gtk::Widget *snapshot_area, const Cairo
     return false;
 }
 
-sigc::signal<void> KiranWindowPreviewer::signal_close()
-{
-    return m_signal_close;
-}
-
 void KiranWindowPreviewer::get_preferred_width_vfunc(int &minimum_width, int &natural_width) const
 {
     GtkStateFlags flags;
@@ -131,7 +126,6 @@ void KiranWindowPreviewer::on_close_button_clicked()
     auto window = get_window_();
     if (window) {
         window->close();
-        signal_close().emit();
     }
 }
 

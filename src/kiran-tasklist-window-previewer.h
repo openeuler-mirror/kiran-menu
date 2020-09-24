@@ -20,8 +20,6 @@ public:
     KiranWindowPreviewer(std::shared_ptr<Kiran::Window> &window);
     virtual ~KiranWindowPreviewer() override;
 
-    sigc::signal<void> signal_close();
-
 protected:
     virtual void get_preferred_width_vfunc(int& minimum_width,
                                            int& natural_width) const override;
@@ -36,8 +34,6 @@ protected:
 
 private:
     KiranWindowContextMenu *context_menu;
-
-    sigc::signal<void> m_signal_close;
 };
 
 #endif // KIRANWINDOWPREVIEWER_H

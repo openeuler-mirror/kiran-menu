@@ -343,12 +343,6 @@ void KiranAppPreviewer::add_window_previewer(std::shared_ptr<Kiran::Window> &win
     auto data = std::make_pair(window->get_xid(), previewer);
     win_previewers.insert(data);
 
-    previewer->signal_close().connect(
-                [&window, this]() -> void {
-                    //TODO 如何处理预览图移除后，鼠标移出预览窗口之外的问题?
-                    this->remove_window_previewer(window);
-                });
-
     if (resize) {
         //调整预览窗口大小和位置
         adjust_size();
