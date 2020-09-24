@@ -53,12 +53,12 @@ static GdkFilterReturn key_event_filter(GdkXEvent *xevent, GdkEvent *event, gpoi
 
     if (x_event->type == ClientMessage)
     {
-        g_message("got client message\n");
+        g_debug("got client message\n");
 
         if (x_event->xclient.message_type == atom_mate_panel_action &&
             x_event->xclient.data.l[0] == atom_mate_panel_action_kiran_menu)
         {
-            g_message("it is kiran menu event\n");
+            g_debug("it is kiran menu event\n");
             button->set_active(!button->get_active());
         }
     }

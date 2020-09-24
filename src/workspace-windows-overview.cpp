@@ -103,7 +103,7 @@ void WorkspaceWindowsOverview::reload()
      * FIXME: max_rows应当根据屏幕高度动态调整
      */
     rows = calculate_rows(windows, viewport_width, viewport_height, layout.get_spacing(), 4);
-    g_message("viewport size %d x %d, rows %d",
+    g_debug("viewport size %d x %d, rows %d",
               viewport_width,
               viewport_height,
               rows);
@@ -156,7 +156,7 @@ void WorkspaceWindowsOverview::reload()
         y_scale = (viewport_height - (rows - 1) * layout.get_spacing() - rows * SNAPSHOT_EXTRA_HEIGHT * get_scale_factor()) *1.0/rows/max_height;
         scale = std::min(x_scale, y_scale);
 
-        g_message("row[%d], real scale %.2lf, x_scale %.2lf, y_scale %.2lf, max_height %d, sum %d\n",
+        g_debug("row[%d], real scale %.2lf, x_scale %.2lf, y_scale %.2lf, max_height %d, sum %d\n",
                   index++, scale, x_scale, y_scale, max_height, sum);
 
         Gtk::Box *row_box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL);

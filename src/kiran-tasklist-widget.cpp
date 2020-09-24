@@ -151,7 +151,7 @@ void KiranTasklistWidget::toggle_previewer(KiranTasklistAppButton *button)
 
     if (previewer_app && previewer_app == target_app && previewer->is_visible())
     {
-        g_message("previewer app and target app match\n");
+        g_debug("previewer app and target app match\n");
         hide_previewer();
         return;
     } else
@@ -359,7 +359,7 @@ void KiranTasklistWidget::move_previewer(KiranTasklistAppButton *target_button)
         }
         if (this->previewer->get_idle() || target_button->get_context_menu_opened()) {
             //如果目标应用按钮的右键菜单已经打开，就没有必要再显示预览窗口
-            g_message("previewer idle or button menu opened\n");
+            g_debug("previewer idle or button menu opened\n");
             return;
         }
         this->previewer->set_app(target_app);

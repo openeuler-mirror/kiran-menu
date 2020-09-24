@@ -30,7 +30,7 @@ bool KiranMenuAvatarWidget::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
                                                allocation.get_width() * scale,
                                                allocation.get_height() * scale);
     } catch (const Glib::Error &e) {
-        std::cerr<<"Failed to load avatar: "<<e.what()<<std::endl;
+        g_warning("Failed to load avatar: %s", e.what().c_str());
         pixbuf = Gdk::Pixbuf::create_from_resource("/kiran-menu/icon/avatar",
                                                    allocation.get_width() * scale,
                                                    allocation.get_height() * scale);

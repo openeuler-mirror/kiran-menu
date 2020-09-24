@@ -12,7 +12,7 @@ static bool kiran_app_is_active(const std::shared_ptr<Kiran::App> &app)
         if (!KiranHelper::window_is_ignored(active_window))
             return active_window->get_app() == app;
     } else
-        g_message("no active window found\n");
+        g_warning("no active window found\n");
 
     return false;
 }
@@ -70,7 +70,6 @@ void KiranTasklistAppButton::get_preferred_width_vfunc(int &minimum_width, int &
         //使用父控件的高度设置
         get_parent()->get_preferred_width(minimum_width, natural_width);
     }
-    g_message("%s: width %d\n", __func__, natural_width);
 }
 
 void KiranTasklistAppButton::get_preferred_height_vfunc(int &minimum_height, int &natural_height) const
@@ -84,7 +83,6 @@ void KiranTasklistAppButton::get_preferred_height_vfunc(int &minimum_height, int
         get_preferred_width(minimum_width, natural_width);
         get_preferred_height_for_width(natural_width, minimum_height, natural_height);
     }
-    g_message("%s: height %d\n", __func__, natural_height);
 }
 
 void KiranTasklistAppButton::get_preferred_width_for_height_vfunc(int height, int &minimum_width, int &natural_width) const
@@ -256,7 +254,7 @@ bool KiranTasklistAppButton::on_button_press_event(GdkEventButton *button_event)
     {
         auto first = windows_list.at(0);
         //当前应用只有一个窗口，不需要显示预览窗口，返回true
-        g_message("%s: event time %lu\n", __PRETTY_FUNCTION__, button_event->time);
+        g_debug("%s: event time %lu\n", __PRETTY_FUNCTION__, button_event->time);
         first->activate(0);
         return true;
     }
