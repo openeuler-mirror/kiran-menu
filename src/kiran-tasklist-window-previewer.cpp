@@ -119,23 +119,6 @@ bool KiranWindowPreviewer::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
 void KiranWindowPreviewer::on_thumbnail_clicked()
 {
     auto window = get_window_();
-    GdkEvent *event = gtk_get_current_event();
-
-    if (gdk_event_triggers_context_menu(event)) {
-        //show context menu
-        if (!context_menu) {
-            context_menu = new KiranWindowContextMenu(window);
-            context_menu->attach_to_widget(*this);
-            context_menu->signal_deactivate().connect(
-                        [this]() -> void {
-                            this->get_toplevel()->hide();
-                        });
-        } else
-            context_menu->refresh();
-
-        context_menu->show_all();
-        context_menu->popup_at_pointer(event);
-    }
 
     if (window)
         window->activate(0);
@@ -150,6 +133,33 @@ void KiranWindowPreviewer::on_close_button_clicked()
         window->close();
         signal_close().emit();
     }
+}
+
+bool KiranWindowPreviewer::on_button_press_event(GdkEventButton *event)
+{
+    auto window = get_window_();
+
+    if (G_UNLIKELY(!window))
+        return false;
+
+    if (event->button == GDK_BUTTON_SECONDARY) {
+        //show context menu
+        if (!context_menu) {
+            context_menu = new KiranWindowContextMenu(window);
+            context_menu->attach_to_widget(*this);
+            context_menu->signal_deactivate().connect(
+                        [this]() -> void {
+                            this->get_toplevel()->hide();
+                        });
+        } else
+            context_menu->refresh();
+
+        context_menu->show_all();
+        context_menu->popup_at_pointer((GdkEvent*)event);
+        return false;
+    }
+
+    return KiranWindowThumbnail::on_button_press_event(event);
 }
 
 void KiranWindowPreviewer::on_composite_changed()

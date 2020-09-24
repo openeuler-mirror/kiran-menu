@@ -30,6 +30,8 @@ protected:
 
     virtual void on_thumbnail_clicked() override;
     virtual void on_close_button_clicked() override;
+
+    virtual bool on_button_press_event(GdkEventButton *event) override;
     void on_composite_changed();
 
 private:
