@@ -44,6 +44,7 @@ public:
 
     // 获取窗口预览图的pixmap
     Pixmap get_pixmap() { return this->pixmap_; };
+    cairo_surface_t *get_thumbnail(int &thumbnail_width, int &thumbnail_height);
 
     // 获取与该窗口关联的App对象
     std::shared_ptr<App> get_app();

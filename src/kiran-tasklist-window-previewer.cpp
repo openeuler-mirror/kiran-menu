@@ -28,72 +28,62 @@ KiranWindowPreviewer::~KiranWindowPreviewer()
 
 bool KiranWindowPreviewer::draw_snapshot(Gtk::Widget *snapshot_area, const Cairo::RefPtr<Cairo::Context> &cr)
 {
-
     Gtk::Allocation allocation;
     double scale_x, scale_y, scale;
-    Window xid;
     auto window = get_window_();
+    int scale_factor = get_scale_factor();
 
     if (!window)
         return true;
 
     allocation = snapshot_area->get_allocation();
-    xid = window->get_xid();
-
     try {
-        Drawable drawable = window->get_pixmap();
-        XWindowAttributes attrs;
-        Display *xdisplay = GDK_DISPLAY_XDISPLAY(get_display()->gobj());
+        int width, height;
+        cairo_surface_t *thumbnail = window->get_thumbnail(width, height);
+        if (thumbnail == nullptr) {
+            //如果无法获取到窗口截图，同时窗口不可见，那么在预览区域绘制窗口图标
+            int pixbuf_width, pixbuf_height;
+            Glib::RefPtr<Gdk::Pixbuf> pixbuf;
+            GdkPixbuf* c_pixbuf = window->get_icon();
+            int icon_size = 64;
 
-        XGetWindowAttributes(xdisplay, xid, &attrs);
-        if (drawable == None) {
-            g_warning("Failed to get pixmap for window 0x%x\n", xid);
-            if (attrs.map_state == IsViewable) {
-                //无法从XComposite扩展获取到窗口截图，调用Xlib接口获取预览（仅针对非最小化的窗口)
-                drawable = xid;
-            } else {
-                //如果无法获取到窗口截图，同时窗口不可见，那么在预览区域绘制窗口图标
-                int pixbuf_width, pixbuf_height;
-                GdkPixbuf* c_pixbuf = window->get_icon();
-                if (!c_pixbuf)
-                    return false;
-
-                auto pixbuf = Glib::wrap(c_pixbuf, true);
-                auto scaled = pixbuf->scale_simple(64, 64, Gdk::INTERP_BILINEAR);
-                pixbuf_width = scaled->get_width();
-                pixbuf_height = scaled->get_height();
-
-                Gdk::Cairo::set_source_pixbuf(cr, scaled,
-                                              (allocation.get_width() - pixbuf_width)/2,
-                                              (allocation.get_height() - pixbuf_height)/2);
-                cr->paint();
+            if (!c_pixbuf) {
+                auto icon_theme = Gtk::IconTheme::get_default();
+                pixbuf = icon_theme->load_icon("application-x-executable",
+                                               icon_size * scale_factor,
+                                               Gtk::ICON_LOOKUP_FORCE_SIZE);
                 return false;
+            } else {
+                pixbuf = Glib::wrap(c_pixbuf, true);
+                pixbuf = pixbuf->scale_simple(icon_size * scale_factor,
+                                              icon_size * scale_factor,
+                                              Gdk::INTERP_BILINEAR);
             }
-        }
 
+            pixbuf_width = pixbuf->get_width();
+            pixbuf_height = pixbuf->get_height();
 
-        auto surface = Cairo::XlibSurface::create(xdisplay,
-                                                  drawable,
-                                                  attrs.visual,
-                                                  attrs.width,
-                                                  attrs.height);
+            cr->scale(1.0/scale_factor, 1.0/scale_factor);
 
-        if (!surface) {
-            std::cerr<<"Failed to get pixbuf for window"<<std::endl;
+            Gdk::Cairo::set_source_pixbuf(cr, pixbuf,
+                                          (allocation.get_width() * scale_factor - pixbuf_width)/2,
+                                          (allocation.get_height() * scale_factor - pixbuf_height)/2);
+            cr->paint();
             return false;
+        } else {
+            scale_x = allocation.get_width() * scale_factor * 1.0/width;
+            scale_y = allocation.get_height()* scale_factor * 1.0/height;
+
+            scale = std::min(scale_x, scale_y);
+
+            cr->scale(1.0/scale_factor * scale, 1.0/scale_factor * scale);
+            cr->translate((allocation.get_width() * scale_factor - width * scale)/2.0,
+                          (allocation.get_height() * scale_factor - height * scale)/2.0);
+
+            cairo_set_source_surface(cr->cobj(), thumbnail, 0, 0);
+            cr->paint();
+            cairo_surface_destroy(thumbnail);
         }
-
-        scale_x = allocation.get_width() * 1.0/attrs.width;
-        scale_y = allocation.get_height()* 1.0/attrs.height;
-
-        scale = scale_x > scale_y?scale_y:scale_x;
-
-        cr->translate((allocation.get_width() - attrs.width * scale)/2.0,
-                      (allocation.get_height() - attrs.height * scale)/2.0);
-
-        cr->scale(scale, scale);
-        cr->set_source(surface, 0, 0);
-        cr->paint();
     } catch (const Glib::Error &e) {
         std::cerr<<"Error occured while trying to draw window snapshot: "<<e.what()<<std::endl;
     }

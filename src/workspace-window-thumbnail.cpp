@@ -178,54 +178,42 @@ void WorkspaceWindowThumbnail::on_thumbnail_clicked()
 
 bool WorkspaceWindowThumbnail::generate_thumbnail()
 {
-    Window wid;
     GdkDisplay *display;
-    Drawable pixmap;
-    XWindowAttributes attrs;
+    cairo_t *cr = nullptr;
+    cairo_surface_t *surface = nullptr;
+    int width, height, scale_factor;
     auto window = get_window_();
+
 
     if (!window)
         return false;
 
-    if (thumbnail_surface != nullptr) {
+    if (thumbnail_surface != nullptr)
         cairo_surface_destroy(thumbnail_surface);
-    }
 
-    wid = window->get_xid();
     display = get_display()->gobj();
-    thumbnail_width = static_cast<int>(window_width * scale);
-    thumbnail_height = static_cast<int>(window_height* scale);
+    scale_factor = get_scale_factor();
+
+    surface = window->get_thumbnail(width, height);
+    if (surface == nullptr) {
+        width = window_width;
+        height = window_height;
+    }
+    thumbnail_width = static_cast<int>(width * scale);
+    thumbnail_height = static_cast<int>(height* scale);
     thumbnail_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
                                                    thumbnail_width,
                                                    thumbnail_height);
 
-    cairo_t *cr = cairo_create(thumbnail_surface);
-    pixmap = window->get_pixmap();
-
-    gdk_x11_display_error_trap_push(display);
-    XGetWindowAttributes(gdk_x11_display_get_xdisplay(display),
-                         window->get_xid(),
-                         &attrs);
-    if (gdk_x11_display_error_trap_pop(display) != 0) {
-        return false;
-    }
-    if (pixmap != None) {
-        //绘制缩放后的窗口缩略图
-        cairo_surface_t *surface = nullptr;
-
-        gdk_x11_display_error_trap_push(display);
-        surface = cairo_xlib_surface_create(gdk_x11_display_get_xdisplay(display),
-                                            pixmap,
-                                            attrs.visual,
-                                            attrs.width,
-                                            attrs.height);
-        gdk_x11_display_error_trap_pop_ignored(display);
-        if (surface) {
-            cairo_scale(cr, scale, scale);
-            cairo_set_source_surface(cr, surface, 0, 0);
-            cairo_paint(cr);
-            cairo_surface_destroy(surface);
-        }
+    cr = cairo_create(thumbnail_surface);
+    if (surface != nullptr) {
+        /**
+         * 绘制缩放后的窗口缩略图
+         */
+        cairo_scale(cr, scale, scale);
+        cairo_set_source_surface(cr, surface, 0, 0);
+        cairo_paint(cr);
+        cairo_surface_destroy(surface);
     } else {
         /**
          * 获取不到窗口截图，绘制窗口大小的阴影区域

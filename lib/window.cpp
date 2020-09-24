@@ -12,6 +12,8 @@
 #include <X11/extensions/Xcomposite.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
+#include <X11/Xlib.h>
+#include <cairo/cairo-xlib.h>
 
 #include "lib/app-manager.h"
 #include "lib/app.h"
@@ -91,6 +93,32 @@ std::string Window::get_icon_name()
 GdkPixbuf* Window::get_icon()
 {
     return wnck_window_get_icon(this->wnck_window_);
+}
+
+cairo_surface_t *Window::get_thumbnail(int &thumbnail_width, int &thumbnail_height)
+{
+    Display *xdisplay;
+    GdkDisplay *display = gdk_display_get_default();
+    XWindowAttributes attrs;
+    cairo_surface_t *surface = nullptr;
+    Pixmap pixmap = get_pixmap();
+
+    xdisplay = GDK_DISPLAY_XDISPLAY(display);
+    if (pixmap != None) {
+        gdk_x11_display_error_trap_push(display);
+        XGetWindowAttributes(xdisplay, get_xid(), &attrs);
+        surface = cairo_xlib_surface_create(xdisplay,
+                                            pixmap,
+                                            attrs.visual,
+                                            attrs.width,
+                                            attrs.height);
+        if (gdk_x11_display_error_trap_pop(display))
+            surface = nullptr;
+        thumbnail_width = attrs.width;
+        thumbnail_height = attrs.height;
+    }
+
+    return surface;
 }
 
 std::shared_ptr<App> Window::get_app()
