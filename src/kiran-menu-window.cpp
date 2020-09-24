@@ -241,7 +241,7 @@ void KiranMenuWindow::on_search_change()
     //搜索时忽略关键字大小写
     auto apps_list = backend->search_app(search_entry->get_text().data(), true);
     if (apps_list.size()) {
-        g_message("search results length %lu\n", apps_list.size());
+        g_debug("search results length %lu\n", apps_list.size());
         auto category_item = Gtk::make_managed<KiranMenuCategoryItem>(_("Search Results"), false);
 
         search_results_box->add(*category_item);
@@ -302,7 +302,7 @@ void KiranMenuWindow::switch_to_category_overview(const std::string &selected_ca
         item->show_all();
 
         if (item->get_category_name() == selected_category) {
-            std::cout<<"found target category: "<<item->get_category_name()<<std::endl;
+            g_debug("found target category: '%s'", item->get_category_name().c_str());
             selected_item = item;
         }
         item->signal_clicked().connect(sigc::bind<const std::string&, bool>(
@@ -451,7 +451,7 @@ bool KiranMenuWindow::on_configure_event(GdkEventConfigure *configure_event)
 bool KiranMenuWindow::on_key_press_event(GdkEventKey *key_event)
 {
     if (overview_stack->get_visible_child_name() == "apps-overview-page") {
-        if (appview_stack->get_visible_child_name() == "all-apps-page") {
+        if (search_entry->is_visible()) {
             // 当前位于应用列表页面
             if (key_event->keyval == GDK_KEY_Escape) {
                 //按下ESC键隐藏开始菜单窗口
@@ -460,8 +460,15 @@ bool KiranMenuWindow::on_key_press_event(GdkEventKey *key_event)
             }
 
             if (search_entry->handle_event(key_event) == GDK_EVENT_STOP) {
-                //优先搜索框处理
-                g_debug("key event handled by search entry\n");
+                /**
+                 * 优先搜索框处理，同时让搜索框获取焦点
+                 * 搜索框获取焦点时，原来的输入框内容会被选中,
+                 * 因此需要调用select_region来取消选中
+                 */
+                if (!search_entry->is_focus()) {
+                    search_entry->grab_focus();
+                    search_entry->select_region(-1, -1);
+                }
                 return true;
             }
         } else {
