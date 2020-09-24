@@ -36,10 +36,13 @@ KiranMenuPowerMenu::KiranMenuPowerMenu()
         append(*hibernate_item);
     }
 
-    reboot_item = Gtk::make_managed<Gtk::MenuItem>(_("Reboot"));
-    reboot_item->signal_activate().connect(
-        sigc::hide_return(sigc::ptr_fun(&KiranPower::reboot)));
-    append(*reboot_item);
+
+    if (KiranPower::can_reboot()) {
+        reboot_item = Gtk::make_managed<Gtk::MenuItem>(_("Reboot"));
+        reboot_item->signal_activate().connect(
+            sigc::hide_return(sigc::ptr_fun(&KiranPower::reboot)));
+        append(*reboot_item);
+    }
 
     shutdown_item = Gtk::make_managed<Gtk::MenuItem>(_("Shutdown"));
     shutdown_item->signal_activate().connect(

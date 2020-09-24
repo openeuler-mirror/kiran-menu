@@ -14,6 +14,24 @@
 #define DISPLAY_MANAGER_INTERFACE "org.freedesktop.DisplayManager.Seat"
 
 
+static bool read_boolean_key_from_gsettings(const Glib::ustring &key, bool default_value)
+{
+    try {
+        auto settings = Gio::Settings::create("org.mate.lockdown");
+        std::vector<Glib::ustring> keys = settings->list_keys();
+
+        if (std::find(keys.begin(), keys.end(), key.c_str()) == keys.end()) {
+            g_warning("key '%s' not found in schema\n", key.c_str());
+            return default_value;
+        }
+        return settings->get_boolean(key);
+    } catch (const Glib::Error &e) {
+        g_warning("Failed to read settings from schema: %s", e.what().c_str());
+        return default_value;
+    }
+}
+
+
 bool KiranPower::suspend()
 {
     try {
@@ -101,6 +119,9 @@ bool KiranPower::logout(int mode)
 
 bool KiranPower::can_suspend()
 {
+    if (read_boolean_key_from_gsettings("disable-suspend", false))
+        return false;
+
     try {
         Glib::VariantBase result;
         Glib::ustring data;
@@ -122,6 +143,9 @@ bool KiranPower::can_suspend()
 
 bool KiranPower::can_hibernate()
 {
+    if (read_boolean_key_from_gsettings("disable-suspend", false))
+        return false;
+
     try {
         Glib::VariantBase result;
         Glib::ustring data;
@@ -170,4 +194,9 @@ bool KiranPower::can_switchuser()
         result = false;
     }
     return result;
+}
+
+bool KiranPower::can_reboot()
+{
+    return !read_boolean_key_from_gsettings("disable-reboot", false);
 }
