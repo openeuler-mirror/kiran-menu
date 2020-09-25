@@ -801,7 +801,7 @@ void KiranMenuWindow::load_user_info()
     avatar_box->show_all();
 }
 
-bool KiranMenuWindow::promise_item_viewable(GdkEventFocus *event, Gtk::Widget *item)
+void KiranMenuWindow::promise_item_viewable(Gtk::Widget *item)
 {
     Gtk::Viewport *viewport = nullptr;
 
@@ -824,8 +824,6 @@ bool KiranMenuWindow::promise_item_viewable(GdkEventFocus *event, Gtk::Widget *i
             viewport->get_vadjustment()->set_value(static_cast<double>(allocation.get_y()));
         }
     }
-
-    return false;
 }
 
 void KiranMenuWindow::set_display_mode(MenuDisplayMode mode)
@@ -903,9 +901,10 @@ KiranMenuAppItem *KiranMenuWindow::create_app_item(std::shared_ptr<Kiran::App> a
 
     item->set_orientation(orient);
     item->signal_launched().connect(sigc::mem_fun(*this, &Gtk::Widget::hide));
-    item->signal_focus_in_event().connect(sigc::bind<Gtk::Widget*>(
-                                              sigc::mem_fun(*this, &KiranMenuWindow::promise_item_viewable),
-                                              item));
+    item->signal_focus_in_event().connect(
+                sigc::hide(sigc::bind_return(
+                               sigc::bind<Gtk::Widget*>(sigc::mem_fun(*this, &KiranMenuWindow::promise_item_viewable),item),
+                               false)));
 
 
     return item;
@@ -916,9 +915,10 @@ KiranMenuCategoryItem *KiranMenuWindow::create_category_item(const std::string &
 {
     auto item = Gtk::make_managed<KiranMenuCategoryItem>(name, clickable);
 
-    item->signal_focus_in_event().connect(sigc::bind<Gtk::Widget*>(
-                                              sigc::mem_fun(*this, &KiranMenuWindow::promise_item_viewable),
-                                              item));
+    item->signal_focus_in_event().connect(
+                sigc::hide(sigc::bind_return(
+                               sigc::bind<Gtk::Widget*>(sigc::mem_fun(*this, &KiranMenuWindow::promise_item_viewable), item),
+                               false)));
     return item;
 }
 

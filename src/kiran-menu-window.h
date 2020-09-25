@@ -137,7 +137,11 @@ protected:
      */
     void switch_to_apps_overview(double position, bool animation = true);
 
-    bool promise_item_viewable(GdkEventFocus *event, Gtk::Widget *item);
+    /**
+     * @brief 确保给定的控件在其所在滚动区域内可见
+     * @param item 控件
+     */
+    void promise_item_viewable(Gtk::Widget *item);
 
 private:
     Glib::RefPtr<Gtk::Builder> builder;
