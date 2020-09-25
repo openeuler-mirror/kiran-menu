@@ -32,7 +32,7 @@ KiranMenuWindow::KiranMenuWindow(Gtk::WindowType window_type):
     set_accept_focus(true);
     set_focus_on_map(true);
 
-    backend = Kiran::MenuSkeleton::get_instance();
+    auto backend = Kiran::MenuSkeleton::get_instance();
     backend->signal_app_changed().connect(sigc::mem_fun(*this, &KiranMenuWindow::reload_apps_data));
     backend->signal_favorite_app_added().connect(sigc::hide(sigc::mem_fun(*this, &KiranMenuWindow::load_favorite_apps)));
     backend->signal_favorite_app_deleted().connect(sigc::hide(sigc::mem_fun(*this, &KiranMenuWindow::load_favorite_apps)));
@@ -228,7 +228,7 @@ void KiranMenuWindow::on_search_change()
     set_stack_current_index(appview_stack, PAGE_SEARCH_RESULT, false);
 
     //搜索时忽略关键字大小写
-    auto apps_list = backend->search_app(search_entry->get_text().data(), true);
+    auto apps_list = Kiran::MenuSkeleton::get_instance()->search_app(search_entry->get_text().data(), true);
     if (apps_list.size()) {
         g_debug("search results length %lu\n", apps_list.size());
         auto category_item = Gtk::make_managed<KiranMenuCategoryItem>(_("Search Results"), false);
@@ -588,12 +588,10 @@ void KiranMenuWindow::add_sidebar_buttons()
     side_box->show_all();
 }
 
-/**
- * @brief 加载系统应用列表
- */
 void KiranMenuWindow::load_all_apps()
 {
     Gtk::Box *all_apps_box;
+    auto backend = Kiran::MenuSkeleton::get_instance();
 
     builder->get_widget<Gtk::Box>("all-apps-box", all_apps_box);
 
@@ -602,12 +600,15 @@ void KiranMenuWindow::load_all_apps()
     KiranHelper::remove_all_for_container(*all_apps_box);
 
     //删除空的应用分类
-    category_names = backend->get_category_names();
+    category_names = Kiran::MenuSkeleton::get_instance()->get_category_names();
     auto start = std::remove_if(category_names.begin(), category_names.end(),
-		    [this](const std::string &name) -> bool {
-		    	if (this->backend->get_category_apps(name).size() == 0)
-				g_message("%s: Remove empty category '%s'\n", __FUNCTION__, name.data());
-		        return (this->backend->get_category_apps(name).size() == 0);
+            [](const std::string &name) -> bool {
+                int apps_size;
+
+                apps_size = Kiran::MenuSkeleton::get_instance()->get_category_apps(name).size();
+                if (apps_size == 0)
+                    g_debug("%s: Remove empty category '%s'\n", __FUNCTION__, name.data());
+                return (apps_size == 0);
 		    });
     category_names.erase(start, category_names.end());
 
@@ -637,7 +638,7 @@ void KiranMenuWindow::load_frequent_apps()
 {
     KiranMenuListItem *item;
     Gtk::Box *frequent_apps_box;
-    auto apps_list = backend->get_nfrequent_apps(4);
+    auto apps_list = Kiran::MenuSkeleton::get_instance()->get_nfrequent_apps(4);
 
     if (display_mode == DISPLAY_MODE_COMPACT) {
         //TODO
@@ -687,7 +688,7 @@ void KiranMenuWindow::load_new_apps()
     KiranHelper::remove_all_for_container(*new_apps_box);
 
     //加载新安装应用列表
-    auto new_apps_list = backend->get_nnew_apps(-1);
+    auto new_apps_list = Kiran::MenuSkeleton::get_instance()->get_nnew_apps(-1);
     if (new_apps_list.size() > 0) {
         int index = 1;
         Gtk::Box *more_apps_box = nullptr;
@@ -741,7 +742,7 @@ void KiranMenuWindow::load_favorite_apps()
     KiranMenuListItem *item;
     Gtk::Box *favorite_header_box;
     Gtk::Grid *favorite_apps_box;
-    auto apps_list = backend->get_favorite_apps();
+    auto apps_list = Kiran::MenuSkeleton::get_instance()->get_favorite_apps();
 
     if (display_mode == DISPLAY_MODE_COMPACT) {
         //TODO 紧凑模式

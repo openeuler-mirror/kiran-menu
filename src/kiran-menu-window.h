@@ -104,7 +104,6 @@ private:
     Gtk::StyleProperty<int> compact_min_height_property, expand_min_height_property;
 
     KiranMenuProfile profile;
-    Kiran::MenuSkeleton *backend;
     MenuDisplayMode display_mode;
     sigc::signal<void,int,int> m_signal_size_changed;
 
