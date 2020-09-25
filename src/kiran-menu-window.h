@@ -29,7 +29,7 @@ public:
     void check_display_mode();
 
     //启动搜索结果中的指定应用项
-    void activate_search_result(KiranMenuAppItem *item);
+    void activate_search_result();
 
 protected:
     virtual bool on_map_event(GdkEventAny *any_event) override;
@@ -101,7 +101,6 @@ private:
                                   Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL);
     KiranMenuCategoryItem *create_category_item(const std::string &name, bool clickable=true);
 
-    sigc::connection search_activate_slot;
     WorkareaMonitor *monitor;
 };
 

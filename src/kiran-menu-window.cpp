@@ -87,7 +87,7 @@ KiranMenuWindow::KiranMenuWindow(Gtk::WindowType window_type):
 
     search_entry->signal_search_changed().connect(sigc::mem_fun(*this, &KiranMenuWindow::on_search_change));
     search_entry->signal_stop_search().connect(sigc::mem_fun(*this, &KiranMenuWindow::on_search_stop));
-
+    search_entry->signal_activate().connect(sigc::mem_fun(*this, &KiranMenuWindow::activate_search_result));
     //添加侧边栏应用快捷方式
     add_sidebar_buttons();
 
@@ -108,8 +108,6 @@ KiranMenuWindow::KiranMenuWindow(Gtk::WindowType window_type):
 
 KiranMenuWindow::~KiranMenuWindow()
 {
-    if (search_activate_slot)
-        search_activate_slot.disconnect();
     delete user_info;
 }
 
@@ -124,10 +122,6 @@ void KiranMenuWindow::reload_apps_data()
     load_frequent_apps();
     load_all_apps();
     load_favorite_apps();
-
-	//app列表发生变化，搜索结果已无效
-    if (search_activate_slot)
-        search_activate_slot.disconnect();
 }
 
 void KiranMenuWindow::check_display_mode()
@@ -220,11 +214,6 @@ bool KiranMenuWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
  */
 void KiranMenuWindow::on_search_change()
 {
-
-    //移除之前搜索框按下Enter时的回调函数	
-    if (search_activate_slot)
-        search_activate_slot.disconnect();
-
     if (search_entry->get_text_length() == 0) {
         //搜索内容为空，返回到应用列表页面
         on_search_stop();
@@ -232,6 +221,7 @@ void KiranMenuWindow::on_search_change()
     }
 
     //清空之前的搜索结果
+    search_results_box->remove_data("first-item");
     KiranHelper::remove_all_for_container(*search_results_box);
 
     //切换到搜索结果页面
@@ -249,11 +239,8 @@ void KiranMenuWindow::on_search_change()
             auto app_item = create_app_item(*iter);
 
             search_results_box->add(*app_item);
-            if (iter == apps_list.begin()) {
-                //在搜索框中回车启动搜索结果列表中的第一个应用程序
-                search_activate_slot = search_entry->signal_activate().connect(
-                                sigc::bind<KiranMenuAppItem*>(sigc::mem_fun(*this, &KiranMenuWindow::activate_search_result), app_item));
-            }
+            if (iter == apps_list.begin())
+                search_results_box->set_data("first-item", app_item);
         }
     } else {
         //搜索结果为空
@@ -266,12 +253,16 @@ void KiranMenuWindow::on_search_change()
     search_results_box->show_all();
 }
 
-void KiranMenuWindow::activate_search_result(KiranMenuAppItem *item)
+void KiranMenuWindow::activate_search_result()
 {
+    KiranMenuAppItem *item;
+
     if (appview_stack->get_visible_child_name() != "search-results-page")
         return;
 
-    item->launch_app();
+    item = reinterpret_cast<KiranMenuAppItem*>(search_results_box->get_data("first-item"));
+    if (item != nullptr)
+        item->launch_app();
 }
 
 /**
@@ -279,8 +270,6 @@ void KiranMenuWindow::activate_search_result(KiranMenuAppItem *item)
  */
 void KiranMenuWindow::on_search_stop()
 {
-    if (search_activate_slot)
-        search_activate_slot.disconnect();
     //返回应用列表页面
     appview_stack->set_visible_child("all-apps-page", Gtk::STACK_TRANSITION_TYPE_NONE);
 }
