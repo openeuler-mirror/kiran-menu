@@ -912,6 +912,7 @@ void KiranMenuWindow::set_display_mode(MenuDisplayMode mode)
     get_preferred_height(min_height, natural_height);
     /* We have to wait for user information from dbus to be ready */
     if (!user_info->is_ready()) {
+        user_info->signal_data_ready().clear();
         user_info->signal_data_ready().connect(
                     sigc::mem_fun(*this, &KiranMenuWindow::load_user_info));
     }
