@@ -18,7 +18,8 @@ void KiranMenuAvatarWidget::set_icon(const char *icon_)
 
 bool KiranMenuAvatarWidget::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
 {
-    int radius, scale;
+    int scale;
+    double radius;
     Gtk::Allocation allocation;
     Glib::RefPtr<Gdk::Pixbuf> pixbuf;
 
