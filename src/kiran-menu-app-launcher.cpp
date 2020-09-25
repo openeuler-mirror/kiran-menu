@@ -18,7 +18,10 @@ KiranMenuAppLauncher::KiranMenuAppLauncher(const char *icon_file, const char *to
 
 void KiranMenuAppLauncher::on_clicked()
 {
-    app->launch(Glib::RefPtr<Gio::File>());
+    std::vector<Glib::RefPtr<Gio::File>> files;
+
+    files.clear();
+    app->launch(files);
 
     signal_app_launched().emit();
 }
