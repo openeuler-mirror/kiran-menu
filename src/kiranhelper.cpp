@@ -140,3 +140,19 @@ void KiranHelper::geometry_to_rect(const Kiran::WindowGeometry &geometry, Gdk::R
     rect.set_width(std::get<2>(geometry));
     rect.set_height(std::get<3>(geometry));
 }
+
+void KiranHelper::run_commandline(const char *cmdline)
+{
+    std::vector<std::string> args;
+    Glib::SpawnFlags flags;
+    gchar **tokens = nullptr;
+
+    flags = Glib::SPAWN_STDOUT_TO_DEV_NULL | Glib::SPAWN_STDERR_TO_DEV_NULL | Glib::SPAWN_CLOEXEC_PIPES;
+    tokens = g_strsplit(cmdline, " ", -1);
+    for (int i = 0; tokens[i] != nullptr; i++) {
+        args.push_back(tokens[i]);
+    }
+
+    g_strfreev(tokens);
+    Glib::spawn_async(std::string(), args, flags);
+}

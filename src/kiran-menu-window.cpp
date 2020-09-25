@@ -65,14 +65,9 @@ KiranMenuWindow::KiranMenuWindow(Gtk::WindowType window_type):
 
     builder->get_widget<Gtk::EventBox>("date-box", date_box);
     date_box->add_events(Gdk::BUTTON_PRESS_MASK | Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
-    date_box->signal_button_press_event().connect([this](GdkEventButton *button) -> bool {
-        std::vector<std::string> args;
-
-        args.push_back("/usr/bin/mate-time-admin");
-        args.push_back("");
-
+    date_box->signal_button_press_event().connect([this](GdkEventButton *button UNUSED) -> bool {
+        KiranHelper::run_commandline("/usr/bin/mate-time-admin");
         this->hide();
-        Glib::spawn_async(std::string(), args, Glib::SPAWN_STDOUT_TO_DEV_NULL | Glib::SPAWN_STDERR_TO_DEV_NULL | Glib::SPAWN_CLOEXEC_PIPES);
 
         return false;
     });

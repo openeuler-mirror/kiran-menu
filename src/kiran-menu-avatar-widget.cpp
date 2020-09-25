@@ -1,4 +1,5 @@
 #include "kiran-menu-avatar-widget.h"
+#include "kiranhelper.h"
 #include <iostream>
 
 KiranMenuAvatarWidget::KiranMenuAvatarWidget(int size):
@@ -56,15 +57,10 @@ bool KiranMenuAvatarWidget::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
     return false;
 }
 
-bool KiranMenuAvatarWidget::on_button_press_event(GdkEventButton *button_event)
+bool KiranMenuAvatarWidget::on_button_press_event(GdkEventButton *button_event UNUSED)
 {
-    std::vector<std::string> args;
-
-    args.push_back("/usr/bin/mate-about-me");
-    args.push_back("");
-
-    this->get_toplevel()->hide();
-    Glib::spawn_async(std::string(), args, Glib::SPAWN_STDOUT_TO_DEV_NULL | Glib::SPAWN_STDERR_TO_DEV_NULL | Glib::SPAWN_CLOEXEC_PIPES);
+    KiranHelper::run_commandline("/usr/bin/mate-about-me");
+    get_toplevel()->hide();
 
     return false;
 }

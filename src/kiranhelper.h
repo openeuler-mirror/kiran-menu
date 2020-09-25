@@ -11,6 +11,8 @@ using KiranWorkspacePointer = std::shared_ptr<Kiran::Workspace>;
 #define WINDOW_WIDTH(w)     (std::get<2>(w->get_client_window_geometry()))
 #define WINDOW_HEIGHT(w)    (std::get<3>(w->get_client_window_geometry()))
 
+#define UNUSED __attribute__((unused))
+
 class KiranHelper
 {
 public:
@@ -36,6 +38,7 @@ public:
     static void cairo_draw_rounded_rect(const Cairo::RefPtr<Cairo::Context> &cr, Gdk::Rectangle &rect, double radius);
     static void geometry_to_rect(const Kiran::WindowGeometry &geometry, Gdk::Rectangle &rect);
 
+    static void run_commandline(const char *cmdline);
 
 };
 
