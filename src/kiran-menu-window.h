@@ -26,21 +26,50 @@ class KiranMenuWindow : public Gtk::Window
 {
 public:
     KiranMenuWindow(Gtk::WindowType window_type = Gtk::WINDOW_TOPLEVEL);
-    ~KiranMenuWindow();
+    ~KiranMenuWindow() override;
 
-    //尺寸变化信号
+    /**
+     * @brief 开始菜单窗口变化信号
+     *
+     * @return 返回信号，第二个和第三个int分别代表新的宽度和高度
+     */
     sigc::signal<void,int,int> signal_size_changed();
 
+    /**
+     * @brief 重新加载所有的应用信息，包括收藏夹、常用应用和新安装应用
+     */
     void reload_apps_data();
+
+    /**
+     * @brief 加载收藏夹应用列表
+     */
     void load_favorite_apps();
+
+    /**
+     * @brief 加载常用应用列表
+     */
     void load_frequent_apps();
+
+    /**
+     * @brief 加载新安装应用列表
+     */
     void load_new_apps();
 
-    //设置开始菜单显示模式(紧凑或扩展）
+    /**
+     * @brief 设置开始菜单当前显示模式(紧凑或扩展）
+     * @param mode 新的显示模式
+     */
     void set_display_mode(MenuDisplayMode mode);
-    void check_display_mode();
 
-    //启动搜索结果中的指定应用项
+    /**
+     * @brief 根据设置重新设置开始菜单的显示模式
+     */
+    void ensure_display_mode();
+
+
+    /**
+     * @brief 启动搜索结果中的第一个应用，当前无搜索结果时什么都不做
+     */
     void activate_search_result();
 
     /**
@@ -68,15 +97,44 @@ protected:
     virtual void on_realize() override;
     virtual void on_unrealize() override;
     virtual void get_preferred_height_vfunc(int &min_width, int &natural_width) const override;
-    void on_active_change();
-
     virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
 
+
+    /**
+     * @brief 回调函数: 开始菜单窗口的激活状态发生变化时调用
+     */
+    void on_active_change();
+
+    /**
+     * @brief 回调函数: 当搜索框内容变化时调用
+     */
     void on_search_change();
+
+    /**
+     * @brief 回调函数： 当搜索框中按下ESC键时调用。该函数只是返回到应用列表页面
+     */
     void on_search_stop();
 
+    /**
+     * @brief 跳转到分类选择页面，并将跳转之前选择的分类标签对应的分类设置为已选择状态
+     * @param button: 跳转前的分类选择标签，通常是被点击的那个
+     */
     void switch_to_category_overview(const std::string &selected_category);
+
+    /**
+     * @brief 跳转到所有应用页面，如果指定了要选择的分类名称，则将所有应用页面滚动到
+     *        该分类对应的分类标签处(该分类标签位于滚动窗口内部的最上方位置）
+     * @param selected_category 要选择的分类名称，如果为空字符串，表示不需要滚动
+     * @param animation         切换页面时是否需要动画效果
+     */
     void switch_to_apps_overview(const std::string &selected_category, bool animation = true);
+
+    /**
+     * @brief 切换到应用视图，并滚动到position对应的位置
+     * @param position  要滚动到的位置，该位置将传递给应用列表所在viewport的adjustment，该值小于0
+     *                  时，将不进行滚动
+     * @param animation 切换页面时是否需要动画效果
+     */
     void switch_to_apps_overview(double position, bool animation = true);
 
     bool promise_item_viewable(GdkEventFocus *event, Gtk::Widget *item);
@@ -95,28 +153,44 @@ private:
     Gtk::Button *compact_apps_button;
     Gtk::Button *compact_favorites_button;
 
-    Gdk::Rectangle geometry;
+    Gdk::Rectangle geometry;                                        /*缓存的开始菜单窗口大小*/
+    sigc::signal<void,int,int> m_signal_size_changed;               /*开始菜单窗口尺寸变化信号*/
 
-    KiranUserInfo *user_info;
-    std::vector<std::string> category_names;
-    std::map<std::string, KiranMenuCategoryItem*> category_items;
+    KiranUserInfo *user_info;                                       /*当前用户信息*/
+    std::vector<std::string> category_names;                        /*应用分类列表*/
+    std::map<std::string, KiranMenuCategoryItem*> category_items;   /*分类名称到分类控件的映射表*/
 
     Gtk::StyleProperty<int> compact_min_height_property, expand_min_height_property;
 
-    KiranMenuProfile profile;
-    MenuDisplayMode display_mode;
-    sigc::signal<void,int,int> m_signal_size_changed;
+    KiranMenuProfile profile;           /*首选项*/
+    MenuDisplayMode display_mode;       /*当前显示模式*/
+    WorkareaMonitor *monitor;           /*屏幕变化监视器*/
 
-
+    /**
+     * @brief 为侧边栏添加视图切换按钮和快捷启动按钮
+     */
     void add_sidebar_buttons();
 
+    /**
+     * @brief 加载系统应用列表
+     */
     void load_all_apps();
+
+    /**
+     * @brief 加载当前用户信息和头像
+     */
     void load_date_info();
+
+    /**
+     * @brief 加载当前用户信息
+     */
     void load_user_info();
 
+
     KiranMenuAppItem *create_app_item(std::shared_ptr<Kiran::App> app,
-                                  Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL);
-    KiranMenuCategoryItem *create_category_item(const std::string &name, bool clickable=true);
+                                      Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL);
+    KiranMenuCategoryItem *create_category_item(const std::string &name,
+                                                bool clickable=true);
 
 
     /**
@@ -144,7 +218,6 @@ private:
                                     const char *tooltip,
                                     int page_index);
 
-    WorkareaMonitor *monitor;
     /**
      * @brief 创建无结果的提示标签
      * @param prompt_text   提示文本

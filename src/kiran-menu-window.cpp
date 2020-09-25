@@ -102,8 +102,6 @@ KiranMenuWindow::KiranMenuWindow(Gtk::WindowType window_type):
     //加载当前用户信息
     user_info = new KiranUserInfo(getuid());
     set_display_mode(profile.get_display_mode());
-
-
 }
 
 KiranMenuWindow::~KiranMenuWindow()
@@ -124,7 +122,7 @@ void KiranMenuWindow::reload_apps_data()
     load_favorite_apps();
 }
 
-void KiranMenuWindow::check_display_mode()
+void KiranMenuWindow::ensure_display_mode()
 {
     set_display_mode(profile.get_display_mode());
 }
@@ -142,7 +140,7 @@ void KiranMenuWindow::on_realize()
 
 
     monitor = new WorkareaMonitor(screen);
-    monitor->signal_size_changed().connect(sigc::mem_fun(*this, &KiranMenuWindow::check_display_mode));
+    monitor->signal_size_changed().connect(sigc::mem_fun(*this, &KiranMenuWindow::ensure_display_mode));
     Gtk::Window::on_realize();
 }
 
@@ -168,11 +166,11 @@ void KiranMenuWindow::get_preferred_height_vfunc(int &min_height, int &natural_h
     else
         min_height_from_css = compact_min_height_property.get_value();
 
-    /* min height should not be larger than monitor height */
+    /* 最小高度不能超过屏幕高度 */
     min_height = std::max(min_height_from_css, min_height);
     min_height = std::min(workarea.get_height(), min_height);
 
-    /* natural height can't be smaller than min height */
+    /* 自然高度不能小于最小高度 */
     natural_height = std::max(min_height, natural_height);
 }
 
@@ -209,9 +207,6 @@ bool KiranMenuWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
     return true;
 }
 
-/**
- * @brief 回调函数: 当搜索框内容变化时调用
- */
 void KiranMenuWindow::on_search_change()
 {
     if (search_entry->get_text_length() == 0) {
@@ -284,9 +279,6 @@ void KiranMenuWindow::set_stack_current_index(Gtk::Stack *stack, int index, bool
     }
 }
 
-/**
- * @brief 回调函数： 当搜索框中按下ESC键时调用。该函数只是返回到应用列表页面
- */
 void KiranMenuWindow::on_search_stop()
 {
     /*返回应用列表页面，并清空搜索内容*/
@@ -294,10 +286,7 @@ void KiranMenuWindow::on_search_stop()
     search_entry->set_text("");
 }
 
-/**
- * @brief 跳转到分类选择页面，并将跳转之前选择的分类标签对应的分类设置为已选择状态
- * @param button: 跳转前的分类选择标签，通常是被点击的那个
- */
+
 void KiranMenuWindow::switch_to_category_overview(const std::string &selected_category)
 {
     KiranMenuCategoryItem *selected_item = nullptr;
@@ -326,12 +315,9 @@ void KiranMenuWindow::switch_to_category_overview(const std::string &selected_ca
         selected_item->grab_focus();
 }
 
-/**
- * @brief 跳转到所有应用页面，如果指定了要选择的分类名称，则将所有应用页面滚动到
- *        该分类对应的分类标签处(该分类标签位于滚动窗口内部的最上方位置）
- * @param selected_category：要选择的分类名称
- */
-void KiranMenuWindow::switch_to_apps_overview(const std::string &selected_category, bool animation)
+
+void KiranMenuWindow::switch_to_apps_overview(const std::string &selected_category,
+                                              bool animation)
 {
     KiranMenuCategoryItem *item;
     Gtk::Allocation allocation;
@@ -439,6 +425,7 @@ bool KiranMenuWindow::on_configure_event(GdkEventConfigure *configure_event)
     return Gtk::Window::on_configure_event(configure_event);
 }
 
+
 bool KiranMenuWindow::on_key_press_event(GdkEventKey *key_event)
 {
     if (key_event->keyval == GDK_KEY_Escape) {
@@ -462,6 +449,7 @@ bool KiranMenuWindow::on_key_press_event(GdkEventKey *key_event)
             hide();
             return true;
         }
+
     } else {
         if (search_entry->handle_event(key_event) == GDK_EVENT_STOP) {
             /**
@@ -541,9 +529,6 @@ Gtk::Label *KiranMenuWindow::create_empty_prompt_label(const char *prompt_text)
     return label;
 }
 
-/**
- * @brief 为侧边栏添加标签页和快捷启动按钮
- */
 void KiranMenuWindow::add_sidebar_buttons()
 {
     Gtk::Separator *separator;
@@ -631,9 +616,6 @@ void KiranMenuWindow::load_all_apps()
     all_apps_box->show_all();
 }
 
-/**
- * @brief 加载常用应用信息
- */
 void KiranMenuWindow::load_frequent_apps()
 {
     KiranMenuListItem *item;
@@ -734,9 +716,6 @@ void KiranMenuWindow::load_new_apps()
     }
 }
 
-/**
- * @brief 加载收藏夹应用列表
- */
 void KiranMenuWindow::load_favorite_apps()
 {
     KiranMenuListItem *item;
@@ -745,8 +724,6 @@ void KiranMenuWindow::load_favorite_apps()
     auto apps_list = Kiran::MenuSkeleton::get_instance()->get_favorite_apps();
 
     if (display_mode == DISPLAY_MODE_COMPACT) {
-        //TODO 紧凑模式
-
         builder->get_widget<Gtk::Grid>("compact-favorites-box", favorite_apps_box);
         builder->get_widget<Gtk::Box>("compact-favorites-header", favorite_header_box);
     } else {
@@ -791,9 +768,6 @@ void KiranMenuWindow::load_favorite_apps()
 
 }
 
-/**
- * @brief 加载当前用户信息和头像
- */
 void KiranMenuWindow::load_user_info()
 {
 
@@ -847,7 +821,7 @@ bool KiranMenuWindow::promise_item_viewable(GdkEventFocus *event, Gtk::Widget *i
             //控件绘制区域在滚动区域内并非全部可见，需要滚动
             viewport->get_vadjustment()->set_value(adjust_value + delta);
         } else if (allocation.get_y() < adjust_value) {
-            viewport->get_vadjustment()->set_value((double)allocation.get_y());
+            viewport->get_vadjustment()->set_value(static_cast<double>(allocation.get_y()));
         }
     }
 
@@ -882,26 +856,22 @@ void KiranMenuWindow::set_display_mode(MenuDisplayMode mode)
         expand_panel->set_visible(false);
         compact_tab_box->set_visible(true);
 
-        if (profile.get_default_page() == PAGE_ALL_APPS) {
-            g_message("change to all apps page");
+        if (profile.get_default_page() == PAGE_ALL_APPS)
             compact_apps_button->clicked();
-        } else {
-            g_message("change to favorites page");
+        else
             compact_favorites_button->clicked();
-        }
     } else {
 
         avatar_button->set_visible(false);
         expand_panel->set_visible(true);
         compact_tab_box->set_visible(false);
         get_preferred_width(min_width, natural_width);
-        g_debug("min-width: %d, workarea %d x %d",
-                  min_width,
-                  rect.get_width(),
-                  rect.get_height());
+        g_debug("min-width: %d, workarea %d x %d", min_width,
+                rect.get_width(),
+                rect.get_height());
 
         if (min_width > rect.get_width()) {
-            //TODO, add comments here
+            /*当前屏幕宽度小于扩展模式的最小宽度，切换到紧凑模式*/
             g_warning("%s: min width for expand mode exceeds monitor size, switch to compact mode now\n", __func__);
             set_display_mode(DISPLAY_MODE_COMPACT);
             return;
@@ -911,7 +881,7 @@ void KiranMenuWindow::set_display_mode(MenuDisplayMode mode)
     }
     get_preferred_width(min_width, natural_width);
     get_preferred_height(min_height, natural_height);
-    /* We have to wait for user information from dbus to be ready */
+    /* 等待DBus信息准备好 */
     if (!user_info->is_ready()) {
         user_info->signal_data_ready().clear();
         user_info->signal_data_ready().connect(
