@@ -245,7 +245,7 @@ void KiranMenuWindow::on_search_change()
         //搜索结果为空
         Gtk::Label *label;
 
-        create_empty_prompt_label(label, _("No matched apps found!"));
+        label = create_empty_prompt_label(_("No matched apps found!"));
         search_results_box->add(*label);
     }
 
@@ -486,31 +486,23 @@ bool KiranMenuWindow::on_leave_notify_event(GdkEventCrossing *crossing_event)
     return false;
 }
 
-/**
- * @brief 添加快捷应用按钮到开始菜单的左侧侧边栏
- * @param icon_resource: 按钮图标的资源路径
- * @param tooltip: 按钮的工具提示文本
- * @param cmdline: 按钮点击时启动应用时调用的命令行参数，如 "/bin/ls /home"
- */
-void KiranMenuWindow::add_app_button(const char *icon_resource,
+Gtk::Button *KiranMenuWindow::create_launcher_button(const char *icon_resource,
                                      const char *tooltip,
                                      const char *cmdline)
 {
-    KiranMenuAppLauncher *button = Gtk::make_managed<KiranMenuAppLauncher>(icon_resource, tooltip, cmdline);
+    KiranMenuAppLauncher *button;
+
+    button = Gtk::make_managed<KiranMenuAppLauncher>(icon_resource,
+                                                     tooltip,
+                                                     cmdline);
 
     button->signal_app_launched().connect(sigc::mem_fun(*this, &Gtk::Widget::hide));
-    side_box->add(*button);
+    return button;
 }
 
-/**
- * @brief 在侧边栏中添加tab标签按钮
- * @param icon_resource: tab标签按钮显示的图标资源路径
- * @param tooltip: 标签按钮的工具提示文本
- * @param page: 点击对应的标签按钮时，要显示的tab页名称
- */
 Gtk::Button* KiranMenuWindow::create_page_button(const char *icon_resource,
-                                  const char *tooltip,
-                                  const char *page)
+                                                 const char *tooltip,
+                                                 int page_index)
 {
     Gtk::Button *button = Gtk::make_managed<Gtk::Button>();
     Gtk::Image *image = Gtk::make_managed<Gtk::Image>();
@@ -519,7 +511,7 @@ Gtk::Button* KiranMenuWindow::create_page_button(const char *icon_resource,
         image->set_pixel_size(16);
         image->set_from_resource(icon_resource);
     } catch (const Glib::Error &e) {
-        std::cerr<<"Failed to load resouce '"<<icon_resource<<"': "<<e.what()<<std::endl;
+        g_warning("Failed to load resouce '%s': %s", icon_resource, e.what().c_str());
     }
 
     button->set_always_show_image(true);
@@ -528,28 +520,25 @@ Gtk::Button* KiranMenuWindow::create_page_button(const char *icon_resource,
     button->get_style_context()->add_class("kiran-app-button");
 
     button->signal_clicked().connect(
-                [this, page]() -> void{
-                    this->overview_stack->set_visible_child(page, Gtk::STACK_TRANSITION_TYPE_CROSSFADE);
+                [this, page_index]() -> void{
+                    this->set_stack_current_index(overview_stack, page_index, true);
                     this->search_entry->grab_focus();
                 });
 
     return button;
 }
 
-/**
- * @brief 创建无结果的提示标签
- * @param label         创建的标签
- * @param prompt_text   提示文本
- */
-void KiranMenuWindow::create_empty_prompt_label(Gtk::Label* &label, const char *prompt_text)
+Gtk::Label *KiranMenuWindow::create_empty_prompt_label(const char *prompt_text)
 {
-    label = Gtk::make_managed<Gtk::Label>(prompt_text);
+    Gtk::Label *label = nullptr;
 
+    label = Gtk::make_managed<Gtk::Label>(prompt_text);
     label->get_style_context()->add_class("search-empty-prompt");
     label->set_hexpand(true);
     label->set_vexpand(true);
     label->set_halign(Gtk::ALIGN_CENTER);
     label->set_valign(Gtk::ALIGN_CENTER);
+    return label;
 }
 
 /**
@@ -558,7 +547,7 @@ void KiranMenuWindow::create_empty_prompt_label(Gtk::Label* &label, const char *
 void KiranMenuWindow::add_sidebar_buttons()
 {
     Gtk::Separator *separator;
-    Gtk::Button *power_btn;
+    Gtk::Button *power_btn, *launcher_btn;
 
     separator= Gtk::make_managed<Gtk::Separator>(Gtk::ORIENTATION_HORIZONTAL);
     separator->set_margin_start(9);
@@ -571,18 +560,29 @@ void KiranMenuWindow::add_sidebar_buttons()
 
     compact_favorites_button = create_page_button("/kiran-menu/icon/favorite",
                                                   _("Favorites"),
-                                                  "compact-favorites-page");
+                                                  VIEW_COMPACT_FAVORITES);
     compact_apps_button = create_page_button("/kiran-menu/icon/list",
                                              _("All applications"),
-                                             "apps-overview-page");
+                                             VIEW_APPS_LIST);
 
     compact_tab_box->add(*compact_favorites_button);
     compact_tab_box->add(*compact_apps_button);
     compact_tab_box->add(*separator);
 
-    add_app_button("/kiran-menu/sidebar/home-dir", _("Home Directory"), "caja");
-    add_app_button("/kiran-menu/sidebar/settings", _("Control center"), "mate-control-center");
-    add_app_button("/kiran-menu/sidebar/lock", _("Lock Screen"), "mate-screensaver-command -l");
+    launcher_btn = create_launcher_button("/kiran-menu/sidebar/home-dir",
+                                          _("Home Directory"),
+                                          "caja");
+    side_box->add(*launcher_btn);
+
+    launcher_btn = create_launcher_button("/kiran-menu/sidebar/settings",
+                                          _("Control center"),
+                                          "mate-control-center");
+    side_box->add(*launcher_btn);
+
+    launcher_btn = create_launcher_button("/kiran-menu/sidebar/lock",
+                                          _("Lock Screen"),
+                                          "mate-screensaver-command -l");
+    side_box->add(*launcher_btn);
     side_box->add(*power_btn);
 
     side_box->show_all();
@@ -757,12 +757,10 @@ void KiranMenuWindow::load_favorite_apps()
     KiranHelper::remove_all_for_container(*favorite_apps_box);
     KiranHelper::remove_all_for_container(*favorite_header_box);
 
-
-
     if (apps_list.size() == 0) {
         Gtk::Label *label;
 
-        create_empty_prompt_label(label, _("No favorite apps!"));
+        label = create_empty_prompt_label(_("No favorite apps!"));
         favorite_apps_box->add(*label);
     } else {
         int index = 0;

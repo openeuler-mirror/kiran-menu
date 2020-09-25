@@ -108,14 +108,6 @@ private:
     MenuDisplayMode display_mode;
     sigc::signal<void,int,int> m_signal_size_changed;
 
-    void add_app_button(const char *icon_resource,
-                        const char *tooltip,
-                        const char *cmdline);
-
-    Gtk::Button* create_page_button(const char *icon_resource,
-                     const char *tooltip,
-                     const char *page);
-    void create_empty_prompt_label(Gtk::Label* &label, const char *prompt_text);
 
     void add_sidebar_buttons();
 
@@ -127,7 +119,40 @@ private:
                                   Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL);
     KiranMenuCategoryItem *create_category_item(const std::string &name, bool clickable=true);
 
+
+    /**
+     * @brief 创建快捷应用按钮
+     * @param icon_resource: 按钮图标的资源路径
+     * @param tooltip: 按钮的工具提示文本
+     * @param cmdline: 按钮点击时启动应用时调用的命令行参数，如 "/bin/ls /home"
+     *
+     * @return 返回创建的按钮，该按钮添加到容器后会随容器一起销毁，未添加到容器时需要手动销毁
+     */
+    Gtk::Button* create_launcher_button(const char *icon_resource,
+                                        const char *tooltip,
+                                        const char *cmdline);
+
+
+    /**
+     * @brief 在侧边栏中添加标签按钮
+     * @param icon_resource: tab标签按钮显示的图标资源路径
+     * @param tooltip: 标签按钮的工具提示文本
+     * @param page: 点击对应的标签按钮时，要显示的tab页索引
+     *
+     * @return 返回创建的按钮
+     */
+    Gtk::Button* create_page_button(const char *icon_resource,
+                                    const char *tooltip,
+                                    int page_index);
+
     WorkareaMonitor *monitor;
+    /**
+     * @brief 创建无结果的提示标签
+     * @param prompt_text   提示文本
+     *
+     * @return 返回创建的标签
+     */
+    Gtk::Label* create_empty_prompt_label(const char *prompt_text);
 };
 
 #endif // KIRANMENUWINDOW_H
