@@ -10,6 +10,18 @@
 #include "menu-skeleton.h"
 #include "workarea-monitor.h"
 
+
+enum {
+    VIEW_APPS_LIST = 0,         /* 应用列表视图 */
+    VIEW_CATEGORY_SELECTION,    /* 分类选择跳转视图 */
+    VIEW_COMPACT_FAVORITES      /* 紧凑模式下的收藏夹视图 */
+};
+
+enum {
+    PAGE_ALL_APPS_LIST = 0,     /*所有应用页面 */
+    PAGE_SEARCH_RESULT          /*搜索结果页面*/
+};
+
 class KiranMenuWindow : public Gtk::Window
 {
 public:
@@ -31,6 +43,21 @@ public:
     //启动搜索结果中的指定应用项
     void activate_search_result();
 
+    /**
+     * @brief 获取Stack中当前显示页面的索引
+     * @param stack 待获取的stack
+     * @return      返回当前页面的索引
+     */
+    int get_stack_current_index(Gtk::Stack *stack);
+
+    /**
+     * @brief 设置Stack当前页面为索引为page的页面
+     * @param stack         待设置的stack
+     * @param page          要设置为当前页面的页面索引
+     * @param animation     是否需要动画效果
+     */
+    void set_stack_current_index(Gtk::Stack *stack, int page, bool animation);
+
 protected:
     virtual bool on_map_event(GdkEventAny *any_event) override;
     virtual bool on_unmap_event(GdkEventAny *any_event) override;
@@ -51,7 +78,6 @@ protected:
     void switch_to_category_overview(const std::string &selected_category);
     void switch_to_apps_overview(const std::string &selected_category, bool animation = true);
     void switch_to_apps_overview(double position, bool animation = true);
-    void switch_to_compact_favorites_view(bool animation = true);
 
     bool promise_item_viewable(GdkEventFocus *event, Gtk::Widget *item);
 

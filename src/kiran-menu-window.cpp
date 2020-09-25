@@ -225,8 +225,7 @@ void KiranMenuWindow::on_search_change()
     KiranHelper::remove_all_for_container(*search_results_box);
 
     //切换到搜索结果页面
-    appview_stack->set_transition_type(Gtk::STACK_TRANSITION_TYPE_NONE);
-    appview_stack->set_visible_child("search-results-page");
+    set_stack_current_index(appview_stack, PAGE_SEARCH_RESULT, false);
 
     //搜索时忽略关键字大小写
     auto apps_list = backend->search_app(search_entry->get_text().data(), true);
@@ -257,7 +256,7 @@ void KiranMenuWindow::activate_search_result()
 {
     KiranMenuAppItem *item;
 
-    if (appview_stack->get_visible_child_name() != "search-results-page")
+    if (get_stack_current_index(appview_stack) != PAGE_SEARCH_RESULT)
         return;
 
     item = reinterpret_cast<KiranMenuAppItem*>(search_results_box->get_data("first-item"));
@@ -265,13 +264,34 @@ void KiranMenuWindow::activate_search_result()
         item->launch_app();
 }
 
+int KiranMenuWindow::get_stack_current_index(Gtk::Stack *stack)
+{
+    Gtk::Widget *child = stack->get_visible_child();
+
+    return stack->child_property_position(*child).get_value();
+}
+
+void KiranMenuWindow::set_stack_current_index(Gtk::Stack *stack, int index, bool animation)
+{
+    for (auto child: stack->get_children()) {
+        int pos;
+
+        pos = stack->child_property_position(*child).get_value();
+        if (pos == index) {
+            stack->set_visible_child(*child);
+            break;
+        }
+    }
+}
+
 /**
  * @brief 回调函数： 当搜索框中按下ESC键时调用。该函数只是返回到应用列表页面
  */
 void KiranMenuWindow::on_search_stop()
 {
-    //返回应用列表页面
-    appview_stack->set_visible_child("all-apps-page", Gtk::STACK_TRANSITION_TYPE_NONE);
+    /*返回应用列表页面，并清空搜索内容*/
+    set_stack_current_index(appview_stack, PAGE_ALL_APPS_LIST, false);
+    search_entry->set_text("");
 }
 
 /**
@@ -300,9 +320,7 @@ void KiranMenuWindow::switch_to_category_overview(const std::string &selected_ca
                                            true));
         category_overview_box->add(*item);
     }
-
-    overview_stack->set_transition_type(Gtk::STACK_TRANSITION_TYPE_CROSSFADE);
-    overview_stack->set_visible_child("category-overview-page");
+    set_stack_current_index(overview_stack, VIEW_CATEGORY_SELECTION, true);
 
     if (selected_item)
         selected_item->grab_focus();
@@ -334,26 +352,19 @@ void KiranMenuWindow::switch_to_apps_overview(const std::string &selected_catego
             switch_to_apps_overview(adjusted_pos, animation);
 
             //将指定的分类标签控件添加焦点
-            g_message("grab focus for category '%s'\n", selected_category.data());
+            g_debug("grab focus for category '%s'\n", selected_category.c_str());
             item->grab_focus();
         } else
-            std::cout<<"invalid category name '"<<selected_category<<"'"<<std::endl;
+            g_warning("invalid category name: '%s'\n", selected_category.c_str());
     }
 }
 
-/**
- * @brief 切换到应用视图，并滚动到position对应的位置
- * @param position 要滚动到的位置，该位置将传递给应用列表所在viewport的adjustment
- */
 void KiranMenuWindow::switch_to_apps_overview(double position, bool animation)
 {
     Gtk::Viewport *all_apps_viewport;
-    Gtk::StackTransitionType transition;
-
-    transition = animation?Gtk::STACK_TRANSITION_TYPE_CROSSFADE:Gtk::STACK_TRANSITION_TYPE_NONE;
 
     //切换到应用程序列表
-    overview_stack->set_visible_child("apps-overview-page", transition);
+    set_stack_current_index(overview_stack, VIEW_APPS_LIST, animation);
     if (position >= 0) {
         builder->get_widget<Gtk::Viewport>("all-apps-viewport", all_apps_viewport);
 
@@ -361,14 +372,6 @@ void KiranMenuWindow::switch_to_apps_overview(double position, bool animation)
         adjustment->set_value(position);
     }
 
-}
-
-void KiranMenuWindow::switch_to_compact_favorites_view(bool animation)
-{
-    Gtk::StackTransitionType transition;
-
-    transition = animation?Gtk::STACK_TRANSITION_TYPE_CROSSFADE:Gtk::STACK_TRANSITION_TYPE_NONE;
-    overview_stack->set_visible_child("compact-favorites-page", transition);
 }
 
 bool KiranMenuWindow::on_map_event(GdkEventAny *any_event)
@@ -384,7 +387,6 @@ bool KiranMenuWindow::on_map_event(GdkEventAny *any_event)
     switch_to_apps_overview(0, false);
 
     on_search_stop();
-    search_entry->set_text("");
 
     if (display_mode == DISPLAY_MODE_EXPAND || profile.get_default_page() == PAGE_ALL_APPS)
         search_entry->grab_focus();
@@ -439,38 +441,38 @@ bool KiranMenuWindow::on_configure_event(GdkEventConfigure *configure_event)
 
 bool KiranMenuWindow::on_key_press_event(GdkEventKey *key_event)
 {
-    if (overview_stack->get_visible_child_name() == "apps-overview-page") {
-        if (search_entry->is_visible()) {
-            // 当前位于应用列表页面
-            if (key_event->keyval == GDK_KEY_Escape) {
-                //按下ESC键隐藏开始菜单窗口
-                hide();
-                return true;
-            }
+    if (key_event->keyval == GDK_KEY_Escape) {
+        switch (get_stack_current_index(overview_stack)) {
+        case VIEW_APPS_LIST:
+            /**
+             * 当前位于应用列表视图.
+             * 无搜索结果时，按下ESC键隐藏开始菜单窗口.否则停止搜索。
+             */
 
-            if (search_entry->handle_event(key_event) == GDK_EVENT_STOP) {
-                /**
-                 * 优先搜索框处理，同时让搜索框获取焦点
-                 * 搜索框获取焦点时，原来的输入框内容会被选中,
-                 * 因此需要调用select_region来取消选中
-                 */
-                if (!search_entry->is_focus()) {
-                    search_entry->grab_focus();
-                    search_entry->select_region(-1, -1);
-                }
-                return true;
-            }
-        } else {
-            if (key_event->keyval == GDK_KEY_Escape) {
-                //ESC Key, 当前处于搜索结果页面，需要返回应用列表页面
-                appview_stack->set_visible_child("all-apps-page", Gtk::STACK_TRANSITION_TYPE_NONE);
-                return true;
-            }
+            if (get_stack_current_index(appview_stack) != PAGE_SEARCH_RESULT)
+                hide();
+            else
+                on_search_stop();
+            return true;
+        case VIEW_CATEGORY_SELECTION:
+            /*当前处于分类选择视图, 返回应用视图*/
+            switch_to_apps_overview(-1, false);
+            return true;
+        default:
+            hide();
+            return true;
         }
     } else {
-        if (key_event->keyval == GDK_KEY_Escape) {
-            //当前处于分类选择视图, 返回应用视图
-            overview_stack->set_visible_child("apps-overview-page", Gtk::STACK_TRANSITION_TYPE_NONE);
+        if (search_entry->handle_event(key_event) == GDK_EVENT_STOP) {
+            /**
+             * 优先搜索框处理，同时让搜索框获取焦点
+             * 搜索框获取焦点时，原来的输入框内容会被选中,
+             * 因此需要调用select_region来取消选中
+             */
+            if (!search_entry->is_focus()) {
+                search_entry->grab_focus();
+                search_entry->select_region(-1, -1);
+            }
             return true;
         }
     }
