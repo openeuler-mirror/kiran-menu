@@ -85,7 +85,7 @@ bool KiranWindowPreviewer::draw_snapshot(Gtk::Widget *snapshot_area, const Cairo
             cairo_surface_destroy(thumbnail);
         }
     } catch (const Glib::Error &e) {
-        std::cerr<<"Error occured while trying to draw window snapshot: "<<e.what()<<std::endl;
+        g_warning("Error occured while trying to draw window thumbnail: %s", e.what().c_str());
     }
 
     return false;

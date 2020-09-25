@@ -188,7 +188,7 @@ bool KiranTasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
             }
         }
     } catch (const Glib::Error &e) {
-        std::cerr<<"Error occured while trying to load app icon: "<<e.what()<<std::endl;
+        g_warning("Error occured while trying to load app icon: %s", e.what().c_str());
         pixbuf.clear();
     }
 

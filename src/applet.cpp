@@ -24,7 +24,7 @@ bool load_resources(const std::string &resource_file) {
         auto resource = Gio::Resource::create_from_file(resource_file);
         resource->register_global();
     } catch (const Glib::Error &e) {
-        std::cerr<<"Failed to load resource file: '"<<e.what()<<"'"<<std::endl;
+        g_error("Failed to load resource file: '%s'", e.what().c_str());
         return false;
     }
 
@@ -40,7 +40,7 @@ bool load_css_styles(const char *name)
                                                    provider,
                                                    GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     } catch (const Glib::Error &e) {
-        std::cerr<<"Failed to load widget styles: '"<<e.what()<<"'"<<std::endl;
+        g_error("Failed to load style file: '%s'", e.what().c_str());
         return false;
     }
     return true;

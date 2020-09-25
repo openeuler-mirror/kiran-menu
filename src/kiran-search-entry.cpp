@@ -5,7 +5,6 @@
 
 void on_preedit_text_changed(KiranSearchEntry *entry, char *preedit_text)
 {
-    std::cout<<"preedit text changed to "<<preedit_text<<std::endl;
     entry->has_preedit_text = (strlen(preedit_text) != 0);
 }
 

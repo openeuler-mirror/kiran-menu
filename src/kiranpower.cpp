@@ -45,7 +45,7 @@ bool KiranPower::suspend()
         proxy->call_sync("Suspend", container, 300);
         return true;
     } catch (const Gio::DBus::Error &e) {
-        std::cout<<"Failed to request suspend method: "<<e.what().data()<<std::endl;
+        g_warning("Failed to request suspend method: %s", e.what().c_str());
         return false;
     }
 }
@@ -63,7 +63,7 @@ bool KiranPower::hibernate()
         proxy->call_sync("Hibernate", container, 300);
         return true;
     } catch (const Gio::DBus::Error &e) {
-        std::cout<<"Failed to request hibernate method: "<<e.what().data()<<std::endl;
+        g_warning("Failed to request hibernate method: %s", e.what().c_str());
         return false;
     }
 }
@@ -78,8 +78,7 @@ bool KiranPower::shutdown()
         proxy->call_sync("RequestShutdown");
         return true;
     } catch (const Gio::DBus::Error &e) {
-        //throw std::string("Failed to connect to login manager: ") + e.what().data();
-        std::cout<<"Failed to request shutdown method: "<<e.what().data()<<std::endl;
+        g_warning("Failed to request shutdown method: %s", e.what().c_str());
         return false;
     }
 }
@@ -94,7 +93,7 @@ bool KiranPower::reboot()
         proxy->call_sync("RequestReboot");
         return true;
     } catch (const Gio::DBus::Error &e) {
-        std::cerr<<"Failed to request reboot method: "<<e.what().data()<<std::endl;
+        g_warning("Failed to request reboot method: %s", e.what().c_str());
         return false;
     }
 }
@@ -112,7 +111,7 @@ bool KiranPower::logout(int mode)
         proxy->call_sync("Logout", container);
         return true;
     } catch (const Gio::DBus::Error &e) {
-        std::cerr<<"Failed to connect to login manager: "<<e.what().data()<<std::endl;
+        g_warning("Failed to request logout method: %s", e.what().c_str());
         return false;
     }
 }
@@ -136,7 +135,7 @@ bool KiranPower::can_suspend()
         return (data == "yes");
     } catch (const Gio::DBus::Error &e) {
         //如果获取失败，就假设其可以挂起，由挂起操作调用时做检查
-        std::cerr<<"Failed to query CanSuspend: "<<e.what().data()<<std::endl;
+        g_warning("Failed to query CanSuspend: %s", e.what().c_str());
         return true;
     }
 }
@@ -160,7 +159,7 @@ bool KiranPower::can_hibernate()
         return (data == "yes");
     } catch (const Gio::DBus::Error &e) {
         //如果获取失败，就假设其可以挂起，由挂起操作调用时做检查
-        std::cerr<<"Failed to query CanSuspend: "<<e.what().data()<<std::endl;
+        g_warning("Failed to query CanHibernate: %s", e.what().c_str());
         return true;
     }
 }
@@ -176,7 +175,7 @@ bool KiranPower::switch_user()
         proxy->call_sync("SwitchToGreeter", Glib::VariantContainerBase(), 300);
         return true;
     } catch (const Gio::DBus::Error &e) {
-        std::cout<<"Failed to request SwitchToGreeter method: "<<e.what().data()<<std::endl;
+        g_warning("Failed to request SwitchToGreeter method: %s", e.what().c_str());
         return false;
     }
 }

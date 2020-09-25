@@ -228,14 +228,16 @@ bool KiranMenuAppItem::add_app_to_desktop()
         if (dest_file->query_exists())
             return true;
 
-        if (!src_file->copy(dest_file, flags))
-            std::cerr<<"Failed to copy"<<std::endl;
+        if (!src_file->copy(dest_file, flags)) {
+            g_warning("Failed to copy file");
+            return false;
+	}
 
         //将desktop文件标记为可执行
         chmod(dest_file->get_path().data(), 0755);
         return true;
     } catch (const Glib::Error &e) {
-        std::cerr<<"Error occured while trying to copy desktop file: "<<e.what()<<std::endl;
+        g_warning("Error occured while trying to copy desktop file: %s", e.what().c_str());
         return false;
     }
 }

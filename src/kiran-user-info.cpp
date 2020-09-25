@@ -5,8 +5,6 @@
 
 void on_user_loaded(KiranUserInfo *info)
 {
-    std::cout<<"haha, user info loaded"<<std::endl;
-
     g_signal_handler_disconnect(info->user, info->handler_id);
     info->signal_data_ready().emit();
 }
@@ -18,7 +16,6 @@ KiranUserInfo::KiranUserInfo(uid_t id): uid(id)
     manager = NULL;
     if (!manager)
         manager = act_user_manager_get_default();
-    std::cout<<"user info init"<<(void*)this<<std::endl;
     user = act_user_manager_get_user_by_id(manager, uid);
     g_object_get(G_OBJECT(user), "is-loaded", &loaded, NULL);
     if (!act_user_is_loaded(user))

@@ -1,8 +1,8 @@
 #include "kiran-menu-applet-button.h"
 #include <glibmm/i18n.h>
+#include "kiranhelper.h"
 
 #define BUTTON_MARGIN 6
-#define UNUSED __attribute__((unused))
 
 KiranMenuAppletButton::KiranMenuAppletButton(MatePanelApplet *panel_applet):
     KiranAppletButton(panel_applet)
