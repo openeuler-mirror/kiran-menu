@@ -4,7 +4,7 @@
 #include <iostream>
 #include <glibmm/i18n.h>
 #include <locale.h>
-#include "config.h"
+#include "../config.h"
 #include "kiranpower.h"
 #include <X11/Xlib.h>
 #include <gtk/gtkx.h>
@@ -14,7 +14,8 @@
 #include "core_worker.h"
 #include "workspace-applet-button.h"
 
-#define GETTEXT_PACKAGE "kiran-applet"
+#define APPLET_RESOURCE_PATH   PACKAGE_DATA_DIR "/kiran-applet.gresource"
+#define GETTEXT_PACKAGE		   PACKAGE_NAME
 
 static Atom atom_mate_panel_action_kiran_menu  = None;
 static Atom atom_mate_panel_action  = None;

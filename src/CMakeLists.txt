@@ -42,7 +42,7 @@ pkg_search_module(ACCOUNTSSERVICE REQUIRED accountsservice)
 pkg_search_module(MATEDESKTOP REQUIRED mate-desktop-2.0)
 
 
-configure_file(config.h.in config.h)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 target_compile_options(kiran-applet PUBLIC "-std=c++11" "-g" "-L${PROJECT_BINARY_DIR}/lib")
 target_include_directories(kiran-applet PUBLIC "${PROJECT_SOURCE_DIR}/lib"

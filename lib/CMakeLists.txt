@@ -21,6 +21,8 @@ pkg_search_module(XCOMPOSITE REQUIRED xcomposite)
 
 set(DEP_LIBDIR ${GLIBMM_LIBDIR})
 
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
 
 target_include_directories(${TARGET_NAME} PUBLIC 
     ${PROJECT_SOURCE_DIR}
