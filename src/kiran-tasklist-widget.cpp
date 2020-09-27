@@ -272,6 +272,8 @@ void KiranTasklistWidget::on_window_opened(KiranWindowPointer window)
     }
     else {
         g_debug("app button already exists\n");
+        app_button->set_has_tooltip(false);
+
         /**
          * 检查app的预览窗口是否打开，如果打开，需要更新预览窗口内容
          */
@@ -303,10 +305,9 @@ void KiranTasklistWidget::on_window_closed(KiranWindowPointer window)
             if (!KiranHelper::app_is_in_fixed_list(app))
                 remove_app_button(app);
             else {
-                app_button->set_has_tooltip(false);
                 app_button->set_tooltip_text(app->get_name());
                 app_button->refresh();
-	    }
+            }
         } else
             app_button->set_has_tooltip(false);
     }
