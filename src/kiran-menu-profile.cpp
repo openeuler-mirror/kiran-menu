@@ -1,8 +1,13 @@
 #include "kiran-menu-profile.h"
 
+const Glib::ustring default_page_key = "default-page";
+const Glib::ustring display_mode_key = "display-mode";
+const Glib::ustring window_opacity_key = "background-opacity";
+const Glib::ustring profile_settings_path = "com.unikylin.Kiran.StartMenu.profile";
+
 KiranMenuProfile::KiranMenuProfile()
 {
-    settings = Gio::Settings::create("com.unikylin.Kiran.StartMenu.profile");
+    settings = Gio::Settings::create(profile_settings_path);
     settings->signal_changed().connect(
                sigc::mem_fun(*this, &KiranMenuProfile::on_settings_changed));
 }
@@ -12,34 +17,38 @@ sigc::signal<void, const Glib::ustring &> KiranMenuProfile::signal_changed()
     return m_signal_changed;
 }
 
-Gdk::RGBA KiranMenuProfile::get_background_color()
-{
-    std::string color_setting;
-
-    //从gsettings中读取颜色和透明度设置
-    color_setting = settings->get_string("background-color");
-
-    return Gdk::RGBA(color_setting);
-}
-
 double KiranMenuProfile::get_opacity()
 {
-    return settings->get_double("background-opacity");
+    return settings->get_double(window_opacity_key);
 }
 
 MenuDisplayMode KiranMenuProfile::get_display_mode()
 {
-    return static_cast<MenuDisplayMode>(settings->get_enum("display-mode"));
+    return static_cast<MenuDisplayMode>(settings->get_enum(display_mode_key));
 }
 
-void KiranMenuProfile::set_background_color(const Gdk::RGBA &color)
+MenuDefaultPage KiranMenuProfile::get_default_page()
 {
-    settings->set_string("background-color", color.to_string());
+    return static_cast<MenuDefaultPage>(settings->get_enum(default_page_key));
 }
 
 void KiranMenuProfile::set_opacity(double value)
 {
-    settings->set_double("background-opacity", value);
+    settings->set_double(window_opacity_key, value);
+}
+
+void KiranMenuProfile::set_default_page(MenuDefaultPage new_page)
+{
+    if (new_page >= PAGE_INVALID)
+        return;
+    settings->set_enum(default_page_key, new_page);
+}
+
+void KiranMenuProfile::set_display_mode(MenuDisplayMode new_mode)
+{
+    if (new_mode >= DISPLAY_MODE_INVALID)
+        return;
+    settings->set_enum(display_mode_key, new_mode);
 }
 
 void KiranMenuProfile::on_settings_changed(const Glib::ustring &key)
