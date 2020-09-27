@@ -559,10 +559,16 @@ void KiranMenuWindow::add_sidebar_buttons()
                                           "mate-control-center");
     side_box->add(*launcher_btn);
 
+    launcher_btn = create_launcher_button("/kiran-menu/sidebar/monitor",
+                                  _("System monitor"),
+                                  "mate-system-monitor");
+    side_box->add(*launcher_btn);
+
     launcher_btn = create_launcher_button("/kiran-menu/sidebar/lock",
                                           _("Lock Screen"),
                                           "mate-screensaver-command -l");
     side_box->add(*launcher_btn);
+
     side_box->add(*power_btn);
 
     side_box->show_all();
