@@ -10,6 +10,7 @@ WorkspaceThumbnail::WorkspaceThumbnail(KiranWorkspacePointer &workspace_) :
     bg(nullptr),
     bg_surface(nullptr),
     is_current(false),
+    drop_check(false),
     border_width(4)
 {
 
@@ -97,10 +98,28 @@ void WorkspaceThumbnail::redraw_background()
 void WorkspaceThumbnail::init_drag_and_drop()
 {
     std::vector<Gtk::TargetEntry> targets;
-    Gtk::TargetEntry entry("binary/XID");
+    Gtk::TargetEntry entry("binary/XID", Gtk::TARGET_SAME_APP);
 
     targets.push_back(entry);
-    snapshot_area.drag_dest_set(targets, Gtk::DEST_DEFAULT_ALL, Gdk::ACTION_MOVE);
+    snapshot_area.drag_dest_set(targets, Gtk::DEST_DEFAULT_HIGHLIGHT, Gdk::ACTION_MOVE);
+    snapshot_area.signal_drag_motion().connect(
+                [this](const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, guint time) -> bool {
+        g_debug("drag motion");
+        this->drop_check = true;
+
+        this->snapshot_area.drag_get_data(context, "binary/XID", time);
+        return true;
+    }, false);
+
+    snapshot_area.signal_drag_drop().connect(
+                [this](const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, guint time) -> bool {
+
+        g_debug("drag-drop finished");
+        this->drop_check = false;
+        this->snapshot_area.drag_get_data(context, "binary/XID", time);
+        return true;
+    }, false);
+
     snapshot_area.signal_drag_data_received().connect(
         [this](const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, const Gtk::SelectionData &selection, guint info, guint time) -> void {
             Gdk::DragAction action = context->get_selected_action();
@@ -108,27 +127,52 @@ void WorkspaceThumbnail::init_drag_and_drop()
             const guchar *data;
             const Window *wid;
 
-            if (action != Gdk::ACTION_MOVE)
-                context->drag_finish(false, false, time);
-
-            std::string atom_string = selection.get_selection();
-            data = selection.get_data(length);
-
-            //传递的数据应该是Window的XID
-            g_assert(length == sizeof(Window));
-            wid = reinterpret_cast<const Window*>(data);
-            
-            auto window = Kiran::WindowManager::get_instance()->get_window(*wid);
-            if (!window) {
-                g_warning("Window with ID 0x%x not found\n", *wid);
+            if (!drop_check && action != Gdk::ACTION_MOVE) {
                 context->drag_finish(false, false, time);
                 return;
             }
 
-            //将对应的窗口移动到该工作区
-            window->move_to_workspace(this->workspace.lock());
-            context->drag_finish(true, true, time);
+            data = selection.get_data(length);
+            //传递的数据应该是Window的XID
+            if (length < 0 || length != sizeof(Window)) {
+                if (!this->drop_check)
+                    context->drag_finish(false, false, time);
+                else
+                    context->drag_refuse(time);
+                return;
+            }
+
+            wid = reinterpret_cast<const Window*>(data);
+
+            auto window = Kiran::WindowManager::get_instance()->get_window(*wid);
+            if (!window) {
+                g_warning("Window with ID 0x%x not found\n", *wid);
+                if (this->drop_check) {
+                    context->drag_refuse(time);
+                    return;
+                }
+                context->drag_finish(false, false, time);
+                return;
+            }
+
+            if (window->get_workspace() == this->workspace.lock()) {
+                if (this->drop_check) {
+                    context->drag_refuse(time);
+                    g_debug("Workspace of window and the target workspace are the same, drag-drop refused!");
+                } else
+                    context->drag_finish(false, false, time);
+                return;
+            }
+
+            if (!this->drop_check) {
+                //将对应的窗口移动到该工作区
+                window->move_to_workspace(this->workspace.lock());
+                context->drag_finish(true, true, time);
+            } else {
+                context->drag_status(Gdk::ACTION_MOVE, time);
+            }
         });
+
 }
 
 

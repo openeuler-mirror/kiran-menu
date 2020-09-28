@@ -42,6 +42,7 @@ private:
     bool is_current;
     int border_width;
 
+    bool drop_check;
     sigc::signal<void, int> m_signal_selected;
 };
 

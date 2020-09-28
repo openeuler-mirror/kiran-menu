@@ -2,6 +2,7 @@
 #include "kiranhelper.h"
 #include <gtk/gtkx.h>
 #include <cairo/cairo-xlib.h>
+#include <X11/Xlib.h>
 
 WorkspaceWindowThumbnail::WorkspaceWindowThumbnail(KiranWindowPointer &win_, double scale_):
     Glib::ObjectBase("WorkspaceWindowSnapshot"),
@@ -119,12 +120,13 @@ void WorkspaceWindowThumbnail::on_drag_data_get(const Glib::RefPtr<Gdk::DragCont
     Window wid;
     auto window = get_window_();
 
-    if (!window) {
+    if (!window || selection_data.get_target() != "binary/XID") {
         gtk_drag_cancel(context->gobj());
         return;
     }
+
     wid = window->get_xid();
-    selection_data.set(8, reinterpret_cast<guint8*>(&wid), sizeof(wid));
+    selection_data.set("binary/XID", 8, reinterpret_cast<guint8*>(&wid), sizeof(wid));
 }
 
 void WorkspaceWindowThumbnail::on_drag_begin(const Glib::RefPtr<Gdk::DragContext> &context)
@@ -231,7 +233,7 @@ bool WorkspaceWindowThumbnail::generate_thumbnail()
 void WorkspaceWindowThumbnail::init_drag_and_drop()
 {
     std::vector<Gtk::TargetEntry> targets;
-    Gtk::TargetEntry entry("binary/XID");
+    Gtk::TargetEntry entry("binary/XID", Gtk::TARGET_SAME_APP);
 
     targets.push_back(entry);
     drag_source_set(targets, Gdk::BUTTON1_MASK, Gdk::ACTION_MOVE);
@@ -240,8 +242,10 @@ void WorkspaceWindowThumbnail::init_drag_and_drop()
 }
 
 
-bool WorkspaceWindowThumbnail::on_drag_failed(const Glib::RefPtr< Gdk::DragContext >& context, Gtk::DragResult result)
+bool WorkspaceWindowThumbnail::on_drag_failed(const Glib::RefPtr< Gdk::DragContext > &context UNUSED,
+                                              Gtk::DragResult result UNUSED)
 {
+    g_debug("drag failed");
     show_thumbnail = true;
     queue_draw();
     return true;
