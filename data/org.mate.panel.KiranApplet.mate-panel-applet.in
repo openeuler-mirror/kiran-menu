@@ -10,7 +10,7 @@ Name=Kiran Start Menu
 Name[zh_CN]=Kiran开始菜单
 Description=Kiran Start Menu
 Description[zh_CN]=Kiran开始菜单
-Icon=user-info
+Icon=kiran-menu
 MateComponentId=OAFIID:KiranMenuApplet;
 
 [KiranTasklistApplet]
@@ -18,13 +18,13 @@ Name=Kiran Task list and switch applet
 Name[zh_CN]=Kiran应用窗口切换插件
 Description=Kiran task list and switch applet
 Description[zh_CN]=Kiran应用窗口切换插件
-Icon=user-info
-MateComponentId=OAFIID:KiranMenuApplet;
+Icon=kiran-window-switcher
+MateComponentId=OAFIID:KiranTasklistApplet;
 
 [KiranWorkspaceApplet]
 Name=Kiran Workspace switching applet
 Name[zh_CN]=Kiran工作区切换插件
 Description=Kiran Workspace switching applet
 Description[zh_CN]=Kiran工作区切换插件
-Icon=user-info
+Icon=kiran-workspace-switcher
 MateComponentId=OAFIID:KiranWorkspaceApplet;

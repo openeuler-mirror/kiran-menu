@@ -6,7 +6,9 @@
 # mkdir build
 # cd build && cmake -DCMAKE_INSTALL_PREFIX=/usr ..
 # make
-# make install
+# sudo make install
+# sudo glib-compile-schemas /usr/share/glib-2.0/schemas/
+# sudo gtk-update-icon-cache -f /usr/share/icons/hicolor/
 ```
 
 ## 运行测试
