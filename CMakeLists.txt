@@ -13,4 +13,5 @@ add_subdirectory(src)
 add_subdirectory(data)
 add_subdirectory(po)
 add_subdirectory(test)
+add_subdirectory(icons)
 

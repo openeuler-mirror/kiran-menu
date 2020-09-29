@@ -37,4 +37,4 @@ install(FILES "com.unikylin.Kiran.TaskBar.gschema.xml.in"
     RENAME "com.unikylin.Kiran.TaskBar.gschema.xml" 
 )
 
-install(CODE "execute_process(COMMAND glib-compile-schemas \"${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas/\")")
+#install(CODE "execute_process(COMMAND glib-compile-schemas \"${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas/\")")
