@@ -312,7 +312,7 @@ uint64_t Window::get_window_group()
 
 void Window::close()
 {
-    SETTINGS_PROFILE("xid: %" PRIu64 ", name: %s.", this->get_xid(), this->get_name());
+    SETTINGS_PROFILE("xid: %" PRIu64 ", name: %s.", this->get_xid(), this->get_name().c_str());
 
     uint64_t now = Glib::DateTime::create_now_local().to_unix();
     wnck_window_close(this->wnck_window_, now);
