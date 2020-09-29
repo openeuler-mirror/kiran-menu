@@ -3,11 +3,10 @@
 
 #include <gtkmm.h>
 #include <gtk/gtkx.h>
-#include "kiran-window-thumbnail.h"
-#include "kiranhelper.h"
+#include "window-thumbnail-widget.h"
+#include "kiran-helper.h"
 
-
-class WorkspaceWindowThumbnail : public KiranWindowThumbnail
+class WorkspaceWindowThumbnail : public WindowThumbnailWidget
 {
 public:
     WorkspaceWindowThumbnail(KiranWindowPointer &window_, double scale_);

@@ -1,6 +1,6 @@
 #include "workspace-windows-overview.h"
 #include "workspace-window-thumbnail.h"
-#include "kiranhelper.h"
+#include "kiran-helper.h"
 #include "window_arrange.h"
 #include <algorithm>
 #include "global.h"

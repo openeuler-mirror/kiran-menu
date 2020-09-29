@@ -1,15 +1,15 @@
 #include <gtkmm.h>
 #include <mate-panel-applet.h>
-#include "kiran-menu-applet-button.h"
+#include "menu-applet-button.h"
 #include <iostream>
 #include <glibmm/i18n.h>
 #include <locale.h>
 #include "../config.h"
-#include "kiranpower.h"
+#include "kiran-power.h"
 #include <X11/Xlib.h>
 #include <gtk/gtkx.h>
 
-#include "kiran-tasklist-widget.h"
+#include "tasklist-applet-widget.h"
 #include "app-manager.h"
 #include "core_worker.h"
 #include "workspace-applet-button.h"
@@ -102,7 +102,7 @@ kiran_menu_applet_fill (MatePanelApplet *applet,
     if (!strcmp(iid, "KiranMenuApplet")) {
         //开始菜单插件
 
-        auto button = new KiranMenuAppletButton(applet);
+        auto button = new MenuAppletButton(applet);
         gtk_container_add(GTK_CONTAINER(applet), GTK_WIDGET(button->gobj()));
         do {
             Display *xdisplay = nullptr;
@@ -125,7 +125,7 @@ kiran_menu_applet_fill (MatePanelApplet *applet,
 
         //窗口切换预览插件
         g_message("loading tasklist applet\n");
-        KiranTasklistWidget *button = Gtk::manage(new KiranTasklistWidget(applet));
+        TasklistAppletWidget *button = Gtk::manage(new TasklistAppletWidget(applet));
         flags = MATE_PANEL_APPLET_HAS_HANDLE | MATE_PANEL_APPLET_EXPAND_MINOR | MATE_PANEL_APPLET_EXPAND_MAJOR;
         mate_panel_applet_set_flags(applet, (MatePanelAppletFlags)flags);
 

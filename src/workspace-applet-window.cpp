@@ -4,7 +4,7 @@
 #include "workspace-thumbnail.h"
 #include "workspace-window-thumbnail.h"
 #include "workspace-windows-overview.h"
-#include "kiranhelper.h"
+#include "kiran-helper.h"
 #include <X11/Xlib.h>
 
 #define MATE_DESKTOP_USE_UNSTABLE_API
