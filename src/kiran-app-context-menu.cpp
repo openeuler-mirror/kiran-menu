@@ -41,6 +41,8 @@ void KiranAppContextMenu::refresh()
                     if (!this->app.expired())
                         this->app.lock()->close_all_windows();
                 });
+    if (app_->get_taskbar_windows().size() == 0)
+        item->set_sensitive(false);
     append(*item);
 
 
