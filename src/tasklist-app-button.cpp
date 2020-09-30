@@ -115,6 +115,7 @@ bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
     Glib::RefPtr<Gdk::Pixbuf> pixbuf;
     Gdk::RGBA indicator_color("#3ca8ea"), active_color("rgba(255, 255, 255, 0.3)");
     int indicator_size = indicator_size_property.get_value();
+    int windows_count;
 
     auto app_ = get_app();
     if (!app_) {
@@ -138,28 +139,52 @@ bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
         g_warning("%s: failed to load color 'tasklist_app_indicator_color'", __func__);
     }
 
+    windows_count = app_->get_taskbar_windows().size();
     if (kiran_app_is_active(app_)) {
         Gdk::Cairo::set_source_rgba(cr, active_color);
         cr->paint();
 
-	//绘制窗口激活状态指示器
+        //绘制窗口激活状态指示器
         Gdk::Cairo::set_source_rgba(cr, indicator_color);
-        cr->rectangle(0, allocation.get_height() - indicator_size,
-                      allocation.get_width(), indicator_size);
+        cr->rectangle(0,
+                      allocation.get_height() - indicator_size,
+                      allocation.get_width(),
+                      indicator_size);
         cr->fill();
+
+        if (windows_count > 1) {
+            /**
+             * 绘制分割符，来表明有多个窗口
+             */
+            cr->set_source_rgba(0.0, 0.0, 0.0, 0.8);
+            cr->set_line_width(0.8);
+            cr->move_to(allocation.get_width() - 3, 0);
+            cr->line_to(allocation.get_width() - 3, allocation.get_height());
+            cr->stroke();
+        }
     } else {
         context->render_background(cr, 0, 0, allocation.get_width(), allocation.get_height());
 
-	//绘制已打开窗口指示器
-        if (app_->get_taskbar_windows().size() != 0)
-        {
+        //绘制已打开窗口指示器
+        if (windows_count > 0) {
+            int x_offset = 0;
+
+            /*最多绘制4个指示器*/
+            if (windows_count > 4)
+                windows_count = 4;
+            x_offset = (allocation.get_width() - (indicator_size * windows_count + 3 * (windows_count - 1)))/2;
+            x_offset += indicator_size/2;
+
             Gdk::Cairo::set_source_rgba(cr, indicator_color);
-            cr->arc(allocation.get_width() / 2.0,
-		     allocation.get_height() - indicator_size / 2.0,
-                    indicator_size / 2.0,
-                    0,
-                    2 * M_PI);
-            cr->fill();
+            for (int i = 0; i < windows_count; i++) {
+
+                cr->arc(x_offset + i * (indicator_size + 3),
+                        allocation.get_height() - indicator_size / 2.0 - 1,
+                        indicator_size / 2.0,
+                        0,
+                        2 * M_PI);
+                cr->fill();
+            }
         }
     }
 
