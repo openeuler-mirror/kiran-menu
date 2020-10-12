@@ -2,6 +2,7 @@
 #include "window-manager.h"
 #include <iostream>
 #include <algorithm>
+#include <gtk/gtkx.h>
 
 static bool kiran_app_is_active(const std::shared_ptr<Kiran::App> &app)
 {
@@ -17,12 +18,13 @@ static bool kiran_app_is_active(const std::shared_ptr<Kiran::App> &app)
     return false;
 }
 
-TasklistAppButton::TasklistAppButton(const std::shared_ptr<Kiran::App> &app_):
+TasklistAppButton::TasklistAppButton(const std::shared_ptr<Kiran::App> &app_, int size_):
     Glib::ObjectBase("KiranTasklistAppButton"),
     indicator_size_property(*this, "indicator-size", G_MAXINT32),
     app(app_),
     menu_opened(false),
-    context_menu(nullptr)
+    context_menu(nullptr),
+    applet_size(size_)
 {
     add(drawing_area);
 
@@ -41,6 +43,12 @@ TasklistAppButton::~TasklistAppButton()
 {
     if (context_menu)
         delete context_menu;
+}
+
+void TasklistAppButton::set_size(int size)
+{
+    applet_size = size;
+    queue_resize();
 }
 
 void TasklistAppButton::on_previewer_opened()
@@ -64,11 +72,11 @@ void TasklistAppButton::get_preferred_width_vfunc(int &minimum_width, int &natur
     if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
         int minimum_height, natural_height;
 
-        get_preferred_height(minimum_height, natural_height); 
+        get_preferred_height(minimum_height, natural_height);
         get_preferred_width_for_height(natural_height, minimum_width, natural_width);
     } else {
         //使用父控件的高度设置
-        get_parent()->get_preferred_width(minimum_width, natural_width);
+        minimum_width = natural_width = applet_size;
     }
 }
 
@@ -76,7 +84,7 @@ void TasklistAppButton::get_preferred_height_vfunc(int &minimum_height, int &nat
 {
     if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
         //使用父控件的高度设置
-        get_parent()->get_preferred_height(minimum_height, natural_height);
+        minimum_height = natural_height = applet_size;
     } else {
         int minimum_width, natural_width;
 
@@ -87,12 +95,18 @@ void TasklistAppButton::get_preferred_height_vfunc(int &minimum_height, int &nat
 
 void TasklistAppButton::get_preferred_width_for_height_vfunc(int height, int &minimum_width, int &natural_width) const
 {
-    minimum_width = natural_width = height + 8;
+    if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL)
+        minimum_width = natural_width = height + 8;
+    else
+        minimum_width = natural_width = height - 8;
 }
 
 void TasklistAppButton::get_preferred_height_for_width_vfunc(int width, int &minimum_height, int &natural_height) const
 {
-    minimum_height = natural_height = width + 8;
+    if (get_orientation() == Gtk::ORIENTATION_VERTICAL)
+        minimum_height = natural_height = width + 8;
+    else
+        minimum_height = natural_height = width - 8;
 }
 
 void TasklistAppButton::on_size_allocate(Gtk::Allocation &allocation)

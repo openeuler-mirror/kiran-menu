@@ -199,7 +199,7 @@ label.search-empty-prompt {
     border-image: none;
     color: #ffffff;
     padding-left: 24px;
-    -GtkButton-image-spacing: 12px;
+
 }
 
 button.kiran-expand-button:focus{
@@ -415,4 +415,21 @@ button.workspace-window-snapshot, button.workspace-window-snapshot:hover {
     text-shadow: -1px 1px 2px alpha(#000000, 0.6), 1px 1px 2px alpha(#000000, 0.6),
                 1px -1px 2px alpha(#000000, 0.6), -1px -1px 2px alpha(#000000, 0.6);
     font-size: 13px;
+}
+
+button.tasklist-arrow-button {
+    padding: 0px;
+    min-width: 16px;
+    min-height: 16px;
+    border: none;
+    background: transparent;
+}
+
+button.tasklist-arrow-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+button.tasklist-arrow-button:disabled {
+    /*background: rgba(255, 255, 255, 0.2);*/
+    border: none;
 }

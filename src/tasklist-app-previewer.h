@@ -4,6 +4,7 @@
 #include <gtkmm.h>
 #include <X11/Xlib.h>
 #include "tasklist-window-previewer.h"
+#include "tasklist-app-button.h"
 #include "app.h"
 
 #define DEBUG
@@ -19,15 +20,13 @@ public:
     const std::shared_ptr<Kiran::App> get_app() const;
     bool get_idle() const;
 
-    void set_relative_to(Gtk::Widget *widget, Gtk::PositionType pos);
+    void set_relative_to(TasklistAppButton *button, Gtk::PositionType pos);
     void set_position(Gtk::PositionType pos, bool force = false);
 
     void reposition();
-    void add_window_previewer(std::shared_ptr<Kiran::Window> &window, bool resize = false);
-    void remove_window_previewer(std::shared_ptr<Kiran::Window> &window);
-    uint32_t get_previewer_num();
-
-    sigc::signal<void> signal_opened();
+    void add_window_thumbnail(std::shared_ptr<Kiran::Window> &window, bool resize = false);
+    void remove_window_thumbnail(std::shared_ptr<Kiran::Window> &window);
+    unsigned long get_thumbnails_count();
 
 protected:
     virtual void get_preferred_height_vfunc(int &minimum_height, int &natural_height) const override;
@@ -36,8 +35,6 @@ protected:
     virtual bool on_enter_notify_event(GdkEventCrossing *crossing_event) override;
     virtual bool on_leave_notify_event(GdkEventCrossing *crossing_event) override;
     //virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
-    virtual void on_show() override;
-
     virtual void on_child_remove();
 
 
@@ -53,10 +50,9 @@ private:
     bool need_display;
     bool is_idle;
 
-    Gtk::Widget *relative_to;
+    TasklistAppButton *relative_to;
     Gtk::PositionType position;
     std::map<unsigned long, TasklistWindowPreviewer*> win_previewers;
-    sigc::signal<void> m_signal_opened;
 
     void load_windows_list();
 };

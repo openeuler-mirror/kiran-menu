@@ -4,16 +4,16 @@
 #include <gtkmm.h>
 #include <app.h>
 #include <mate-panel-applet.h>
-#include "tasklist-app-previewer.h"
 #include "kiran-helper.h"
 #include "tasklist-app-context-menu.h"
 
 class TasklistAppButton: public Gtk::EventBox
 {
 public:
-    TasklistAppButton(const std::shared_ptr<Kiran::App> &app);
-    ~TasklistAppButton();
+    TasklistAppButton(const std::shared_ptr<Kiran::App> &app, int size);
+    ~TasklistAppButton() override;
 
+    void set_size(int size);
     void on_previewer_opened();
     void refresh();
     const std::shared_ptr<Kiran::App> get_app();
@@ -50,6 +50,7 @@ private:
 
     TasklistAppContextMenu *context_menu;                      //右键菜单
 
+    int applet_size;
     int icon_size;                                //绘制应用图标的尺寸
     std::weak_ptr<Kiran::Window> last_raised;     //上次点击时最前的窗口
 

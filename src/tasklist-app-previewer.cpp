@@ -84,9 +84,10 @@ bool TasklistAppPreviewer::get_idle() const
     return is_idle;
 }
 
-void TasklistAppPreviewer::set_relative_to(Gtk::Widget *widget, Gtk::PositionType pos)
+void TasklistAppPreviewer::set_relative_to(TasklistAppButton *widget, Gtk::PositionType pos)
 {
     relative_to = widget;
+    set_app(widget->get_app());
     set_position(pos);
 }
 
@@ -94,6 +95,9 @@ void TasklistAppPreviewer::reposition()
 {
     int width, height;
     Gtk::Requisition mini, natural;
+
+    if (!relative_to)
+        return;
 
     if (!get_realized())
         realize();
@@ -148,8 +152,7 @@ void TasklistAppPreviewer::reposition()
             //检查位置是否超出当前显示器的工作区范围
             Gdk::Rectangle workarea;
             auto display = get_display();
-            auto monitor = display->get_monitor_at_window(
-                        Glib::RefPtr<Gdk::Window>::cast_dynamic(relative_window));
+            auto monitor = display->get_monitor_at_window(relative_window);
 
             monitor->get_workarea(workarea);
             g_debug("%s: workarea (%d, %d), %d x %d, position %d x %d\n", __FUNCTION__,
@@ -178,10 +181,17 @@ void TasklistAppPreviewer::get_preferred_height_vfunc(int &minimum_height, int &
     Gdk::Rectangle workarea;
     Gtk::Requisition min_size, natural_size;
     int min_width, natural_width;
+    Glib::RefPtr<Gdk::Window> window;
+    Glib::RefPtr<Gdk::Monitor> monitor;
 
     scroll_window.get_preferred_size(min_size, natural_size);
-    auto monitor = box.get_display()->get_monitor_at_window(
-                Glib::RefPtr<Gdk::Window>::cast_const(this->get_window()));
+    if (relative_to == nullptr) {
+        minimum_height = natural_height = 0;
+        return;
+    }
+
+    window = relative_to->get_window();
+    monitor = relative_to->get_display()->get_monitor_at_window(window);
 
     monitor->get_workarea(workarea);
     if (natural_size.height > workarea.get_height()) {
@@ -202,11 +212,17 @@ void TasklistAppPreviewer::get_preferred_width_vfunc(int &minimum_width, int &na
 {
     Gdk::Rectangle workarea;
     Gtk::Requisition min_size, natural_size;
+    Glib::RefPtr<Gdk::Window> window;
+    Glib::RefPtr<Gdk::Monitor> monitor;
 
+    if (relative_to == nullptr) {
+        minimum_width = natural_width = 0;
+        return;
+    }
+    window = relative_to->get_window();
     scroll_window.get_preferred_size(min_size, natural_size);
 
-    auto monitor = box.get_display()->get_monitor_at_window(
-                Glib::RefPtr<Gdk::Window>::cast_const(this->get_window()));
+    monitor = relative_to->get_display()->get_monitor_at_window(window);
     monitor->get_workarea(workarea);
     if (workarea.get_width() < natural_size.width + 10) {
         natural_width = workarea.get_width() - 10;
@@ -233,6 +249,7 @@ void TasklistAppPreviewer::adjust_size()
     get_preferred_size(mini, natural);
     if (natural.width > 0 && natural.height > 0)
         resize(natural.width, natural.height);
+    reposition();
 }
 
 bool TasklistAppPreviewer::on_enter_notify_event(GdkEventCrossing *crossing_event)
@@ -290,13 +307,6 @@ void TasklistAppPreviewer::on_child_remove()
     }
 }
 
-void TasklistAppPreviewer::on_show()
-{
-    Gtk::Window::on_show();
-
-    signal_opened().emit();
-}
-
 void TasklistAppPreviewer::set_rgba_visual()
 {
     //FIXME, 使用default_screen是否合适??
@@ -323,7 +333,7 @@ void TasklistAppPreviewer::load_windows_list()
         delete child;
     }
     for (auto window: app_->get_taskbar_windows()) {
-        add_window_previewer(window);
+        add_window_thumbnail(window);
     }
     box.show_all();
 }
@@ -331,7 +341,7 @@ void TasklistAppPreviewer::load_windows_list()
 /**
  *
  */
-void TasklistAppPreviewer::add_window_previewer(std::shared_ptr<Kiran::Window> &window, bool resize)
+void TasklistAppPreviewer::add_window_thumbnail(std::shared_ptr<Kiran::Window> &window, bool resize)
 {
     if (window->get_window_type() != WNCK_WINDOW_NORMAL &&
         window->get_window_type() != WNCK_WINDOW_DIALOG)
@@ -346,12 +356,10 @@ void TasklistAppPreviewer::add_window_previewer(std::shared_ptr<Kiran::Window> &
     if (resize) {
         //调整预览窗口大小和位置
         adjust_size();
-        if (get_realized())
-            reposition();
     }
 }
 
-void TasklistAppPreviewer::remove_window_previewer(std::shared_ptr<Kiran::Window> &window)
+void TasklistAppPreviewer::remove_window_thumbnail(std::shared_ptr<Kiran::Window> &window)
 {
     if (window->get_window_type() != WNCK_WINDOW_NORMAL &&
         window->get_window_type() != WNCK_WINDOW_DIALOG)
@@ -365,24 +373,17 @@ void TasklistAppPreviewer::remove_window_previewer(std::shared_ptr<Kiran::Window
     box.remove(*previewer);
     win_previewers.erase(iter);
     adjust_size();
-    reposition();
 }
 
-uint32_t TasklistAppPreviewer::get_previewer_num() {
+unsigned long TasklistAppPreviewer::get_thumbnails_count() {
     return win_previewers.size();
 }
-
-sigc::signal<void> TasklistAppPreviewer::signal_opened()
-{
-    return m_signal_opened;
-}
-
 
 void TasklistAppPreviewer::set_position(Gtk::PositionType pos, bool force)
 {
     Gtk::Orientation orient = Gtk::ORIENTATION_VERTICAL;
-    if (!force) {
-            position = pos;
+    if (position != pos || relative_to == nullptr) {
+        position = pos;
     }
     if (position == Gtk::POS_TOP || position == Gtk::POS_BOTTOM) {
         if (is_composited())

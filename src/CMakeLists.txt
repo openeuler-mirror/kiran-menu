@@ -20,6 +20,7 @@ add_executable(kiran-applet
         tasklist-app-previewer.cpp
         tasklist-window-previewer.cpp
         tasklist-applet-widget.cpp
+        tasklist-buttons-container.cpp
         tasklist-app-context-menu.cpp
         tasklist-window-context-menu.cpp
         workspace-thumbnail.cpp
