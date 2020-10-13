@@ -343,9 +343,6 @@ void TasklistAppPreviewer::load_windows_list()
  */
 void TasklistAppPreviewer::add_window_thumbnail(std::shared_ptr<Kiran::Window> &window, bool resize)
 {
-    if (window->get_window_type() != WNCK_WINDOW_NORMAL &&
-        window->get_window_type() != WNCK_WINDOW_DIALOG)
-        return;
     auto previewer = Gtk::manage(new TasklistWindowPreviewer(window));
     box.pack_start(*previewer, Gtk::PACK_SHRINK);
     previewer->show();
@@ -361,10 +358,6 @@ void TasklistAppPreviewer::add_window_thumbnail(std::shared_ptr<Kiran::Window> &
 
 void TasklistAppPreviewer::remove_window_thumbnail(std::shared_ptr<Kiran::Window> &window)
 {
-    if (window->get_window_type() != WNCK_WINDOW_NORMAL &&
-        window->get_window_type() != WNCK_WINDOW_DIALOG)
-        return;
-
     auto iter = win_previewers.find(window->get_xid());
     if (iter == win_previewers.end())           //没有找到窗口的预览控件
         return;

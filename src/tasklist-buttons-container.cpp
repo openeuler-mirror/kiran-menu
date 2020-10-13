@@ -220,7 +220,7 @@ void TasklistButtonsContainer::on_window_opened(KiranWindowPointer window)
     /**
      * 如果窗口设置了不在工作区或任务栏上显示，就直接跳过
      */ 
-    if (window->is_skip_taskbar() || window->is_skip_pager())
+    if (window->should_skip_taskbar())
         return;
 
     auto app = window->get_app();
@@ -249,6 +249,9 @@ void TasklistButtonsContainer::on_window_opened(KiranWindowPointer window)
 
 void TasklistButtonsContainer::on_window_closed(KiranWindowPointer window)
 {
+    if (window->should_skip_taskbar())
+        return;
+
     auto app = window->get_app();
     if (!app)
         return;

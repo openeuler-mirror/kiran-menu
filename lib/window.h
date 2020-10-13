@@ -128,6 +128,9 @@ public:
     void set_on_visible_workspace(bool on);
     bool get_on_visible_workspace();
 
+    // 是否应当在任务栏上显示
+    bool should_skip_taskbar();
+
     // 窗口标题发生变化信号
     sigc::signal<void> signal_name_changed() { return this->name_changed_; }
     // 工作区变化信号。两个参数分别代表之前的工作区和当前的工作区，如果指针为nullptr，说明窗口不属于任意工作区或者窗口是pin状态

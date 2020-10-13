@@ -520,4 +520,10 @@ bool Window::get_on_visible_workspace()
     return wnck_window_is_pinned(this->wnck_window_);
 }
 
+bool Window::should_skip_taskbar()
+{
+    if (is_skip_pager() || is_skip_taskbar())
+        return true;
+    return get_window_type() != WNCK_WINDOW_NORMAL && get_window_type() != WNCK_WINDOW_DIALOG;
+}
 }  // namespace Kiran
