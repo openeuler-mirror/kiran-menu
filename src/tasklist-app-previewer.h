@@ -21,10 +21,10 @@ public:
     bool get_idle() const;
 
     void set_relative_to(TasklistAppButton *button, Gtk::PositionType pos);
-    void set_position(Gtk::PositionType pos, bool force = false);
+    void set_position(Gtk::PositionType pos);
 
     void reposition();
-    void add_window_thumbnail(std::shared_ptr<Kiran::Window> &window, bool resize = false);
+    void add_window_thumbnail(std::shared_ptr<Kiran::Window> &window);
     void remove_window_thumbnail(std::shared_ptr<Kiran::Window> &window);
     unsigned long get_thumbnails_count();
 
@@ -34,11 +34,13 @@ protected:
     virtual void adjust_size();
     virtual bool on_enter_notify_event(GdkEventCrossing *crossing_event) override;
     virtual bool on_leave_notify_event(GdkEventCrossing *crossing_event) override;
-    //virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
+    virtual bool on_scroll_event(GdkEventScroll *event) override;
+
     virtual void on_child_remove();
 
 
     virtual void set_rgba_visual();
+    virtual void init_ui();
 
 
 private:
@@ -55,6 +57,7 @@ private:
     std::map<unsigned long, TasklistWindowPreviewer*> win_previewers;
 
     void load_windows_list();
+    const Gtk::Scrollbar *get_scrollbar() const;
 };
 
 #endif // TASKLIST_APP_PREVIEWER_H

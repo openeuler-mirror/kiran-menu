@@ -94,6 +94,14 @@ void TasklistButtonsContainer::add_app_button(const KiranAppPointer &app)
                 sigc::bind_return<bool>(
                     sigc::hide(sigc::mem_fun(*this, &TasklistButtonsContainer::hide_previewer)),
                     false));
+
+    //应用右键菜单打开时，隐藏预览窗口
+    button->signal_context_menu_toggled().connect(
+                [this](bool active) -> void {
+                    if (active)
+                        this->hide_previewer();
+                });
+
 #endif
     box.pack_start(*button, Gtk::PACK_SHRINK);
     button->show_all();
@@ -201,11 +209,11 @@ void TasklistButtonsContainer::on_active_window_changed(KiranWindowPointer previ
         active_button = find_app_button(current_app);
 
         if (last_button) {
-            last_button->refresh();
+            last_button->queue_draw();
         }
 
         if (active_button) {
-            active_button->refresh();
+            active_button->queue_draw();
         }
 
 
@@ -241,9 +249,9 @@ void TasklistButtonsContainer::on_window_opened(KiranWindowPointer window)
          * 检查app的预览窗口是否打开，如果打开，需要更新预览窗口内容
          */
         if (previewer->is_visible() && previewer->get_app() == app) {
-            previewer->add_window_thumbnail(window, true);
+            previewer->add_window_thumbnail(window);
         } else
-            app_button->refresh();
+            app_button->queue_draw();
     }
 }
 
@@ -272,7 +280,7 @@ void TasklistButtonsContainer::on_window_closed(KiranWindowPointer window)
                 remove_app_button(app);
             else {
                 app_button->set_tooltip_text(app->get_name());
-                app_button->refresh();
+                app_button->queue_draw();
             }
         } else
             app_button->set_has_tooltip(false);
@@ -577,6 +585,8 @@ void TasklistButtonsContainer::init_ui()
     //响应预览窗口打开信号
     previewer->signal_show().connect(
                 sigc::mem_fun(*this, &TasklistButtonsContainer::on_previewer_window_opened));
+    previewer->signal_leave_notify_event().connect_notify(
+                sigc::hide(sigc::mem_fun(*this, &TasklistButtonsContainer::hide_previewer)), true);
 }
 
 void TasklistButtonsContainer::move_to_next_page()

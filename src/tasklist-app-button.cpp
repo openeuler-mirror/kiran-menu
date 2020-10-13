@@ -12,8 +12,7 @@ static bool kiran_app_is_active(const std::shared_ptr<Kiran::App> &app)
     if (active_window) {
         if (!KiranHelper::window_is_ignored(active_window))
             return active_window->get_app() == app;
-    } else
-        g_warning("no active window found\n");
+    }
 
     return false;
 }
@@ -22,7 +21,6 @@ TasklistAppButton::TasklistAppButton(const std::shared_ptr<Kiran::App> &app_, in
     Glib::ObjectBase("KiranTasklistAppButton"),
     indicator_size_property(*this, "indicator-size", G_MAXINT32),
     app(app_),
-    menu_opened(false),
     context_menu(nullptr),
     applet_size(size_)
 {
@@ -53,10 +51,6 @@ void TasklistAppButton::set_size(int size)
 
 void TasklistAppButton::on_previewer_opened()
 {
-    if (menu_opened) {
-        context_menu->popdown();
-        menu_opened = false;
-    }
 }
 
 Gtk::SizeRequestMode TasklistAppButton::get_request_mode_vfunc() const
@@ -252,32 +246,29 @@ bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
 
 bool TasklistAppButton::on_button_press_event(GdkEventButton *button_event)
 {
-    auto app_  = get_app();
+    GdkEvent *event = nullptr;
+    auto app_ = get_app();
 
     if (!app_) {
         g_warning("%s: app already expired", __FUNCTION__);
         return false;
     }
-
-    if (gdk_event_triggers_context_menu((GdkEvent*)button_event)) {
-        if (!context_menu) {
-            Gtk::MenuItem *item = nullptr;
+    event = reinterpret_cast<GdkEvent*>(button_event);
+    if (gdk_event_triggers_context_menu(event)) {
+        if (context_menu == nullptr) {
             context_menu = new TasklistAppContextMenu(app_);
-
+            context_menu->attach_to_widget(*this);
+            context_menu->signal_deactivate().connect(
+                        [this]() -> void {
+                            this->m_signal_context_menu_toggled.emit(false);
+                        });
         } else {
             //刷新右键菜单内容，因为收藏夹等选项可能需要更新
-            g_debug("%s: refresh context menu\n", __FUNCTION__);
             context_menu->refresh();
         }
         context_menu->show_all();
-
-        context_menu->popup_at_pointer((GdkEvent*)button_event);
-        gtk_grab_add(GTK_WIDGET(context_menu->gobj()));
-        menu_opened = true;
-        context_menu->signal_deactivate().connect([this]() -> void {
-            this->menu_opened = false;
-            gtk_grab_remove(GTK_WIDGET(this->context_menu->gobj()));
-        });
+        context_menu->popup_at_pointer(event);
+        m_signal_context_menu_toggled.emit(true);
         return true;
     }
     set_state_flags(Gtk::STATE_FLAG_ACTIVE, false);
@@ -301,30 +292,27 @@ bool TasklistAppButton::on_button_press_event(GdkEventButton *button_event)
     return false;
 }
 
-bool TasklistAppButton::on_button_release_event(GdkEventButton *button_event)
+bool TasklistAppButton::on_button_release_event(GdkEventButton *button_event UNUSED)
 {
     set_state_flags(get_state_flags() & ~Gtk::STATE_FLAG_ACTIVE, true);
     return false;
 }
 
-bool TasklistAppButton::on_enter_notify_event(GdkEventCrossing *crossing_event)
+bool TasklistAppButton::on_enter_notify_event(GdkEventCrossing *crossing_event UNUSED)
 {
+    if (get_context_menu_opened())
+        return true;
+
     set_state_flags(Gtk::STATE_FLAG_PRELIGHT, false);
     return false;
 }
 
-bool TasklistAppButton::on_leave_notify_event(GdkEventCrossing *crossing_event)
+bool TasklistAppButton::on_leave_notify_event(GdkEventCrossing *crossing_event UNUSED)
 {
+    if (get_context_menu_opened())
+        return true;
     set_state_flags(get_state_flags() & ~Gtk::STATE_FLAG_PRELIGHT, true);
     return false;
-}
-
-
-void TasklistAppButton::refresh() {
-    Gtk::Allocation allocation;
-
-    allocation = get_allocation();
-    queue_draw();
 }
 
 const std::shared_ptr<Kiran::App> TasklistAppButton::get_app()
@@ -334,8 +322,14 @@ const std::shared_ptr<Kiran::App> TasklistAppButton::get_app()
 
 bool TasklistAppButton::get_context_menu_opened()
 {
-    return menu_opened;
+    return context_menu != nullptr && context_menu->is_visible();
 }
+
+sigc::signal<void, bool> TasklistAppButton::signal_context_menu_toggled()
+{
+    return m_signal_context_menu_toggled;
+}
+
 
 Gtk::Orientation TasklistAppButton::get_orientation() const
 {

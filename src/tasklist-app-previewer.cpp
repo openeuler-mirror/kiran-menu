@@ -9,40 +9,10 @@ TasklistAppPreviewer::TasklistAppPreviewer():
     is_idle(true)
 {
     set_rgba_visual();
-    scroll_window.set_propagate_natural_height(true);
-    scroll_window.set_propagate_natural_width(true);
 
-    set_position(position, true);
     //signal_composited_changed().connect(sigc::mem_fun(*this, &KiranAppPreviewer::set_position));
 
-    scroll_window.add(box);
-    scroll_window.show_all();
-    add(scroll_window);
-
-
-    scroll_window.set_margin_top(5);
-    scroll_window.set_margin_bottom(5);
-    scroll_window.set_margin_start(5);
-    scroll_window.set_margin_end(5);
-
-    scroll_window.signal_scroll_event().connect(
-                    [this](GdkEventScroll *event) -> bool {
-                        /**
-                         * FIXME
-                         * 将滚动事件传递给滚动条，不知道为何没有自动传递滚动事件
-                         */
-                        Gtk::Scrollbar *scrollbar;
-
-                        if (this->box.get_orientation() == Gtk::ORIENTATION_HORIZONTAL)
-                            scrollbar = this->scroll_window.get_hscrollbar();
-                        else
-                            scrollbar = this->scroll_window.get_vscrollbar();
-
-                        if (scrollbar->is_visible())
-                            gtk_propagate_event(GTK_WIDGET(scrollbar->gobj()),
-                                            (GdkEvent*)event);
-                        return false;
-                    });
+    init_ui();
 
     set_decorated(false);
     set_skip_taskbar_hint(true);
@@ -93,8 +63,10 @@ void TasklistAppPreviewer::set_relative_to(TasklistAppButton *widget, Gtk::Posit
 
 void TasklistAppPreviewer::reposition()
 {
-    int width, height;
+    int parent_x, parent_y, new_x, new_y;
     Gtk::Requisition mini, natural;
+    Gtk::Allocation parent_allocation;
+    Gdk::Rectangle workarea;
 
     if (!relative_to)
         return;
@@ -102,78 +74,66 @@ void TasklistAppPreviewer::reposition()
     if (!get_realized())
         realize();
 
-    get_preferred_size(mini, natural);
-    width = natural.width;
-    height = natural.height;
-    if (relative_to) {
-        int parent_x, parent_y, new_x, new_y;
-        Gtk::Allocation parent_allocation;
+    auto relative_window = relative_to->get_window();
+    relative_window->get_origin(parent_x, parent_y);
+    parent_allocation = relative_to->get_allocation();
 
-        auto relative_window = relative_to->get_window();
-        relative_window->get_origin(parent_x, parent_y);
-        parent_allocation = relative_to->get_allocation();
+    g_debug("parent %p, geometry: (%d, %d), offset(%d, %d), size %d x %d, previewer size %d x %d\n",
+            relative_to,
+            parent_x, parent_y,
+            parent_allocation.get_x(),
+            parent_allocation.get_y(),
+            parent_allocation.get_width(),
+            parent_allocation.get_height(),
+            natural.width,
+            natural.height);
 
-        g_debug("parent %p, geometry: (%d, %d), offset(%d, %d), size %d x %d, previewer size %d x %d\n",
-                  relative_to,
-                  parent_x, parent_y,
-                  parent_allocation.get_x(),
-                  parent_allocation.get_y(),
-                  parent_allocation.get_width(),
-                  parent_allocation.get_height(),
-                  natural.width,
-                  natural.height);
-
-        if (!relative_to->get_has_window()) {
-            //如果父控件没有自己的GdkWindow，那么需要重新计算其位置
-            parent_x += parent_allocation.get_x();
-            parent_y += parent_allocation.get_y();
-        }
-
-        switch (position) {
-        case Gtk::POS_TOP:
-            new_x = parent_x + (parent_allocation.get_width() - width)/2;
-            new_y = parent_y - height;
-            break;
-        case Gtk::POS_BOTTOM:
-            new_x = parent_x + (parent_allocation.get_width() - width)/2;
-            new_y = parent_y + parent_allocation.get_height();
-            break;
-        case Gtk::POS_LEFT:
-            new_x = parent_x - width;
-            new_y = parent_y + (parent_allocation.get_height() - height)/2;
-            break;
-        case Gtk::POS_RIGHT:
-            new_x = parent_x + parent_allocation.get_width();
-            new_y = parent_y + (parent_allocation.get_height() - height)/2;
-            break;
-        }
-
-        do {
-            //检查位置是否超出当前显示器的工作区范围
-            Gdk::Rectangle workarea;
-            auto display = get_display();
-            auto monitor = display->get_monitor_at_window(relative_window);
-
-            monitor->get_workarea(workarea);
-            g_debug("%s: workarea (%d, %d), %d x %d, position %d x %d\n", __FUNCTION__,
-                    workarea.get_x(), workarea.get_y(),
-                    workarea.get_width(), workarea.get_height(),
-                    new_x, new_y);
-            if (new_x < workarea.get_x())
-                new_x = workarea.get_x() + 5;
-            else if (new_x > workarea.get_x() + workarea.get_width())
-                new_x = workarea.get_x() + workarea.get_width();
-
-            if (new_y < workarea.get_y())
-                new_y = workarea.get_y() + 5;
-            else if (new_y > workarea.get_y() + workarea.get_height())
-                new_y = workarea.get_y() + workarea.get_height();
-
-        } while (0);
-
-        g_debug("move previewer to (%d, %d)\n", new_x, new_y);
-        move(new_x, new_y);
+    if (!relative_to->get_has_window()) {
+        //如果父控件没有自己的GdkWindow，那么需要重新计算其位置
+        parent_x += parent_allocation.get_x();
+        parent_y += parent_allocation.get_y();
     }
+
+    get_preferred_size(mini, natural);
+    switch (position) {
+    case Gtk::POS_TOP:
+        new_x = parent_x + (parent_allocation.get_width() - natural.width)/2;
+        new_y = parent_y - natural.height;
+        break;
+    case Gtk::POS_BOTTOM:
+        new_x = parent_x + (parent_allocation.get_width() - natural.width)/2;
+        new_y = parent_y + parent_allocation.get_height();
+        break;
+    case Gtk::POS_LEFT:
+        new_x = parent_x - natural.width;
+        new_y = parent_y + (parent_allocation.get_height() - natural.height)/2;
+        break;
+    case Gtk::POS_RIGHT:
+        new_x = parent_x + parent_allocation.get_width();
+        new_y = parent_y + (parent_allocation.get_height() - natural.height)/2;
+        break;
+    }
+
+    //检查位置是否超出当前显示器的工作区范围
+    auto display = relative_to->get_display();
+    auto monitor = display->get_monitor_at_window(relative_window);
+
+    monitor->get_workarea(workarea);
+    g_debug("%s: workarea (%d, %d), %d x %d, position %d x %d\n", __FUNCTION__,
+            workarea.get_x(), workarea.get_y(),
+            workarea.get_width(), workarea.get_height(),
+            new_x, new_y);
+    if (new_x < workarea.get_x())
+        new_x = workarea.get_x() + 5;
+    else
+        new_x = std::min(new_x, workarea.get_x() + workarea.get_width());
+
+    if (new_y < workarea.get_y())
+        new_y = workarea.get_y() + 5;
+    else
+        new_y = std::min(new_y, workarea.get_y() + workarea.get_height());
+
+    move(new_x, new_y);
 }
 
 void TasklistAppPreviewer::get_preferred_height_vfunc(int &minimum_height, int &natural_height) const
@@ -200,7 +160,7 @@ void TasklistAppPreviewer::get_preferred_height_vfunc(int &minimum_height, int &
     } else {
         natural_height = natural_size.height;
 
-        scroll_window.get_hscrollbar()->get_preferred_width(min_width, natural_width);
+        get_scrollbar()->get_preferred_width(min_width, natural_width);
         if (workarea.get_width() < natural_size.width) //需要额外加上滚动条的尺寸
             natural_height += natural_width;
     }
@@ -231,7 +191,7 @@ void TasklistAppPreviewer::get_preferred_width_vfunc(int &minimum_width, int &na
         int min_height, natural_height;
 
         natural_width = natural_size.width;
-        scroll_window.get_hscrollbar()->get_preferred_height(min_height, natural_height);
+        get_scrollbar()->get_preferred_height(min_height, natural_height);
         if (workarea.get_height() < natural_size.height) //需要额外加上滚动条的尺寸
             natural_width += natural_height;
     }
@@ -268,35 +228,12 @@ bool TasklistAppPreviewer::on_leave_notify_event(GdkEventCrossing *crossing_even
     if (crossing_event->x > 0 && crossing_event->x < width &&
             crossing_event->y > 0 && crossing_event->y < height) {
         //鼠标仍旧在窗口范围内
-        return false;
+        return true;
     }
 
     set_idle(true);
-    //schedule for hiding previewer
-    Glib::signal_timeout().connect(
-                [this]() -> bool {
-                    if (this->get_idle())
-                        this->hide();
-                    return false;
-                }, 300);
     return false;
 }
-
-/*
-bool KiranAppPreviewer::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
-{
-    Gtk::Widget *child = get_child();
-
-    cr->save();
-    cr->set_operator(Cairo::OPERATOR_CLEAR);
-    //cr->set_source_rgb(0.0, 1.0, 0.0);
-    cr->paint();
-    cr->restore();
-
-    propagate_draw(*child, cr);
-    return false;
-}
-*/
 
 void TasklistAppPreviewer::on_child_remove()
 {
@@ -315,6 +252,26 @@ void TasklistAppPreviewer::set_rgba_visual()
         g_warning("no rgba visual found\n");
     else
         gtk_widget_set_visual(reinterpret_cast<GtkWidget*>(this->gobj()), visual->gobj());
+}
+
+void TasklistAppPreviewer::init_ui()
+{
+    box.set_spacing(4);
+    box.signal_remove().connect(
+                sigc::hide(sigc::mem_fun(*this, &TasklistAppPreviewer::on_child_remove)));
+
+    scroll_window.set_propagate_natural_height(true);
+    scroll_window.set_propagate_natural_width(true);
+    scroll_window.set_margin_top(5);
+    scroll_window.set_margin_bottom(5);
+    scroll_window.set_margin_start(5);
+    scroll_window.set_margin_end(5);
+    scroll_window.add(box);
+
+    scroll_window.show_all();
+    scroll_window.signal_scroll_event().connect(sigc::mem_fun(*this, &TasklistAppPreviewer::on_scroll_event));
+
+    add(scroll_window);
 }
 
 void TasklistAppPreviewer::load_windows_list()
@@ -338,10 +295,18 @@ void TasklistAppPreviewer::load_windows_list()
     box.show_all();
 }
 
+const Gtk::Scrollbar *TasklistAppPreviewer::get_scrollbar() const
+{
+    if (box.get_orientation() == Gtk::ORIENTATION_HORIZONTAL)
+        return scroll_window.get_hscrollbar();
+    else
+        return scroll_window.get_vscrollbar();
+}
+
 /**
  *
  */
-void TasklistAppPreviewer::add_window_thumbnail(std::shared_ptr<Kiran::Window> &window, bool resize)
+void TasklistAppPreviewer::add_window_thumbnail(std::shared_ptr<Kiran::Window> &window)
 {
     auto previewer = Gtk::manage(new TasklistWindowPreviewer(window));
     box.pack_start(*previewer, Gtk::PACK_SHRINK);
@@ -350,10 +315,8 @@ void TasklistAppPreviewer::add_window_thumbnail(std::shared_ptr<Kiran::Window> &
     auto data = std::make_pair(window->get_xid(), previewer);
     win_previewers.insert(data);
 
-    if (resize) {
-        //调整预览窗口大小和位置
-        adjust_size();
-    }
+    //调整预览窗口大小和位置
+    adjust_size();
 }
 
 void TasklistAppPreviewer::remove_window_thumbnail(std::shared_ptr<Kiran::Window> &window)
@@ -372,22 +335,41 @@ unsigned long TasklistAppPreviewer::get_thumbnails_count() {
     return win_previewers.size();
 }
 
-void TasklistAppPreviewer::set_position(Gtk::PositionType pos, bool force)
+void TasklistAppPreviewer::set_position(Gtk::PositionType pos)
 {
-    Gtk::Orientation orient = Gtk::ORIENTATION_VERTICAL;
-    if (position != pos || relative_to == nullptr) {
-        position = pos;
+    Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL;
+
+    if (position == pos && relative_to != nullptr)
+        return;
+
+    if (pos == Gtk::POS_LEFT || pos == Gtk::POS_RIGHT || !is_composited()) {
+        /* 只有窗口管理器未开混成模式或者预览窗口位于左右侧时，窗口缩略图才需要纵向排列 */
+        orient = Gtk::ORIENTATION_VERTICAL;
     }
-    if (position == Gtk::POS_TOP || position == Gtk::POS_BOTTOM) {
-        if (is_composited())
-            orient = Gtk::ORIENTATION_HORIZONTAL;
-    }
+
     box.set_orientation(orient);
 
-    if (box.get_orientation() == Gtk::ORIENTATION_HORIZONTAL)
+    if (orient == Gtk::ORIENTATION_HORIZONTAL)
         scroll_window.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
     else
         scroll_window.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
     reposition();
 }
+
+bool TasklistAppPreviewer::on_scroll_event(GdkEventScroll *event)
+{
+    /**
+     * FIXME
+     * 将滚动事件传递给滚动条，不知道为何没有自动传递滚动事件
+     */
+    Gtk::Scrollbar *scrollbar;
+
+    scrollbar = const_cast<Gtk::Scrollbar*>(get_scrollbar());
+    if (scrollbar->is_visible()) {
+        GtkWidget *widget = reinterpret_cast<GtkWidget*>(scrollbar->gobj());
+        gtk_propagate_event(widget, reinterpret_cast<GdkEvent*>(event));
+     }
+    return false;
+}
+

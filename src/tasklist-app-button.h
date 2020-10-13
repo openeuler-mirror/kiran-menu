@@ -15,10 +15,10 @@ public:
 
     void set_size(int size);
     void on_previewer_opened();
-    void refresh();
     const std::shared_ptr<Kiran::App> get_app();
 
     bool get_context_menu_opened();
+    sigc::signal<void, bool> signal_context_menu_toggled();
 
 protected:
     virtual Gtk::SizeRequestMode get_request_mode_vfunc() const override;
@@ -54,7 +54,7 @@ private:
     int icon_size;                                //绘制应用图标的尺寸
     std::weak_ptr<Kiran::Window> last_raised;     //上次点击时最前的窗口
 
-    bool menu_opened;
+    sigc::signal<void, bool> m_signal_context_menu_toggled;
 };
 
 #endif // TASKLIST_APP_BUTTON_H
