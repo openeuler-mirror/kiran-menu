@@ -5,6 +5,7 @@
 #include "kiran-helper.h"
 #include "menu-avatar-widget.h"
 #include "global.h"
+#include <gtk/gtkx.h>
 
 
 #include <unistd.h>
@@ -173,6 +174,16 @@ void MenuAppletWindow::on_active_change()
 {
     if (is_active())
         KiranHelper::grab_input(*this);
+    else {
+        auto active_window = get_screen()->get_active_window();
+        if (!active_window || active_window != get_window()) {
+            /**
+             * 打开其它应用时，当前活动窗口会发生变化。
+             * 但在开始菜单窗口的右键菜单打开时，当前活动窗口依旧为开始菜单窗口。
+             */
+            hide();
+        }
+    }
 }
 
 bool MenuAppletWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
@@ -364,6 +375,8 @@ bool MenuAppletWindow::on_map_event(GdkEventAny *any_event)
      */
     KiranHelper::grab_input(*this);
 
+    //gtk_grab_add(GTK_WIDGET(this->gobj()));
+
     //应用列表滚动到开始位置
     switch_to_apps_overview(0, false);
 
@@ -379,6 +392,7 @@ bool MenuAppletWindow::on_map_event(GdkEventAny *any_event)
 bool MenuAppletWindow::on_unmap_event(GdkEventAny *any_event)
 {
     KiranHelper::ungrab_input(*this);
+    //gtk_grab_remove(GTK_WIDGET(this->gobj()));
     return Gtk::Window::on_unmap_event(any_event);
 }
 
