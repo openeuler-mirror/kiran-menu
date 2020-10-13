@@ -129,31 +129,29 @@ void TasklistWindowPreviewer::on_close_button_clicked()
     }
 }
 
-bool TasklistWindowPreviewer::on_button_press_event(GdkEventButton *event)
+bool TasklistWindowPreviewer::on_button_press_event(GdkEventButton *button_event)
 {
+    GdkEvent *event;
     auto window = get_window_();
 
     if (G_UNLIKELY(!window))
         return false;
 
-    if (event->button == GDK_BUTTON_SECONDARY) {
+    event = reinterpret_cast<GdkEvent*>(button_event);
+    if (gdk_event_triggers_context_menu(event)) {
         //show context menu
         if (!context_menu) {
             context_menu = new TasklistWindowContextMenu(window);
             context_menu->attach_to_widget(*this);
-            context_menu->signal_deactivate().connect(
-                        [this]() -> void {
-                            this->get_toplevel()->hide();
-                        });
         } else
             context_menu->refresh();
 
         context_menu->show_all();
-        context_menu->popup_at_pointer((GdkEvent*)event);
+        context_menu->popup_at_pointer(event);
         return false;
     }
 
-    return WindowThumbnailWidget::on_button_press_event(event);
+    return WindowThumbnailWidget::on_button_press_event(button_event);
 }
 
 void TasklistWindowPreviewer::on_composite_changed()
@@ -171,4 +169,9 @@ void TasklistWindowPreviewer::on_composite_changed()
 
     if (get_realized())
         queue_resize();
+}
+
+bool TasklistWindowPreviewer::context_menu_is_opened()
+{
+    return context_menu != nullptr && context_menu->is_visible();
 }

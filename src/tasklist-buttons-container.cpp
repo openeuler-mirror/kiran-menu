@@ -305,6 +305,10 @@ void TasklistButtonsContainer::move_previewer(TasklistAppButton *target_button)
         return;
     }
 
+    /* 当前预览窗口的右键菜单已经打开，不允许移动预览窗口 */
+    if (previewer->has_context_menu_opened())
+        return;
+
     previewer->set_idle(false);
 
     Glib::signal_timeout().connect_once([this, target_button]() -> void {
@@ -325,6 +329,9 @@ void TasklistButtonsContainer::move_previewer(TasklistAppButton *target_button)
 
 void TasklistButtonsContainer::hide_previewer()
 {
+
+    if (previewer->has_context_menu_opened())
+        return;
     previewer->set_idle(true);
 
     Glib::signal_timeout().connect_once(

@@ -20,6 +20,8 @@ public:
     TasklistWindowPreviewer(std::shared_ptr<Kiran::Window> &window);
     virtual ~TasklistWindowPreviewer() override;
 
+    bool context_menu_is_opened();
+
 protected:
     virtual void get_preferred_width_vfunc(int& minimum_width,
                                            int& natural_width) const override;

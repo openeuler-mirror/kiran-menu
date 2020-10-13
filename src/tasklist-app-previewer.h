@@ -28,6 +28,8 @@ public:
     void remove_window_thumbnail(std::shared_ptr<Kiran::Window> &window);
     unsigned long get_thumbnails_count();
 
+    bool has_context_menu_opened();
+
 protected:
     virtual void get_preferred_height_vfunc(int &minimum_height, int &natural_height) const override;
     virtual void get_preferred_width_vfunc(int &minimum_width, int &natural_width) const override;

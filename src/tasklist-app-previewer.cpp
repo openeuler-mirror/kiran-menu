@@ -231,6 +231,9 @@ bool TasklistAppPreviewer::on_leave_notify_event(GdkEventCrossing *crossing_even
         return true;
     }
 
+    if (has_context_menu_opened())
+        return true;
+
     set_idle(true);
     return false;
 }
@@ -333,6 +336,17 @@ void TasklistAppPreviewer::remove_window_thumbnail(std::shared_ptr<Kiran::Window
 
 unsigned long TasklistAppPreviewer::get_thumbnails_count() {
     return win_previewers.size();
+}
+
+bool TasklistAppPreviewer::has_context_menu_opened()
+{
+    for (auto child: box.get_children()) {
+        TasklistWindowPreviewer *thumbnail = dynamic_cast<TasklistWindowPreviewer*>(child);
+        if (thumbnail->context_menu_is_opened())
+            return true;
+    }
+
+    return false;
 }
 
 void TasklistAppPreviewer::set_position(Gtk::PositionType pos)

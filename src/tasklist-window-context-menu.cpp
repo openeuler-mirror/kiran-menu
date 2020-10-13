@@ -17,6 +17,7 @@ void TasklistWindowContextMenu::refresh()
     Gtk::MenuItem *item = nullptr;
     Gtk::RadioMenuItem *radio_item;
     Gtk::CheckMenuItem *check_item;
+    Gtk::RadioButtonGroup group;
 
     KiranHelper::remove_all_for_container(*this);
     auto window = this->win.lock();

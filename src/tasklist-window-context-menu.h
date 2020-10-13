@@ -14,9 +14,6 @@ protected:
 
 private:
     std::weak_ptr<Kiran::Window> win;
-
-    Glib::RefPtr<Gdk::Window> g_window;
-    Gtk::RadioButtonGroup group;
 };
 
 #endif // TASKLIST_WINDOW_CONTEXT_MENU_H
