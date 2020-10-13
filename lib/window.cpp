@@ -210,7 +210,7 @@ void Window::activate(uint32_t timestamp)
 
     if (state & WNCK_WINDOW_STATE_MINIMIZED)
     {
-        if (workspace != current_workspace)
+        if (workspace && workspace != current_workspace)
             workspace->activate(timestamp);
         wnck_window_activate_transient(this->wnck_window_, timestamp);
     }
@@ -222,7 +222,7 @@ void Window::activate(uint32_t timestamp)
     }
     else
     {
-        if (workspace != current_workspace)
+        if (workspace && workspace != current_workspace)
             workspace->activate(timestamp);
         wnck_window_activate_transient(this->wnck_window_, timestamp);
     }
