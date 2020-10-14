@@ -1,4 +1,5 @@
 #include "tasklist-applet-widget.h"
+#include "global.h"
 #include <glibmm/i18n.h>
 
 void on_applet_orient_change(MatePanelApplet *applet UNUSED,

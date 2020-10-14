@@ -1,4 +1,5 @@
 #include "tasklist-app-context-menu.h"
+#include "global.h"
 #include <menu-skeleton.h>
 #include <glib/gi18n.h>
 #include "kiran-helper.h"
@@ -25,8 +26,7 @@ void TasklistAppContextMenu::refresh()
     }
 
     for (auto action_name: app_->get_actions()) {
-        item = Gtk::manage(new Gtk::MenuItem(app_->get_action_name(action_name)));
-        //FIXME, action_name传递是否合适??
+        item = Gtk::make_managed<Gtk::MenuItem>(app_->get_action_name(action_name));
         item->signal_activate().connect(
                     [action_name, this]() -> void {
             if (!app.expired())
@@ -35,7 +35,7 @@ void TasklistAppContextMenu::refresh()
         append(*item);
     }
 
-    item = Gtk::manage(new Gtk::MenuItem(_("Close all windows")));
+    item = Gtk::make_managed<Gtk::MenuItem>(_("Close all windows"));
     item->signal_activate().connect(
                 [this]() -> void {
                     if (!app.expired())
@@ -47,14 +47,14 @@ void TasklistAppContextMenu::refresh()
 
 
     if (!KiranHelper::app_is_in_favorite(app_)) {
-        item = Gtk::manage(new Gtk::MenuItem(_("Add to favorites")));
+        item = Gtk::make_managed<Gtk::MenuItem>(_("Add to favorites"));
         item->signal_activate().connect(
                     [this]() -> void {
                         if (!app.expired())
                             KiranHelper::add_app_to_favorite(app.lock());
                     });
     } else {
-        item = Gtk::manage(new Gtk::MenuItem(_("Remove from favorites")));
+        item = Gtk::make_managed<Gtk::MenuItem>(_("Remove from favorites"));
         item->signal_activate().connect(
                     [this]() -> void {
                         if (!app.expired())
@@ -64,14 +64,14 @@ void TasklistAppContextMenu::refresh()
     append(*item);
 
     if (!KiranHelper::app_is_in_fixed_list(app_)) {
-        item = Gtk::manage(new Gtk::MenuItem(_("Pin to taskbar")));
+        item = Gtk::make_managed<Gtk::MenuItem>(_("Pin to taskbar"));
         item->signal_activate().connect(
                     [this]() -> void {
                         if (!app.expired())
                             KiranHelper::add_app_to_fixed_list(app.lock());
                     });
     } else {
-        item = Gtk::manage(new Gtk::MenuItem(_("Unpin to taskbar")));
+        item = Gtk::make_managed<Gtk::MenuItem>(_("Unpin to taskbar"));
         item->signal_activate().connect(
                     [this]() -> void {
                         if (!app.expired())

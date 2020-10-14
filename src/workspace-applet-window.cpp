@@ -5,6 +5,7 @@
 #include "workspace-window-thumbnail.h"
 #include "workspace-windows-overview.h"
 #include "kiran-helper.h"
+#include "global.h"
 #include <X11/Xlib.h>
 
 #define MATE_DESKTOP_USE_UNSTABLE_API
@@ -112,7 +113,7 @@ void WorkspaceAppletWindow::update_ui()
 
     for (auto workspace: Kiran::WorkspaceManager::get_instance()->get_workspaces())
     {
-        auto thumbnail_area = Gtk::manage(new WorkspaceThumbnail(workspace));
+        auto thumbnail_area = Gtk::make_managed<WorkspaceThumbnail>(workspace);
 
         left_layout->pack_start(*thumbnail_area, Gtk::PACK_SHRINK);
         ws_list.insert(std::make_pair(workspace->get_number(), thumbnail_area));

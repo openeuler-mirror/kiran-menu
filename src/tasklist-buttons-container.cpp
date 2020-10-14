@@ -1,4 +1,5 @@
 ﻿#include "tasklist-buttons-container.h"
+#include "global.h"
 #include <window-manager.h>
 #include <window.h>
 #include "taskbar-skeleton.h"

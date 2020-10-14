@@ -13,6 +13,7 @@
 #include "app-manager.h"
 #include "core_worker.h"
 #include "workspace-applet-button.h"
+#include "global.h"
 
 #define APPLET_RESOURCE_PATH   PACKAGE_DATA_DIR "/kiran-applet.gresource"
 #define GETTEXT_PACKAGE		   PACKAGE_NAME
@@ -125,13 +126,13 @@ kiran_menu_applet_fill (MatePanelApplet *applet,
 
         //窗口切换预览插件
         g_message("loading tasklist applet\n");
-        TasklistAppletWidget *button = Gtk::manage(new TasklistAppletWidget(applet));
+        TasklistAppletWidget *button = Gtk::make_managed<TasklistAppletWidget>(applet);
         flags = MATE_PANEL_APPLET_HAS_HANDLE | MATE_PANEL_APPLET_EXPAND_MINOR | MATE_PANEL_APPLET_EXPAND_MAJOR;
         mate_panel_applet_set_flags(applet, (MatePanelAppletFlags)flags);
 
         gtk_container_add(GTK_CONTAINER(applet), GTK_WIDGET(button->gobj()));
     } else if (!strcmp(iid, "KiranWorkspaceApplet")) {
-        WorkspaceAppletButton *button = Gtk::manage(new WorkspaceAppletButton(applet));
+        WorkspaceAppletButton *button = Gtk::make_managed<WorkspaceAppletButton>(applet);
         gtk_container_add(GTK_CONTAINER(applet), GTK_WIDGET(button->gobj()));
     }
 

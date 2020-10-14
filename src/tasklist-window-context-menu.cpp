@@ -2,6 +2,7 @@
 #include "kiran-helper.h"
 #include <glib/gi18n.h>
 #include <gtk/gtkx.h>
+#include "global.h"
 #include "workspace-manager.h"
 
 

@@ -1,5 +1,6 @@
 #include "tasklist-app-previewer.h"
 #include <window-manager.h>
+#include "global.h"
 
 TasklistAppPreviewer::TasklistAppPreviewer():
     Gtk::Window(Gtk::WINDOW_POPUP),
@@ -311,7 +312,7 @@ const Gtk::Scrollbar *TasklistAppPreviewer::get_scrollbar() const
  */
 void TasklistAppPreviewer::add_window_thumbnail(std::shared_ptr<Kiran::Window> &window)
 {
-    auto previewer = Gtk::manage(new TasklistWindowPreviewer(window));
+    auto previewer = Gtk::make_managed<TasklistWindowPreviewer>(window);
     box.pack_start(*previewer, Gtk::PACK_SHRINK);
     previewer->show();
 
