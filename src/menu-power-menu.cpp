@@ -63,8 +63,8 @@ void MenuPowerMenu::hide_menu_window()
 {
     Gtk::Widget *menu_window;
 
-    if (!this->get_attach_widget())
+    if (!get_attach_widget())
         return;
-    menu_window = this->get_attach_widget()->get_toplevel();
+    menu_window = get_attach_widget()->get_toplevel();
     menu_window->hide();
 }

@@ -45,21 +45,21 @@ void MenuAppItem::init_drag_and_drop()
     targets.push_back(target);
     drag_source_set(targets, Gdk::BUTTON1_MASK, Gdk::ACTION_COPY);
 
-    this->signal_drag_begin().connect(
+   signal_drag_begin().connect(
         [this](const Glib::RefPtr<Gdk::DragContext> &context) -> void {
             /**
              * 设置拖动操作的Icon
              */
-            auto app = this->get_app();
+            auto app = get_app();
             gtk_drag_set_icon_gicon(context->gobj(), app->get_icon()->gobj(), 0, 0);
         });
 
-    this->signal_drag_data_get().connect(
+    signal_drag_data_get().connect(
         [this](const Glib::RefPtr<Gdk::DragContext> &context, Gtk::SelectionData &selection, guint info, guint timestamp) -> void {
             /**
              * 将app对应的desktop文件路径传递给目的控件 
              */
-            auto app = this->get_app();
+            auto app = get_app();
             if (!app) {
                 g_warning("init_drag_and_drop: app alreay expired\n");
                 return;
@@ -69,14 +69,14 @@ void MenuAppItem::init_drag_and_drop()
             selection.set(8, (const guint8*)uri.data(), uri.length());
         });
 
-    this->signal_drag_end().connect(
+    signal_drag_end().connect(
         [this](const Glib::RefPtr<Gdk::DragContext> &context) -> void {
             // 让开始菜单窗口重新获取输入焦点
-            Gtk::Container *toplevel = this->get_toplevel();
+            Gtk::Container *toplevel = get_toplevel();
             KiranHelper::grab_input(*toplevel);
         });
 
-    this->signal_drag_failed().connect(
+    signal_drag_failed().connect(
         [this](const Glib::RefPtr<Gdk::DragContext> &context, Gtk::DragResult result) -> bool {
             g_debug("drag failed, result %d\n", (int)result);
             return true;
@@ -148,21 +148,15 @@ void MenuAppItem::create_context_menu()
         item = Gtk::make_managed<Gtk::MenuItem>(_("Add to favorites"));
         item->signal_activate().connect(
                     [this]() -> void {
-                        if (!this->app.expired()) {
-                            auto app = this->app.lock();
-
-                            Kiran::MenuSkeleton::get_instance()->add_favorite_app(app->get_desktop_id());
-                        }
+                        if (!app.expired())
+                            Kiran::MenuSkeleton::get_instance()->add_favorite_app(app.lock()->get_desktop_id());
                     });
     } else {
         item = Gtk::make_managed<Gtk::MenuItem>(_("Remove from favorites"));
         item->signal_activate().connect(
                     [this]() -> void {
-                        if (!this->app.expired()) {
-                            auto app = this->app.lock();
-
-                            Kiran::MenuSkeleton::get_instance()->del_favorite_app(app->get_desktop_id());
-                        }
+                        if (!app.expired())
+                            Kiran::MenuSkeleton::get_instance()->del_favorite_app(app.lock()->get_desktop_id());
                     });
     }
     context_menu.append(*item);
@@ -184,44 +178,44 @@ void MenuAppItem::create_context_menu()
 
 bool MenuAppItem::pin_app_to_taskbar()
 {
-    auto app = this->app.lock();
+    auto app_ = app.lock();
     auto backend = Kiran::TaskBarSkeleton::get_instance();
 
-    if (!app) {
+    if (!app_) {
         g_warning("%s: app already expired\n", __FUNCTION__);
         return false;
     }
 
-    return backend->add_fixed_app(app->get_desktop_id());
+    return backend->add_fixed_app(app_->get_desktop_id());
 }
 bool MenuAppItem::unpin_app_from_taskbar()
 {
-    auto app = this->app.lock();
+    auto app_ = app.lock();
     auto backend = Kiran::TaskBarSkeleton::get_instance();
 
-    if (!app) {
+    if (!app_) {
         g_warning("%s: app already expired\n", __FUNCTION__);
         return false;
     }
 
-    return backend->del_fixed_app(app->get_desktop_id());
+    return backend->del_fixed_app(app_->get_desktop_id());
 }
 
 bool MenuAppItem::add_app_to_desktop()
 {
     std::string target_dir;
     Gio::FileCopyFlags flags = Gio::FILE_COPY_BACKUP | Gio::FILE_COPY_TARGET_DEFAULT_PERMS;
-    std::shared_ptr<Kiran::App> app;
+    std::shared_ptr<Kiran::App> app_;
 
-    if (this->app.expired()) {
+    if (app.expired()) {
         g_warning("%s: app already expired\n", __FUNCTION__);
         return false;
     }
 
-    app = this->app.lock();
+    app_ = app.lock();
     target_dir = Glib::get_user_special_dir(Glib::USER_DIRECTORY_DESKTOP);
     try {
-        auto src_file = Gio::File::create_for_path(app->get_file_name());
+        auto src_file = Gio::File::create_for_path(app_->get_file_name());
         auto dest_file = Gio::File::create_for_path(target_dir + "/" + src_file->get_basename());
 
         //如果桌面上已经存在相同的文件，跳过拷贝操作
@@ -244,20 +238,20 @@ bool MenuAppItem::add_app_to_desktop()
 
 bool MenuAppItem::is_in_favorite()
 {
-    auto app = this->app.lock();
+    auto app_ = app.lock();
     auto backend = Kiran::MenuSkeleton::get_instance();
 
-    if (!app || backend->lookup_favorite_app(app->get_desktop_id()) == nullptr)
+    if (!app_ || backend->lookup_favorite_app(app_->get_desktop_id()) == nullptr)
         return false;
     return true;
 }
 
 bool MenuAppItem::is_fixed_on_taskbar()
 {
-    auto app = this->app.lock();
+    auto app_ = app.lock();
     auto backend = Kiran::TaskBarSkeleton::get_instance();
 
-    if (!app || backend->lookup_fixed_app(app->get_desktop_id()) == nullptr)
+    if (!app_ || backend->lookup_fixed_app(app_->get_desktop_id()) == nullptr)
         return false;
 
     return true;

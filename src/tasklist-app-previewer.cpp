@@ -22,8 +22,8 @@ TasklistAppPreviewer::TasklistAppPreviewer():
     box.set_spacing(4);
     box.signal_remove().connect(
                 [this](Gtk::Widget *widget) -> void {
-                    if (this->box.get_children().size() == 0)
-                        this->hide();
+                    if (box.get_children().size() == 0)
+                        hide();
                 });
 
     get_style_context()->add_class("app-previewer");
@@ -254,7 +254,7 @@ void TasklistAppPreviewer::set_rgba_visual()
     if (!visual)
         g_warning("no rgba visual found\n");
     else
-        gtk_widget_set_visual(reinterpret_cast<GtkWidget*>(this->gobj()), visual->gobj());
+        gtk_widget_set_visual(reinterpret_cast<GtkWidget*>(gobj()), visual->gobj());
 }
 
 void TasklistAppPreviewer::init_ui()

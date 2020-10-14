@@ -28,7 +28,7 @@ bool MenuAvatarWidget::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
     radius = allocation.get_width() > allocation.get_height()?allocation.get_height():allocation.get_width();
     radius /= 2.0;
     try {
-        pixbuf = Gdk::Pixbuf::create_from_file(this->icon,
+        pixbuf = Gdk::Pixbuf::create_from_file(icon,
                                                allocation.get_width() * scale,
                                                allocation.get_height() * scale);
     } catch (const Glib::Error &e) {

@@ -67,7 +67,7 @@ bool WorkspaceAppletWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
 
     //先绘制桌面背景图
     mate_bg_load_from_preferences(bg);
-    surface = mate_bg_create_surface(bg, this->get_window()->gobj(), get_width(), get_height(), FALSE);
+    surface = mate_bg_create_surface(bg, get_window()->gobj(), get_width(), get_height(), FALSE);
     cairo_set_source_surface(cr->cobj(), surface, 0, 0);
     cairo_paint(cr->cobj());
 
@@ -119,7 +119,7 @@ void WorkspaceAppletWindow::update_ui()
 
         //点击工作区时切换右侧的窗口预览
         thumbnail_area->signal_selected().connect([this](int ws_number) -> void {
-            for (auto data: this->ws_list){
+            for (auto data: ws_list){
                 auto num = data.first;
                 auto area = data.second;
                 if (num != ws_number)

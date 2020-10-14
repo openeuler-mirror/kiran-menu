@@ -91,7 +91,7 @@ void MenuListItemWidget::get_preferred_width_vfunc(int &minimum_width,int &natur
         GValue value = G_VALUE_INIT;
         GtkStyleContext *c_context = context.get()->gobj();
 
-        gtk_style_context_get_property(c_context, "min-width", gtk_widget_get_state_flags(GTK_WIDGET(this->gobj())), &value);
+        gtk_style_context_get_property(c_context, "min-width", gtk_widget_get_state_flags(GTK_WIDGET(gobj())), &value);
         minimum_width = g_value_get_int(&value);
         g_value_unset(&value);
     } while(0);
@@ -126,7 +126,7 @@ void MenuListItemWidget::get_preferred_height_vfunc(int &minimum_height,int &nat
         GValue value = G_VALUE_INIT;
         GtkStyleContext *c_context = context.get()->gobj();
 
-        gtk_style_context_get_property(c_context, "min-height", gtk_widget_get_state_flags(GTK_WIDGET(this->gobj())), &value);
+        gtk_style_context_get_property(c_context, "min-height", gtk_widget_get_state_flags(GTK_WIDGET(gobj())), &value);
         minimum_height = g_value_get_int(&value);
         g_value_unset(&value);
     } while(0);

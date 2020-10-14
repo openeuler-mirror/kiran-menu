@@ -29,7 +29,7 @@ WindowThumbnailWidget::WindowThumbnailWidget(KiranWindowPointer &window_):
     get_style_context()->add_class("window-previewer");
 
     signal_state_flags_changed().connect([this](Gtk::StateFlags flags) -> void {
-        this->queue_draw();
+        queue_draw();
     });
 
     window_->signal_name_changed().connect(sigc::mem_fun(*this, &WindowThumbnailWidget::update_title));

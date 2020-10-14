@@ -16,7 +16,7 @@ MenuAppletButton::MenuAppletButton(MatePanelApplet *panel_applet):
     connection1 = window.signal_hide().connect(sigc::bind<bool>(sigc::mem_fun(*this, &Gtk::ToggleButton::set_active), false));
     window.signal_size_changed().connect(
                 [this](int width UNUSED, int height UNUSED) -> void {
-                    this->on_toggled();
+                    on_toggled();
                 });
 
     get_style_context()->add_class("kiran-menu-applet-button");

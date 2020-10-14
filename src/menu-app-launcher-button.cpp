@@ -28,5 +28,5 @@ void MenuAppLauncherButton::on_clicked()
 
 sigc::signal<void> MenuAppLauncherButton::signal_app_launched()
 {
-    return this->m_signal_app_launched;
+    return m_signal_app_launched;
 }

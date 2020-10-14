@@ -84,17 +84,17 @@ void TasklistAppletWidget::init_ui()
 
     hbox.property_orientation().signal_changed().connect(
                 [this]() -> void {
-                    if (this->hbox.get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
-                        this->vbox.set_orientation(Gtk::ORIENTATION_VERTICAL);
+                    if (hbox.get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
+                        vbox.set_orientation(Gtk::ORIENTATION_VERTICAL);
                         vbox.set_size_request(16, -1);
                     }
                     else {
-                        this->vbox.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+                        vbox.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
                         vbox.set_size_request(-1, 16);
                     }
 
-                    this->container.update_orientation();
-                    this->container.queue_resize();
+                    container.update_orientation();
+                    container.queue_resize();
                 });
 
 

@@ -84,7 +84,7 @@ void TasklistButtonsContainer::add_app_button(const KiranAppPointer &app)
             if (gdk_event_triggers_context_menu(reinterpret_cast<GdkEvent*>(event)))
                 return false;
 
-            this->toggle_previewer(button);
+            toggle_previewer(button);
             return false;
         });
 
@@ -99,7 +99,7 @@ void TasklistButtonsContainer::add_app_button(const KiranAppPointer &app)
     button->signal_context_menu_toggled().connect(
                 [this](bool active) -> void {
                     if (active)
-                        this->hide_previewer();
+                        hide_previewer();
                 });
 
 #endif
@@ -313,17 +313,17 @@ void TasklistButtonsContainer::move_previewer(TasklistAppButton *target_button)
 
     Glib::signal_timeout().connect_once([this, target_button]() -> void {
         auto target_app = target_button->get_app();
-        auto previewer_app = this->previewer->get_app();
+        auto previewer_app = previewer->get_app();
         if (previewer_app == target_app && previewer->is_visible()) {
             //当前预览的应用和目标应用是同一应用
             return;
         }
-        if (this->previewer->get_idle()) {
+        if (previewer->get_idle()) {
             g_debug("previewer idle\n");
             return;
         }
-        this->previewer->set_relative_to(target_button, this->get_previewer_position());
-        this->previewer->show();
+        previewer->set_relative_to(target_button, get_previewer_position());
+        previewer->show();
     }, PREVIEWER_ANIMATION_TIMEOUT);
 }
 
@@ -336,8 +336,8 @@ void TasklistButtonsContainer::hide_previewer()
 
     Glib::signal_timeout().connect_once(
                 [this]() -> void {
-                    if (this->previewer->get_idle()) {
-                        this->previewer->hide();
+                    if (previewer->get_idle()) {
+                        previewer->hide();
                     }
                 }, PREVIEWER_ANIMATION_TIMEOUT);
 }
@@ -394,7 +394,7 @@ void TasklistButtonsContainer::update_orientation()
     if (adjustment)
         adjustment->signal_value_changed().connect(
                     [this]() -> void {
-                        this->signal_page_changed().emit();
+                        signal_page_changed().emit();
                     });
 
     if (get_realized()) {

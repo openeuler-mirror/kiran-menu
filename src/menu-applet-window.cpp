@@ -57,9 +57,9 @@ MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type):
     profile.signal_changed().connect(
         [this](const Glib::ustring &key) -> void {
             if (key != "opacity") {
-                this->set_display_mode(this->profile.get_display_mode());
+                set_display_mode(profile.get_display_mode());
             } else
-                this->queue_draw();
+                queue_draw();
     });
 
     Gtk::EventBox *date_box;
@@ -68,7 +68,7 @@ MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type):
     date_box->add_events(Gdk::BUTTON_PRESS_MASK | Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
     date_box->signal_button_press_event().connect([this](GdkEventButton *button UNUSED) -> bool {
         KiranHelper::run_commandline("/usr/bin/mate-time-admin");
-        this->hide();
+        hide();
 
         return false;
     });
@@ -518,8 +518,8 @@ Gtk::Button* MenuAppletWindow::create_page_button(const char *icon_resource,
 
     button->signal_clicked().connect(
                 [this, page_index]() -> void{
-                    this->set_stack_current_index(overview_stack, page_index, true);
-                    this->search_entry->grab_focus();
+                    set_stack_current_index(overview_stack, page_index, true);
+                    search_entry->grab_focus();
                 });
 
     return button;

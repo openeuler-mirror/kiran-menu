@@ -95,7 +95,7 @@ void TasklistWindowPreviewer::get_preferred_width_vfunc(int &minimum_width, int 
 {
     GtkStateFlags flags;
     GValue value = G_VALUE_INIT;
-    GtkWidget *widget = reinterpret_cast<GtkWidget*>(const_cast<GtkButton*>(this->gobj()));
+    GtkWidget *widget = reinterpret_cast<GtkWidget*>(const_cast<GtkButton*>(gobj()));
     auto context = get_style_context()->gobj();
 
     flags = gtk_widget_get_state_flags(widget);

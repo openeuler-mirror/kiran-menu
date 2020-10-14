@@ -260,7 +260,7 @@ bool TasklistAppButton::on_button_press_event(GdkEventButton *button_event)
             context_menu->attach_to_widget(*this);
             context_menu->signal_deactivate().connect(
                         [this]() -> void {
-                            this->m_signal_context_menu_toggled.emit(false);
+                            m_signal_context_menu_toggled.emit(false);
                         });
         } else {
             //刷新右键菜单内容，因为收藏夹等选项可能需要更新

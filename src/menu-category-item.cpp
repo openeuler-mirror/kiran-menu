@@ -19,9 +19,9 @@ MenuCategoryItem::MenuCategoryItem(const std::string &name,
  * @brief 设置分类标签是否可点击
  * @param clickable 是否可点击
  */
-void MenuCategoryItem::set_clickable(bool clickable)
+void MenuCategoryItem::set_clickable(bool clickable_)
 {
-    this->clickable = clickable;
+    clickable = clickable_;
     set_can_focus(true);
 }
 
