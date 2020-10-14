@@ -21,7 +21,6 @@ TasklistButtonsContainer::TasklistButtonsContainer(MatePanelApplet *applet_):
 {
     init_ui();
 
-    active_app = get_current_active_app();
     //响应窗口变化信号
     auto window_manager = Kiran::WindowManager::get_instance();
     window_manager->signal_active_window_changed().connect(
@@ -67,7 +66,6 @@ void TasklistButtonsContainer::add_app_button(const KiranAppPointer &app)
     applet_size = static_cast<int>(mate_panel_applet_get_size(applet));
 
     button = Gtk::make_managed<TasklistAppButton>(app, applet_size);
-    button->show_all();
 #if 1
     //鼠标进入应用按钮时，显示预览窗口
     button->signal_enter_notify_event().connect(
@@ -101,6 +99,17 @@ void TasklistButtonsContainer::add_app_button(const KiranAppPointer &app)
                 [this](bool active) -> void {
                     if (active)
                         hide_previewer();
+                });
+
+    /* 按钮应用为当前窗口的应用时，确保其在任务栏上可见 */
+    button->signal_size_allocate().connect(
+                [this, button](Gtk::Allocation &allocation UNUSED) -> void {
+                    auto active_win = Kiran::WindowManager::get_instance()->get_active_window();
+                    if (!active_win)
+                        return;
+
+                    if (active_win->get_app() == button->get_app())
+                        ensure_app_button_visible(button);
                 });
 
 #endif
@@ -194,31 +203,39 @@ void TasklistButtonsContainer::on_active_window_changed(KiranWindowPointer previ
                                                    KiranWindowPointer active)
 {
     KiranAppPointer current_app = nullptr;
+    TasklistAppButton *last_button, *active_button;
 
     if (!KiranHelper::window_is_ignored(active))
         current_app = active->get_app();
 
+    active_button = find_app_button(current_app);
     if (current_app != active_app) {
         //active app changed
-        TasklistAppButton *last_button, *active_button;
 
         g_debug("active app changed, new '%s', old '%s'\n",
                   current_app?current_app->get_name().data():"null",
                   active_app?active_app->get_name().data():"null");
 
         last_button = find_app_button(active_app);
-        active_button = find_app_button(current_app);
+
 
         if (last_button) {
             last_button->queue_draw();
         }
 
-        if (active_button) {
-            active_button->queue_draw();
-        }
-
-
         active_app = current_app;
+    }
+
+
+    if (active_button) {
+        active_button->queue_draw();
+        /**
+         * 确保面板空间不足需要滚动时，活动窗口对应的应用按钮可见
+         * 对于新打开的窗口，其应用按钮尚未初始化完成，该操作需要放在
+         * 按钮的size_allocate信号处理函数中完成.
+         */
+        if (active_button->get_allocation().get_x() >= 0)
+            ensure_app_button_visible(active_button);
     }
 }
 
@@ -476,6 +493,10 @@ void TasklistButtonsContainer::on_size_allocate(Gtk::Allocation &allocation)
 
     Gtk::ScrolledWindow::on_size_allocate(allocation);
     m_signal_page_changed.emit();
+
+    /* 当任务栏应用按钮过多需要滚动时，确保当前窗口对应的任务栏按钮始终可见 */
+    on_active_window_changed(KiranWindowPointer(),
+                             Kiran::WindowManager::get_instance()->get_active_window());
 }
 
 void TasklistButtonsContainer::on_map()
@@ -579,6 +600,51 @@ void TasklistButtonsContainer::on_previewer_window_opened()
     for (auto data: app_buttons) {
         auto button = data.second;
         button->on_previewer_opened();
+    }
+}
+
+void TasklistButtonsContainer::ensure_app_button_visible(TasklistAppButton *button)
+{
+    Gtk::Viewport *viewport = nullptr;
+    Glib::RefPtr<Gtk::Adjustment> adjustment;
+    Gtk::Allocation allocation;
+    Gtk::Container *parent;
+    double offset_current, delta, offset_end, offset_start;
+    int view_size;
+
+    viewport = dynamic_cast<Gtk::Viewport*>(get_child());
+
+    allocation = button->get_allocation();
+
+    for (parent = button->get_parent(); parent != nullptr && parent != viewport; parent = parent->get_parent()) {
+        Gtk::Allocation parent_allocation;
+
+        parent_allocation = parent->get_allocation();
+        allocation.set_x(allocation.get_x() + parent_allocation.get_x());
+        allocation.set_y(allocation.get_y() + parent_allocation.get_y());
+    }
+
+    if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
+        adjustment = get_hadjustment();
+        view_size  = viewport->get_view_window()->get_width();
+        offset_start = allocation.get_x();
+        offset_end = offset_start + allocation.get_width();
+    }
+    else {
+        adjustment = get_vadjustment();
+        view_size  = viewport->get_view_window()->get_height();
+        offset_start = allocation.get_y();
+        offset_end = offset_start + allocation.get_height();
+    }
+
+    offset_current = adjustment->get_value();
+    delta = offset_end - (offset_current + view_size);
+    if (delta > 0) {
+        //下半部分内容超出滚动区域
+        adjustment->set_value(offset_end - view_size);
+    } else if (offset_start < offset_current) {
+        //上半部分内容超出滚动区域
+        adjustment->set_value(static_cast<double>(offset_start));
     }
 }
 

@@ -65,6 +65,12 @@ protected:
     virtual void on_fixed_apps_removed(const Kiran::AppVec &apps);
     virtual void on_previewer_window_opened();
 
+    /**
+     * @brief 确保指定的应用按钮在任务栏上可见。任务栏上空间不足时，通过滚动来保证可见
+     * @param button    需要可见的应用按钮
+     */
+    virtual void ensure_app_button_visible(TasklistAppButton *button);
+
     virtual void init_ui();
 
 private:
