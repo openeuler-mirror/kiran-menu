@@ -15,9 +15,9 @@ void on_applet_size_change(MatePanelApplet *applet UNUSED,
     widget->handle_applet_size_change();
 }
 
-TasklistButtonsContainer::TasklistButtonsContainer(MatePanelApplet *applet_):
+TasklistButtonsContainer::TasklistButtonsContainer(MatePanelApplet *applet_, int spacing_):
     applet(applet_),
-    box(Gtk::ORIENTATION_HORIZONTAL)
+    child_spacing(spacing_)
 {
     init_ui();
 
@@ -108,12 +108,13 @@ void TasklistButtonsContainer::add_app_button(const KiranAppPointer &app)
                     if (!active_win)
                         return;
 
-                    if (active_win->get_app() == button->get_app())
-                        ensure_app_button_visible(button);
+                    if (active_win->get_app() == button->get_app()) {
+                        switch_to_page_of_button(button);
+                    }
                 });
 
 #endif
-    box.pack_start(*button, Gtk::PACK_SHRINK);
+    add(*button);
     button->show_all();
 
     //建立app和应用按钮之间的映射
@@ -158,7 +159,7 @@ void TasklistButtonsContainer::remove_app_button(const KiranAppPointer &app)
     }
 
     g_debug("remove button for app '%s'\n", app->get_name().data());
-    box.remove(*button);
+    remove(*button);
     app_buttons.erase(app);
 
     delete button;
@@ -235,7 +236,7 @@ void TasklistButtonsContainer::on_active_window_changed(KiranWindowPointer previ
          * 按钮的size_allocate信号处理函数中完成.
          */
         if (active_button->get_allocation().get_x() >= 0)
-            ensure_app_button_visible(active_button);
+            switch_to_page_of_button(active_button);
     }
 }
 
@@ -399,40 +400,41 @@ void TasklistButtonsContainer::update_orientation()
     {
     case MATE_PANEL_APPLET_ORIENT_DOWN:
     case MATE_PANEL_APPLET_ORIENT_UP:
-        box.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+        orient = Gtk::ORIENTATION_HORIZONTAL;
         adjustment = get_hadjustment();
         break;
     case MATE_PANEL_APPLET_ORIENT_LEFT:
     case MATE_PANEL_APPLET_ORIENT_RIGHT:
-        box.set_orientation(Gtk::ORIENTATION_VERTICAL);
+        orient = Gtk::ORIENTATION_VERTICAL;
         adjustment = get_vadjustment();
         break;
     }
 
-    if (adjustment)
-        adjustment->signal_value_changed().connect(
-                    [this]() -> void {
-                        signal_page_changed().emit();
-                    });
+    //FIXME 应该在此处重新连接信号???
+//    if (adjustment)
+//        adjustment->signal_value_changed().connect(
+//                    [this]() -> void {
+//                        signal_page_changed().emit();
+//                    });
 
     if (get_realized()) {
         //调整应用按钮大小
-        for (auto button: box.get_children()) {
+        for (auto button: get_children()) {
             button->queue_resize();
         }
     }
 }
 
-Gtk::Orientation TasklistButtonsContainer::get_orientation()
+Gtk::Orientation TasklistButtonsContainer::get_orientation() const
 {
-    return box.get_orientation();
+    return orient;
 }
 
 void TasklistButtonsContainer::handle_applet_size_change()
 {
     int applet_size = get_applet_size();
 
-    for (auto child: box.get_children()) {
+    for (auto child: get_children()) {
         TasklistAppButton *button = dynamic_cast<TasklistAppButton*>(child);
         button->set_size(applet_size);
     }
@@ -448,63 +450,190 @@ int TasklistButtonsContainer::get_applet_size() const
 
 void TasklistButtonsContainer::get_preferred_width_vfunc(int &min_width, int &natural_width) const
 {
-    if (box.get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
-        box.get_preferred_width(min_width, natural_width);
-        min_width = 0;
+
+    if (orient == Gtk::ORIENTATION_HORIZONTAL) {
+        int child_min_width, child_natural_width;
+        auto children = get_children();
+
+        if (children.size() == 0) {
+            min_width = natural_width = 1;
+            return;
+        }
+
+        auto child = children.at(0);
+        child->get_preferred_width(child_min_width, child_natural_width);
+
+        min_width = child_min_width;
+        natural_width = (child_natural_width + child_spacing) * children.size() - child_spacing;
     } else {
         min_width = natural_width = get_applet_size();
     }
-    g_debug("%s: container min %d, natural %d\n", __func__, min_width, natural_width);
+    //g_message("%s: container min %d, natural %d\n", __func__, min_width, natural_width);
 }
 
 void TasklistButtonsContainer::get_preferred_height_vfunc(int &min_height, int &natural_height) const
 {
 
-    if (box.get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
+    if (orient == Gtk::ORIENTATION_HORIZONTAL) {
         min_height = natural_height = get_applet_size();
     } else {
-        box.get_preferred_height(min_height, natural_height);
-        min_height = 0;
+        int child_min_height, child_natural_height;
+        auto children = get_children();
+
+        if (children.size() == 0) {
+            min_height = natural_height = 1;
+            return;
+        }
+
+        auto child = children.at(0);
+        child->get_preferred_height(child_min_height, child_natural_height);
+
+        min_height = child_min_height;
+        natural_height = (child_natural_height + child_spacing) * children.size() - child_spacing;
     }
 
 }
 
 void TasklistButtonsContainer::on_size_allocate(Gtk::Allocation &allocation)
 {
-    Gtk::Requisition min, natural;
+    int child_total_size = 0, n_child = 0, child_index;
+    int child_computed_size, child_min_size, child_max_size;
+    int page_size;
+    int real_child_spacing = child_spacing;
+    std::vector<Gtk::Widget*> children = get_children();
 
-    box.get_preferred_size(min, natural);
+    set_allocation(allocation);
+    get_window()->move_resize(allocation.get_x(),
+                              allocation.get_y(),
+                              allocation.get_width(),
+                              allocation.get_height());
+    get_bin_window()->resize(allocation.get_width(),
+                             allocation.get_height());
 
-    g_debug("%s: container natural %d x %d\n",
-              __func__,
-            natural.width,
-            natural.height);
+    n_child = children.size();
+    if (n_child == 0)
+        return;
 
+    if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL)
+        page_size = allocation.get_width();
+    else
+        page_size = allocation.get_height();
+    child_computed_size = (page_size - (n_child - 1) * real_child_spacing)/n_child;
 
-    if (box.get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
-        if (allocation.get_width() > natural.width)
-            allocation.set_width(natural.width);
+    /*
+     * 由于所有child的尺寸都应该相同, 取第一个child的最小和最大尺寸即可
+     */
+    children.front()->get_preferred_width(child_min_size, child_max_size);
+
+    if (child_computed_size >= child_min_size) {
+        /* 放的下，不需要分页显示 */
+        child_computed_size = std::min(child_computed_size, child_max_size);
+        n_child_page = n_child;
+    } else {
+#if 0
+        /*
+         * 在child间隔不变的情况下，调整child尺寸，确保每页的child个数尽量多，同时剩余空间尽量小
+         */
+        int min_delta = G_MAXINT, best_width = child_min_size;
+        for (child_computed_size = child_min_size; child_computed_size <= child_max_size; child_computed_size += 2) {
+            int delta;
+
+            n_child_page = (parent_size + child_spacing)/(child_computed_size + child_spacing);
+            delta = (parent_size + child_spacing)%(child_computed_size + child_spacing);
+
+            if (delta < min_delta) {
+                best_width = child_computed_size;
+                min_delta = delta;
+            }
+        }
+        child_computed_size = best_width;
+        n_child_page = (parent_size + child_spacing)/(child_computed_size + child_spacing);
+#else
+        /*
+         * 计算每页能放的child的最大个数，同时调整child间距，使其排列更均匀
+         */
+        n_child_page = n_child;
+        for (n_child_page = n_child - 1; n_child_page > 0; n_child_page--) {
+            child_computed_size = (page_size - (n_child_page - 1) * real_child_spacing)/n_child_page;
+            if (child_computed_size >= child_min_size) {
+                real_child_spacing = (page_size - child_computed_size * n_child_page)/n_child_page-1;
+                break;
+            }
+        }
+#endif
     }
-    else {
-        if (allocation.get_height() > natural.height)
-            allocation.set_height(natural.height);
+
+    child_index = 0;
+    for (auto child: get_children()) {
+        Gtk::Allocation child_allocation;
+
+        if (child_index % n_child_page == 0) {
+            /* 新的页面，child需要排在开头 */
+            child_total_size = (child_index/n_child_page) * allocation.get_width();
+        } else
+            child_total_size += real_child_spacing;
+
+
+        child_allocation.set_x(child_total_size);
+        child_allocation.set_y(0);
+        child_allocation.set_width(child_computed_size);
+        child_allocation.set_height(allocation.get_height());
+        child->size_allocate(child_allocation);
+
+        child_total_size += child_computed_size;
+        child_index++;
     }
 
+    /* 确保滚动区域为整数个页面(可视区域)大小 */
+    if (child_total_size % page_size != 0)
+        child_total_size = (child_total_size / page_size + 1) * page_size;
 
-    Gtk::ScrolledWindow::on_size_allocate(allocation);
-    m_signal_page_changed.emit();
+    if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL)
+        set_size(static_cast<unsigned int>(child_total_size),
+                 static_cast<unsigned int>(allocation.get_height()));
+    else
+        set_size(static_cast<unsigned int>(allocation.get_width()),
+                 static_cast<unsigned int>(child_total_size));
+}
 
-    /* 当任务栏应用按钮过多需要滚动时，确保当前窗口对应的任务栏按钮始终可见 */
-    on_active_window_changed(KiranWindowPointer(),
-                             Kiran::WindowManager::get_instance()->get_active_window());
+void TasklistButtonsContainer::on_add(Gtk::Widget *child)
+{
+    Gtk::Layout::on_add(child);
+    queue_allocate();
+}
+
+void TasklistButtonsContainer::on_remove(Gtk::Widget *child)
+{
+    Gtk::Layout::on_remove(child);
+    queue_allocate();
 }
 
 void TasklistButtonsContainer::on_map()
 {
-    Gtk::ScrolledWindow::on_map();
+    Gtk::Layout::on_map();
+    signal_page_changed().emit();
     //Schedule: 加载应用按钮
     Glib::signal_idle().connect_once(
                 sigc::mem_fun(*this, &TasklistButtonsContainer::load_applications));
+}
+
+void TasklistButtonsContainer::on_realize()
+{
+    Gtk::Layout::on_realize();
+
+    /*
+     * 监控滚动区域变化(包括滚动区域本身和当前值)，大小变化和child变化都会导致滚动区域发生变化
+     */
+    auto adjustment = get_adjustment();
+    adjustment->signal_changed().connect(
+                [this]() -> void {
+                    signal_page_changed().emit();
+                });
+
+    adjustment->signal_value_changed().connect(
+                [this]() -> void {
+                    signal_page_changed().emit();
+                });
 }
 
 void TasklistButtonsContainer::reload_app_buttons()
@@ -555,8 +684,6 @@ void TasklistButtonsContainer::load_applications()
 
         add_app_button(app);
     }
-
-    queue_resize();
 }
 
 /**
@@ -603,57 +730,31 @@ void TasklistButtonsContainer::on_previewer_window_opened()
     }
 }
 
-void TasklistButtonsContainer::ensure_app_button_visible(TasklistAppButton *button)
+void TasklistButtonsContainer::switch_to_page_of_button(TasklistAppButton *button)
 {
-    Gtk::Viewport *viewport = nullptr;
-    Glib::RefPtr<Gtk::Adjustment> adjustment;
-    Gtk::Allocation allocation;
-    Gtk::Container *parent;
-    double offset_current, delta, offset_end, offset_start;
-    int view_size;
+    Gtk::Allocation child_allocation;
+    int view_size, offset_end;
+    int page_no;
 
-    viewport = dynamic_cast<Gtk::Viewport*>(get_child());
+    auto adjustment = get_adjustment();
+    child_allocation = button->get_allocation();
 
-    allocation = button->get_allocation();
+    view_size = static_cast<int>(adjustment->get_page_size());
 
-    for (parent = button->get_parent(); parent != nullptr && parent != viewport; parent = parent->get_parent()) {
-        Gtk::Allocation parent_allocation;
-
-        parent_allocation = parent->get_allocation();
-        allocation.set_x(allocation.get_x() + parent_allocation.get_x());
-        allocation.set_y(allocation.get_y() + parent_allocation.get_y());
-    }
-
-    if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
-        adjustment = get_hadjustment();
-        view_size  = viewport->get_view_window()->get_width();
-        offset_start = allocation.get_x();
-        offset_end = offset_start + allocation.get_width();
+    if (orient == Gtk::ORIENTATION_HORIZONTAL) {
+        offset_end = child_allocation.get_x() + child_allocation.get_width();
     }
     else {
-        adjustment = get_vadjustment();
-        view_size  = viewport->get_view_window()->get_height();
-        offset_start = allocation.get_y();
-        offset_end = offset_start + allocation.get_height();
+        offset_end = child_allocation.get_y() + child_allocation.get_height();
     }
 
-    offset_current = adjustment->get_value();
-    delta = offset_end - (offset_current + view_size);
-    if (delta > 0) {
-        //下半部分内容超出滚动区域
-        adjustment->set_value(offset_end - view_size);
-    } else if (offset_start < offset_current) {
-        //上半部分内容超出滚动区域
-        adjustment->set_value(static_cast<double>(offset_start));
-    }
+    page_no = offset_end / view_size;
+    adjustment->set_value(page_no * view_size);
 }
 
 void TasklistButtonsContainer::init_ui()
 {
-    set_policy(Gtk::POLICY_EXTERNAL, Gtk::POLICY_NEVER);
-    add(box);
     update_orientation();
-    box.set_spacing(6);
 
     previewer = new TasklistAppPreviewer();
     //响应预览窗口打开信号
@@ -675,10 +776,11 @@ void TasklistButtonsContainer::move_to_next_page()
 
     value = adjustment->get_value();
     value += adjustment->get_page_size();
-    if (value > adjustment->get_upper())
+    if (value + adjustment->get_page_size() > adjustment->get_upper())
         value = adjustment->get_upper();
 
     adjustment->set_value(value);
+    queue_draw();
 }
 
 void TasklistButtonsContainer::move_to_previous_page()
@@ -698,6 +800,7 @@ void TasklistButtonsContainer::move_to_previous_page()
         value = adjustment->get_lower();
 
     adjustment->set_value(value);
+    queue_draw();
 }
 
 bool TasklistButtonsContainer::has_previous_page()
@@ -731,4 +834,12 @@ bool TasklistButtonsContainer::has_next_page()
 sigc::signal<void> TasklistButtonsContainer::signal_page_changed()
 {
     return m_signal_page_changed;
+}
+
+Glib::RefPtr<Gtk::Adjustment> TasklistButtonsContainer::get_adjustment()
+{
+    if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL)
+        return get_hadjustment();
+    else
+        return get_vadjustment();
 }

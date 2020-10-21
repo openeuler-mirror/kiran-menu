@@ -3,6 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include <gtk/gtkx.h>
+#include "tasklist-buttons-container.h"
 
 static bool kiran_app_is_active(const std::shared_ptr<Kiran::App> &app)
 {
@@ -89,18 +90,22 @@ void TasklistAppButton::get_preferred_height_vfunc(int &minimum_height, int &nat
 
 void TasklistAppButton::get_preferred_width_for_height_vfunc(int height, int &minimum_width, int &natural_width) const
 {
-    if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL)
-        minimum_width = natural_width = height + 8;
-    else
+    if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
+        natural_width = height + 8;
+        minimum_width = height;
+    } else {
         minimum_width = natural_width = height - 8;
+    }
 }
 
 void TasklistAppButton::get_preferred_height_for_width_vfunc(int width, int &minimum_height, int &natural_height) const
 {
-    if (get_orientation() == Gtk::ORIENTATION_VERTICAL)
-        minimum_height = natural_height = width + 8;
-    else
+    if (get_orientation() == Gtk::ORIENTATION_VERTICAL) {
+        natural_height = width + 8;
+        minimum_height = width;
+    } else {
         minimum_height = natural_height = width - 8;
+    }
 }
 
 void TasklistAppButton::on_size_allocate(Gtk::Allocation &allocation)
@@ -333,7 +338,7 @@ sigc::signal<void, bool> TasklistAppButton::signal_context_menu_toggled()
 
 Gtk::Orientation TasklistAppButton::get_orientation() const
 {
-    const Gtk::Box *parent = static_cast<const Gtk::Box*>(get_parent());
+    const TasklistButtonsContainer *parent = static_cast<const TasklistButtonsContainer*>(get_parent());
 
     //使用父控件容器的排列方向
     return parent->get_orientation();

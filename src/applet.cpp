@@ -125,7 +125,7 @@ kiran_menu_applet_fill (MatePanelApplet *applet,
         int flags;
 
         //窗口切换预览插件
-        g_message("loading tasklist applet\n");
+        g_debug("loading tasklist applet\n");
         TasklistAppletWidget *button = Gtk::make_managed<TasklistAppletWidget>(applet);
         flags = MATE_PANEL_APPLET_HAS_HANDLE | MATE_PANEL_APPLET_EXPAND_MINOR | MATE_PANEL_APPLET_EXPAND_MAJOR;
         mate_panel_applet_set_flags(applet, (MatePanelAppletFlags)flags);
