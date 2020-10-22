@@ -118,6 +118,8 @@ void TasklistAppButton::on_size_allocate(Gtk::Allocation &allocation)
     } else {
         icon_size = allocation.get_height() - 8;
     }
+
+    update_windows_icon_geometry();
 }
 
 bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
@@ -342,4 +344,30 @@ Gtk::Orientation TasklistAppButton::get_orientation() const
 
     //使用父控件容器的排列方向
     return parent->get_orientation();
+}
+
+void TasklistAppButton::update_windows_icon_geometry()
+{
+    int origin_x, origin_y;
+    int scale_factor;
+    Gtk::Allocation allocation;
+
+    if (!get_realized())
+        return;
+
+    scale_factor = get_scale_factor();
+    allocation = get_allocation();
+    get_window()->get_origin(origin_x, origin_y);
+
+    if (!get_has_window()) {
+        origin_x += allocation.get_x();
+        origin_y += allocation.get_y();
+    }
+
+    for (auto window: get_app()->get_taskbar_windows()) {
+        window->set_icon_geometry(origin_x * scale_factor,
+                                  origin_y * scale_factor,
+                                  allocation.get_width() * scale_factor,
+                                  allocation.get_height() * scale_factor);
+    }
 }

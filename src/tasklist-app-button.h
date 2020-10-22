@@ -41,6 +41,12 @@ protected:
 
     virtual Gtk::Orientation get_orientation() const;
 
+    /**
+     * @brief update_windows_icon_geometry
+     *        更新应用所有窗口的最小化位置
+     */
+    void update_windows_icon_geometry();
+
 
 private:
     std::weak_ptr<Kiran::App> app;              //关联的app对象

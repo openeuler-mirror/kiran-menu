@@ -526,4 +526,13 @@ bool Window::should_skip_taskbar()
         return true;
     return get_window_type() != WNCK_WINDOW_NORMAL && get_window_type() != WNCK_WINDOW_DIALOG;
 }
+
+void Window::set_icon_geometry(int x, int y, int width, int height)
+{
+    wnck_window_set_icon_geometry(this->wnck_window_,
+                                  x,
+                                  y,
+                                  width,
+                                  height);
+}
 }  // namespace Kiran
