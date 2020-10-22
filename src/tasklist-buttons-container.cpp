@@ -230,13 +230,12 @@ void TasklistButtonsContainer::on_active_window_changed(KiranWindowPointer previ
 
     if (active_button) {
         active_button->queue_draw();
-        /**
+        /*
          * 确保面板空间不足需要滚动时，活动窗口对应的应用按钮可见
          * 对于新打开的窗口，其应用按钮尚未初始化完成，该操作需要放在
          * 按钮的size_allocate信号处理函数中完成.
          */
-        if (active_button->get_allocation().get_x() >= 0)
-            switch_to_page_of_button(active_button);
+         switch_to_page_of_button(active_button);
     }
 }
 
@@ -736,8 +735,21 @@ void TasklistButtonsContainer::switch_to_page_of_button(TasklistAppButton *butto
     int view_size, offset_end;
     int page_no;
 
+    if (button == nullptr)
+        return;
+
     auto adjustment = get_adjustment();
     child_allocation = button->get_allocation();
+
+    if (child_allocation.get_width() <= 1) {
+        g_warning("%s: button not realized, allocation (%d, %d), %d x %d",
+                  __func__,
+                  child_allocation.get_x(),
+                  child_allocation.get_y(),
+                  child_allocation.get_width(),
+                  child_allocation.get_height());
+        return;
+    }
 
     view_size = static_cast<int>(adjustment->get_page_size());
 

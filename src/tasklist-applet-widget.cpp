@@ -48,7 +48,7 @@ TasklistAppletWidget::TasklistAppletWidget(MatePanelApplet *applet_):
     g_signal_connect(applet, "change-orient", G_CALLBACK(on_applet_orient_change), this);
 }
 
-void TasklistAppletWidget::on_app_buttons_page_changed()
+void TasklistAppletWidget::update_action_buttons_state()
 {
     prev_btn->set_sensitive(container.has_previous_page());
     next_btn->set_sensitive(container.has_next_page());
@@ -56,9 +56,17 @@ void TasklistAppletWidget::on_app_buttons_page_changed()
     button_box.set_visible(prev_btn->get_sensitive() || next_btn->get_sensitive());
 }
 
+void TasklistAppletWidget::on_app_buttons_page_changed()
+{
+    /*
+     * 此处延缓更新分页按钮状态，否则不会触发size-allocate事件
+     */
+    Glib::signal_idle().connect_once(sigc::mem_fun(*this, &TasklistAppletWidget::update_action_buttons_state));
+}
+
 void TasklistAppletWidget::on_applet_orient_changed()
 {
-    main_box.set_orientation(container.get_orientation());
+    set_orientation(container.get_orientation());
 }
 
 void TasklistAppletWidget::init_ui()
@@ -72,20 +80,17 @@ void TasklistAppletWidget::init_ui()
     button_box.set_spacing(2);
     button_box.set_margin_start(5);
     button_box.set_margin_end(5);
-    button_box.set_margin_top(5);
-    button_box.set_margin_bottom(5);
     button_box.set_valign(Gtk::ALIGN_FILL);
     button_box.set_halign(Gtk::ALIGN_CENTER);
     button_box.pack_start(*prev_btn, true, true);
     button_box.pack_end(*next_btn, true, true);
 
-    main_box.pack_start(container, true, true);
-    main_box.pack_end(button_box, false, false);
-    add(main_box);
+    pack_start(container, true, true);
+    pack_end(button_box, false, false);
 
-    main_box.property_orientation().signal_changed().connect(
+    property_orientation().signal_changed().connect(
                 [this]() -> void {
-                    if (main_box.get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
+                    if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
                         button_box.set_orientation(Gtk::ORIENTATION_VERTICAL);
                         button_box.set_size_request(16, -1);
                     }
@@ -99,7 +104,7 @@ void TasklistAppletWidget::init_ui()
                 });
 
 
-    main_box.set_orientation(container.get_orientation());
+    set_orientation(container.get_orientation());
 
     container.signal_page_changed().connect(sigc::mem_fun(*this, &TasklistAppletWidget::on_app_buttons_page_changed));
 
