@@ -75,9 +75,10 @@ bool TasklistWindowPreviewer::draw_snapshot(Gtk::Widget *snapshot_area, const Ca
             scale_y = allocation.get_height()* scale_factor * 1.0/height;
 
             scale = std::min(scale_x, scale_y);
+            cr->scale(1.0/scale_factor, 1.0/scale_factor);
             cr->translate((allocation.get_width() * scale_factor - width * scale)/2.0,
                           (allocation.get_height() * scale_factor - height * scale)/2.0);
-            cr->scale(1.0/scale_factor * scale, 1.0/scale_factor * scale);
+            cr->scale(scale, scale);
 
 
             cairo_set_source_surface(cr->cobj(), thumbnail, 0, 0);
