@@ -1,12 +1,12 @@
 #include "workspace-window-thumbnail.h"
-#include "kiranhelper.h"
+#include "kiran-helper.h"
 #include <gtk/gtkx.h>
 #include <cairo/cairo-xlib.h>
 #include <X11/Xlib.h>
 
 WorkspaceWindowThumbnail::WorkspaceWindowThumbnail(KiranWindowPointer &win_, double scale_):
     Glib::ObjectBase("WorkspaceWindowSnapshot"),
-    KiranWindowThumbnail (win_),
+    WindowThumbnailWidget (win_),
     border_width(4),
     thumbnail_surface(nullptr),
     scale(scale_),
@@ -256,5 +256,5 @@ bool WorkspaceWindowThumbnail::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
     if (!show_thumbnail)
         return false;
 
-    return KiranWindowThumbnail::on_draw(cr);
+    return WindowThumbnailWidget::on_draw(cr);
 }

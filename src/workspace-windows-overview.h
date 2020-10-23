@@ -3,7 +3,7 @@
 
 #include <gtkmm.h>
 #include "workspace-manager.h"
-#include "kiranhelper.h"
+#include "kiran-helper.h"
 
 class WorkspaceWindowsOverview : public Gtk::EventBox
 {

@@ -41,7 +41,7 @@ bool KiranSearchEntry::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
     int offset_x, offset_y;
     auto layout = get_layout();
 
-    layout->set_text(this->get_placeholder_text());
+    layout->set_text(get_placeholder_text());
     get_layout_offsets(offset_x, offset_y);
 
     if (context->lookup_color("placeholder_text_color", color))

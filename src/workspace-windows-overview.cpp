@@ -1,6 +1,6 @@
 #include "workspace-windows-overview.h"
 #include "workspace-window-thumbnail.h"
-#include "kiranhelper.h"
+#include "kiran-helper.h"
 #include "window_arrange.h"
 #include <algorithm>
 #include "global.h"
@@ -64,7 +64,7 @@ void WorkspaceWindowsOverview::get_preferred_height_vfunc(int &min_height, int &
 bool WorkspaceWindowsOverview::on_button_press_event(GdkEventButton *event)
 {
     /*Hide window when clicked on blank area*/
-    this->get_toplevel()->hide();
+    get_toplevel()->hide();
     return false;
 }
 

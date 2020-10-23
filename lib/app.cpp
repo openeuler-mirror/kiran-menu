@@ -156,9 +156,7 @@ WindowVec App::get_taskbar_windows()
 {
     auto windows = get_windows();
     auto iter = std::remove_if(windows.begin(), windows.end(), [](std::shared_ptr<Kiran::Window> window) {
-        if (window->is_skip_pager() || window->is_skip_taskbar())
-            return true;
-        return window->get_window_type() != WNCK_WINDOW_NORMAL && window->get_window_type() != WNCK_WINDOW_DIALOG;
+        return window->should_skip_taskbar();
     });
     windows.erase(iter, windows.end());
     return windows;
@@ -210,11 +208,12 @@ bool App::launch()
 
     bool res = false;
     std::string error;
+    auto app_context = Gdk::Display::get_default()->get_app_launch_context();
 
     try
     {
         std::vector<Glib::RefPtr<Gio::File> > files;
-        res = this->desktop_app_->launch(files);
+        res = this->desktop_app_->launch(files, app_context);
     }
     catch (const Glib::Error &e)
     {
@@ -240,7 +239,8 @@ void App::launch_action(const std::string &action_name)
 
     g_return_if_fail(this->desktop_app_);
 
-    this->desktop_app_->launch_action(action_name);
+    auto app_context = Gdk::Display::get_default()->get_app_launch_context();
+    this->desktop_app_->launch_action(action_name, app_context);
     // there is no way to detect failures that occur while using this function
     // this->launched_.emit(this->shared_from_this());
 }
