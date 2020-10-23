@@ -98,7 +98,7 @@ void WorkspaceWindowsOverview::reload()
     if (windows.size() == 0)
         return;
 
-    /**
+    /*
      * 计算合适的窗口显示行数，最大显示行数为4
      * FIXME: max_rows应当根据屏幕高度动态调整
      */
@@ -108,17 +108,17 @@ void WorkspaceWindowsOverview::reload()
               viewport_height,
               rows);
 
-    /**
+    /*
      * 将窗口分成rows分组，确保每组窗口的宽度之和近似
      */
     std::vector<std::vector<int16_t>> results;
     for (auto window: windows) {
         width_vector.push_back(WINDOW_WIDTH(window));
     }
-    results = window_arrangement(width_vector, rows, WIN_SIZE_UNIT);
+    results = arrange_data(width_vector, rows);
 
 
-    /**
+    /*
      * 开始计算每行的实际缩放比，然后绘制窗口缩略图
      */
     int index = 0;
@@ -138,7 +138,7 @@ void WorkspaceWindowsOverview::reload()
                 return WINDOW_HEIGHT(w1) >= WINDOW_HEIGHT(w2);
         });
 
-        /**
+        /*
          * 提取该行窗口的最大高度
          */
         for (auto index: row) {
@@ -148,7 +148,7 @@ void WorkspaceWindowsOverview::reload()
             max_height = std::max(max_height, WINDOW_HEIGHT(window));
         }
 
-        /**
+        /*
          * 计算每行横向和纵向的实际缩放比(去掉窗口之间的间隔)，取两者的最小值,
          * 确保该行最大高度的窗口缩放后也可以正常显示
          */
@@ -185,7 +185,7 @@ int WorkspaceWindowsOverview::calculate_rows(std::vector<std::shared_ptr<Kiran::
     int min_width = G_MAXINT, min_height = G_MAXINT, max_height = 0;
     gint64 sum_width = 0;
 
-    /**
+    /*
      * 遍历窗口，获取窗口宽度和高度的最小值，高度的最大值，以及所有窗口宽度之和
      */
     for (auto window: windows) {
@@ -200,7 +200,7 @@ int WorkspaceWindowsOverview::calculate_rows(std::vector<std::shared_ptr<Kiran::
         max_height = std::max(max_height, height);
     }
 
-    /**
+    /*
      * 约束:
      * 1、最小宽度和最小高度的窗口经过缩放后尺寸不能小于阈值，确保窗口预览可见
      * 2、最大高度的窗口经过缩放后也在行高的范围内，同时最接近行高
@@ -212,7 +212,7 @@ int WorkspaceWindowsOverview::calculate_rows(std::vector<std::shared_ptr<Kiran::
         double x_scale, y_scale;
 
         x_scale = viewport_width * rows * 1.0/sum_width;        //宽度缩放比
-        y_scale = (viewport_height - (rows - 1) * (row_spacing + SNAPSHOT_EXTRA_HEIGHT * get_scale_factor())) * 1.0/(rows * max_height);    //高度缩放比
+        y_scale = (viewport_height - (rows - 1) * row_spacing - rows * SNAPSHOT_EXTRA_HEIGHT * get_scale_factor()) * 1.0/(rows * max_height);    //高度缩放比
 
         if (x_scale <= y_scale && min_width * x_scale > MIN_VIEW_WIDTH && min_height * x_scale > MIN_VIEW_HEIGHT) {
             found_ok = true;
