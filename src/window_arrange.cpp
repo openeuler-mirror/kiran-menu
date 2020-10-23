@@ -182,3 +182,64 @@ std::vector<std::vector<int16_t>> window_arrangement(std::vector<int> windows, i
 
     return result;
 }
+
+std::vector<std::vector<int16_t>> arrange_data(std::vector<int> data, uint32_t rows)
+{
+        std::vector<std::vector<int16_t>> results;
+        std::vector<std::pair<int16_t, int>> new_data;
+
+        int64_t *row_sum = nullptr;
+        uint32_t num_rows = 0, row_index;
+        int16_t index = 0;
+
+        /*
+         * 由于最终返回的结果中记录的是数据的索引，所以需要保留原数据的索引信息
+         */
+        for (auto num: data) {
+            new_data.push_back(std::make_pair(index, num));
+            index++;
+        }
+
+        /* 把数据按照从大到小排序 */
+        std::sort(new_data.begin(), new_data.end(),
+                  [](const std::pair<int16_t,int> &a, const std::pair<int16_t,int> &b) -> bool {
+                        return a.second > b.second;
+                  });
+
+        /* 构造基本数据结构并进行初始化 */
+        row_sum = new int64_t[rows];
+        for (uint32_t i = 0; i < rows; i++) {
+                results.push_back(std::vector<int16_t>());
+                row_sum[i] = 0;
+        }
+
+        /*
+         * 先排满指定的行数，然后将剩余的逐个放到总和最小的行中
+         */
+        for (auto pair: new_data)
+        {
+                int num = pair.second;
+                if (num_rows >= rows) {
+                        int64_t min_sum = INT64_MAX;
+                        uint32_t min_row = 0;
+                        for (uint32_t j = 0; j < rows; j++) {
+                                if (min_sum >= row_sum[j]) {
+                                        min_sum = row_sum[j];
+                                        min_row = j;
+                                }
+                        }
+                        row_index = min_row;
+                } else
+                        row_index = num_rows;
+
+                results.at(row_index).push_back(pair.first);
+                row_sum[row_index] += num;
+                if (num_rows < rows)
+                        num_rows++;
+        }
+
+        delete []row_sum;
+        return results;
+}
+
+
