@@ -60,6 +60,9 @@ private:
 
     void load_windows_list();
     const Gtk::Scrollbar *get_scrollbar() const;
+    Gtk::Scrollbar *get_scrollbar();
+
+    static const int border_spacing;
 };
 
 #endif // TASKLIST_APP_PREVIEWER_H

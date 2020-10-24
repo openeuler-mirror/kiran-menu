@@ -2,6 +2,8 @@
 #include <window-manager.h>
 #include "global.h"
 
+const int TasklistAppPreviewer::border_spacing = 5;
+
 TasklistAppPreviewer::TasklistAppPreviewer():
     Gtk::Window(Gtk::WINDOW_POPUP),
     need_display(true),
@@ -28,7 +30,6 @@ TasklistAppPreviewer::TasklistAppPreviewer():
                 });
 
     get_style_context()->add_class("app-previewer");
-    //set_size_request(500, 500);
 }
 
 
@@ -36,7 +37,6 @@ void TasklistAppPreviewer::set_app(const std::shared_ptr<Kiran::App> &app_)
 {
     app = app_;
     load_windows_list();
-    //TODO resize window
     adjust_size();
 }
 
@@ -125,12 +125,12 @@ void TasklistAppPreviewer::reposition()
             workarea.get_width(), workarea.get_height(),
             new_x, new_y);
     if (new_x < workarea.get_x())
-        new_x = workarea.get_x() + 5;
+        new_x = workarea.get_x() + border_spacing;
     else
         new_x = std::min(new_x, workarea.get_x() + workarea.get_width());
 
     if (new_y < workarea.get_y())
-        new_y = workarea.get_y() + 5;
+        new_y = workarea.get_y() + border_spacing;
     else
         new_y = std::min(new_y, workarea.get_y() + workarea.get_height());
 
@@ -140,12 +140,10 @@ void TasklistAppPreviewer::reposition()
 void TasklistAppPreviewer::get_preferred_height_vfunc(int &minimum_height, int &natural_height) const
 {
     Gdk::Rectangle workarea;
-    Gtk::Requisition min_size, natural_size;
-    int min_width, natural_width;
+    Gtk::Requisition unused_size, natural_size;
     Glib::RefPtr<Gdk::Window> window;
     Glib::RefPtr<Gdk::Monitor> monitor;
 
-    scroll_window.get_preferred_size(min_size, natural_size);
     if (relative_to == nullptr) {
         minimum_height = natural_height = 0;
         return;
@@ -153,17 +151,26 @@ void TasklistAppPreviewer::get_preferred_height_vfunc(int &minimum_height, int &
 
     window = relative_to->get_window();
     monitor = relative_to->get_display()->get_monitor_at_window(window);
-
     monitor->get_workarea(workarea);
-    if (natural_size.height > workarea.get_height()) {
-        //如果box的大小超过了当前显示器大小，使用滚动窗口大小，因为滚动窗口的natural_size包含了滚动条的size
-        natural_height = workarea.get_height();
-    } else {
+    scroll_window.get_preferred_size(unused_size, natural_size);
+
+    if (natural_size.height + border_spacing * 2 <= workarea.get_height()) {
         natural_height = natural_size.height;
 
-        get_scrollbar()->get_preferred_width(min_width, natural_width);
-        if (workarea.get_width() < natural_size.width) //需要额外加上滚动条的尺寸
-            natural_height += natural_width;
+        if (workarea.get_width() < natural_size.width) {
+            /*
+             * 需要额外加上滚动条的尺寸
+             */
+            int min_width, scrollbar_width;
+
+            get_scrollbar()->get_preferred_width(min_width, scrollbar_width);
+            natural_height += scrollbar_width;
+        }
+    } else {
+        /*
+         * 预览窗口高度不能超过屏幕高度
+         */
+        natural_height = workarea.get_height() - border_spacing * 2;
     }
 
     minimum_height = natural_height;
@@ -185,16 +192,27 @@ void TasklistAppPreviewer::get_preferred_width_vfunc(int &minimum_width, int &na
 
     monitor = relative_to->get_display()->get_monitor_at_window(window);
     monitor->get_workarea(workarea);
-    if (workarea.get_width() < natural_size.width + 10) {
-        natural_width = workarea.get_width() - 10;
+    if (natural_size.width + border_spacing * 2 <= workarea.get_width()) {
+        /*
+         * 显示内容宽度未超过屏幕宽度
+         */
+        natural_width = natural_size.width;
+
+        if (workarea.get_height() < natural_size.height){
+            /*
+             * 需要额外加上滚动条的尺寸
+             */
+            int min_height, scrollbar_height;
+
+            get_scrollbar()->get_preferred_height(min_height, scrollbar_height);
+            natural_width += scrollbar_height;
+        }
     }
     else {
-        int min_height, natural_height;
-
-        natural_width = natural_size.width;
-        get_scrollbar()->get_preferred_height(min_height, natural_height);
-        if (workarea.get_height() < natural_size.height) //需要额外加上滚动条的尺寸
-            natural_width += natural_height;
+        /*
+         * 预览窗口宽度不能超过屏幕宽度
+         */
+        natural_width = workarea.get_width() - border_spacing * 2;
     }
     minimum_width = natural_width;
 }
@@ -307,6 +325,14 @@ const Gtk::Scrollbar *TasklistAppPreviewer::get_scrollbar() const
         return scroll_window.get_vscrollbar();
 }
 
+Gtk::Scrollbar *TasklistAppPreviewer::get_scrollbar()
+{
+    if (box.get_orientation() == Gtk::ORIENTATION_HORIZONTAL)
+        return scroll_window.get_hscrollbar();
+    else
+        return scroll_window.get_vscrollbar();
+}
+
 /**
  *
  */
@@ -374,17 +400,25 @@ void TasklistAppPreviewer::set_position(Gtk::PositionType pos)
 
 bool TasklistAppPreviewer::on_scroll_event(GdkEventScroll *event)
 {
-    /**
-     * FIXME
-     * 将滚动事件传递给滚动条，不知道为何没有自动传递滚动事件
+    /*
+     * 将滚动事件直接传递给滚动条
+     *
+     * 由于scroll window只会在鼠标位置变化的方向和滚动条方向一致
+     * 的情况下才会自动滚动，当滚动鼠标滚轮的时候，鼠标位置在Y
+     * 方向上发生变化，水平滚动条不会自动滚动。所以需要手动传递
+     * 滚动事件给水平滚动条.
      */
     Gtk::Scrollbar *scrollbar;
 
-    scrollbar = const_cast<Gtk::Scrollbar*>(get_scrollbar());
-    if (scrollbar->is_visible()) {
+    scrollbar = get_scrollbar();
+    if (!scrollbar->is_visible())
+        return false;
+
+    if (event->delta_x == 0.0 && scrollbar->get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
         GtkWidget *widget = reinterpret_cast<GtkWidget*>(scrollbar->gobj());
         gtk_propagate_event(widget, reinterpret_cast<GdkEvent*>(event));
-     }
+    }
+
     return false;
 }
 
