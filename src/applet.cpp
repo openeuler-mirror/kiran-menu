@@ -68,6 +68,98 @@ static GdkFilterReturn key_event_filter(GdkXEvent *xevent, GdkEvent *event, gpoi
     return GDK_FILTER_CONTINUE;
 }
 
+
+
+static void show_applet_about_dialog(const char *program_name,
+                                     const char *icon_name,
+                                     const char *comments)
+{
+    GtkWidget *dialog;
+
+    dialog = gtk_about_dialog_new();
+
+    gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(dialog), program_name);
+    gtk_about_dialog_set_logo_icon_name(GTK_ABOUT_DIALOG(dialog), icon_name);
+    gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG(dialog), comments);
+
+    gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), PACKAGE_VERSION);
+    gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(dialog),
+                                   "Copyright © KylinSec Co., Ltd. 2020. All rights reserved.");
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
+}
+
+void open_menu_about(GtkAction *action, gpointer userdata)
+{
+    show_applet_about_dialog(_("Kiran Menu Applet"),
+                             "kiran-menu",
+                             _("Startup menu designed for Kiran Desktop"));
+}
+
+
+void open_tasklist_about(GtkAction *action, gpointer userdata)
+{
+    show_applet_about_dialog(_("Kiran Tasklist Applet"),
+                             "kiran-window-switcher",
+                             _("Task switcher designed for Kiran Desktop"));
+}
+
+void open_workspace_switcher_about(GtkAction *action, gpointer userdata)
+{
+    show_applet_about_dialog(_("Kiran Workspace switcher Applet"),
+                             "kiran-workspace-switcher",
+                             _("Workspace switcher designed for Kiran Desktop"));
+}
+
+GtkActionGroup *create_action_group_for_menu()
+{
+    GtkActionGroup *action_group;
+    GtkAction *action;
+
+    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+    action_group = gtk_action_group_new("kiran-menu");
+    action = gtk_action_new("KiranMenuAbout", _("About"), _("About this applet"), "gtk-about");
+    gtk_action_group_add_action(action_group, action);
+    g_signal_connect(action, "activate", G_CALLBACK(open_menu_about), NULL);
+    G_GNUC_END_IGNORE_DEPRECATIONS
+
+
+    return action_group;
+}
+
+GtkActionGroup *create_action_group_for_tasklist()
+{
+    GtkActionGroup *action_group;
+    GtkAction *action;
+
+    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+    action_group = gtk_action_group_new("kiran-tasklist");
+
+    action = gtk_action_new("KiranTasklistAbout", _("About"), _("About this applet"), "gtk-about");
+    gtk_action_group_add_action(action_group, action);
+    g_signal_connect(action, "activate", G_CALLBACK(open_tasklist_about), NULL);
+    G_GNUC_END_IGNORE_DEPRECATIONS
+
+    return action_group;
+}
+
+GtkActionGroup *create_action_group_for_workspace_switcher()
+{
+    GtkActionGroup *action_group;
+    GtkAction *action;
+
+    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+    action_group = gtk_action_group_new("kiran-workspace-switcher");
+
+    action = gtk_action_new("KiranWorkspaceSwitcherAbout", _("About"), _("About this applet"), "gtk-about");
+    gtk_action_group_add_action(action_group, action);
+    g_signal_connect(action, "activate", G_CALLBACK(open_workspace_switcher_about), NULL);
+    G_GNUC_END_IGNORE_DEPRECATIONS
+
+    return action_group;
+}
+
+
 static gboolean
 kiran_menu_applet_fill (MatePanelApplet *applet,
            const gchar *iid,
@@ -87,12 +179,11 @@ kiran_menu_applet_fill (MatePanelApplet *applet,
     bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
     textdomain (GETTEXT_PACKAGE);
 
-    mate_panel_applet_set_flags (applet, MATE_PANEL_APPLET_EXPAND_MINOR);
 
     Gtk::Main::init_gtkmm_internals();
     if (!backend_inited) {
     	Kiran::init_backend_system();
-	backend_inited = true;
+        backend_inited = true;
     }
 
     if (!load_resources(APPLET_RESOURCE_PATH))
@@ -102,38 +193,43 @@ kiran_menu_applet_fill (MatePanelApplet *applet,
 
     if (!strcmp(iid, "KiranMenuApplet")) {
         //开始菜单插件
+        Display *xdisplay = gdk_x11_get_default_xdisplay();
 
-        auto button = new MenuAppletButton(applet);
+        auto button = Gtk::make_managed<MenuAppletButton>(applet);
         gtk_container_add(GTK_CONTAINER(applet), GTK_WIDGET(button->gobj()));
-        do {
-            Display *xdisplay = nullptr;
 
-            xdisplay = gdk_x11_get_default_xdisplay();
-            atom_mate_panel_action_kiran_menu =
-                XInternAtom(xdisplay,
-                        "_MATE_PANEL_ACTION_KIRAN_MENU",
-                        FALSE);
+        atom_mate_panel_action_kiran_menu = XInternAtom(xdisplay,
+                                                        "_MATE_PANEL_ACTION_KIRAN_MENU",
+                                                        FALSE);
 
-            atom_mate_panel_action =
-                XInternAtom(xdisplay,
-                        "_MATE_PANEL_ACTION",
-                        FALSE);
+        atom_mate_panel_action = XInternAtom(xdisplay,
+                                             "_MATE_PANEL_ACTION",
+                                             FALSE);
 
-            gdk_window_add_filter(nullptr, key_event_filter, button);
-        } while (0);
+        gdk_window_add_filter(nullptr, key_event_filter, button);
+        mate_panel_applet_set_flags (applet, MATE_PANEL_APPLET_EXPAND_MINOR);
+        mate_panel_applet_setup_menu_from_file(applet,
+                                               PACKAGE_DATA_DIR "/menu-menu.ui.xml",
+                                               create_action_group_for_menu());
     } else if (!strcmp(iid, "KiranTasklistApplet"))  {
         int flags;
-
-        //窗口切换预览插件
-        g_debug("loading tasklist applet\n");
         TasklistAppletWidget *button = Gtk::make_managed<TasklistAppletWidget>(applet);
+
         flags = MATE_PANEL_APPLET_HAS_HANDLE | MATE_PANEL_APPLET_EXPAND_MINOR | MATE_PANEL_APPLET_EXPAND_MAJOR;
         mate_panel_applet_set_flags(applet, (MatePanelAppletFlags)flags);
+        mate_panel_applet_setup_menu_from_file(applet,
+                                               PACKAGE_DATA_DIR "/tasklist-menu.ui.xml",
+                                               create_action_group_for_tasklist());
 
         gtk_container_add(GTK_CONTAINER(applet), GTK_WIDGET(button->gobj()));
     } else if (!strcmp(iid, "KiranWorkspaceApplet")) {
         WorkspaceAppletButton *button = Gtk::make_managed<WorkspaceAppletButton>(applet);
+
         gtk_container_add(GTK_CONTAINER(applet), GTK_WIDGET(button->gobj()));
+        mate_panel_applet_set_flags (applet, MATE_PANEL_APPLET_EXPAND_MINOR);
+        mate_panel_applet_setup_menu_from_file(applet,
+                                               PACKAGE_DATA_DIR "/workspace-switcher-menu.ui.xml",
+                                               create_action_group_for_workspace_switcher());
     }
 
     gtk_widget_show_all(GTK_WIDGET(applet));

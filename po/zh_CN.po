@@ -192,4 +192,29 @@ msgstr "移动到其它工作区"
 msgid "Close Window"
 msgstr "关闭"
 
+msgid "Preferences"
+msgstr "首选项"
+
+msgid "About"
+msgstr "关于"
+
+msgid "Kiran Menu Applet"
+msgstr "Kiran开始菜单插件"
+
+msgid "Startup menu designed for Kiran Desktop"
+msgstr "专为Kiran桌面设计的开始菜单"
+
+msgid "Kiran Tasklist Applet"
+msgstr "Kiran任务切换插件"
+
+msgid "Task switcher designed for Kiran Desktop"
+msgstr "专为Kiran桌面设计的任务切换插件"
+
+msgid "Kiran Workspace switcher Applet"
+msgstr "Kiran工作区切换插件"
+
+msgid "Workspace switcher designed for Kiran Desktop"
+msgstr "专为Kiran桌面设计的工作区切换插件"
+
+
 
