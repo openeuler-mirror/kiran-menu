@@ -66,7 +66,7 @@ void TasklistButtonsContainer::add_app_button(const KiranAppPointer &app)
     applet_size = static_cast<int>(mate_panel_applet_get_size(applet));
 
     button = Gtk::make_managed<TasklistAppButton>(app, applet_size);
-#if 1
+
     //鼠标进入应用按钮时，显示预览窗口
     button->signal_enter_notify_event().connect(
                 sigc::bind_return<bool>(
@@ -101,19 +101,6 @@ void TasklistButtonsContainer::add_app_button(const KiranAppPointer &app)
                         hide_previewer();
                 });
 
-    /* 按钮应用为当前窗口的应用时，确保其在任务栏上可见 */
-    button->signal_size_allocate().connect(
-                [this, button](Gtk::Allocation &allocation UNUSED) -> void {
-                    auto active_win = Kiran::WindowManager::get_instance()->get_active_window();
-                    if (!active_win)
-                        return;
-
-                    if (active_win->get_app() == button->get_app()) {
-                        switch_to_page_of_button(button);
-                    }
-                });
-
-#endif
     add(*button);
     button->show_all();
 
@@ -627,6 +614,7 @@ void TasklistButtonsContainer::on_realize()
     adjustment->signal_changed().connect(
                 [this]() -> void {
                     signal_page_changed().emit();
+                    ensure_active_app_button_visible();
                 });
 
     adjustment->signal_value_changed().connect(
@@ -762,6 +750,17 @@ void TasklistButtonsContainer::switch_to_page_of_button(TasklistAppButton *butto
 
     page_no = offset_end / view_size;
     adjustment->set_value(page_no * view_size);
+}
+
+void TasklistButtonsContainer::ensure_active_app_button_visible()
+{
+    auto active_window = Kiran::WindowManager::get_instance()->get_active_window();
+
+    if (!active_window)
+        return;
+
+    auto active_button = find_app_button(active_window->get_app());
+    switch_to_page_of_button(active_button);
 }
 
 void TasklistButtonsContainer::init_ui()

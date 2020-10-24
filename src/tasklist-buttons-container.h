@@ -75,6 +75,7 @@ protected:
      * @param button    需要可见的应用按钮
      */
     virtual void switch_to_page_of_button(TasklistAppButton *button);
+    virtual void ensure_active_app_button_visible();
 
     virtual void init_ui();
 
