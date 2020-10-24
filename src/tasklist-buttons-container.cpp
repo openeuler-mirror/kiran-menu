@@ -43,6 +43,8 @@ TasklistButtonsContainer::TasklistButtonsContainer(MatePanelApplet *applet_, int
     get_style_context()->add_class("tasklist-widget");
 
     add_events(Gdk::STRUCTURE_MASK);
+
+    active_app = get_current_active_app();
 }
 
 TasklistButtonsContainer::~TasklistButtonsContainer()
