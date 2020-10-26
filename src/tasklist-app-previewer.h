@@ -30,6 +30,9 @@ public:
 
     bool has_context_menu_opened();
 
+    void deferred_hide();
+    void deferred_show();
+
 protected:
     virtual void get_preferred_height_vfunc(int &minimum_height, int &natural_height) const override;
     virtual void get_preferred_width_vfunc(int &minimum_width, int &natural_width) const override;
@@ -40,6 +43,7 @@ protected:
 
     virtual void on_child_remove();
 
+    virtual void on_child_context_menu_toggled(bool active);
 
     virtual void set_rgba_visual();
     virtual void init_ui();
@@ -63,6 +67,7 @@ private:
     Gtk::Scrollbar *get_scrollbar();
 
     static const int border_spacing;
+    static const int deferred_time;
 };
 
 #endif // TASKLIST_APP_PREVIEWER_H

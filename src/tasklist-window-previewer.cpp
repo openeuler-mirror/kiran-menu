@@ -144,11 +144,16 @@ bool TasklistWindowPreviewer::on_button_press_event(GdkEventButton *button_event
         if (!context_menu) {
             context_menu = new TasklistWindowContextMenu(window);
             context_menu->attach_to_widget(*this);
+            context_menu->signal_deactivate().connect(
+                        [this]() -> void {
+                            signal_context_menu_toggled().emit(false);
+                        });
         } else
             context_menu->refresh();
 
         context_menu->show_all();
         context_menu->popup_at_pointer(event);
+        signal_context_menu_toggled().emit(true);
         return false;
     }
 
@@ -175,4 +180,9 @@ void TasklistWindowPreviewer::on_composite_changed()
 bool TasklistWindowPreviewer::context_menu_is_opened()
 {
     return context_menu != nullptr && context_menu->is_visible();
+}
+
+sigc::signal<void, bool> TasklistWindowPreviewer::signal_context_menu_toggled()
+{
+    return m_signal_context_menu_toggled;
 }

@@ -5,7 +5,6 @@
 #include "taskbar-skeleton.h"
 #include "menu-skeleton.h"
 
-#define PREVIEWER_ANIMATION_TIMEOUT 400
 
 void on_applet_size_change(MatePanelApplet *applet UNUSED,
                            gint size UNUSED,
@@ -317,36 +316,20 @@ void TasklistButtonsContainer::move_previewer(TasklistAppButton *target_button)
         return;
 
     previewer->set_idle(false);
-
-    Glib::signal_timeout().connect_once([this, target_button]() -> void {
-        auto target_app = target_button->get_app();
-        auto previewer_app = previewer->get_app();
-        if (previewer_app == target_app && previewer->is_visible()) {
-            //当前预览的应用和目标应用是同一应用
-            return;
-        }
-        if (previewer->get_idle()) {
-            g_debug("previewer idle\n");
-            return;
-        }
-        previewer->set_relative_to(target_button, get_previewer_position());
-        previewer->show();
-    }, PREVIEWER_ANIMATION_TIMEOUT);
+    if (previewer->get_app() == target_button->get_app() && previewer->is_visible()) {
+        //当前预览的应用和目标应用是同一应用
+        return;
+    }
+    previewer->set_relative_to(target_button, get_previewer_position());
+    previewer->deferred_show();
 }
 
 void TasklistButtonsContainer::hide_previewer()
 {
-
     if (previewer->has_context_menu_opened())
         return;
     previewer->set_idle(true);
-
-    Glib::signal_timeout().connect_once(
-                [this]() -> void {
-                    if (previewer->get_idle()) {
-                        previewer->hide();
-                    }
-                }, PREVIEWER_ANIMATION_TIMEOUT);
+    previewer->deferred_hide();
 }
 
 Gtk::PositionType TasklistButtonsContainer::get_previewer_position()

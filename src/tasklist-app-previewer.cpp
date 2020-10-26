@@ -3,6 +3,7 @@
 #include "global.h"
 
 const int TasklistAppPreviewer::border_spacing = 5;
+const int TasklistAppPreviewer::deferred_time = 400;  //毫秒
 
 TasklistAppPreviewer::TasklistAppPreviewer():
     Gtk::Window(Gtk::WINDOW_POPUP),
@@ -241,11 +242,15 @@ bool TasklistAppPreviewer::on_enter_notify_event(GdkEventCrossing *crossing_even
 bool TasklistAppPreviewer::on_leave_notify_event(GdkEventCrossing *crossing_event)
 {
     int width, height;
+    int pointer_x, pointer_y;
+
+    pointer_x = static_cast<int>(crossing_event->x);
+    pointer_y = static_cast<int>(crossing_event->y);
 
     width = get_window()->get_width();
     height = get_window()->get_height();
-    if (crossing_event->x > 0 && crossing_event->x < width &&
-            crossing_event->y > 0 && crossing_event->y < height) {
+    if (pointer_x > 0 && pointer_x < width &&
+            pointer_y > 0 && pointer_y < height) {
         //鼠标仍旧在窗口范围内
         return true;
     }
@@ -262,7 +267,30 @@ void TasklistAppPreviewer::on_child_remove()
     g_debug("after remove, %d children last\n", box.get_children().size());
     if (!box.get_children().size()) {
         //如果当前app没有已打开的窗口，隐藏预览窗口
-        hide();
+        deferred_hide();
+    }
+}
+
+void TasklistAppPreviewer::on_child_context_menu_toggled(bool active)
+{
+    GdkPoint point;
+    GdkRectangle rect;
+
+    if (active)
+        return;
+
+    auto pointer_device = get_display()->get_default_seat()->get_pointer();
+    pointer_device->get_position(point.x, point.y);
+
+    auto window = get_window();
+    window->get_origin(rect.x, rect.y);
+
+    rect.width = get_allocated_width();
+    rect.height = get_allocated_height();
+
+    if (!KiranHelper::gdk_rectangle_contains_point(&rect, &point)) {
+        set_idle(true);
+        deferred_hide();
     }
 }
 
@@ -294,6 +322,24 @@ void TasklistAppPreviewer::init_ui()
     scroll_window.signal_scroll_event().connect(sigc::mem_fun(*this, &TasklistAppPreviewer::on_scroll_event));
 
     add(scroll_window);
+}
+
+void TasklistAppPreviewer::deferred_hide()
+{
+    Glib::signal_timeout().connect_once(
+                [this]() -> void {
+                    if (get_idle())
+                        hide();
+                }, deferred_time);
+}
+
+void TasklistAppPreviewer::deferred_show()
+{
+    Glib::signal_timeout().connect_once(
+                [this]() -> void {
+                    if (!get_idle())
+                        show();
+                }, deferred_time);
 }
 
 void TasklistAppPreviewer::load_windows_list()
@@ -341,6 +387,9 @@ void TasklistAppPreviewer::add_window_thumbnail(std::shared_ptr<Kiran::Window> &
     auto previewer = Gtk::make_managed<TasklistWindowPreviewer>(window);
     box.pack_start(*previewer, Gtk::PACK_SHRINK);
     previewer->show();
+
+    previewer->signal_context_menu_toggled().connect(
+                sigc::mem_fun(*this, &TasklistAppPreviewer::on_child_context_menu_toggled));
 
     auto data = std::make_pair(window->get_xid(), previewer);
     win_previewers.insert(data);

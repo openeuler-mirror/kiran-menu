@@ -21,6 +21,7 @@ public:
     virtual ~TasklistWindowPreviewer() override;
 
     bool context_menu_is_opened();
+    sigc::signal<void, bool> signal_context_menu_toggled();
 
 protected:
     virtual void get_preferred_width_vfunc(int& minimum_width,
@@ -36,6 +37,7 @@ protected:
 
 private:
     TasklistWindowContextMenu *context_menu;
+    sigc::signal<void, bool> m_signal_context_menu_toggled;
 };
 
 #endif // TASKLIST_WINDOW_PREVIEWER_H

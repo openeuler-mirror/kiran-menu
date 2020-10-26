@@ -316,9 +316,9 @@ bool TasklistAppButton::on_enter_notify_event(GdkEventCrossing *crossing_event U
 
 bool TasklistAppButton::on_leave_notify_event(GdkEventCrossing *crossing_event UNUSED)
 {
+    set_state_flags(get_state_flags() & ~Gtk::STATE_FLAG_PRELIGHT, true);
     if (get_context_menu_opened())
         return true;
-    set_state_flags(get_state_flags() & ~Gtk::STATE_FLAG_PRELIGHT, true);
     return false;
 }
 
