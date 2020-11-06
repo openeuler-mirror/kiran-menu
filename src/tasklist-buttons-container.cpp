@@ -5,6 +5,7 @@
 #include "taskbar-skeleton.h"
 #include "menu-skeleton.h"
 
+#define PREVIEWER_ANIMATION_TIMEOUT 300
 
 void on_applet_size_change(MatePanelApplet *applet UNUSED,
                            gint size UNUSED,
@@ -48,6 +49,7 @@ TasklistButtonsContainer::TasklistButtonsContainer(MatePanelApplet *applet_, int
 
 TasklistButtonsContainer::~TasklistButtonsContainer()
 {
+    stop_pointer_check();
     delete previewer;
 }
 
@@ -68,19 +70,16 @@ void TasklistButtonsContainer::add_app_button(const KiranAppPointer &app)
 
     button = Gtk::make_managed<TasklistAppButton>(app, applet_size);
 
-    //鼠标进入应用按钮时，显示预览窗口
-    button->signal_enter_notify_event().connect(
-                sigc::bind_return<bool>(
-                    sigc::hide(
-                        sigc::bind<TasklistAppButton*>(
-                            sigc::mem_fun(*this, &TasklistButtonsContainer::move_previewer),
-                            button)),
-                    false));
+    button->signal_enter_notify_event().connect_notify(
+                sigc::hide(sigc::mem_fun(*this, &TasklistButtonsContainer::schedule_pointer_check)));
+    button->signal_leave_notify_event().connect_notify(
+                sigc::hide(sigc::mem_fun(*this, &TasklistButtonsContainer::schedule_pointer_check)));
 
 
     //鼠标点击时开关预览窗口
-    button->signal_button_press_event().connect(
+    button->signal_button_release_event().connect(
         [button, this](GdkEventButton *event) -> bool {
+            stop_pointer_check();
             if (gdk_event_triggers_context_menu(reinterpret_cast<GdkEvent*>(event)))
                 return false;
 
@@ -89,17 +88,13 @@ void TasklistButtonsContainer::add_app_button(const KiranAppPointer &app)
         });
 
 
-    //鼠标离开应用按钮时，隐藏预览窗口
-    button->signal_leave_notify_event().connect(
-                sigc::bind_return<bool>(
-                    sigc::hide(sigc::mem_fun(*this, &TasklistButtonsContainer::hide_previewer)),
-                    false));
-
     //应用右键菜单打开时，隐藏预览窗口
     button->signal_context_menu_toggled().connect(
                 [this](bool active) -> void {
-                    if (active)
-                        hide_previewer();
+                    if (!active)
+                        return;
+                    stop_pointer_check();
+                    hide_previewer();
                 });
 
     add(*button);
@@ -128,6 +123,62 @@ void TasklistButtonsContainer::toggle_previewer(TasklistAppButton *button)
         return;
     } else
         move_previewer(button);
+}
+
+void TasklistButtonsContainer::schedule_pointer_check()
+{
+    if (!pointer_check.connected()) {
+        pointer_check = Glib::signal_timeout().connect(
+                    sigc::bind_return<bool>(
+                        sigc::mem_fun(*this, &TasklistButtonsContainer::check_and_toggle_previewer),
+                        false),
+                    PREVIEWER_ANIMATION_TIMEOUT);
+    }
+}
+
+void TasklistButtonsContainer::stop_pointer_check()
+{
+    pointer_check.disconnect();
+}
+
+void TasklistButtonsContainer::check_and_toggle_previewer()
+{
+    GdkPoint point;
+    auto pointer_device = get_display()->get_default_seat()->get_pointer();
+
+    pointer_device->get_position(point.x, point.y);
+
+    if (previewer->contains_pointer()) {
+        /*
+         * 鼠标位于预览窗口内
+         */
+        return;
+    }
+
+    for (auto data: app_buttons) {
+        GdkRectangle rect;
+        auto button = data.second;
+
+        if (!button->is_visible())
+            continue;
+
+        auto window = button->get_window();
+        window->get_origin(rect.x, rect.y);
+
+        rect.width = button->get_allocated_width();
+        rect.height = button->get_allocated_height();
+
+        if (KiranHelper::gdk_rectangle_contains_point(&rect, &point)) {
+            /*
+             * 鼠标位于某个应用按钮的上方，将应用预览窗口移动到对应的应用按钮处
+             */
+            move_previewer(button);
+            return;
+        }
+    }
+
+    /*鼠标位于任务栏应用按钮之外，直接隐藏预览窗口*/
+    hide_previewer();
 }
 
 /**
@@ -315,21 +366,19 @@ void TasklistButtonsContainer::move_previewer(TasklistAppButton *target_button)
     if (previewer->has_context_menu_opened())
         return;
 
-    previewer->set_idle(false);
     if (previewer->get_app() == target_button->get_app() && previewer->is_visible()) {
         //当前预览的应用和目标应用是同一应用
         return;
     }
     previewer->set_relative_to(target_button, get_previewer_position());
-    previewer->deferred_show();
+    previewer->show();
 }
 
 void TasklistButtonsContainer::hide_previewer()
 {
     if (previewer->has_context_menu_opened())
         return;
-    previewer->set_idle(true);
-    previewer->deferred_hide();
+    previewer->hide();
 }
 
 Gtk::PositionType TasklistButtonsContainer::get_previewer_position()
@@ -757,7 +806,7 @@ void TasklistButtonsContainer::init_ui()
     previewer->signal_show().connect(
                 sigc::mem_fun(*this, &TasklistButtonsContainer::on_previewer_window_opened));
     previewer->signal_leave_notify_event().connect_notify(
-                sigc::hide(sigc::mem_fun(*this, &TasklistButtonsContainer::hide_previewer)), true);
+                sigc::hide(sigc::mem_fun(*this, &TasklistButtonsContainer::schedule_pointer_check)));
 }
 
 void TasklistButtonsContainer::move_to_next_page()

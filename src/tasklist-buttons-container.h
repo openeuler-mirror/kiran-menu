@@ -44,6 +44,17 @@ public:
 
     void toggle_previewer(TasklistAppButton *target);
 
+    /**
+     * @brief 设置定时器，延时检查鼠标位置
+     */
+    void schedule_pointer_check();
+
+    /**
+     * @brief 清除检查鼠标位置的定时器
+     */
+    void stop_pointer_check();
+
+
 
     void move_to_next_page();
     void move_to_previous_page();
@@ -79,6 +90,12 @@ protected:
 
     virtual void init_ui();
 
+    /**
+     * @brief 检查鼠标位置，以决定是否显示预览窗口以及预览窗口位置
+     */
+    void check_and_toggle_previewer();
+
+
 private:
     MatePanelApplet *applet;
     std::map<KiranAppPointer, TasklistAppButton*> app_buttons; //任务栏应用按钮列表
@@ -91,6 +108,8 @@ private:
     int child_spacing;                      //应用按钮间隔
     int n_child_page;                       //可视区域内的应用按钮个数
     Gtk::Orientation orient;                //应用按钮排列方向
+
+    sigc::connection pointer_check;
 };
 
 #endif // TASKLIST_BUTTONS_CONTAINER_H
