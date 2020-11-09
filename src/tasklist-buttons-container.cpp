@@ -17,7 +17,9 @@ void on_applet_size_change(MatePanelApplet *applet UNUSED,
 
 TasklistButtonsContainer::TasklistButtonsContainer(MatePanelApplet *applet_, int spacing_):
     applet(applet_),
-    child_spacing(spacing_)
+    child_spacing(spacing_),
+    pointer_pos(-1, -1),
+    drag_checking(false)
 {
     init_ui();
 
@@ -42,9 +44,10 @@ TasklistButtonsContainer::TasklistButtonsContainer(MatePanelApplet *applet_, int
 
     get_style_context()->add_class("tasklist-widget");
 
-    add_events(Gdk::STRUCTURE_MASK);
+    add_events(Gdk::STRUCTURE_MASK | Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
 
     active_app = get_current_active_app();
+    init_drag_and_drop();
 }
 
 TasklistButtonsContainer::~TasklistButtonsContainer()
@@ -70,18 +73,20 @@ void TasklistButtonsContainer::add_app_button(const KiranAppPointer &app)
 
     button = Gtk::make_managed<TasklistAppButton>(app, applet_size);
 
-    button->signal_enter_notify_event().connect_notify(
-                sigc::hide(sigc::mem_fun(*this, &TasklistButtonsContainer::schedule_pointer_check)));
-    button->signal_leave_notify_event().connect_notify(
-                sigc::hide(sigc::mem_fun(*this, &TasklistButtonsContainer::schedule_pointer_check)));
+    button->signal_enter_notify_event().connect(
+                sigc::bind_return<bool>(
+                    sigc::hide(sigc::mem_fun(*this, &TasklistButtonsContainer::schedule_pointer_check)),
+                    false));
+    button->signal_leave_notify_event().connect(
+                sigc::bind_return<bool>(
+                    sigc::hide(sigc::mem_fun(*this, &TasklistButtonsContainer::schedule_pointer_check)),
+                    false));
 
 
     //鼠标点击时开关预览窗口
-    button->signal_button_release_event().connect(
-        [button, this](GdkEventButton *event) -> bool {
+    button->signal_clicked().connect(
+        [button, this]() -> void {
             stop_pointer_check();
-            if (gdk_event_triggers_context_menu(reinterpret_cast<GdkEvent*>(event)))
-                return false;
 
             auto target_app = button->get_app();
             auto previewer_app = previewer->get_app();
@@ -90,7 +95,6 @@ void TasklistButtonsContainer::add_app_button(const KiranAppPointer &app)
                 hide_previewer();
             else
                 move_previewer(button);
-            return false;
         });
 
 
@@ -144,16 +148,17 @@ void TasklistButtonsContainer::check_and_toggle_previewer()
 
     for (auto data: app_buttons) {
         GdkRectangle rect;
+        Gdk::Rectangle geometry;
         auto button = data.second;
 
         if (!button->is_visible())
             continue;
 
-        auto window = button->get_window();
-        window->get_origin(rect.x, rect.y);
-
-        rect.width = button->get_allocated_width();
-        rect.height = button->get_allocated_height();
+        get_child_geometry(static_cast<Gtk::Widget*>(button), geometry);
+        rect.x = geometry.get_x();
+        rect.y = geometry.get_y();
+        rect.width = geometry.get_width();
+        rect.height = geometry.get_height();
 
         if (KiranHelper::gdk_rectangle_contains_point(&rect, &point)) {
             /*
@@ -344,14 +349,16 @@ void TasklistButtonsContainer::move_previewer(TasklistAppButton *target_button)
     auto target_app = target_button->get_app();
     auto previewer_app = previewer->get_app();
 
-    if (!target_app || target_app->get_taskbar_windows().size() == 0) {
-        g_debug("target app expired or has no windows\n");
-        return;
-    }
 
     /* 当前预览窗口的右键菜单已经打开，不允许移动预览窗口 */
     if (previewer->has_context_menu_opened())
         return;
+
+    if (!target_app || target_app->get_taskbar_windows().size() == 0) {
+        g_debug("target app expired or has no windows\n");
+        previewer->hide();
+        return;
+    }
 
     if (previewer->get_app() == target_button->get_app() && previewer->is_visible()) {
         //当前预览的应用和目标应用是同一应用
@@ -571,7 +578,18 @@ void TasklistButtonsContainer::on_size_allocate(Gtk::Allocation &allocation)
     }
 
     child_index = 0;
-    for (auto child: get_children()) {
+
+    /*
+     * 将child按照其在父控件上的位置从左往右进行顺序。
+     *
+     * child拖动之后其在父控件上的位置(X属性)会发生变化。
+     */
+    std::sort(children.begin(), children.end(),
+              [this](const Gtk::Widget *c1, const Gtk::Widget *c2) -> bool {
+                return child_property_x(*c1).get_value() < child_property_x(*c2).get_value();
+              });
+
+    for (auto child: children) {
         Gtk::Allocation child_allocation;
 
         if (child_index % n_child_page == 0) {
@@ -586,6 +604,9 @@ void TasklistButtonsContainer::on_size_allocate(Gtk::Allocation &allocation)
         child_allocation.set_width(child_computed_size);
         child_allocation.set_height(allocation.get_height());
         child->size_allocate(child_allocation);
+
+        /* 更新控件的x属性 */
+        child_property_x(*child).set_value(child_total_size);
 
         child_total_size += child_computed_size;
         child_index++;
@@ -606,6 +627,8 @@ void TasklistButtonsContainer::on_size_allocate(Gtk::Allocation &allocation)
 void TasklistButtonsContainer::on_add(Gtk::Widget *child)
 {
     Gtk::Layout::on_add(child);
+    /* 确保新添加的child在size_allocate的时候，排在最右侧 */
+    child_property_x(*child).set_value(G_MAXINT);
     queue_allocate();
 }
 
@@ -642,6 +665,179 @@ void TasklistButtonsContainer::on_realize()
                 [this]() -> void {
                     signal_page_changed().emit();
                 });
+}
+
+void TasklistButtonsContainer::put_child_before(Gtk::Widget *source, Gtk::Widget *dest)
+{
+    int dest_x;
+
+    dest_x = child_property_x(*dest).get_value();
+
+    child_property_x(*source).set_value(dest_x-1);
+    queue_allocate();
+}
+
+void TasklistButtonsContainer::put_child_after(Gtk::Widget *source, Gtk::Widget *dest)
+{
+    int dest_x;
+
+    dest_x = child_property_x(*dest).get_value();
+
+    child_property_x(*source).set_value(dest_x+1);
+    queue_allocate();
+}
+
+bool TasklistButtonsContainer::child_is_after(Gtk::Widget *w1, Gtk::Widget *w2)
+{
+    Gtk::Allocation a1, a2;
+
+    a1 = w1->get_allocation();
+    a2 = w2->get_allocation();
+
+    return a1.get_x() > a2.get_x();
+}
+
+bool TasklistButtonsContainer::child_is_before(Gtk::Widget *w1, Gtk::Widget *w2)
+{
+    Gtk::Allocation a1, a2;
+
+    a1 = w1->get_allocation();
+    a2 = w2->get_allocation();
+
+    return a1.get_x() < a2.get_x();
+}
+
+bool TasklistButtonsContainer::on_drag_motion(const Glib::RefPtr<Gdk::DragContext> &context,
+                                              int x,
+                                              int y,
+                                              guint time)
+{
+    drag_checking = true;
+    /*
+     * 根据上次记录的鼠标位置和当前鼠标位置，判断拖动方向
+     */
+    if (pointer_pos.get_x() != -1)
+    {
+        if (x > pointer_pos.get_x())
+            motion_dir = MOTION_DIR_RIGHT;
+        else
+            motion_dir = MOTION_DIR_LEFT;
+    } else
+        motion_dir = MOTION_DIR_UNKNOWN;
+
+    pointer_pos.set_x(x);
+    pointer_pos.set_y(y);
+
+    drag_get_data(context, "text/plain", time);
+    return true;
+}
+
+void TasklistButtonsContainer::on_drag_data_received(const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, const Gtk::SelectionData &selection_data, guint info, guint time)
+{
+    Gtk::Widget *source_widget;
+    bool found = false;
+    Glib::ustring data = selection_data.get_text();
+
+    /*
+     * 先根据传递的数据，获取到源按钮
+     * 不知为何context->drag_get_source_widget()获取到的为nullptr
+     */
+    auto app = Kiran::AppManager::get_instance()->lookup_app(data);
+    if (!app) {
+        context->drag_refuse(time);
+        return;
+    }
+
+    auto result = app_buttons.find(app);
+    if (result == app_buttons.end()) {
+        context->drag_refuse(time);
+        return;
+    }
+    source_widget = static_cast<Gtk::Widget*>(result->second);
+
+
+    if (motion_dir != MOTION_DIR_UNKNOWN)
+    {
+        int pointer_x, pointer_y;
+        std::vector<Gtk::Widget *> children = get_children();
+
+        /* 按照屏幕位置将按钮从左到右进行排序 */
+        std::sort(children.begin(), children.end(),
+                  [](const Gtk::Widget *c1, const Gtk::Widget *c2) -> bool {
+            Gtk::Allocation a1, a2;
+
+            a1 = c1->get_allocation();
+            a2 = c2->get_allocation();
+            return a1.get_x() < a2.get_x();
+        });
+
+        /* 获取当前鼠标位置 */
+        get_pointer_position(pointer_x, pointer_y);
+
+        for (auto child : children)
+        {
+            Gdk::Rectangle rect;
+
+            if (!child->is_visible())
+                continue;
+
+            get_child_geometry(child, rect);
+            if (pointer_x >= rect.get_x() && pointer_x < rect.get_x() + rect.get_width())
+            {
+                /*
+                 * 鼠标位于按钮上方
+                 */
+                if (child != source_widget) {
+                    if (motion_dir == MOTION_DIR_LEFT)
+                    {
+                        if (child_is_before(child, source_widget)) {
+                            put_child_after(child, source_widget);
+                        }
+                    }
+
+                    if (motion_dir == MOTION_DIR_RIGHT)
+                    {
+                        if (child_is_after(child, source_widget)) {
+                            put_child_before(child, source_widget);
+                        }
+                    }
+                }
+                found = true;
+                break;
+            } else if (pointer_x < rect.get_x()) {
+                /*
+                 * 鼠标位于按钮之间的间隙
+                 */
+                 if (source_widget != child)
+                    put_child_before(source_widget, child);
+
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            /* 鼠标位于所有按钮的最右侧 */
+            if (children.size() > 0)
+                put_child_after(source_widget, children.back());
+            else
+                put_child_after(source_widget, nullptr);
+        }
+    }
+
+
+    if (drag_checking) {
+        context->drag_status(Gdk::ACTION_MOVE, time);
+        drag_checking = false;
+    } else {
+        context->drag_finish(true, true, time);
+    }
+}
+
+bool TasklistButtonsContainer::on_drag_drop(const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, guint time)
+{
+    context->drag_finish(true, true, time);
+    return true;
 }
 
 
@@ -858,4 +1054,37 @@ Glib::RefPtr<Gtk::Adjustment> TasklistButtonsContainer::get_adjustment()
         return get_hadjustment();
     else
         return get_vadjustment();
+}
+
+void TasklistButtonsContainer::init_drag_and_drop()
+{
+    std::vector<Gtk::TargetEntry> targets;
+
+    targets.push_back(Gtk::TargetEntry("text/plain", Gtk::TARGET_SAME_APP));
+    drag_dest_set(targets, Gtk::DEST_DEFAULT_HIGHLIGHT, Gdk::ACTION_MOVE);
+}
+
+void TasklistButtonsContainer::get_child_geometry(Gtk::Widget *child, Gdk::Rectangle &rect)
+{
+    int child_x, child_y;
+    Gtk::Allocation allocation = child->get_allocation();
+
+    child->get_window()->get_origin(child_x, child_y);
+
+    if (!child->get_has_window())
+    {
+        child_x += allocation.get_x();
+        child_y += allocation.get_y();
+    }
+
+    rect.set_x(child_x);
+    rect.set_y(child_y);
+    rect.set_width(allocation.get_width());
+    rect.set_height(allocation.get_height());
+}
+
+void TasklistButtonsContainer::get_pointer_position(int &pointer_x, int &pointer_y)
+{
+    auto pointer = get_display()->get_default_seat()->get_pointer();
+    pointer->get_position(pointer_x, pointer_y);
 }

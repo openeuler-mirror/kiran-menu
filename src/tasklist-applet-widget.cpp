@@ -114,6 +114,7 @@ void TasklistAppletWidget::init_ui()
 
 Gtk::Button *TasklistAppletWidget::create_paging_button(std::string icon_resource, std::string tooltip_text)
 {
+    std::vector<Gtk::TargetEntry> targets;
     Gtk::Button *button = nullptr;
 
     auto image = Gtk::make_managed<Gtk::Image>();
@@ -135,6 +136,19 @@ Gtk::Button *TasklistAppletWidget::create_paging_button(std::string icon_resourc
 
                     button->grab_focus();
                 });
+
+
+    /*
+     * 当拖动的应用按钮经过分页按钮上方时，触发页面跳转
+     */
+    targets.push_back(Gtk::TargetEntry("text/plain"));
+    button->drag_dest_set(targets, Gtk::DEST_DEFAULT_ALL, Gdk::ACTION_MOVE);
+    button->signal_drag_motion().connect(
+                [button]( const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, guint time) -> bool {
+                    button->clicked();
+                    return true;
+                });
+
 
     return button;
 }
