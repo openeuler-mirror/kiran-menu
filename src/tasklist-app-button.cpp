@@ -50,10 +50,6 @@ void TasklistAppButton::set_size(int size)
     queue_resize();
 }
 
-void TasklistAppButton::on_previewer_opened()
-{
-}
-
 Gtk::SizeRequestMode TasklistAppButton::get_request_mode_vfunc() const
 {
     if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL)
@@ -203,7 +199,7 @@ bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
         }
     }
 
-    /**
+    /*
      * 绘制应用图标
      */
     cr->save();

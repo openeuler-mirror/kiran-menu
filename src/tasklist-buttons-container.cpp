@@ -12,7 +12,7 @@ void on_applet_size_change(MatePanelApplet *applet UNUSED,
                            gpointer userdata)
 {
     auto widget = reinterpret_cast<TasklistButtonsContainer*>(userdata);
-    widget->handle_applet_size_change();
+    widget->on_applet_size_change();
 }
 
 TasklistButtonsContainer::TasklistButtonsContainer(MatePanelApplet *applet_, int spacing_):
@@ -38,7 +38,7 @@ TasklistButtonsContainer::TasklistButtonsContainer(MatePanelApplet *applet_, int
                 sigc::mem_fun(*this, &TasklistButtonsContainer::on_fixed_apps_removed));
 
     auto menu_backend = Kiran::MenuSkeleton::get_instance();
-    menu_backend->signal_app_changed().connect(sigc::mem_fun(*this, &TasklistButtonsContainer::reload_app_buttons));
+    menu_backend->signal_app_changed().connect(sigc::mem_fun(*this, &TasklistButtonsContainer::load_applications));
 
     get_style_context()->add_class("tasklist-widget");
 
@@ -83,7 +83,13 @@ void TasklistButtonsContainer::add_app_button(const KiranAppPointer &app)
             if (gdk_event_triggers_context_menu(reinterpret_cast<GdkEvent*>(event)))
                 return false;
 
-            toggle_previewer(button);
+            auto target_app = button->get_app();
+            auto previewer_app = previewer->get_app();
+
+            if (previewer_app && previewer_app == target_app && previewer->is_visible())
+                hide_previewer();
+            else
+                move_previewer(button);
             return false;
         });
 
@@ -104,25 +110,6 @@ void TasklistButtonsContainer::add_app_button(const KiranAppPointer &app)
     app_buttons.insert(std::make_pair(app, button));
     g_debug("Add app button '%s'(%p)\n", app->get_name().data(), app.get());
 
-}
-
-void TasklistButtonsContainer::toggle_previewer(TasklistAppButton *button)
-{
-    auto target_app = button->get_app();
-    auto previewer_app = previewer->get_app();
-
-    if (!target_app) {
-        g_warning("%s: target app expired\n", __FUNCTION__);
-        return;
-    }
-
-    if (previewer_app && previewer_app == target_app && previewer->is_visible())
-    {
-        g_debug("previewer app and target app match\n");
-        hide_previewer();
-        return;
-    } else
-        move_previewer(button);
 }
 
 void TasklistButtonsContainer::schedule_pointer_check()
@@ -450,7 +437,7 @@ Gtk::Orientation TasklistButtonsContainer::get_orientation() const
     return orient;
 }
 
-void TasklistButtonsContainer::handle_applet_size_change()
+void TasklistButtonsContainer::on_applet_size_change()
 {
     int applet_size = get_applet_size();
 
@@ -657,21 +644,6 @@ void TasklistButtonsContainer::on_realize()
                 });
 }
 
-void TasklistButtonsContainer::reload_app_buttons()
-{
-    g_debug("%s: reloading apps\n", __FUNCTION__);
-
-    for (auto iter: app_buttons) {
-        auto app = iter.first;
-        auto button = iter.second;
-
-        delete button;
-    }
-
-    app_buttons.clear();
-
-    load_applications();
-}
 
 /**
  * @brief KiranTasklistWidget::load_applications
@@ -682,6 +654,16 @@ void TasklistButtonsContainer::load_applications()
     Kiran::AppVec apps;
     Kiran::TaskBarSkeleton *backend = Kiran::TaskBarSkeleton::get_instance();
     auto app_manager = Kiran::AppManager::get_instance();
+
+    /*
+     * 删除旧的应用数据和应用按钮
+     */
+    for (auto child: get_children()) {
+        remove(*child);
+        delete child;
+    }
+    app_buttons.clear();
+
 
     //加载常驻任务栏应用
     g_debug("%s: loading fixed apps ...\n", __FUNCTION__);
@@ -743,14 +725,6 @@ void TasklistButtonsContainer::on_fixed_apps_removed(const Kiran::AppVec &apps)
     }
 }
 
-void TasklistButtonsContainer::on_previewer_window_opened()
-{
-    for (auto data: app_buttons) {
-        auto button = data.second;
-        button->on_previewer_opened();
-    }
-}
-
 void TasklistButtonsContainer::switch_to_page_of_button(TasklistAppButton *button)
 {
     Gtk::Allocation child_allocation;
@@ -802,9 +776,6 @@ void TasklistButtonsContainer::init_ui()
     update_orientation();
 
     previewer = new TasklistAppPreviewer();
-    //响应预览窗口打开信号
-    previewer->signal_show().connect(
-                sigc::mem_fun(*this, &TasklistButtonsContainer::on_previewer_window_opened));
     previewer->signal_leave_notify_event().connect_notify(
                 sigc::hide(sigc::mem_fun(*this, &TasklistButtonsContainer::schedule_pointer_check)));
 }

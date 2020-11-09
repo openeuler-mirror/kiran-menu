@@ -17,32 +17,136 @@ public:
     TasklistButtonsContainer(MatePanelApplet *applet_, int child_spacing = 4);
     ~TasklistButtonsContainer() override;
 
-    void add_app_button(const KiranAppPointer &app);
-    void remove_app_button(const KiranAppPointer &app);
-    KiranAppPointer get_current_active_app();
 
-    TasklistAppButton *find_app_button(const KiranAppPointer &app);
+    /**
+     * @brief   get_current_active_app 获取当前活动窗口对应的应用
+     * @return  返回活动窗口对应的应用，如果没有当前活动窗口，返回空应用
+     */
+    static KiranAppPointer get_current_active_app();
 
-    void on_active_window_changed(KiranWindowPointer previous, KiranWindowPointer active);
-    void on_window_opened(KiranWindowPointer window);
-    void on_window_closed(KiranWindowPointer window);
-
-    //移动预览窗口到指定的应用按钮，并显示该应用的窗口预览信息
-    void move_previewer(TasklistAppButton *target);
-    //隐藏预览窗口
-    void hide_previewer();
-    Gtk::PositionType get_previewer_position();
-
-    //根据applet所在面板的排列方向更新应用按钮排列方向
+    /**
+     * @brief update_orientation 根据applet所在面板的排列方向更新应用按钮排列方向
+     */
     void update_orientation();
+
+    /**
+     * @brief get_orientation  获取应用按钮的排列方向
+     * @return 返回应用按钮的排列方向
+     */
     Gtk::Orientation get_orientation() const;
 
-    void handle_applet_size_change();
+    /**
+     * @brief on_applet_size_change  回调函数：所属的Applet插件尺寸变化时调用
+     */
+    void on_applet_size_change();
+
+
+    /**
+     * @brief get_applet_size       获取所属插件的尺寸
+     * @return  返回插件尺寸
+     */
     int get_applet_size() const;
 
-    void reload_app_buttons();
 
-    void toggle_previewer(TasklistAppButton *target);
+    /**
+     * @brief move_to_next_page     移动并显示下一页的应用按钮
+     */
+    void move_to_next_page();
+
+    /**
+     * @brief move_to_previous_page 移动并显示上一页的应用按钮
+     */
+    void move_to_previous_page();
+
+    /**
+     * @brief has_previous_page     是否存在上一页的应用按钮
+     * @return 存在返回true，不存在返回false
+     */
+    bool has_previous_page();
+
+    /**
+     * @brief has_next_page         是否存在下一页的应用按钮
+     * @return 存在返回true，不存在返回false
+     */
+    bool has_next_page();
+
+    /**
+     * @brief signal_page_changed   信号：当前任务栏显示的应用按钮页面发生变化时触发
+     * @return
+     */
+    sigc::signal<void> signal_page_changed();
+
+
+
+protected:
+    virtual void get_preferred_width_vfunc(int &min_width, int &natural_width) const override;
+    virtual void get_preferred_height_vfunc(int &min_height, int &natural_height) const override;
+
+    virtual void on_size_allocate(Gtk::Allocation &allocation) override;
+    virtual void on_add(Gtk::Widget *child) override;
+    virtual void on_remove(Gtk::Widget *child) override;
+    virtual void on_map() override;
+    virtual void on_realize() override;
+
+    /**
+     * @brief 加载系统已打开应用列表
+     */
+    virtual void load_applications();
+
+    /**
+     * @brief on_active_window_changed 回调函数：当前活动和窗口变化时调用
+     * @param previous  上一个活动窗口
+     * @param active    当前活动窗口
+     */
+    void on_active_window_changed(KiranWindowPointer previous, KiranWindowPointer active);
+
+    /**
+     * @brief on_window_opened  回调函数：新窗口打开时调用
+     * @param window    新窗口
+     */
+    void on_window_opened(KiranWindowPointer window);
+
+    /**
+     * @brief on_window_closed  回调函数：窗口关闭时调用
+     * @param window    关闭的窗口
+     */
+    void on_window_closed(KiranWindowPointer window);
+
+
+    /**
+     * @brief 回调函数: 将应用固定到任务栏时调用
+     * @param apps   新固定到任务栏的应用列表
+     */
+    virtual void on_fixed_apps_added(const Kiran::AppVec &apps);
+
+    /**
+     * @brief 回调函数: 将应用取消固定到任务栏时调用
+     * @param apps   不再固定到任务栏的应用列表
+     */
+    virtual void on_fixed_apps_removed(const Kiran::AppVec &apps);
+
+    /**
+     * @brief 确保指定的应用按钮在任务栏上可见。任务栏上空间不足时，通过滚动来保证可见
+     * @param button    需要可见的应用按钮
+     */
+    virtual void ensure_active_app_button_visible();
+
+    /**
+     * @brief 切换到应用按钮所在的页面，该接口只有在任务栏空间不足时应用按钮分页后才有意义
+     * @param button 需要切换显示的按钮
+     */
+    virtual void switch_to_page_of_button(TasklistAppButton *button);
+
+    /**
+     * @brief 初始化界面元素
+     */
+    virtual void init_ui();
+
+    /**
+     * @brief 检查鼠标位置，以决定是否显示预览窗口以及预览窗口位置
+     */
+    void check_and_toggle_previewer();
+
 
     /**
      * @brief 设置定时器，延时检查鼠标位置
@@ -55,61 +159,63 @@ public:
     void stop_pointer_check();
 
 
+    /**
+     * @brief   find_app_button 查找给定的app对应的应用按钮
+     * @param   app 需查找的应用
+     * @return  返回app对应的应用按钮，如果未找到，返回nullptr
+     */
+    TasklistAppButton *find_app_button(const KiranAppPointer &app);
 
-    void move_to_next_page();
-    void move_to_previous_page();
-    bool has_previous_page();
-    bool has_next_page();
+    /**
+     * @brief   add_app_button 将给定的app创建应用按钮并添加到任务栏，如果该app对应的按钮已经存在，什么都不做。
+     * @param   app 需要添加的应用
+     */
+    void add_app_button(const KiranAppPointer &app);
 
-    sigc::signal<void> signal_page_changed();
+    /**
+     * @brief   remove_app_button 将给定的app对应的应用按钮从任务栏上移除，如果该app对应的按钮不存在，什么也不做
+     * @param   app 需要移除的应用
+     */
+    void remove_app_button(const KiranAppPointer &app);
 
+
+    /**
+     * @brief move_previewer 移动预览窗口到指定的应用按钮，并显示该应用的窗口预览信息
+     * @param target         要显示预览窗口的应用按钮
+     */
+    void move_previewer(TasklistAppButton *target);
+
+    /**
+     * @brief hide_previewer 隐藏预览窗口
+     */
+    void hide_previewer();
+
+    /**
+     * @brief get_previewer_position 根据任务栏面板的排列方向计算预览窗口的显示位置
+     * @return 返回预览窗口的显示位置
+     */
+    Gtk::PositionType get_previewer_position();
+
+    /**
+     * @brief get_adjustment 获取滚动区域的Adjustment控件，该控件对应的滚动方向由面板方向决定
+     * @return 返回滚动区域的Adjustment控件
+     */
     Glib::RefPtr<Gtk::Adjustment> get_adjustment();
-
-protected:
-    virtual void get_preferred_width_vfunc(int &min_width, int &natural_width) const override;
-    virtual void get_preferred_height_vfunc(int &min_height, int &natural_height) const override;
-
-    virtual void on_size_allocate(Gtk::Allocation &allocation) override;
-    virtual void on_add(Gtk::Widget *child) override;
-    virtual void on_remove(Gtk::Widget *child) override;
-    virtual void on_map() override;
-    virtual void on_realize() override;
-
-    virtual void load_applications();
-
-    virtual void on_fixed_apps_added(const Kiran::AppVec &apps);
-    virtual void on_fixed_apps_removed(const Kiran::AppVec &apps);
-    virtual void on_previewer_window_opened();
-
-    /**
-     * @brief 确保指定的应用按钮在任务栏上可见。任务栏上空间不足时，通过滚动来保证可见
-     * @param button    需要可见的应用按钮
-     */
-    virtual void switch_to_page_of_button(TasklistAppButton *button);
-    virtual void ensure_active_app_button_visible();
-
-    virtual void init_ui();
-
-    /**
-     * @brief 检查鼠标位置，以决定是否显示预览窗口以及预览窗口位置
-     */
-    void check_and_toggle_previewer();
 
 
 private:
-    MatePanelApplet *applet;
+    MatePanelApplet *applet;                //所属的面板插件
     std::map<KiranAppPointer, TasklistAppButton*> app_buttons; //任务栏应用按钮列表
 
     KiranAppPointer active_app;             //当前活动窗口所属app(cached，不一定是最新的)
     TasklistAppPreviewer *previewer;        //应用预览窗口
 
-    int signal_applet_size_changed;
     sigc::signal<void> m_signal_page_changed;
     int child_spacing;                      //应用按钮间隔
     int n_child_page;                       //可视区域内的应用按钮个数
     Gtk::Orientation orient;                //应用按钮排列方向
 
-    sigc::connection pointer_check;
+    sigc::connection pointer_check;         //预览窗口显示状态切换检查定时器
 };
 
 #endif // TASKLIST_BUTTONS_CONTAINER_H

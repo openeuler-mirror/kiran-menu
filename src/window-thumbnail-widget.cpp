@@ -137,43 +137,6 @@ void WindowThumbnailWidget::on_clicked()
     on_thumbnail_clicked();
 }
 
-void WindowThumbnailWidget::on_close_button_clicked()
-{
-    g_message("close area clicked");
-}
-
-void WindowThumbnailWidget::on_thumbnail_clicked()
-{
-    g_message("thumbnail clicked");
-}
-
-bool WindowThumbnailWidget::draw_snapshot(Gtk::Widget *snapshot_area, const Cairo::RefPtr<Cairo::Context> &cr)
-{
-    Gtk::Allocation allocation = snapshot_area->get_allocation();
-    if (snapshot_area->get_has_window()) {
-        allocation.set_x(0);
-        allocation.set_y(0);
-    }
-
-    cr->rectangle(allocation.get_x() + 1,
-                  allocation.get_y() + 1,
-                  allocation.get_width() - 2,
-                  allocation.get_height() - 2);
-    cr->clip();
-    cr->set_source_rgb(1.0, 0.0, 0.0);
-    cr->paint();
-
-    if (get_state_flags() & Gtk::STATE_FLAG_PRELIGHT) {
-        cr->reset_clip();
-        cr->set_line_width(1.0);
-        cr->set_source_rgb(0.0, 1.0, 0.0);
-        cr->rectangle(allocation.get_x(), allocation.get_y(), allocation.get_width(), allocation.get_height());
-        cr->stroke();
-    }
-
-    return true;
-}
-
 bool WindowThumbnailWidget::draw_close_button(Gtk::Widget *close_area, const Cairo::RefPtr<Cairo::Context> &cr)
 {
     Gtk::Allocation allocation = close_area->get_allocation();

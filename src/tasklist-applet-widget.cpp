@@ -48,7 +48,7 @@ TasklistAppletWidget::TasklistAppletWidget(MatePanelApplet *applet_):
     g_signal_connect(applet, "change-orient", G_CALLBACK(on_applet_orient_change), this);
 }
 
-void TasklistAppletWidget::update_action_buttons_state()
+void TasklistAppletWidget::update_paging_buttons_state()
 {
     prev_btn->set_sensitive(container.has_previous_page());
     next_btn->set_sensitive(container.has_next_page());
@@ -61,7 +61,7 @@ void TasklistAppletWidget::on_app_buttons_page_changed()
     /*
      * 此处延缓更新分页按钮状态，否则不会触发size-allocate事件
      */
-    Glib::signal_idle().connect_once(sigc::mem_fun(*this, &TasklistAppletWidget::update_action_buttons_state));
+    Glib::signal_idle().connect_once(sigc::mem_fun(*this, &TasklistAppletWidget::update_paging_buttons_state));
 }
 
 void TasklistAppletWidget::on_applet_orient_changed()
@@ -71,8 +71,8 @@ void TasklistAppletWidget::on_applet_orient_changed()
 
 void TasklistAppletWidget::init_ui()
 {
-    prev_btn = create_action_button("/kiran-tasklist/icon/go-previous", _("Previous"));
-    next_btn = create_action_button("/kiran-tasklist/icon/go-next", _("Next"));
+    prev_btn = create_paging_button("/kiran-tasklist/icon/go-previous", _("Previous"));
+    next_btn = create_paging_button("/kiran-tasklist/icon/go-next", _("Next"));
 
     prev_btn->set_valign(Gtk::ALIGN_FILL);
     next_btn->set_valign(Gtk::ALIGN_FILL);
@@ -110,18 +110,9 @@ void TasklistAppletWidget::init_ui()
 
     prev_btn->signal_clicked().connect(sigc::mem_fun(container, &TasklistButtonsContainer::move_to_previous_page));
     next_btn->signal_clicked().connect(sigc::mem_fun(container, &TasklistButtonsContainer::move_to_next_page));
-
-    prev_btn->get_style_context()->add_class("tasklist-arrow-button");
-    next_btn->get_style_context()->add_class("tasklist-arrow-button");
 }
 
-/**
- * @brief 创建显示给定图片和提示的按钮，该按钮将随父控件一起销毁
- * @param icon_resource     图标资源路径
- * @param tooltip_text      提示信息文本
- * @return                  创建的按钮
- */
-Gtk::Button *TasklistAppletWidget::create_action_button(std::string icon_resource, std::string tooltip_text)
+Gtk::Button *TasklistAppletWidget::create_paging_button(std::string icon_resource, std::string tooltip_text)
 {
     Gtk::Button *button = nullptr;
 
@@ -133,6 +124,7 @@ Gtk::Button *TasklistAppletWidget::create_action_button(std::string icon_resourc
     button->add(*image);
     button->set_tooltip_text(tooltip_text);
     button->set_size_request(16, 16);
+    button->get_style_context()->add_class("tasklist-arrow-button");
 
     button->signal_clicked().connect(
                 [this, button]() -> void {

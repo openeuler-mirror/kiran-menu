@@ -241,15 +241,6 @@ bool TasklistAppPreviewer::on_leave_notify_event(GdkEventCrossing *crossing_even
     return false;
 }
 
-void TasklistAppPreviewer::on_child_remove()
-{
-    g_debug("after remove, %d children last\n", box.get_children().size());
-    if (!box.get_children().size()) {
-        //如果当前app没有已打开的窗口，隐藏预览窗口
-        hide();
-    }
-}
-
 void TasklistAppPreviewer::on_child_context_menu_toggled(bool active)
 {
     if (active)
@@ -274,7 +265,12 @@ void TasklistAppPreviewer::init_ui()
 {
     box.set_spacing(4);
     box.signal_remove().connect(
-                sigc::hide(sigc::mem_fun(*this, &TasklistAppPreviewer::on_child_remove)));
+                [this](Gtk::Widget *child UNUSED) -> void {
+                    if (!box.get_children().size()) {
+                        //如果当前app没有已打开的窗口，隐藏预览窗口
+                        hide();
+                    }
+                });
 
     scroll_window.set_propagate_natural_height(true);
     scroll_window.set_propagate_natural_width(true);

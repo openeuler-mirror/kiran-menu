@@ -7,37 +7,43 @@
 #include "window.h"
 #include "tasklist-window-context-menu.h"
 #include "window-thumbnail-widget.h"
-
-
 #include <sigc++/sigc++.h>
 
 class TasklistWindowPreviewer : public WindowThumbnailWidget
 {
-    friend GdkFilterReturn target_event_filter (GdkXEvent *xevent,
-                      GdkEvent *event,
-                      gpointer data);
 public:
     TasklistWindowPreviewer(std::shared_ptr<Kiran::Window> &window);
     virtual ~TasklistWindowPreviewer() override;
 
+    /**
+     * @brief context_menu_is_opened  右键菜单是否已经打开
+     * @return 右键菜单打开返回true,否则返回false
+     */
     bool context_menu_is_opened();
+
+    /**
+     * @brief signal_context_menu_toggled  信号: 右键菜单打开或关闭时触发，bool参数表示右键菜单是否打开
+     * @return 信号
+     */
     sigc::signal<void, bool> signal_context_menu_toggled();
 
 protected:
     virtual void get_preferred_width_vfunc(int& minimum_width,
                                            int& natural_width) const override;
     virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
+    virtual bool on_button_press_event(GdkEventButton *event) override;
     virtual bool draw_snapshot(Gtk::Widget *snapshot_area, const Cairo::RefPtr<Cairo::Context> &cr) override;
-
     virtual void on_thumbnail_clicked() override;
     virtual void on_close_button_clicked() override;
 
-    virtual bool on_button_press_event(GdkEventButton *event) override;
+    /**
+     * @brief on_composite_changed  回调函数，窗口管理器复合状态(composite)打开或关闭时调用
+     */
     void on_composite_changed();
 
 private:
-    TasklistWindowContextMenu *context_menu;
-    sigc::signal<void, bool> m_signal_context_menu_toggled;
+    TasklistWindowContextMenu *context_menu;                    /* 右键菜单 */
+    sigc::signal<void, bool> m_signal_context_menu_toggled;     /* 右键菜单打开或关闭的信号 */
 };
 
 #endif // TASKLIST_WINDOW_PREVIEWER_H
