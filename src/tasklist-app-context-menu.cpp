@@ -61,6 +61,13 @@ void TasklistAppContextMenu::refresh()
                             KiranHelper::remove_app_from_favorite(app.lock());
                     });
     }
+
+    if (app_->get_kind() == Kiran::AppKind::FAKE_DESKTOP) {
+        /*
+         * 无desktop文件的app无法添加到收藏夹
+         */
+        item->set_sensitive(false);
+    }
     append(*item);
 
     if (!KiranHelper::app_is_in_fixed_list(app_)) {
@@ -77,6 +84,13 @@ void TasklistAppContextMenu::refresh()
                         if (!app.expired())
                             KiranHelper::remove_app_from_fixed_list(app.lock());
                     });
+    }
+
+    if (app_->get_kind() == Kiran::AppKind::FAKE_DESKTOP) {
+        /*
+         * 无desktop文件的app无法固定到任务栏
+         */
+        item->set_sensitive(false);
     }
     append(*item);
 }

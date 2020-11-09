@@ -50,7 +50,7 @@ bool TaskBarSkeleton::add_fixed_app(const std::string &desktop_id)
     if (iter == this->fixed_apps_.end())
     {
         auto app = this->app_manager_->lookup_app(desktop_id);
-        if (app)
+        if (app && app->get_kind() == AppKind::DESKTOP)
         {
             this->fixed_apps_.push_back(quark.id());
 
@@ -60,7 +60,7 @@ bool TaskBarSkeleton::add_fixed_app(const std::string &desktop_id)
         }
         else
         {
-            LOG_DEBUG("not found desktop_id: %s.", desktop_id.c_str());
+            LOG_DEBUG("desktop id '%s' not found or invalid.", desktop_id.c_str());
         }
     }
     return false;
@@ -77,7 +77,7 @@ bool TaskBarSkeleton::del_fixed_app(const std::string &desktop_id)
     if (iter != this->fixed_apps_.end())
     {
         auto app = this->app_manager_->lookup_app(desktop_id);
-        if (app)
+        if (app && app->get_kind() == AppKind::DESKTOP)
         {
             this->fixed_apps_.erase(iter);
 
@@ -87,7 +87,7 @@ bool TaskBarSkeleton::del_fixed_app(const std::string &desktop_id)
         }
         else
         {
-            LOG_DEBUG("not found desktop_id: %s.", desktop_id.c_str());
+            LOG_DEBUG("desktop id '%s' not found or invalid.", desktop_id.c_str());
         }
     }
     return false;
