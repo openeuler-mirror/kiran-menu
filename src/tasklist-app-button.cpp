@@ -230,8 +230,12 @@ bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
             /*
              * 无法获取到应用图标的情况下，使用应用第一个已打开窗口的图标作为应用图标
              */
-            pixbuf = Glib::wrap(app_->get_taskbar_windows().front()->get_icon(), true);
-            pixbuf = pixbuf->scale_simple(icon_size * scale, icon_size * scale, Gdk::INTERP_BILINEAR);
+            auto windows = app_->get_taskbar_windows();
+
+            if (windows.size() > 0) {
+                pixbuf = Glib::wrap(windows.front()->get_icon(), true);
+                pixbuf = pixbuf->scale_simple(icon_size * scale, icon_size * scale, Gdk::INTERP_BILINEAR);
+            }
         }
     } catch (const Glib::Error &e) {
         g_warning("Error occured while trying to load app icon: %s", e.what().c_str());
