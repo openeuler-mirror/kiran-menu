@@ -26,11 +26,7 @@ TasklistAppButton::TasklistAppButton(const std::shared_ptr<Kiran::App> &app_, in
     applet_size(size_),
     dragging(false)
 {
-
     add_events(Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
-    //set_has_window(true);
-    //set_above_child(true);
-    //set_visible_window(true);
 
     if (app_->get_taskbar_windows().size() == 0)
         set_tooltip_text(app_->get_locale_name());
@@ -319,11 +315,13 @@ void TasklistAppButton::on_drag_data_get(const Glib::RefPtr<Gdk::DragContext> &c
 {
     auto app = get_app();
     if (!app) {
-        gtk_drag_cancel(context->gobj());
-        return;
+        g_warning("%s: app expired, return nothing");
+        selection_data.set(8, nullptr, 0);
     }
+
     /* 传递内容为应用的desktop ID */
-    selection_data.set_text(app->get_desktop_id());
+    const char *raw_data = app->get_desktop_id().c_str();
+    selection_data.set(8, (const guchar*)raw_data, strlen(raw_data));
 }
 
 void TasklistAppButton::on_drag_data_delete(const Glib::RefPtr<Gdk::DragContext> &context)
@@ -454,7 +452,7 @@ Glib::RefPtr<Gdk::Pixbuf> TasklistAppButton::get_app_icon_pixbuf()
 
 void TasklistAppButton::init_drag_and_drop()
 {
-    Gtk::TargetEntry entry("text/plain", Gtk::TARGET_SAME_APP);
+    Gtk::TargetEntry entry("binary/app-id", Gtk::TARGET_SAME_APP);
     std::vector<Gtk::TargetEntry> targets;
 
     targets.push_back(entry);

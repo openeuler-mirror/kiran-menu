@@ -61,12 +61,28 @@ void TasklistAppletWidget::on_app_buttons_page_changed()
     /*
      * 此处延缓更新分页按钮状态，否则不会触发size-allocate事件
      */
-    Glib::signal_idle().connect_once(sigc::mem_fun(*this, &TasklistAppletWidget::update_paging_buttons_state));
+    if (paging_check.connected())
+        return;
+
+    paging_check = Glib::signal_idle().connect(
+                    sigc::bind_return<bool>(
+                        sigc::mem_fun(*this, &TasklistAppletWidget::update_paging_buttons_state),
+                        false));
 }
 
 void TasklistAppletWidget::on_applet_orient_changed()
 {
-    set_orientation(container.get_orientation());
+    switch (mate_panel_applet_get_orient(applet))
+    {
+    case MATE_PANEL_APPLET_ORIENT_DOWN:
+    case MATE_PANEL_APPLET_ORIENT_UP:
+        set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+        break;
+    case MATE_PANEL_APPLET_ORIENT_LEFT:
+    case MATE_PANEL_APPLET_ORIENT_RIGHT:
+        set_orientation(Gtk::ORIENTATION_VERTICAL);
+        break;
+    }
 }
 
 void TasklistAppletWidget::init_ui()
@@ -100,11 +116,11 @@ void TasklistAppletWidget::init_ui()
                     }
 
                     container.update_orientation();
-                    container.queue_resize();
+                    container.queue_allocate();
                 });
 
 
-    set_orientation(container.get_orientation());
+    on_applet_orient_changed();
 
     container.signal_page_changed().connect(sigc::mem_fun(*this, &TasklistAppletWidget::on_app_buttons_page_changed));
 
@@ -141,11 +157,12 @@ Gtk::Button *TasklistAppletWidget::create_paging_button(std::string icon_resourc
     /*
      * 当拖动的应用按钮经过分页按钮上方时，触发页面跳转
      */
-    targets.push_back(Gtk::TargetEntry("text/plain"));
+    targets.push_back(Gtk::TargetEntry("binary/app-id"));
     button->drag_dest_set(targets, Gtk::DEST_DEFAULT_ALL, Gdk::ACTION_MOVE);
     button->signal_drag_motion().connect(
                 [button]( const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, guint time) -> bool {
                     button->clicked();
+                    context->drag_refuse(time);
                     return true;
                 });
 

@@ -25,6 +25,7 @@ public:
     TasklistButtonsContainer(MatePanelApplet *applet_, int child_spacing = 15);
     ~TasklistButtonsContainer() override;
 
+    Glib::PropertyProxy<Gtk::Orientation> property_orient();
 
     /**
      * @brief   get_current_active_app 获取当前活动窗口对应的应用
@@ -112,6 +113,11 @@ protected:
                               int x,
                               int y,
                               guint time) override;
+
+    /**
+     * @brief on_orientation_changed 应用按钮排列方向发生变化时的回调函数
+     */
+    virtual void on_orientation_changed();
 
 
     /**
@@ -289,13 +295,15 @@ private:
     sigc::signal<void> m_signal_page_changed;
     int child_spacing;                      //应用按钮间隔
     int n_child_page;                       //可视区域内的应用按钮个数
-    Gtk::Orientation orient;                //应用按钮排列方向
+
+    Glib::Property<Gtk::Orientation> m_property_orient;     //应用按钮排列方向
 
     Gdk::Point pointer_pos;                 //上次收到拖动事件时的鼠标位置
     bool drag_checking;                     //是否处于拖动检查过程中
     PointerMotionDirection motion_dir;      //拖动过程中的鼠标移动方向
 
     sigc::connection pointer_check;         //预览窗口显示状态切换检查定时器
+    sigc::connection paging_notify;          //应用按钮页面发生变化时的回调函数
 };
 
 #endif // TASKLIST_BUTTONS_CONTAINER_H
