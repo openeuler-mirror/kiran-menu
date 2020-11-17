@@ -138,6 +138,11 @@ void TasklistAppPreviewer::get_preferred_height_vfunc(int &minimum_height, int &
     }
 
     window = relative_to->get_window();
+    if (!window) {
+        minimum_height = natural_height = 0;
+        return;
+    }
+
     monitor = relative_to->get_display()->get_monitor_at_window(window);
     monitor->get_workarea(workarea);
     scroll_window.get_preferred_size(unused_size, natural_size);
@@ -176,6 +181,12 @@ void TasklistAppPreviewer::get_preferred_width_vfunc(int &minimum_width, int &na
         return;
     }
     window = relative_to->get_window();
+
+    if (!window) {
+        minimum_width = natural_width = 0;
+        return;
+    }
+
     scroll_window.get_preferred_size(min_size, natural_size);
 
     monitor = relative_to->get_display()->get_monitor_at_window(window);
