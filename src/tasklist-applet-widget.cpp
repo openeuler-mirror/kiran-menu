@@ -1,4 +1,5 @@
 #include "tasklist-applet-widget.h"
+#include "tasklist-paging-button.h"
 #include "global.h"
 #include <glibmm/i18n.h>
 
@@ -130,42 +131,12 @@ void TasklistAppletWidget::init_ui()
 
 Gtk::Button *TasklistAppletWidget::create_paging_button(std::string icon_resource, std::string tooltip_text)
 {
-    std::vector<Gtk::TargetEntry> targets;
-    Gtk::Button *button = nullptr;
 
-    auto image = Gtk::make_managed<Gtk::Image>();
-    image->set_pixel_size(16);
-    image->set_from_resource(icon_resource);
+    auto button = Gtk::make_managed<TasklistPagingButton>(applet);
 
-    button = Gtk::make_managed<Gtk::Button>();
-    button->add(*image);
-    button->set_tooltip_text(tooltip_text);
     button->set_size_request(16, 16);
-    button->get_style_context()->add_class("tasklist-arrow-button");
-
-    button->signal_clicked().connect(
-                [this, button]() -> void {
-                    /*
-                     * 获取输入焦点，当鼠标离开任务栏后当前窗口变化时，任务栏应用按钮会自动显示对应的状态
-                     */
-                    mate_panel_applet_request_focus(applet, gtk_get_current_event_time());
-
-                    button->grab_focus();
-                });
-
-
-    /*
-     * 当拖动的应用按钮经过分页按钮上方时，触发页面跳转
-     */
-    targets.push_back(Gtk::TargetEntry("binary/app-id"));
-    button->drag_dest_set(targets, Gtk::DEST_DEFAULT_ALL, Gdk::ACTION_MOVE);
-    button->signal_drag_motion().connect(
-                [button]( const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, guint time) -> bool {
-                    button->clicked();
-                    context->drag_refuse(time);
-                    return true;
-                });
-
+    button->set_icon_image(icon_resource, 16);
+    button->set_tooltip_text(tooltip_text);
 
     return button;
 }

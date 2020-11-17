@@ -23,6 +23,7 @@ add_executable(kiran-applet
         tasklist-buttons-container.cpp
         tasklist-app-context-menu.cpp
         tasklist-window-context-menu.cpp
+        tasklist-paging-button.cpp
         workspace-thumbnail.cpp
         workspace-window-thumbnail.cpp
         workspace-applet-window.cpp

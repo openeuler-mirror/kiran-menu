@@ -974,6 +974,8 @@ void TasklistButtonsContainer::load_applications()
 
         add_app_button(app);
     }
+
+    previewer->hide();
 }
 
 /**
