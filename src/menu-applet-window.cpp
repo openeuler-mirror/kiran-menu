@@ -260,6 +260,9 @@ void MenuAppletWindow::activate_search_result()
     if (get_stack_current_index(appview_stack) != PAGE_SEARCH_RESULT)
         return;
 
+    if (!search_entry->has_focus())
+        return;
+
     item = reinterpret_cast<MenuAppItem*>(search_results_box->get_data("first-item"));
     if (item != nullptr)
         item->launch_app();
