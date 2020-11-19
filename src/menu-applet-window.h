@@ -120,6 +120,11 @@ protected:
     virtual void on_date_box_clicked();
 
     /**
+     * @brief on_avatar_clicked 回调函数：点击用户头像时调用
+     */
+    virtual void on_avatar_clicked();
+
+    /**
      * @brief on_profile_changed 回调函数：当开始菜单设置发生变化时调用
      * @param changed_key   变化的gsettings 键名
      */
@@ -166,6 +171,13 @@ protected:
      * @param animation 切换页面时是否需要动画效果
      */
     void switch_to_apps_overview(double position, bool animation = true);
+
+    /**
+     * @brief 从指定的app列表中启动第一个当前系统中存在的app
+     * @param app_names   指定的app名称列表，最后一个元素需要以nullptr(NULL)结尾
+     * @return  启动成功返回true，失败返回false
+     */
+    bool launch_app_from_list(const char **app_names);
 
 private:
     Glib::RefPtr<Gtk::Builder> builder;

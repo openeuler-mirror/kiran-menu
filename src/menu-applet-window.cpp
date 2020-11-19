@@ -246,7 +246,29 @@ Gtk::SearchEntry *MenuAppletWindow::create_app_search_entry()
 
 void MenuAppletWindow::on_date_box_clicked()
 {
-    KiranHelper::run_commandline("/usr/bin/mate-time-admin");
+    const char *app_names[] = {
+        "kiran-timedate-manager",
+        "mate-time-admin",
+        "system-config-date",
+        nullptr};
+
+    if (!launch_app_from_list(app_names))
+        g_warning("Failed to launch datetime manage tools");
+
+    hide();
+}
+
+void MenuAppletWindow::on_avatar_clicked()
+{
+    const char *app_names[] = {
+        "kiran-account-manager",
+        "mate-about-me",
+        "system-config-users",
+        nullptr};
+
+    if (!launch_app_from_list(app_names))
+        g_warning("Failed to launch avatar or account manage tools");
+
     hide();
 }
 
@@ -422,6 +444,25 @@ void MenuAppletWindow::switch_to_apps_overview(double position, bool animation)
         adjustment->set_value(position);
     }
 
+}
+
+bool MenuAppletWindow::launch_app_from_list(const char **app_names)
+{
+    std::shared_ptr<Kiran::App> app;
+    auto app_manager = Kiran::AppManager::get_instance();
+
+    for (int i = 0; app_names[i] != nullptr; i++) {
+        app = app_manager->lookup_app(std::string(app_names[i]) + ".desktop");
+        if (app)
+            break;
+    }
+
+    if (app) {
+        app->launch();
+        return true;
+    }
+
+    return false;
 }
 
 bool MenuAppletWindow::on_map_event(GdkEventAny *any_event)
@@ -859,6 +900,8 @@ void MenuAppletWindow::load_user_info()
 
     avatar = Gtk::make_managed<MenuAvatarWidget>(icon_size);
     avatar->set_icon(user_info->get_iconfile());
+    avatar->signal_button_press_event().connect_notify(sigc::hide(sigc::mem_fun(*this, &MenuAppletWindow::on_avatar_clicked)));
+
 
     if (display_mode == DISPLAY_MODE_COMPACT) {
         //显示用户头像并在tooltip中提示用户名

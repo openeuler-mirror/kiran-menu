@@ -11,7 +11,6 @@ public:
 
 protected:
     virtual bool on_draw(const ::Cairo::RefPtr< ::Cairo::Context >& cr) override;
-    virtual bool on_button_press_event (GdkEventButton* button_event) override;
 
 private:
     std::string icon;

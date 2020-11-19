@@ -57,11 +57,3 @@ bool MenuAvatarWidget::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
     cr->restore();
     return false;
 }
-
-bool MenuAvatarWidget::on_button_press_event(GdkEventButton *button_event UNUSED)
-{
-    KiranHelper::run_commandline("/usr/bin/mate-about-me");
-    get_toplevel()->hide();
-
-    return false;
-}
