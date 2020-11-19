@@ -513,6 +513,9 @@ bool MenuAppletWindow::on_key_press_event(GdkEventKey *key_event)
             return true;
         }
 
+    } else if (key_event->keyval == GDK_KEY_Super_L || key_event->keyval == GDK_KEY_Super_R) {
+        hide();
+        return true;
     } else {
         if (search_entry->handle_event(key_event) == GDK_EVENT_STOP) {
             /**
