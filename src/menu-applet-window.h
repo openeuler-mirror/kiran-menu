@@ -99,6 +99,30 @@ protected:
     virtual void get_preferred_height_vfunc(int &min_width, int &natural_width) const override;
     virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
 
+    virtual void init_ui();
+
+
+    /**
+     * @brief create_app_search_entry  创建并初始化应用搜索输入框
+     * @return 创建的搜索框
+     */
+    Gtk::SearchEntry *create_app_search_entry();
+
+    /**
+     * @brief on_date_box_clicked 回调函数：点击日期时间标签时调用
+     */
+    virtual void on_date_box_clicked();
+
+    /**
+     * @brief on_profile_changed 回调函数：当开始菜单设置发生变化时调用
+     * @param changed_key   变化的gsettings 键名
+     */
+    virtual void on_profile_changed(const Glib::ustring &changed_key);
+
+    /**
+     * @brief init_window_visual  设置开始菜单窗口使用的Visual
+     */
+    virtual void init_window_visual();
 
     /**
      * @brief 回调函数: 开始菜单窗口的激活状态发生变化时调用
@@ -136,12 +160,6 @@ protected:
      * @param animation 切换页面时是否需要动画效果
      */
     void switch_to_apps_overview(double position, bool animation = true);
-
-    /**
-     * @brief 确保给定的控件在其所在滚动区域内可见
-     * @param item 控件
-     */
-    void promise_item_viewable(Gtk::Widget *item);
 
 private:
     Glib::RefPtr<Gtk::Builder> builder;
@@ -229,6 +247,8 @@ private:
      * @return 返回创建的标签
      */
     Gtk::Label* create_empty_prompt_label(const char *prompt_text);
+
+    void init_scrollable_areas();
 };
 
 #endif // MENU_APPLET_WINDOW_H

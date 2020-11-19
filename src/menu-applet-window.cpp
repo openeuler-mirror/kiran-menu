@@ -23,7 +23,6 @@ MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type):
     compact_apps_button(nullptr),
     compact_favorites_button(nullptr)
 {
-    Gtk::Box *search_box;
 
     set_name("menu-window");
     set_skip_taskbar_hint(true);
@@ -33,6 +32,8 @@ MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type):
     set_accept_focus(true);
     set_focus_on_map(true);
 
+    init_ui();
+
     auto backend = Kiran::MenuSkeleton::get_instance();
     backend->signal_app_changed().connect(sigc::mem_fun(*this, &MenuAppletWindow::reload_apps_data));
     backend->signal_favorite_app_added().connect(sigc::hide(sigc::mem_fun(*this, &MenuAppletWindow::load_favorite_apps)));
@@ -40,60 +41,12 @@ MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type):
     backend->signal_frequent_usage_app_changed().connect(sigc::mem_fun(*this, &MenuAppletWindow::load_frequent_apps));
     backend->signal_new_app_changed().connect(sigc::mem_fun(*this, &MenuAppletWindow::load_new_apps));
 
-    builder = Gtk::Builder::create_from_resource("/kiran-menu/ui/menu");
-    builder->get_widget<Gtk::Box>("menu-container", box);
-    builder->get_widget<Gtk::Grid>("sidebar-box", side_box);
-    builder->get_widget<Gtk::Stack>("overview-stack", overview_stack);
-    builder->get_widget<Gtk::Stack>("apps-view-stack", appview_stack);
-
-    builder->get_widget<Gtk::Box>("new-apps-box", new_apps_box);
-    builder->get_widget<Gtk::Box>("all-apps-box", all_apps_box);
-    builder->get_widget<Gtk::Grid>("category-overview-box", category_overview_box);
-    builder->get_widget<Gtk::Grid>("search-results-box", search_results_box);
-    builder->get_widget("compact-tab-box", compact_tab_box);
-
-    category_overview_box->set_orientation(Gtk::ORIENTATION_VERTICAL);
-
-    profile.signal_changed().connect(
-        [this](const Glib::ustring &key) -> void {
-            if (key != "opacity") {
-                set_display_mode(profile.get_display_mode());
-            } else
-                queue_draw();
-    });
-
-    Gtk::EventBox *date_box;
-
-    builder->get_widget<Gtk::EventBox>("date-box", date_box);
-    date_box->add_events(Gdk::BUTTON_PRESS_MASK | Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
-    date_box->signal_button_press_event().connect([this](GdkEventButton *button UNUSED) -> bool {
-        KiranHelper::run_commandline("/usr/bin/mate-time-admin");
-        hide();
-
-        return false;
-    });
-
-    //添加搜索框
-    builder->get_widget<Gtk::Box>("search-box", search_box);
-    search_entry = Gtk::make_managed<KiranSearchEntry>();
-    search_entry->set_can_default(true);
-    search_entry->set_can_focus(true);
-    search_entry->set_activates_default(true);
-    search_box->add(*search_entry);
-
-    search_entry->signal_search_changed().connect(sigc::mem_fun(*this, &MenuAppletWindow::on_search_change));
-    search_entry->signal_stop_search().connect(sigc::mem_fun(*this, &MenuAppletWindow::on_search_stop));
-    search_entry->signal_activate().connect(sigc::mem_fun(*this, &MenuAppletWindow::activate_search_result));
-    //添加侧边栏应用快捷方式
-    add_sidebar_buttons();
-
-    //通过reparent，将布局添加到当前窗口
-    box->reparent(*this);
-    box->show_all();
-
-    //reload_apps_data();
-
+    profile.signal_changed().connect(sigc::mem_fun(*this, &MenuAppletWindow::on_profile_changed));
     property_is_active().signal_changed().connect(sigc::mem_fun(*this, &MenuAppletWindow::on_active_change));
+
+    auto screen = get_screen();
+    monitor = new WorkareaMonitor(screen);
+    monitor->signal_size_changed().connect(sigc::mem_fun(*this, &MenuAppletWindow::ensure_display_mode));
 
     //加载当前用户信息
     user_info = new KiranUserInfo(getuid());
@@ -125,18 +78,7 @@ void MenuAppletWindow::ensure_display_mode()
 
 void MenuAppletWindow::on_realize()
 {
-    Glib::RefPtr<Gdk::Visual> rgba_visual;
-    Gdk::Rectangle rect;
-    GtkWidget *widget = GTK_WIDGET(gobj());
-    auto screen = Gdk::Screen::get_default();
 
-    /*设置窗口的Visual为RGBA visual，确保窗口背景透明度可以正常绘制 */
-    rgba_visual = screen->get_rgba_visual();
-    gtk_widget_set_visual(widget, rgba_visual->gobj());
-
-
-    monitor = new WorkareaMonitor(screen);
-    monitor->signal_size_changed().connect(sigc::mem_fun(*this, &MenuAppletWindow::ensure_display_mode));
     Gtk::Window::on_realize();
 }
 
@@ -211,6 +153,115 @@ bool MenuAppletWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
     child = get_child();
     propagate_draw(*child, cr);
     return true;
+}
+
+void MenuAppletWindow::init_ui()
+{
+    Gtk::Box *search_box;
+    Gtk::EventBox *date_box;
+
+    init_window_visual();
+
+    builder = Gtk::Builder::create_from_resource("/kiran-menu/ui/menu");
+    builder->get_widget<Gtk::Box>("menu-container", box);
+    builder->get_widget<Gtk::Grid>("sidebar-box", side_box);
+    builder->get_widget<Gtk::Stack>("overview-stack", overview_stack);
+    builder->get_widget<Gtk::Stack>("apps-view-stack", appview_stack);
+
+    builder->get_widget<Gtk::Box>("new-apps-box", new_apps_box);
+    builder->get_widget<Gtk::Box>("all-apps-box", all_apps_box);
+    builder->get_widget<Gtk::Grid>("category-overview-box", category_overview_box);
+    builder->get_widget<Gtk::Grid>("search-results-box", search_results_box);
+    builder->get_widget<Gtk::Box>("compact-tab-box", compact_tab_box);
+    builder->get_widget<Gtk::Box>("search-box", search_box);
+    builder->get_widget<Gtk::EventBox>("date-box", date_box);
+
+    init_scrollable_areas();
+
+    category_overview_box->set_orientation(Gtk::ORIENTATION_VERTICAL);
+
+    //添加搜索框
+    search_entry = create_app_search_entry();
+    search_box->add(*search_entry);
+
+    date_box->add_events(Gdk::BUTTON_PRESS_MASK | Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
+    date_box->signal_button_press_event().connect_notify(
+                sigc::hide(
+                    sigc::mem_fun(*this, &MenuAppletWindow::on_date_box_clicked)));
+
+    //添加侧边栏应用快捷方式
+    add_sidebar_buttons();
+
+    //通过reparent，将布局添加到当前窗口
+    box->reparent(*this);
+    box->show_all();
+}
+
+void MenuAppletWindow::init_scrollable_areas()
+{
+    Gtk::Viewport *viewport;
+    std::vector<Gtk::Viewport*> viewport_list;
+
+
+    builder->get_widget<Gtk::Viewport>("all-apps-viewport", viewport);
+    viewport_list.push_back(viewport);
+    builder->get_widget<Gtk::Viewport>("search-results-viewport", viewport);
+    viewport_list.push_back(viewport);
+    builder->get_widget<Gtk::Viewport>("category-overview-viewport", viewport);
+    viewport_list.push_back(viewport);
+    builder->get_widget<Gtk::Viewport>("compact-favorites-viewport", viewport);
+    viewport_list.push_back(viewport);
+    builder->get_widget<Gtk::Viewport>("expand-favorites-viewport", viewport);
+    viewport_list.push_back(viewport);
+
+    /* 确保app列表中的应用和分类获取焦点时通过滚动保证可见 */
+    for (auto viewport: viewport_list)
+        viewport->signal_realize().connect(
+            [viewport]() -> void {
+                if (!viewport)
+                    return;
+
+                auto scrolled_window = dynamic_cast<Gtk::ScrolledWindow *>(viewport->get_parent());
+                viewport->set_focus_vadjustment(scrolled_window->get_vadjustment());
+            });
+}
+
+Gtk::SearchEntry *MenuAppletWindow::create_app_search_entry()
+{
+    auto search_entry = Gtk::make_managed<KiranSearchEntry>();
+    search_entry->set_can_default(true);
+    search_entry->set_can_focus(true);
+    search_entry->set_activates_default(true);
+
+    search_entry->signal_search_changed().connect(sigc::mem_fun(*this, &MenuAppletWindow::on_search_change));
+    search_entry->signal_stop_search().connect(sigc::mem_fun(*this, &MenuAppletWindow::on_search_stop));
+    search_entry->signal_activate().connect(sigc::mem_fun(*this, &MenuAppletWindow::activate_search_result));
+
+    return search_entry;
+}
+
+void MenuAppletWindow::on_date_box_clicked()
+{
+    KiranHelper::run_commandline("/usr/bin/mate-time-admin");
+    hide();
+}
+
+void MenuAppletWindow::on_profile_changed(const Glib::ustring &changed_key)
+{
+    if (changed_key != "opacity")
+        set_display_mode(profile.get_display_mode());
+    else
+        queue_draw();
+}
+
+void MenuAppletWindow::init_window_visual()
+{
+    Glib::RefPtr<Gdk::Visual> rgba_visual;
+    GtkWidget *widget = GTK_WIDGET(gobj());
+
+    /*设置窗口的Visual为RGBA visual，确保窗口背景透明度可以正常绘制 */
+    rgba_visual = get_screen()->get_rgba_visual();
+    gtk_widget_set_visual(widget, rgba_visual->gobj());
 }
 
 void MenuAppletWindow::on_search_change()
@@ -356,14 +407,14 @@ void MenuAppletWindow::switch_to_apps_overview(const std::string &selected_categ
 
 void MenuAppletWindow::switch_to_apps_overview(double position, bool animation)
 {
-    Gtk::Viewport *all_apps_viewport;
+    Gtk::ScrolledWindow *all_apps_area;
 
     //切换到应用程序列表
     set_stack_current_index(overview_stack, VIEW_APPS_LIST, animation);
     if (position >= 0) {
-        builder->get_widget<Gtk::Viewport>("all-apps-viewport", all_apps_viewport);
+        builder->get_widget<Gtk::ScrolledWindow>("all-apps-container", all_apps_area);
 
-        auto adjustment = all_apps_viewport->get_vadjustment();
+        auto adjustment = all_apps_area->get_vadjustment();
         adjustment->set_value(position);
     }
 
@@ -819,31 +870,6 @@ void MenuAppletWindow::load_user_info()
     avatar_box->show_all();
 }
 
-void MenuAppletWindow::promise_item_viewable(Gtk::Widget *item)
-{
-    Gtk::Viewport *viewport = nullptr;
-
-    viewport = dynamic_cast<Gtk::Viewport*>(item->get_ancestor(GTK_TYPE_VIEWPORT));
-    if (viewport) {
-        Gtk::Allocation allocation;
-        int view_height;
-        double delta;
-        double adjust_value;
-
-        allocation = item->get_allocation();
-        view_height  = viewport->get_view_window()->get_height();
-        adjust_value = viewport->get_vadjustment()->get_value();
-
-        delta = (allocation.get_y() + allocation.get_height()) - (adjust_value + view_height);
-        if (delta > 0) {
-            //控件绘制区域在滚动区域内并非全部可见，需要滚动
-            viewport->get_vadjustment()->set_value(adjust_value + delta);
-        } else if (allocation.get_y() < adjust_value) {
-            viewport->get_vadjustment()->set_value(static_cast<double>(allocation.get_y()));
-        }
-    }
-}
-
 void MenuAppletWindow::set_display_mode(MenuDisplayMode mode)
 {
     Gtk::Box *avatar_button;
@@ -919,11 +945,6 @@ MenuAppItem *MenuAppletWindow::create_app_item(std::shared_ptr<Kiran::App> app, 
 
     item->set_orientation(orient);
     item->signal_launched().connect(sigc::mem_fun(*this, &Gtk::Widget::hide));
-    item->signal_focus_in_event().connect(
-                sigc::hide(sigc::bind_return(
-                               sigc::bind<Gtk::Widget*>(sigc::mem_fun(*this, &MenuAppletWindow::promise_item_viewable),item),
-                               false)));
-
 
     return item;
 }
@@ -933,10 +954,6 @@ MenuCategoryItem *MenuAppletWindow::create_category_item(const std::string &name
 {
     auto item = Gtk::make_managed<MenuCategoryItem>(name, clickable);
 
-    item->signal_focus_in_event().connect(
-                sigc::hide(sigc::bind_return(
-                               sigc::bind<Gtk::Widget*>(sigc::mem_fun(*this, &MenuAppletWindow::promise_item_viewable), item),
-                               false)));
     return item;
 }
 
