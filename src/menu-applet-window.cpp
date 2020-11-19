@@ -6,6 +6,7 @@
 #include "menu-avatar-widget.h"
 #include "global.h"
 #include <gtk/gtkx.h>
+#include "window-manager.h"
 
 
 #include <unistd.h>
@@ -27,12 +28,14 @@ MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type):
     set_name("menu-window");
     set_skip_taskbar_hint(true);
     set_skip_pager_hint(true);
-    set_keep_above(true);
     set_decorated(false);
     set_accept_focus(true);
     set_focus_on_map(true);
 
     init_ui();
+
+    Kiran::WindowManager::get_instance()->signal_active_window_changed().connect(
+                sigc::hide<0>(sigc::mem_fun(*this, &MenuAppletWindow::on_active_window_changed)));
 
     auto backend = Kiran::MenuSkeleton::get_instance();
     backend->signal_app_changed().connect(sigc::mem_fun(*this, &MenuAppletWindow::reload_apps_data));
@@ -56,6 +59,7 @@ MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type):
 MenuAppletWindow::~MenuAppletWindow()
 {
     delete user_info;
+    delete monitor;
 }
 
 sigc::signal<void, int, int> MenuAppletWindow::signal_size_changed()
@@ -116,16 +120,6 @@ void MenuAppletWindow::on_active_change()
 {
     if (is_active())
         KiranHelper::grab_input(*this);
-    else {
-        auto active_window = get_screen()->get_active_window();
-        if (!active_window || active_window != get_window()) {
-            /**
-             * 打开其它应用时，当前活动窗口会发生变化。
-             * 但在开始菜单窗口的右键菜单打开时，当前活动窗口依旧为开始菜单窗口。
-             */
-            hide();
-        }
-    }
 }
 
 bool MenuAppletWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
@@ -225,6 +219,16 @@ void MenuAppletWindow::init_scrollable_areas()
                 viewport->set_focus_vadjustment(scrolled_window->get_vadjustment());
             });
 }
+
+void MenuAppletWindow::on_active_window_changed(std::shared_ptr<Kiran::Window> active_window)
+{
+    if (!get_realized())
+        return;
+
+    if (!active_window || active_window->get_xid() != GDK_WINDOW_XID(get_window()->gobj()))
+        hide();
+}
+
 
 Gtk::SearchEntry *MenuAppletWindow::create_app_search_entry()
 {

@@ -103,6 +103,12 @@ protected:
 
 
     /**
+     * @brief on_active_window_changed 回调函数：系统当前活动窗口发生变化时调用
+     * @param active_window   新的活动窗口
+     */
+    virtual void on_active_window_changed(std::shared_ptr<Kiran::Window> active_window);
+
+    /**
      * @brief create_app_search_entry  创建并初始化应用搜索输入框
      * @return 创建的搜索框
      */
