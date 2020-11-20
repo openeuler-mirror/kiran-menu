@@ -291,8 +291,6 @@ bool TasklistAppButton::on_enter_notify_event(GdkEventCrossing *crossing_event)
 
 bool TasklistAppButton::on_leave_notify_event(GdkEventCrossing *crossing_event UNUSED)
 {
-    if (get_context_menu_opened())
-        return true;
     return Gtk::Button::on_leave_notify_event(crossing_event);
 }
 
