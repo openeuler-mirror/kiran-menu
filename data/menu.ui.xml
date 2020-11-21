@@ -378,38 +378,14 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkGrid" id="compact-favorites-box">
+                          <object class="GtkFlowBox" id="compact-favorites-box">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="hexpand">True</property>
-                            <property name="orientation">vertical</property>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
+                            <property name="valign">start</property>
+                            <property name="vexpand">False</property>
+                            <property name="homogeneous">True</property>
+                            <property name="min_children_per_line">1</property>
+                            <property name="max_children_per_line">1</property>
                           </object>
                         </child>
                       </object>
@@ -547,7 +523,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkBox" id="frequent-box">
+              <object class="GtkBox" id="expand-frequent-container">
                 <property name="height_request">158</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -555,7 +531,7 @@
                 <property name="vexpand">False</property>
                 <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkBox" id="frequent-header-box">
+                  <object class="GtkBox" id="expand-frequent-header">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
@@ -576,22 +552,19 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="frequent-apps-box">
+                  <object class="GtkFlowBox" id="expand-frequent-box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="margin_left">4</property>
-                    <property name="margin_right">4</property>
-                    <property name="hexpand">True</property>
-                    <property name="spacing">13</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
+                    <property name="valign">start</property>
+                    <property name="vexpand">False</property>
+                    <property name="column_spacing">2</property>
+                    <property name="row_spacing">4</property>
+                    <property name="min_children_per_line">1</property>
+                    <property name="selection_mode">none</property>
+                    <property name="activate_on_single_click">False</property>
                   </object>
                   <packing>
-                    <property name="expand">True</property>
+                    <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">1</property>
                   </packing>
@@ -614,7 +587,7 @@
                 <property name="vexpand">True</property>
                 <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkBox" id="favorite-header-box">
+                  <object class="GtkBox" id="expand-favorite-header">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
@@ -645,41 +618,17 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkGrid" id="favorite-apps-box">
+                          <object class="GtkFlowBox" id="expand-favorite-box">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="margin_left">4</property>
-                            <property name="margin_right">4</property>
-                            <property name="hexpand">True</property>
+                            <property name="valign">start</property>
+                            <property name="vexpand">False</property>
+                            <property name="homogeneous">True</property>
+                            <property name="column_spacing">2</property>
                             <property name="row_spacing">4</property>
-                            <property name="column_spacing">13</property>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
+                            <property name="min_children_per_line">1</property>
+                            <property name="selection_mode">none</property>
+                            <property name="activate_on_single_click">False</property>
                           </object>
                         </child>
                       </object>

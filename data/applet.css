@@ -175,7 +175,8 @@ entry.kiran-search-entry selection {
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     padding-bottom: 10px;
-    padding-left: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 scrolledwindow {

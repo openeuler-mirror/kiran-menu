@@ -736,11 +736,12 @@ void MenuAppletWindow::load_all_apps()
 void MenuAppletWindow::load_frequent_apps()
 {
     MenuListItemWidget *item;
-    Gtk::Box *frequent_apps_box;
     auto apps_list = Kiran::MenuSkeleton::get_instance()->get_nfrequent_apps(4);
 
     if (display_mode == DISPLAY_MODE_COMPACT) {
         //TODO
+        Gtk::Box *frequent_apps_box;
+
         builder->get_widget<Gtk::Box>("compact-frequent-box", frequent_apps_box);
         KiranHelper::remove_all_for_container(*frequent_apps_box);
 
@@ -756,10 +757,11 @@ void MenuAppletWindow::load_frequent_apps()
         frequent_apps_box->show_all();
     } else {
         Gtk::Box *frequent_header_box, *frequent_container;
+        Gtk::FlowBox *frequent_apps_box;
 
-        builder->get_widget<Gtk::Box>("frequent-apps-box", frequent_apps_box);
-        builder->get_widget<Gtk::Box>("frequent-header-box", frequent_header_box);
-        builder->get_widget<Gtk::Box>("frequent-box", frequent_container);
+        builder->get_widget<Gtk::FlowBox>("expand-frequent-box", frequent_apps_box);
+        builder->get_widget<Gtk::Box>("expand-frequent-header", frequent_header_box);
+        builder->get_widget<Gtk::Box>("expand-frequent-container", frequent_container);
         frequent_apps_box->set_orientation(Gtk::ORIENTATION_HORIZONTAL);
 
         KiranHelper::remove_all_for_container(*frequent_apps_box);
@@ -770,7 +772,7 @@ void MenuAppletWindow::load_frequent_apps()
             frequent_header_box->add(*item);
             for (auto app: apps_list) {
                 item = create_app_item(app, Gtk::ORIENTATION_VERTICAL);
-                frequent_apps_box->pack_start(*item, Gtk::PACK_SHRINK);
+                frequent_apps_box->insert(*item, -1);
             }
             frequent_container->show_all();
         } else {
@@ -837,16 +839,15 @@ void MenuAppletWindow::load_favorite_apps()
 {
     MenuListItemWidget *item;
     Gtk::Box *favorite_header_box;
-    Gtk::Grid *favorite_apps_box;
+    Gtk::FlowBox *favorite_apps_box;
     auto apps_list = Kiran::MenuSkeleton::get_instance()->get_favorite_apps();
 
     if (display_mode == DISPLAY_MODE_COMPACT) {
-        builder->get_widget<Gtk::Grid>("compact-favorites-box", favorite_apps_box);
+        builder->get_widget<Gtk::FlowBox>("compact-favorites-box", favorite_apps_box);
         builder->get_widget<Gtk::Box>("compact-favorites-header", favorite_header_box);
     } else {
-#define APP_COLUMN_COUNT 4                  //每行显示的app个数
-        builder->get_widget<Gtk::Grid>("favorite-apps-box", favorite_apps_box);
-        builder->get_widget<Gtk::Box>("favorite-header-box", favorite_header_box);
+        builder->get_widget<Gtk::FlowBox>("expand-favorite-box", favorite_apps_box);
+        builder->get_widget<Gtk::Box>("expand-favorite-header", favorite_header_box);
     }
 
     KiranHelper::remove_all_for_container(*favorite_apps_box);
@@ -866,16 +867,15 @@ void MenuAppletWindow::load_favorite_apps()
         for (auto app: apps_list) {
             if (display_mode == DISPLAY_MODE_EXPAND) {
                 item = create_app_item(app, Gtk::ORIENTATION_VERTICAL);
-                favorite_apps_box->attach(*item,
-                                          index % APP_COLUMN_COUNT,
-                                          index / APP_COLUMN_COUNT,
-                                          1, 1);
+                item->set_vexpand(false);
+                item->set_valign(Gtk::ALIGN_START);
+                favorite_apps_box->insert(*item, -1);
                 index++;
             } else {
                 item = create_app_item(app);
                 item->set_hexpand(true);
                 item->set_halign(Gtk::ALIGN_FILL);
-                favorite_apps_box->add(*item);
+                favorite_apps_box->insert(*item, -1);
             }
         }
     }
