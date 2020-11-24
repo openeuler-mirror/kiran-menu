@@ -9,6 +9,8 @@
 
 #include "menu-skeleton.h"
 #include "workarea-monitor.h"
+#include "menu-apps-container.h"
+#include "menu-new-apps-container.h"
 
 
 enum {
@@ -94,8 +96,6 @@ protected:
     virtual bool on_key_press_event(GdkEventKey *key_event) override;
     virtual bool on_button_press_event(GdkEventButton *button_event) override;
     virtual bool on_configure_event(GdkEventConfigure* configure_event) override;
-    virtual void on_realize() override;
-    virtual void on_unrealize() override;
     virtual void get_preferred_height_vfunc(int &min_width, int &natural_width) const override;
     virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
 
@@ -182,23 +182,25 @@ protected:
 private:
     Glib::RefPtr<Gtk::Builder> builder;
 
-    Gtk::Box *box;
+    Gtk::Box *main_box;
     Gtk::SearchEntry *search_entry;
     Gtk::Grid *side_box;
     Gtk::Stack *overview_stack, *appview_stack;
-    Gtk::Box *all_apps_box, *new_apps_box;
-    Gtk::Box *favorite_apps_box, *frequent_apps_box;
-    Gtk::Grid *category_overview_box, *search_results_box;
+    Gtk::Box *all_apps_page, *category_overview_page;
     Gtk::Box *compact_tab_box;
     Gtk::Button *compact_apps_button;
     Gtk::Button *compact_favorites_button;
+
+    MenuAppsContainer *compact_favorites_container, *expand_favorites_container;
+    MenuAppsContainer *expand_frequents_container;
+    MenuAppsContainer *search_results_container;
+    MenuAppsContainer *new_apps_container;
 
     Gdk::Rectangle geometry;                                        /*缓存的开始菜单窗口大小*/
     sigc::signal<void,int,int> m_signal_size_changed;               /*开始菜单窗口尺寸变化信号*/
 
     KiranUserInfo *user_info;                                       /*当前用户信息*/
-    std::vector<std::string> category_names;                        /*应用分类列表*/
-    std::map<std::string, MenuCategoryItem*> category_items;   /*分类名称到分类控件的映射表*/
+    std::map<std::string, MenuAppsContainer*> category_items;       /*分类名称到分类控件的映射表*/
 
     Gtk::StyleProperty<int> compact_min_height_property, expand_min_height_property;
 
@@ -258,15 +260,6 @@ private:
                                     const char *tooltip,
                                     int page_index);
 
-    /**
-     * @brief 创建无结果的提示标签
-     * @param prompt_text   提示文本
-     *
-     * @return 返回创建的标签
-     */
-    Gtk::Label* create_empty_prompt_label(const char *prompt_text);
-
-    void init_scrollable_areas();
 };
 
 #endif // MENU_APPLET_WINDOW_H

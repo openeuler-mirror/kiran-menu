@@ -16,6 +16,8 @@ add_executable(kiran-applet
         menu-power-button.cpp
         menu-power-menu.cpp
         menu-avatar-widget.cpp
+        menu-apps-container.cpp
+        menu-new-apps-container.cpp
         tasklist-app-button.cpp
         tasklist-app-previewer.cpp
         tasklist-window-previewer.cpp

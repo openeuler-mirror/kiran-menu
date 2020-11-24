@@ -25,9 +25,14 @@ void MenuCategoryItem::set_clickable(bool clickable_)
     set_can_focus(true);
 }
 
-const std::string &MenuCategoryItem::get_category_name()
+const std::string &MenuCategoryItem::get_category_name() const
 {
     return category_name;
+}
+
+bool MenuCategoryItem::get_clickable() const
+{
+    return clickable;
 }
 
 void MenuCategoryItem::set_category_name(const std::string &name)
