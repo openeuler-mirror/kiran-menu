@@ -57,7 +57,7 @@ bool MenuNewAppsContainer::load_applications(const Kiran::AppVec &apps)
 Gtk::ToggleButton *MenuNewAppsContainer::create_expand_button()
 {
     auto button = new Gtk::ToggleButton(_("Expand"));
-    auto image = new Gtk::Image();
+    auto image = Gtk::make_managed<Gtk::Image>();
 
     image->set_from_resource("/kiran-menu/icon/expand");
     image->set_margin_left(5);
