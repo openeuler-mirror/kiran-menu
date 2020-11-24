@@ -19,7 +19,7 @@ MenuAppletButton::MenuAppletButton(MatePanelApplet *panel_applet):
                     on_toggled();
                 });
 
-    get_style_context()->add_class("kiran-menu-applet-button");
+    get_style_context()->add_class("menu-applet-button");
 }
 
 MenuAppletButton::~MenuAppletButton()

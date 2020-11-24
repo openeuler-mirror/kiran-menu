@@ -27,8 +27,7 @@ MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type):
     compact_apps_button(nullptr),
     compact_favorites_button(nullptr)
 {
-
-    set_name("menu-window");
+    set_name("menu-applet-window");
     set_skip_taskbar_hint(true);
     set_skip_pager_hint(true);
     set_decorated(false);
@@ -205,6 +204,7 @@ void MenuAppletWindow::init_ui()
 
     //添加搜索框
     search_entry = create_app_search_entry();
+    search_entry->get_style_context()->add_class("menu-search-entry");
     search_box->add(*search_entry);
 
     /* 日期时间信息 */
@@ -602,7 +602,7 @@ Gtk::Button* MenuAppletWindow::create_page_button(const char *icon_resource,
     button->set_always_show_image(true);
     button->set_image(*image);
     button->set_tooltip_text(tooltip);
-    button->get_style_context()->add_class("kiran-app-button");
+    button->get_style_context()->add_class("menu-app-launcher");
 
     button->signal_clicked().connect(
                 [this, page_index]() -> void{

@@ -41,9 +41,9 @@ void MenuAppsContainer::set_auto_hide(bool auto_hide_)
 void MenuAppsContainer::set_draw_frame(bool draw_frame_)
 {
     if (draw_frame_)
-        get_style_context()->add_class("kiran-section-box");
+        get_style_context()->add_class("menu-section-box");
     else
-        get_style_context()->remove_class("kiran-section-box");
+        get_style_context()->remove_class("menu-section-box");
 }
 
 void MenuAppsContainer::set_empty_prompt_text(const Glib::ustring &text)
@@ -67,7 +67,7 @@ bool MenuAppsContainer::load_applications(const Kiran::AppVec &apps)
         }
 
         label = Gtk::make_managed<Gtk::Label>(empty_prompt_text);
-        label->get_style_context()->add_class("search-empty-prompt");
+        label->get_style_context()->add_class("empty-prompt-text");
         label->set_hexpand(true);
         label->set_vexpand(true);
         label->set_halign(Gtk::ALIGN_CENTER);

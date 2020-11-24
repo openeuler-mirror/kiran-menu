@@ -7,22 +7,34 @@
     font-family: "Noto Sans CJK SC";
 }
 
-button.toggle.kiran-menu-applet-button {
+/* 开始菜单主窗口 */
+window#menu-applet-window {
+    background: rgba(28, 28, 28, 0.9);
+    min-width: 760px;
+    min-height: 682px;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
+    -gtkmm__CustomObject_KiranMenuWindow-compact-min-height: 682px;
+    -gtkmm__CustomObject_KiranMenuWindow-expand-min-height: 682px;
+}
+
+/* 开始菜单任务栏按钮 */
+button.toggle.menu-applet-button {
     background: transparent;
     box-shadow: none;
 }
-
-button.toggle.kiran-menu-applet-button:active {
+button.toggle.menu-applet-button:active {
     background: rgba(255, 255, 255, 0.35);
     box-shadow: none;
 }
-
-button.toggle.kiran-menu-applet-button:hover {
+button.toggle.menu-applet-button:hover {
     background: rgba(255, 255, 255, 0.2);
     box-shadow: none;
 }
 
-button.kiran-app-item, button.kiran-category-item {
+/* 开始菜单应用按钮和分类标签 */
+button.menu-app-item.horizontal, button.menu-category-item {
     background: transparent;
     color: #ffffff;
     border-width: 0px;
@@ -34,15 +46,20 @@ button.kiran-app-item, button.kiran-category-item {
     outline: none;
     box-shadow: none;
 }
-
-button.kiran-app-item {
+button.menu-app-item.horizontal:hover, button.menu-category-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #4cb5ff;
+    border-style: solid;
+    border-width: 0px;
+    border-right-width: 3px;
+}
+button.menu-app-item.horizontal {
     min-height: 40px;
     padding: 0px;
     padding-left: 25px;
     -gtkmm__CustomObject_KiranMenuAppItem-icon-spacing: 12px;
 }
-
-button.kiran-category-item {
+button.menu-category-item {
     min-height: 40px;
     margin-top: 10px;
     margin-bottom: 10px;
@@ -52,8 +69,7 @@ button.kiran-category-item {
 
     -gtkmm__CustomObject_KiranMenuCategoryItem-icon-spacing: 12px;
 }
-
-button.kiran-app-entry {
+button.menu-app-item.vertical {
     min-height: 100px;
     min-width: 88px;
     border: none;
@@ -70,44 +86,21 @@ button.kiran-app-entry {
     background: transparent;
     color: white;
 }
-
-button.kiran-app-entry:hover {
+button.menu-app-item.vertical:hover {
     background: rgba(255, 255, 255, 0.1);
 }
 
-
-button.kiran-app-item:hover, button.kiran-category-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: #4cb5ff;
-    border-style: solid;
-    border-width: 0px;
-    border-right-width: 3px;
-}
-
-button.kiran-app-item:focus, button.kiran-category-item:focus, button.kiran-app-entry:focus {
+button.menu-app-item:focus,
+button.menu-category-item:focus
+{
     outline-offset: -2px;
     outline-style: dotted;
     outline-color: #ffffff;
     outline-width: 1px;
 }
 
-.kiran-search-entry {
-    border-radius: 3px;
-    box-shadow: none;
-}
-
-window#menu-window {
-    background: rgba(28, 28, 28, 0.9);
-    min-width: 760px;
-    min-height: 682px;
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-
-    -gtkmm__CustomObject_KiranMenuWindow-compact-min-height: 682px;
-    -gtkmm__CustomObject_KiranMenuWindow-expand-min-height: 682px;
-}
-
-button.kiran-app-button {
+/* 开始菜单侧边栏按钮 */
+button.menu-app-launcher {
     border-width: 1px;
     border-style: solid;
     border-color: transparent;
@@ -117,8 +110,7 @@ button.kiran-app-button {
 
     min-height: 30px;
 }
-
-button.kiran-app-button:focus{
+button.menu-app-launcher:focus{
     outline-offset: -2px;
     outline-style: dotted;
     outline-color: #ffffff;
@@ -127,8 +119,7 @@ button.kiran-app-button:focus{
     box-shadow: none;
     border-image: none;
 }
-
-button.kiran-app-button:hover {
+button.menu-app-launcher:hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: transparent;
     box-shadow: none;
@@ -136,40 +127,34 @@ button.kiran-app-button:hover {
     border-image: none;
 }
 
-separator.horizontal, separator.vertical
+/* 开始菜单窗口 分割线 */
+window#menu-applet-window separator.horizontal, window.menu-applet-window separator.vertical
 {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-separator#sidebar-separator {
-    margin-left: 5px;
-    margin-right: 5px;
-    margin-top: 5px;
-    margin-bottom: 5px;
-    background-color: red;
-}
-
-entry.kiran-search-entry {
+/* 开始菜单应用搜索框 */
+entry.menu-search-entry {
     margin-left: 10px;
     margin-right: 10px;
     border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 0px;
+    border-radius: 3px;
     background: rgba(255, 255, 255, 0.1);
     color: white;
     padding-left: 10px;
+    box-shadow: none
 }
-
-entry.kiran-search-entry:focus {
+entry.menu-search-entry:focus {
     border: 1px solid rgba(255, 255, 255, 0.3);
     box-shadow: none;
 }
-
-entry.kiran-search-entry selection {
+entry.menu-search-entry selection {
     color: #ffffff;
     background: rgba(255, 255, 255, 0.2);
 }
 
-.kiran-section-box {
+/* 开始菜单区域框 */
+.menu-section-box {
     color: #ffffff;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -179,31 +164,28 @@ entry.kiran-search-entry selection {
     padding-right: 5px;
 }
 
-scrolledwindow {
-    border: none;
-    background: transparent;
-}
 
-viewport {
-    background: transparent;
-}
-
-label.search-empty-prompt {
+label.empty-prompt-text {
     font-size: 18px;
     color: #8b8b8b;
 }
 
-.kiran-expand-button {
+/* 开始菜单：应用列表展开按钮 */
+button.toggle.menu-expand-button {
     box-shadow: none;
     background: transparent;
     border: none;
     border-image: none;
     color: #ffffff;
     padding-left: 24px;
-
+    min-height: 32px;
 }
 
-button.kiran-expand-button:focus{
+button.toggle.menu-expand-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+button.toggle.menu-expand-button:focus{
     outline-offset: -2px;
     outline-style: dotted;
     outline-color: #ffffff;
@@ -212,6 +194,7 @@ button.kiran-expand-button:focus{
     box-shadow: none;
     border-image: none;
 }
+
 
 .kiran-tasklist-button {
     background: transparent;

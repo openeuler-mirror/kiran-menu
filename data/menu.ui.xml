@@ -318,7 +318,7 @@
                       </packing>
                     </child>
                     <style>
-                      <class name="kiran-section-box"/>
+                      <class name="menu-section-box"/>
                     </style>
                   </object>
                 </child>

@@ -65,7 +65,7 @@ Gtk::ToggleButton *MenuNewAppsContainer::create_expand_button()
     button->set_image(*image);
     button->set_image_position(Gtk::POS_RIGHT);
     button->set_alignment(0.0, 0.5);
-    button->get_style_context()->add_class("kiran-expand-button");
+    button->get_style_context()->add_class("menu-expand-button");
 
     button->signal_toggled().connect(
         [this]() -> void {
