@@ -2,10 +2,11 @@
 #define MENU_APPLET_WINDOW_H
 
 #include <gtkmm.h>
-#include "kiran-user-info.h"
+#include "menu-user-info.h"
 #include "menu-app-item.h"
 #include "menu-category-item.h"
 #include "menu-profile.h"
+#include "menu-avatar-widget.h"
 
 #include "menu-skeleton.h"
 #include "workarea-monitor.h"
@@ -100,7 +101,7 @@ protected:
     virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
 
     virtual void init_ui();
-
+    virtual void init_avatar_widget();
 
     /**
      * @brief on_active_window_changed 回调函数：系统当前活动窗口发生变化时调用
@@ -195,16 +196,17 @@ private:
     MenuAppsContainer *expand_frequents_container;
     MenuAppsContainer *search_results_container;
     MenuAppsContainer *new_apps_container;
+    MenuAvatarWidget  *compact_avatar_widget, *expand_avatar_widget;
 
     Gdk::Rectangle geometry;                                        /*缓存的开始菜单窗口大小*/
     sigc::signal<void,int,int> m_signal_size_changed;               /*开始菜单窗口尺寸变化信号*/
 
-    KiranUserInfo *user_info;                                       /*当前用户信息*/
+    MenuUserInfo user_info;                                       /*当前用户信息*/
     std::map<std::string, MenuAppsContainer*> category_items;       /*分类名称到分类控件的映射表*/
 
     Gtk::StyleProperty<int> compact_min_height_property, expand_min_height_property;
 
-    MenuProfile profile;           /*首选项*/
+    MenuProfile profile;                 /*首选项*/
     MenuDisplayMode display_mode;       /*当前显示模式*/
     WorkareaMonitor *monitor;           /*屏幕变化监视器*/
 
@@ -227,12 +229,6 @@ private:
      * @brief 加载当前用户信息
      */
     void load_user_info();
-
-
-    MenuAppItem *create_app_item(std::shared_ptr<Kiran::App> app,
-                                      Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL);
-    MenuCategoryItem *create_category_item(const std::string &name,
-                                                bool clickable=true);
 
 
     /**

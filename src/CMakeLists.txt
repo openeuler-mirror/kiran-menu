@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.0)
 
 add_executable(kiran-applet
         kiran-search-entry.cpp
-        kiran-user-info.cpp
         kiran-opacity-menu.cpp
         kiran-applet-button.cpp
         window-thumbnail-widget.cpp
+        menu-user-info.cpp
         menu-list-item-widget.cpp
         menu-app-launcher-button.cpp
         menu-app-item.cpp

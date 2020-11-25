@@ -3,7 +3,6 @@
 #include "menu-power-button.h"
 #include "kiran-search-entry.h"
 #include "kiran-helper.h"
-#include "menu-avatar-widget.h"
 #include "global.h"
 #include <gtk/gtkx.h>
 #include "window-manager.h"
@@ -22,10 +21,13 @@
 MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type):
     Glib::ObjectBase("KiranMenuWindow"),
     Gtk::Window(window_type),
+    user_info(getuid()),
     compact_min_height_property(*this, "compact-min-height", 0),
     expand_min_height_property(*this, "expand-min-height", 0),
     compact_apps_button(nullptr),
-    compact_favorites_button(nullptr)
+    compact_favorites_button(nullptr),
+    compact_avatar_widget(nullptr),
+    expand_avatar_widget(nullptr)
 {
     set_name("menu-applet-window");
     set_skip_taskbar_hint(true);
@@ -54,13 +56,12 @@ MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type):
     monitor->signal_size_changed().connect(sigc::mem_fun(*this, &MenuAppletWindow::ensure_display_mode));
 
     //加载当前用户信息
-    user_info = new KiranUserInfo(getuid());
     set_display_mode(profile.get_display_mode());
+    Glib::signal_idle().connect_once(sigc::mem_fun(*this, &MenuAppletWindow::load_user_info));
 }
 
 MenuAppletWindow::~MenuAppletWindow()
 {
-    delete user_info;
     delete monitor;
 }
 
@@ -215,9 +216,40 @@ void MenuAppletWindow::init_ui()
     //添加侧边栏应用快捷方式
     add_sidebar_buttons();
 
+    //初始化用户头像
+    init_avatar_widget();
+
     //通过reparent，将布局添加到当前窗口
     main_box->reparent(*this);
     main_box->show_all();
+}
+
+void MenuAppletWindow::init_avatar_widget() 
+{
+    Gtk::Box *avatar_box;
+
+    if (display_mode == DISPLAY_MODE_COMPACT && compact_avatar_widget == nullptr)
+    {
+        compact_avatar_widget = Gtk::make_managed<MenuAvatarWidget>(36);
+        compact_avatar_widget->signal_button_press_event().connect_notify(
+            sigc::hide(sigc::mem_fun(*this, &MenuAppletWindow::on_avatar_clicked)));
+
+        builder->get_widget("compact-avatar-box", avatar_box);
+        avatar_box->add(*compact_avatar_widget);
+        avatar_box->show_all();
+    }
+
+    if (display_mode == DISPLAY_MODE_EXPAND && expand_avatar_widget == nullptr)
+    {
+        expand_avatar_widget = Gtk::make_managed<MenuAvatarWidget>(60);
+        expand_avatar_widget->set_vexpand(true);
+        expand_avatar_widget->signal_button_press_event().connect_notify(
+            sigc::hide(sigc::mem_fun(*this, &MenuAppletWindow::on_avatar_clicked)));
+
+        builder->get_widget("expand-avatar-box", avatar_box);
+        avatar_box->add(*expand_avatar_widget);
+        avatar_box->show_all();
+    }
 }
 
 void MenuAppletWindow::on_active_window_changed(std::shared_ptr<Kiran::Window> active_window)
@@ -719,47 +751,40 @@ void MenuAppletWindow::load_favorite_apps()
 
 void MenuAppletWindow::load_user_info()
 {
-
-    Gtk::Box *avatar_box;
-    MenuAvatarWidget *avatar;
-    int icon_size = 60;
-
-    if (!user_info->is_ready())
+    if (!user_info.is_ready()) {
+        user_info.load();
+        user_info.signal_ready().connect(sigc::mem_fun(*this, &MenuAppletWindow::load_user_info));
         return;
-
-    if (display_mode == DISPLAY_MODE_COMPACT)
-        icon_size = 36;
-
-    avatar = Gtk::make_managed<MenuAvatarWidget>(icon_size);
-    avatar->set_icon(user_info->get_iconfile());
-    avatar->signal_button_press_event().connect_notify(sigc::hide(sigc::mem_fun(*this, &MenuAppletWindow::on_avatar_clicked)));
-
+    }
 
     if (display_mode == DISPLAY_MODE_COMPACT) {
-        //显示用户头像并在tooltip中提示用户名
-        builder->get_widget("compact-avatar-box", avatar_box);
-        avatar->set_tooltip_text(Glib::ustring(user_info->get_username()));
+        //在头像的tooltip中提示用户名
+        if (compact_avatar_widget == nullptr)
+            return;
+        compact_avatar_widget->set_icon(user_info.get_iconfile());
+        compact_avatar_widget->set_tooltip_text(user_info.get_username());
     } else {
         Gtk::Label *name_label;
-        builder->get_widget("expand-avatar-box", avatar_box);
-        builder->get_widget<Gtk::Label>("username-label", name_label);
 
-        avatar->set_vexpand(true);
-        name_label->set_markup(Glib::ustring(_("Hello")) + ", <b>" + user_info->get_username() +"</b>");
+        if (expand_avatar_widget == nullptr)
+            return;
+        builder->get_widget<Gtk::Label>("username-label", name_label);
+        name_label->set_markup(Glib::ustring::compose("%1, <b>%2</b>", _("Hello"), user_info.get_username()));
+        expand_avatar_widget->set_icon(user_info.get_iconfile());
     }
-    KiranHelper::remove_all_for_container(*avatar_box);
-    avatar_box->add(*avatar);
-    avatar_box->show_all();
 }
 
 void MenuAppletWindow::set_display_mode(MenuDisplayMode mode)
 {
-    Gtk::Box *avatar_button;
+    Gtk::Box *compact_avatar_box;
     Gtk::Box *expand_panel, *compact_tab_box;
     int min_width, natural_width, min_height, natural_height;
     Gdk::Rectangle rect;
     Glib::RefPtr<Gdk::Monitor> monitor;
     Glib::RefPtr<Gdk::Display> display;
+
+    if (display_mode == mode)
+        return;
 
     if (get_realized()) {
         display = get_display();
@@ -770,13 +795,13 @@ void MenuAppletWindow::set_display_mode(MenuDisplayMode mode)
     monitor = display->get_primary_monitor();
     monitor->get_workarea(rect);
 
-    builder->get_widget("compact-avatar-box", avatar_button);
+    builder->get_widget("compact-avatar-box", compact_avatar_box);
     builder->get_widget("expand-panel", expand_panel);
     builder->get_widget("compact-tab-box", compact_tab_box);
 
     if(display_mode == DISPLAY_MODE_COMPACT) {
         //紧凑模式下隐藏右侧面板
-        avatar_button->set_visible(true);
+        compact_avatar_box->set_visible(true);
         expand_panel->set_visible(false);
         compact_tab_box->set_visible(true);
 
@@ -785,8 +810,7 @@ void MenuAppletWindow::set_display_mode(MenuDisplayMode mode)
         else
             compact_favorites_button->clicked();
     } else {
-
-        avatar_button->set_visible(false);
+        compact_avatar_box->set_visible(false);
         expand_panel->set_visible(true);
         compact_tab_box->set_visible(false);
         get_preferred_width(min_width, natural_width);
@@ -801,42 +825,23 @@ void MenuAppletWindow::set_display_mode(MenuDisplayMode mode)
             return;
         }
 
-        load_date_info();
+        Glib::signal_idle().connect_once(sigc::mem_fun(*this, &MenuAppletWindow::load_date_info));
     }
+
+    /* 重新初始化用户头像控件 */
+    init_avatar_widget();
+
+    /*
+     * 重新调整窗口大小
+     */
     get_preferred_width(min_width, natural_width);
     get_preferred_height(min_height, natural_height);
-    /* 等待DBus信息准备好 */
-    if (!user_info->is_ready()) {
-        user_info->signal_data_ready().clear();
-        user_info->signal_data_ready().connect(
-                    sigc::mem_fun(*this, &MenuAppletWindow::load_user_info));
-    }
-    else
-        load_user_info();
-
     natural_height = std::min(natural_height, rect.get_height());
     resize(natural_width, natural_height);
+
+    /* 重新加载应用数据和用户头像等信息 */
     Glib::signal_idle().connect_once(sigc::mem_fun(*this, &MenuAppletWindow::reload_apps_data));
-}
-
-
-MenuAppItem *MenuAppletWindow::create_app_item(std::shared_ptr<Kiran::App> app, Gtk::Orientation orient)
-{
-
-    auto item = Gtk::make_managed<MenuAppItem>(app);
-
-    item->set_orientation(orient);
-    item->signal_launched().connect(sigc::mem_fun(*this, &Gtk::Widget::hide));
-
-    return item;
-}
-
-MenuCategoryItem *MenuAppletWindow::create_category_item(const std::string &name,
-                                                             bool clickable)
-{
-    auto item = Gtk::make_managed<MenuCategoryItem>(name, clickable);
-
-    return item;
+    Glib::signal_idle().connect_once(sigc::mem_fun(*this, &MenuAppletWindow::load_user_info));
 }
 
 void MenuAppletWindow::load_date_info()
