@@ -243,7 +243,7 @@ std::shared_ptr<App> AppManager::get_app_from_sandboxed_app(std::shared_ptr<Wind
             break;
         }
 
-        auto desktop_id = key_file.get_string("Application", "name");
+        auto desktop_id = key_file.get_string("Application", "name") + ".desktop";
 
         app = lookup_app(desktop_id.raw());
         RETURN_VAL_IF_TRUE(app, app);
@@ -305,7 +305,7 @@ std::shared_ptr<App> AppManager::get_app_from_sandboxed_app(std::shared_ptr<Wind
             }
         }
 
-        auto desktop_id = std::string(contents_start, security_label_contents_size);
+        auto desktop_id = std::string(contents_start, security_label_contents_size) + ".desktop";
         app = lookup_app(desktop_id);
         RETURN_VAL_IF_TRUE(app, app);
     } while (0);

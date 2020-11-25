@@ -16,7 +16,7 @@
 
 ## 编译安装
 ```
-   # yum install mate-panel-devel cmake gettext libwnck3-devel glib2 gcc-c++ gtkmm30-devel cairomm-devel accountsservice-devel mate-desktop-devel gtk-update-icon-cache
+   # yum install mate-panel-devel cmake gettext libwnck3-devel glib2 gcc-c++ gtkmm30-devel cairomm-devel accountsservice-devel mate-desktop-devel gtk-update-icon-cache libX11-devel libxcb-devel
    # mkdir build
    # cd build && cmake -DCMAKE_INSTALL_PREFIX=/usr ..
    # make

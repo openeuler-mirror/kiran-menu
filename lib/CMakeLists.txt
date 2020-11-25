@@ -15,7 +15,8 @@ pkg_search_module(GIOMM REQUIRED giomm-2.4)
 pkg_search_module(GTHREAD REQUIRED gthread-2.0)
 pkg_search_module(WNCK3 REQUIRED libwnck-3.0)
 pkg_search_module(GDKMM3 REQUIRED gdkmm-3.0)
-pkg_search_module(X11 REQUIRED x11)
+pkg_search_module(X11_XCB REQUIRED x11-xcb)
+pkg_search_module(XCB_RES REQUIRED xcb-res)
 pkg_search_module(XCOMPOSITE REQUIRED xcomposite)
 
 
@@ -29,7 +30,8 @@ target_include_directories(${TARGET_NAME} PUBLIC
     ${GTHREAD_INCLUDE_DIRS}
     ${WNCK3_INCLUDE_DIRS}
     ${GDKMM3_INCLUDE_DIRS}
-    ${X11_INCLUDE_DIRS}
+    ${X11_XCB_INCLUDE_DIRS}
+    ${XCB_RES_INCLUDE_DIRS}
     ${XCOMPOSITE_INCLUDE_DIRS})
 
 
@@ -44,6 +46,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     ${GTHREAD_LIBRARIES}
     ${WNCK3_LIBRARIES}
     ${GDKMM3_LIBRARIES}
-    ${X11_LIBRARIES}
+    ${X11_XCB_LIBRARIES}
+    ${XCB_RES_LIBRARIES}
     ${XCOMPOSITE_LIBRARIES})
 

@@ -9,11 +9,13 @@
 
 #include "lib/window.h"
 
+#include <X11/Xlib-xcb.h>
+#include <X11/Xlib.h>
 #include <X11/extensions/Xcomposite.h>
+#include <cairo/cairo-xlib.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
-#include <X11/Xlib.h>
-#include <cairo/cairo-xlib.h>
+#include <xcb/res.h>
 
 #include "lib/app-manager.h"
 #include "lib/app.h"
@@ -22,7 +24,7 @@
 
 namespace Kiran
 {
-Window::Window(WnckWindow* wnck_window) : wnck_window_(wnck_window),
+Window::Window(WnckWindow *wnck_window) : wnck_window_(wnck_window),
                                           gdk_window_(NULL),
                                           last_workspace_number_(-1),
                                           last_is_pinned_(false),
@@ -90,7 +92,7 @@ std::string Window::get_icon_name()
     RET_WRAP_NULL(wnck_window_get_icon_name(this->wnck_window_));
 }
 
-GdkPixbuf* Window::get_icon()
+GdkPixbuf *Window::get_icon()
 {
     return wnck_window_get_icon(this->wnck_window_);
 }
@@ -104,7 +106,8 @@ cairo_surface_t *Window::get_thumbnail(int &thumbnail_width, int &thumbnail_heig
     Pixmap pixmap = get_pixmap();
 
     xdisplay = GDK_DISPLAY_XDISPLAY(display);
-    if (pixmap != None) {
+    if (pixmap != None)
+    {
         gdk_x11_display_error_trap_push(display);
         XGetWindowAttributes(xdisplay, get_xid(), &attrs);
         surface = cairo_xlib_surface_create(xdisplay,
@@ -144,7 +147,7 @@ WindowVec Window::get_group_windows()
 
     for (auto l = wnck_windows; l != NULL; l = l->next)
     {
-        auto wnck_window = (WnckWindow*)(l->data);
+        auto wnck_window = (WnckWindow *)(l->data);
         auto window = WindowManager::get_instance()->lookup_window(wnck_window);
         if (window)
         {
@@ -172,7 +175,42 @@ std::string Window::get_class_instance_name()
 
 int32_t Window::get_pid()
 {
-    return wnck_window_get_pid(this->wnck_window_);
+    /*没有使用wnck_window_get_pid获取窗口pid，因为如果窗口对应的是flatpak应用，
+    函数返回的是沙盒内的进程ID，这里参考mutter的代码，直接向xserver发送请求，
+    对于flatpak应用，这里获取的是沙盒外的进程ID*/
+
+    auto xdisplay = gdk_x11_get_default_xdisplay();
+    xcb_connection_t *xcb = XGetXCBConnection(xdisplay);
+    xcb_res_client_id_spec_t spec = {0};
+    xcb_res_query_client_ids_cookie_t cookie;
+    xcb_res_query_client_ids_reply_t *reply = NULL;
+
+    spec.client = this->get_xid();
+    spec.mask = XCB_RES_CLIENT_ID_MASK_LOCAL_CLIENT_PID;
+
+    cookie = xcb_res_query_client_ids(xcb, 1, &spec);
+    reply = xcb_res_query_client_ids_reply(xcb, cookie, NULL);
+
+    if (reply == NULL)
+        return 0;
+
+    uint32_t pid = 0, *value;
+    xcb_res_client_id_value_iterator_t it;
+    for (it = xcb_res_query_client_ids_ids_iterator(reply);
+         it.rem;
+         xcb_res_client_id_value_next(&it))
+    {
+        spec = it.data->spec;
+        if (spec.mask & XCB_RES_CLIENT_ID_MASK_LOCAL_CLIENT_PID)
+        {
+            value = xcb_res_client_id_value_value(it.data);
+            pid = *value;
+            break;
+        }
+    }
+
+    free(reply);
+    return pid;
 }
 
 WnckWindowType Window::get_window_type()
@@ -401,7 +439,7 @@ void Window::flush_workspace()
     }
 }
 
-void Window::name_changed(WnckWindow* wnck_window, gpointer user_data)
+void Window::name_changed(WnckWindow *wnck_window, gpointer user_data)
 {
     auto window = WindowManager::get_instance()->lookup_window(wnck_window);
     g_return_if_fail(window);
@@ -411,7 +449,7 @@ void Window::name_changed(WnckWindow* wnck_window, gpointer user_data)
     window->name_changed_.emit();
 }
 
-void Window::workspace_changed(WnckWindow* wnck_window, gpointer user_data)
+void Window::workspace_changed(WnckWindow *wnck_window, gpointer user_data)
 {
     g_return_if_fail(wnck_window != NULL);
 
@@ -434,7 +472,7 @@ void Window::workspace_changed(WnckWindow* wnck_window, gpointer user_data)
     }
 }
 
-void Window::geometry_changed(WnckWindow* wnck_window,
+void Window::geometry_changed(WnckWindow *wnck_window,
                               gpointer user_data)
 {
     auto window = WindowManager::get_instance()->lookup_window(wnck_window);
@@ -473,9 +511,9 @@ void Window::geometry_changed(WnckWindow* wnck_window,
     window->last_geometry_ = geometry;
 }
 
-void Window::process_events(GdkXEvent* xevent, GdkEvent* event)
+void Window::process_events(GdkXEvent *xevent, GdkEvent *event)
 {
-    auto x_event = (XEvent*)xevent;
+    auto x_event = (XEvent *)xevent;
 
     if (x_event->type == MapNotify)
     {
