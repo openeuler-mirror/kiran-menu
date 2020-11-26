@@ -10,6 +10,12 @@
 class TasklistAppButton: public Gtk::Button
 {
 public:
+    enum AppButtonState {
+        APP_BUTTON_STATE_NORMAL = 0,        //正常显示
+        APP_BUTTON_STATE_ATTENTION,         //需要注意
+        APP_BUTTON_STATE_FLICKER            //闪烁（需要注意和常态之间反复切换)
+    };
+public:
     TasklistAppButton(const std::shared_ptr<Kiran::App> &app, int size);
     ~TasklistAppButton() override;
 
@@ -56,6 +62,8 @@ protected:
     virtual bool on_enter_notify_event(GdkEventCrossing *crossing_event) override;
     virtual bool on_leave_notify_event(GdkEventCrossing *crossing_event) override;
 
+    virtual void on_map() override;
+
     virtual void on_drag_begin(const Glib::RefPtr<Gdk::DragContext> &context) override;
     virtual void on_drag_data_get (const Glib::RefPtr< Gdk::DragContext >& context,
                                    Gtk::SelectionData& selection_data,
@@ -89,6 +97,17 @@ protected:
     void init_drag_and_drop();
 
 
+    /**
+     * @brief 回调函数：按钮所属应用的窗口中任一窗口状态发生变化时调用
+     */
+    void on_windows_state_changed();
+
+    /**
+     * @brief  为应用按钮绘制需要注意的状态提示
+     * @param cr on_draw()信号中的Cairo上下文
+     */
+    void draw_attentions(const Cairo::RefPtr<Cairo::Context> &cr);
+
 private:
     TasklistAppContextMenu *context_menu;               //右键菜单
     Gtk::StyleProperty<int> indicator_size_property;    //绘制指示器的尺寸
@@ -98,7 +117,11 @@ private:
     int icon_size;                                      //绘制应用图标的尺寸
     std::weak_ptr<Kiran::App> app;                      //关联的app对象
 
+    AppButtonState state;                               //按钮显示状态
     bool dragging;                                      //当前是否处于被拖动状态
+    sigc::connection    draw_attention_flicker;         //需要用户注意时的闪烁绘制定时器
+    sigc::connection    draw_attention_normal;          //需要用户注意时的最终绘制定时器
+    sigc::connection    window_opened_handler;          //窗口打开时的回调
 
 
     sigc::signal<void, bool> m_signal_context_menu_toggled;

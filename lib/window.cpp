@@ -30,7 +30,8 @@ Window::Window(WnckWindow* wnck_window) : wnck_window_(wnck_window),
                                           last_geometry_(0, 0, 0, 0),
                                           name_changed_handler_(0),
                                           workspace_changed_handler_(0),
-                                          geometry_changed_handler_(0)
+                                          geometry_changed_handler_(0),
+                                          state_changed_handler(0)
 {
     auto workspace = this->get_workspace();
     if (workspace)
@@ -42,6 +43,7 @@ Window::Window(WnckWindow* wnck_window) : wnck_window_(wnck_window),
     this->name_changed_handler_ = g_signal_connect(this->wnck_window_, "name-changed", G_CALLBACK(Window::name_changed), NULL);
     this->workspace_changed_handler_ = g_signal_connect(this->wnck_window_, "workspace-changed", G_CALLBACK(Window::workspace_changed), NULL);
     this->geometry_changed_handler_ = g_signal_connect(this->wnck_window_, "geometry-changed", G_CALLBACK(Window::geometry_changed), NULL);
+    this->state_changed_handler = g_signal_connect(this->wnck_window_, "state-changed", G_CALLBACK(Window::state_changed), NULL);
     this->update_window_pixmap();
 }
 
@@ -77,6 +79,9 @@ Window::~Window()
         {
             g_signal_handler_disconnect(this->wnck_window_, this->geometry_changed_handler_);
         }
+
+        if (this->state_changed_handler)
+            g_signal_handler_disconnect(this->wnck_window_, this->state_changed_handler);
     }
 }
 
@@ -163,6 +168,11 @@ std::shared_ptr<Window> Window::get_transient()
 std::string Window::get_class_group_name()
 {
     RET_WRAP_NULL(wnck_window_get_class_group_name(this->wnck_window_));
+}
+
+bool Window::needs_attention()
+{
+    return wnck_window_needs_attention(this->wnck_window_);
 }
 
 std::string Window::get_class_instance_name()
@@ -471,6 +481,14 @@ void Window::geometry_changed(WnckWindow* wnck_window,
     }
 
     window->last_geometry_ = geometry;
+}
+
+void Window::state_changed(WnckWindow *wnck_window, gpointer user_data)
+{
+    auto window = WindowManager::get_instance()->lookup_window(wnck_window);
+    g_return_if_fail(window);
+
+    window->signal_state_changed().emit();
 }
 
 void Window::process_events(GdkXEvent* xevent, GdkEvent* event)
