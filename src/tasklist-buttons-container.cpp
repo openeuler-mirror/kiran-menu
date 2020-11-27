@@ -326,8 +326,10 @@ void TasklistButtonsContainer::on_window_closed(KiranWindowPointer window)
                 app_button->set_tooltip_text(app->get_name());
                 app_button->queue_draw();
             }
-        } else
+        } else {
             app_button->set_has_tooltip(false);
+            app_button->queue_draw();
+        }
     }
 }
 
