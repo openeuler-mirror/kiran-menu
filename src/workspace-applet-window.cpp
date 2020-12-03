@@ -29,6 +29,7 @@ WorkspaceAppletWindow::WorkspaceAppletWindow():
     set_skip_pager_hint(true);
     set_skip_taskbar_hint(true);
     set_decorated(false);
+    set_keep_above(true);
 }
 
 void WorkspaceAppletWindow::get_preferred_width_vfunc(int &min_width, int &natural_width) const
@@ -103,6 +104,18 @@ bool WorkspaceAppletWindow::on_key_press_event(GdkEventKey *event)
         return true;
     }
     return Gtk::Window::on_key_press_event(event);
+}
+
+bool WorkspaceAppletWindow::on_map_event(GdkEventAny *event)
+{
+    KiranHelper::grab_input(*this);
+    return Gtk::Window::on_map_event(event);
+}
+
+void WorkspaceAppletWindow::on_unmap()
+{
+    KiranHelper::ungrab_input(*this);
+    Gtk::Window::on_unmap();
 }
 
 void WorkspaceAppletWindow::update_ui()

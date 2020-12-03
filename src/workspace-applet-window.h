@@ -21,6 +21,8 @@ protected:
     void update_ui();
 
     virtual void on_map() override;
+    virtual bool on_map_event(GdkEventAny *event) override;
+    virtual void on_unmap() override;
     void update_workspace(int workspace_num);
     void set_on_all_workspaces();
 
