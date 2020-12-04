@@ -16,6 +16,7 @@ void on_applet_size_change(MatePanelApplet *applet UNUSED,
 }
 
 TasklistButtonsContainer::TasklistButtonsContainer(MatePanelApplet *applet_, int spacing_):
+    Glib::ObjectBase("KiranTasklistButtonsContainer"),
     applet(applet_),
     child_spacing(spacing_),
     pointer_pos(-1, -1),
