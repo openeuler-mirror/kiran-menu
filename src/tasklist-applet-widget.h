@@ -46,6 +46,7 @@ private:
     TasklistButtonsContainer container;     //按钮容器
 
     MatePanelApplet *applet;                //所属插件
+    sigc::connection paging_check;          //分页按钮状态更新
 };
 
 #endif // TASKLISTAPPLETWIDGET_H

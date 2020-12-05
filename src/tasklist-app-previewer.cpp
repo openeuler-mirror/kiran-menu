@@ -418,6 +418,7 @@ void TasklistAppPreviewer::set_position(Gtk::PositionType pos)
     else
         scroll_window.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
+    position = pos;
     reposition();
 }
 

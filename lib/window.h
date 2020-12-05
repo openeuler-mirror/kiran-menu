@@ -110,6 +110,9 @@ public:
     // 判断窗口是否为激活状态
     bool is_active();
 
+    // 判断窗口是否需要用户注意
+    bool needs_attention();
+
     // 将窗口移动到指定工作区
     void move_to_workspace(std::shared_ptr<Workspace> workspace);
 
@@ -135,6 +138,7 @@ public:
 
     // 窗口标题发生变化信号
     sigc::signal<void> signal_name_changed() { return this->name_changed_; }
+    sigc::signal<void> signal_state_changed() { return this->m_signal_state_changed;}
     // 工作区变化信号。两个参数分别代表之前的工作区和当前的工作区，如果指针为nullptr，说明窗口不属于任意工作区或者窗口是pin状态
     sigc::signal<void, std::shared_ptr<Workspace>, std::shared_ptr<Workspace>> signal_workspace_changed() { return this->workspace_changed_; }
 
@@ -144,6 +148,7 @@ private:
     static void name_changed(WnckWindow* wnck_window, gpointer user_data);
     static void workspace_changed(WnckWindow* wnck_window, gpointer user_data);
     static void geometry_changed(WnckWindow* wnck_window, gpointer user_data);
+    static void state_changed(WnckWindow *wnck_window, gpointer user_data);
 
     void process_events(GdkXEvent* xevent, GdkEvent* event);
     bool update_window_pixmap();
@@ -165,8 +170,10 @@ private:
     uint64_t name_changed_handler_;
     uint64_t workspace_changed_handler_;
     uint64_t geometry_changed_handler_;
+    uint64_t state_changed_handler;
 
     sigc::signal<void> name_changed_;
+    sigc::signal<void> m_signal_state_changed;
     sigc::signal<void, std::shared_ptr<Workspace>, std::shared_ptr<Workspace>> workspace_changed_;
 
     friend class WindowManager;

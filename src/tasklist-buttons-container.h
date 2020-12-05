@@ -10,13 +10,22 @@
 #include "app-manager.h"
 #include "kiran-helper.h"
 
+typedef enum {
+    MOTION_DIR_UNKNOWN,
+    MOTION_DIR_LEFT,            /* 往左拖动 */
+    MOTION_DIR_RIGHT,           /* 往右拖动 */
+    MOTION_DIR_UP,              /* 往上拖动 */
+    MOTION_DIR_DOWN             /* 往右拖动 */
+} PointerMotionDirection;
+
 class TasklistButtonsContainer : public Gtk::Layout
 {
 
 public:
-    TasklistButtonsContainer(MatePanelApplet *applet_, int child_spacing = 4);
+    TasklistButtonsContainer(MatePanelApplet *applet_, int child_spacing = 15);
     ~TasklistButtonsContainer() override;
 
+    Glib::PropertyProxy<Gtk::Orientation> property_orient();
 
     /**
      * @brief   get_current_active_app 获取当前活动窗口对应的应用
@@ -87,6 +96,59 @@ protected:
     virtual void on_remove(Gtk::Widget *child) override;
     virtual void on_map() override;
     virtual void on_realize() override;
+
+
+    virtual bool on_drag_motion (const Glib::RefPtr< Gdk::DragContext >& context,
+                                 int x,
+                                 int y,
+                                 guint time) override;
+    virtual void on_drag_data_received(const Glib::RefPtr<Gdk::DragContext> &context,
+                                       int x,
+                                       int y,
+                                       const Gtk::SelectionData &selection_data,
+                                       guint info,
+                                       guint time) override;
+
+    virtual bool on_drag_drop(const Glib::RefPtr< Gdk::DragContext >& context,
+                              int x,
+                              int y,
+                              guint time) override;
+
+    /**
+     * @brief on_orientation_changed 应用按钮排列方向发生变化时的回调函数
+     */
+    virtual void on_orientation_changed();
+
+
+    /**
+     * @brief put_child_before 将子控件source放到子控件dest之前
+     * @param source           待移动的控件
+     * @param dest             目标控件
+     */
+    virtual void put_child_before(Gtk::Widget *source, Gtk::Widget *dest);
+
+    /**
+     * @brief put_child_after  将子控件source放到子控件dest之后
+     * @param source           待移动的控件
+     * @param dest             目标控件
+     */
+    virtual void put_child_after(Gtk::Widget *source, Gtk::Widget *dest);
+
+    /**
+     * @brief child_is_after   检查子控件w1位置是否位于子控件w2之后
+     * @param w1               子控件
+     * @param w2               子控件
+     * @return  w1位于w2之后返回true，否则返回false
+     */
+    virtual bool child_is_after(Gtk::Widget *w1, Gtk::Widget *w2);
+    /**
+     * @brief child_is_before  检查子控件w1位置是否位于子控件w2之前
+     * @param w1               子控件
+     * @param w2               子控件
+     * @return w1位于w2之前返回true，否则返回false
+     */
+    virtual bool child_is_before(Gtk::Widget *w1, Gtk::Widget *w2);
+
 
     /**
      * @brief 加载系统已打开应用列表
@@ -202,6 +264,26 @@ protected:
      */
     Glib::RefPtr<Gtk::Adjustment> get_adjustment();
 
+    /**
+     * @brief init_drag_and_drop 添加拖放支持
+     */
+    void init_drag_and_drop();
+
+    /**
+     * @brief get_child_geometry 获取给定控件的大小和位置信息，位置信息是基于root窗口坐标
+     * @param child         待获取信息的控件
+     * @param rect          用来存放控件信息的结构体
+     */
+    void get_child_geometry(Gtk::Widget *child, Gdk::Rectangle &rect);
+
+
+    /**
+     * @brief get_pointer_position  获取当前鼠标的屏幕坐标
+     * @param pointer_x     鼠标X坐标
+     * @param pointer_y     鼠标Y坐标
+     */
+    void get_pointer_position(int &pointer_x, int &pointer_y);
+
 
 private:
     MatePanelApplet *applet;                //所属的面板插件
@@ -213,9 +295,15 @@ private:
     sigc::signal<void> m_signal_page_changed;
     int child_spacing;                      //应用按钮间隔
     int n_child_page;                       //可视区域内的应用按钮个数
-    Gtk::Orientation orient;                //应用按钮排列方向
+
+    Glib::Property<Gtk::Orientation> m_property_orient;     //应用按钮排列方向
+
+    Gdk::Point pointer_pos;                 //上次收到拖动事件时的鼠标位置
+    bool drag_checking;                     //是否处于拖动检查过程中
+    PointerMotionDirection motion_dir;      //拖动过程中的鼠标移动方向
 
     sigc::connection pointer_check;         //预览窗口显示状态切换检查定时器
+    sigc::connection paging_notify;          //应用按钮页面发生变化时的回调函数
 };
 
 #endif // TASKLIST_BUTTONS_CONTAINER_H

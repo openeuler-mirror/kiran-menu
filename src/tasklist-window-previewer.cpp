@@ -6,8 +6,11 @@
 
 TasklistWindowPreviewer::TasklistWindowPreviewer(std::shared_ptr<Kiran::Window> &window_):
     WindowThumbnailWidget(window_),
-    context_menu(nullptr)
+    context_menu(nullptr),
+    attention_color("red")
 {
+    needs_attention = window_->needs_attention();
+
     add_events(Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK | Gdk::BUTTON_PRESS_MASK);
     set_no_show_all(true);
     set_spacing(10);
@@ -15,7 +18,19 @@ TasklistWindowPreviewer::TasklistWindowPreviewer(std::shared_ptr<Kiran::Window> 
     //如果窗口管理器混合模式关闭，我们需要隐藏窗口预览图，因为窗口预览图已经无法获取
     signal_composited_changed().connect(sigc::mem_fun(*this, &TasklistWindowPreviewer::on_composite_changed));
 
+
+    window_state_change = window_->signal_state_changed().connect(
+        sigc::mem_fun(*this, &TasklistWindowPreviewer::on_window_state_changed));
+
+    /*
+     * 从样式表中加载提示颜色
+     */
     get_style_context()->add_class("window-previewer");
+    if (!get_style_context()->lookup_color("tasklist_attention_color", attention_color))
+    {
+        g_warning("Failed to load attention-color from style");
+    }
+
     on_composite_changed();
 }
 
@@ -24,6 +39,8 @@ TasklistWindowPreviewer::~TasklistWindowPreviewer()
     if (context_menu)
         delete context_menu;
 
+    if (window_state_change.connected())
+        window_state_change.disconnect();
 }
 
 bool TasklistWindowPreviewer::draw_snapshot(Gtk::Widget *snapshot_area, const Cairo::RefPtr<Cairo::Context> &cr)
@@ -109,6 +126,21 @@ void TasklistWindowPreviewer::get_preferred_width_vfunc(int &minimum_width, int 
 
 bool TasklistWindowPreviewer::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
 {
+    auto window = get_window_();
+
+    if (!window)
+        return false;
+
+    if (window->needs_attention()) {
+        /* 绘制需要注意的背景色 */
+        auto child = get_child();
+
+        Gdk::Cairo::set_source_rgba(cr, attention_color);
+        cr->paint();
+        propagate_draw(*child, cr);
+        return false;
+    }
+
     return WindowThumbnailWidget::on_draw(cr);
 }
 
@@ -175,6 +207,18 @@ void TasklistWindowPreviewer::on_composite_changed()
 
     if (get_realized())
         queue_resize();
+}
+
+void TasklistWindowPreviewer::on_window_state_changed()
+{
+    auto window = get_window_();
+    if (!window)
+        return;
+
+    if (needs_attention != window->needs_attention()) {
+        needs_attention = window->needs_attention();
+        queue_draw();
+    }
 }
 
 bool TasklistWindowPreviewer::context_menu_is_opened()

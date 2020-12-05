@@ -18,30 +18,58 @@ static bool kiran_app_is_active(const std::shared_ptr<Kiran::App> &app)
     return false;
 }
 
+static bool kiran_app_needs_attention(const std::shared_ptr<Kiran::App> &app)
+{
+    if (!app)
+        return false;
+
+    for (auto window: app->get_taskbar_windows()) {
+        if (window->needs_attention())
+            return true;
+    }
+
+    return false;
+}
+
 TasklistAppButton::TasklistAppButton(const std::shared_ptr<Kiran::App> &app_, int size_):
     Glib::ObjectBase("KiranTasklistAppButton"),
     indicator_size_property(*this, "indicator-size", G_MAXINT32),
     app(app_),
     context_menu(nullptr),
-    applet_size(size_)
+    applet_size(size_),
+    dragging(false),
+    state(APP_BUTTON_STATE_NORMAL)
 {
-    add(drawing_area);
-
+    init_drag_and_drop();
     add_events(Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
-    set_has_window(true);
-    set_above_child(true);
-    set_visible_window(true);
-
-    if (app_->get_taskbar_windows().size() == 0)
-        set_tooltip_text(app_->get_locale_name());
 
     get_style_context()->add_class("kiran-tasklist-button");
+
+    auto windows_list = app_->get_taskbar_windows();
+    if (windows_list.size() == 0)
+        set_tooltip_text(app_->get_locale_name());
+
+    for (auto window: windows_list) {
+        window->signal_state_changed().connect(
+            sigc::mem_fun(*this, &TasklistAppButton::on_windows_state_changed));
+    }
+
+    auto window_manager = Kiran::WindowManager::get_instance();
+    window_opened_handler = window_manager->signal_window_opened().connect(
+        [this](const std::shared_ptr<Kiran::Window> &window) -> void {
+            if (window && window->get_app() == get_app())
+                window->signal_state_changed().connect(
+                    sigc::mem_fun(*this, &TasklistAppButton::on_windows_state_changed));
+        });
 }
 
 TasklistAppButton::~TasklistAppButton()
 {
     if (context_menu)
         delete context_menu;
+
+    if (window_opened_handler.connected())
+        window_opened_handler.disconnect();
 }
 
 void TasklistAppButton::set_size(int size)
@@ -106,7 +134,7 @@ void TasklistAppButton::get_preferred_height_for_width_vfunc(int width, int &min
 
 void TasklistAppButton::on_size_allocate(Gtk::Allocation &allocation)
 {
-    Gtk::EventBox::on_size_allocate(allocation);
+    Gtk::Button::on_size_allocate(allocation);
 
     if (get_orientation() == Gtk::ORIENTATION_VERTICAL) {
         icon_size = allocation.get_width() - 8;
@@ -121,16 +149,24 @@ void TasklistAppButton::on_size_allocate(Gtk::Allocation &allocation)
 bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
 {
     Gtk::Allocation allocation;
-    auto context = get_style_context();
-    int scale = get_scale_factor();
     Glib::RefPtr<Gdk::Pixbuf> pixbuf;
     Gdk::RGBA indicator_color("#3ca8ea"), active_color("rgba(255, 255, 255, 0.3)");
     int indicator_size = indicator_size_property.get_value();
     int windows_count;
+    int scale = get_scale_factor();
+    auto context = get_style_context();
+    static bool hilight = false;
 
     auto app_ = get_app();
     if (!app_) {
         g_warning("%s: app already expired!!\n", __FUNCTION__);
+        return false;
+    }
+
+    if (dragging) {
+        /*
+         * 正在拖动过程中，不绘制内容
+         */
         return false;
     }
 
@@ -139,7 +175,9 @@ bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
     allocation = get_allocation();
     context->set_state(get_state_flags());
 
-    /**
+
+
+    /*
      * 从样式中加载活动窗口背景色和指示器颜色
      */
     if (!context->lookup_color("tasklist_app_active_color", active_color)) {
@@ -154,6 +192,8 @@ bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
     if (kiran_app_is_active(app_)) {
         Gdk::Cairo::set_source_rgba(cr, active_color);
         cr->paint();
+
+        draw_attentions(cr);
 
         //绘制窗口激活状态指示器
         Gdk::Cairo::set_source_rgba(cr, indicator_color);
@@ -175,6 +215,8 @@ bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
         }
     } else {
         context->render_background(cr, 0, 0, allocation.get_width(), allocation.get_height());
+
+        draw_attentions(cr);
 
         //绘制已打开窗口指示器
         if (windows_count > 0) {
@@ -203,49 +245,8 @@ bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
      * 绘制应用图标
      */
     cr->save();
-    try {
-        auto gicon = app_->get_icon();
 
-        if (gicon)
-        {
-            //将应用图标转换为pixbuf
-            std::string icon_desc = gicon->to_string();
-
-            if (icon_desc[0] == '/') {
-                pixbuf = Gdk::Pixbuf::create_from_file(icon_desc, icon_size * scale, icon_size * scale);
-            }
-            else
-            {
-                auto icon_theme = Gtk::IconTheme::get_default();
-                pixbuf = icon_theme->load_icon(gicon->to_string(),
-                                               icon_size,
-                                               scale,
-                                               Gtk::ICON_LOOKUP_FORCE_SIZE);
-            }
-        } else {
-            /*
-             * 无法获取到应用图标的情况下，使用应用第一个已打开窗口的图标作为应用图标
-             */
-            auto windows = app_->get_taskbar_windows();
-
-            if (windows.size() > 0) {
-                pixbuf = Glib::wrap(windows.front()->get_icon(), true);
-                pixbuf = pixbuf->scale_simple(icon_size * scale, icon_size * scale, Gdk::INTERP_BILINEAR);
-            }
-        }
-    } catch (const Glib::Error &e) {
-        g_warning("Error occured while trying to load app icon: %s", e.what().c_str());
-        pixbuf.clear();
-    }
-
-    if (!pixbuf)
-    {
-        //未能找到对应应用的图标，使用内置的默认图标
-        pixbuf = Gdk::Pixbuf::create_from_resource("/kiran-tasklist/icon/executable",
-                                                   icon_size * scale,
-                                                   icon_size * scale);
-    }
-
+    pixbuf = get_app_icon_pixbuf();
     cr->scale(1.0 / scale, 1.0 / scale);
     Gdk::Cairo::set_source_pixbuf(cr, pixbuf,
                                   (allocation.get_width() - icon_size) / 2.0 * scale,
@@ -286,6 +287,19 @@ bool TasklistAppButton::on_button_press_event(GdkEventButton *button_event)
     }
     set_state_flags(Gtk::STATE_FLAG_ACTIVE, false);
 
+    return false;
+}
+
+bool TasklistAppButton::on_button_release_event(GdkEventButton *button_event UNUSED)
+{
+    auto app_ = get_app();
+
+    if (!app_) {
+        g_warning("%s: app already expired", __FUNCTION__);
+        return false;
+    }
+
+    set_state_flags(get_state_flags() & ~Gtk::STATE_FLAG_ACTIVE, true);
     auto windows_list = app_->get_taskbar_windows();
     if (windows_list.size() == 0) {
         //无已打开窗口，打开新的应用窗口(仅针对常驻任务栏应用)
@@ -295,41 +309,85 @@ bool TasklistAppButton::on_button_press_event(GdkEventButton *button_event)
 
     if (windows_list.size() == 1)
     {
+        /* 当前应用只有一个窗口，不需要显示预览窗口，返回true */
         auto first = windows_list.at(0);
-        //当前应用只有一个窗口，不需要显示预览窗口，返回true
-        g_debug("%s: event time %lu\n", __PRETTY_FUNCTION__, button_event->time);
         first->activate(0);
-        return true;
+        return false;
     }
-
     return false;
 }
 
-bool TasklistAppButton::on_button_release_event(GdkEventButton *button_event UNUSED)
-{
-    set_state_flags(get_state_flags() & ~Gtk::STATE_FLAG_ACTIVE, true);
-    return false;
-}
-
-bool TasklistAppButton::on_enter_notify_event(GdkEventCrossing *crossing_event UNUSED)
+bool TasklistAppButton::on_enter_notify_event(GdkEventCrossing *crossing_event)
 {
     if (get_context_menu_opened())
         return true;
 
-    set_state_flags(Gtk::STATE_FLAG_PRELIGHT, false);
-    return false;
+    return Gtk::Button::on_enter_notify_event(crossing_event);
 }
 
 bool TasklistAppButton::on_leave_notify_event(GdkEventCrossing *crossing_event UNUSED)
 {
-    set_state_flags(get_state_flags() & ~Gtk::STATE_FLAG_PRELIGHT, true);
-    if (get_context_menu_opened())
-        return true;
-    return false;
+    return Gtk::Button::on_leave_notify_event(crossing_event);
+}
+
+void TasklistAppButton::on_map()
+{
+    on_windows_state_changed();
+    Gtk::Button::on_map();
+}
+
+void TasklistAppButton::on_drag_begin(const Glib::RefPtr<Gdk::DragContext> &context)
+{
+    auto pixbuf = get_app_icon_pixbuf();
+
+    /*
+     * 将应用图标作为拖动的图标，鼠标位于图标中心位置
+     */
+    context->set_icon(pixbuf, pixbuf->get_width()/2, pixbuf->get_height()/2);
+    dragging = true;
+    queue_draw();
+}
+
+void TasklistAppButton::on_drag_data_get(const Glib::RefPtr<Gdk::DragContext> &context,
+                                         Gtk::SelectionData &selection_data,
+                                         guint info,
+                                         guint time)
+{
+    auto app = get_app();
+    if (!app) {
+        g_warning("%s: app expired, return nothing");
+        selection_data.set(8, nullptr, 0);
+    }
+
+    /* 传递内容为应用的desktop ID */
+    const char *raw_data = app->get_desktop_id().c_str();
+    selection_data.set(8, (const guchar*)raw_data, strlen(raw_data));
+}
+
+void TasklistAppButton::on_drag_data_delete(const Glib::RefPtr<Gdk::DragContext> &context)
+{
+    /*
+     * 拖动结束，恢复显示按钮图标
+     */
+    dragging = false;
+    set_state_flags(get_state_flags() & ~Gtk::STATE_FLAG_ACTIVE, true);
+    queue_draw();
+}
+
+void TasklistAppButton::on_drag_end(const Glib::RefPtr<Gdk::DragContext> &context)
+{
+    /*
+     * 拖动结束，恢复显示按钮图标
+     */
+    dragging = false;
+    set_state_flags(get_state_flags() & ~Gtk::STATE_FLAG_ACTIVE, true);
+    queue_draw();
 }
 
 const std::shared_ptr<Kiran::App> TasklistAppButton::get_app()
 {
+    if (app.expired())
+        return nullptr;
     return app.lock();
 }
 
@@ -376,4 +434,142 @@ void TasklistAppButton::update_windows_icon_geometry()
                                   allocation.get_width() * scale_factor,
                                   allocation.get_height() * scale_factor);
     }
+}
+
+Glib::RefPtr<Gdk::Pixbuf> TasklistAppButton::get_app_icon_pixbuf()
+{
+    Glib::RefPtr<Gdk::Pixbuf> pixbuf;
+    int scale;
+    auto app_ = app.lock();
+
+    if (!app_)
+        return pixbuf;
+
+    scale = get_scale_factor();
+    try {
+        auto gicon = app_->get_icon();
+
+        if (gicon)
+        {
+            //将应用图标转换为pixbuf
+            std::string icon_desc = gicon->to_string();
+
+            if (icon_desc[0] == '/') {
+                pixbuf = Gdk::Pixbuf::create_from_file(icon_desc, icon_size * scale, icon_size * scale);
+            }
+            else
+            {
+                auto icon_theme = Gtk::IconTheme::get_default();
+                pixbuf = icon_theme->load_icon(gicon->to_string(),
+                                               icon_size,
+                                               scale,
+                                               Gtk::ICON_LOOKUP_FORCE_SIZE);
+            }
+        } else {
+            /*
+             * 无法获取到应用图标的情况下，使用应用第一个已打开窗口的图标作为应用图标
+             */
+            auto windows = app_->get_taskbar_windows();
+
+            if (windows.size() > 0) {
+                pixbuf = Glib::wrap(windows.front()->get_icon(), true);
+                pixbuf = pixbuf->scale_simple(icon_size * scale, icon_size * scale, Gdk::INTERP_BILINEAR);
+            }
+        }
+    } catch (const Glib::Error &e) {
+        g_warning("Error occured while trying to load app icon: %s", e.what().c_str());
+        pixbuf.clear();
+    }
+
+    if (!pixbuf)
+    {
+        //未能找到对应应用的图标，使用内置的默认图标
+        pixbuf = Gdk::Pixbuf::create_from_resource("/kiran-tasklist/icon/executable",
+                                                   icon_size * scale,
+                                                   icon_size * scale);
+    }
+
+    return pixbuf;
+}
+
+void TasklistAppButton::init_drag_and_drop()
+{
+    Gtk::TargetEntry entry("binary/app-id", Gtk::TARGET_SAME_APP);
+    std::vector<Gtk::TargetEntry> targets;
+
+    targets.push_back(entry);
+    drag_source_set(targets, Gdk::BUTTON1_MASK, Gdk::ACTION_MOVE);
+}
+
+void TasklistAppButton::on_windows_state_changed()
+{
+    bool need = kiran_app_needs_attention(app.lock());
+    if (need) {
+        if (!draw_attention_flicker.connected())
+        {
+            state = APP_BUTTON_STATE_FLICKER;
+            /*
+             * 让应用按钮每500ms闪烁一次，提示用户注意
+             */
+            draw_attention_flicker = Glib::signal_timeout().connect(
+                sigc::bind_return<bool>(sigc::mem_fun(*this, &Gtk::Widget::queue_draw), true),
+                400);
+
+            /*
+             * 闪烁5秒后停止，并绘制提示颜色
+             */
+            draw_attention_normal = Glib::signal_timeout().connect(
+                [this]() -> bool {
+                    draw_attention_flicker.disconnect();
+                    if (kiran_app_needs_attention(get_app()))
+                        state = APP_BUTTON_STATE_ATTENTION;
+                    else
+                        state = APP_BUTTON_STATE_NORMAL;
+
+                    queue_draw();
+                    return false;
+                }, 2800);
+        }
+    } else {
+        state = APP_BUTTON_STATE_NORMAL;
+        if (draw_attention_flicker.connected())
+            draw_attention_flicker.disconnect();
+
+        if (draw_attention_normal.connected())
+            draw_attention_normal.disconnect();
+        queue_draw();
+    }
+}
+
+void TasklistAppButton::draw_attentions(const Cairo::RefPtr<Cairo::Context> &cr)
+{
+    static bool hilight = true;
+    Gdk::RGBA attention_color("red");
+
+    /*
+     * 从样式表中加载提示颜色
+     */
+    if (!get_style_context()->lookup_color("tasklist_attention_color", attention_color))
+    {
+        g_warning("Failed to load attention-color from style");
+    }
+
+    attention_color.set_alpha(1.0);
+    cr->save();
+    if (state == APP_BUTTON_STATE_FLICKER)
+    {
+        if (hilight)
+        {
+            Gdk::Cairo::set_source_rgba(cr, attention_color);
+            cr->paint();
+        }
+
+        hilight = !hilight;
+    }
+    else if (state == APP_BUTTON_STATE_ATTENTION)
+    {
+        Gdk::Cairo::set_source_rgba(cr, attention_color);
+        cr->paint();
+    }
+    cr->restore();
 }

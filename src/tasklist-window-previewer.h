@@ -41,9 +41,18 @@ protected:
      */
     void on_composite_changed();
 
+    /**
+     * @brief on_window_state_changed 回调函数，窗口状态发生变化时调用
+     */
+    void on_window_state_changed();
+
 private:
     TasklistWindowContextMenu *context_menu;                    /* 右键菜单 */
     sigc::signal<void, bool> m_signal_context_menu_toggled;     /* 右键菜单打开或关闭的信号 */
+
+    sigc::connection window_state_change;                       /* 窗口状态变化监控 */
+    bool needs_attention;                                       /* 窗口是否需要注意 */
+    Gdk::RGBA attention_color;                                  /* 窗口需要注意时的提示颜色 */
 };
 
 #endif // TASKLIST_WINDOW_PREVIEWER_H

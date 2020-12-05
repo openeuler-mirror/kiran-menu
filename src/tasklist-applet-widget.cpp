@@ -1,4 +1,5 @@
 #include "tasklist-applet-widget.h"
+#include "tasklist-paging-button.h"
 #include "global.h"
 #include <glibmm/i18n.h>
 
@@ -61,12 +62,28 @@ void TasklistAppletWidget::on_app_buttons_page_changed()
     /*
      * 此处延缓更新分页按钮状态，否则不会触发size-allocate事件
      */
-    Glib::signal_idle().connect_once(sigc::mem_fun(*this, &TasklistAppletWidget::update_paging_buttons_state));
+    if (paging_check.connected())
+        return;
+
+    paging_check = Glib::signal_idle().connect(
+                    sigc::bind_return<bool>(
+                        sigc::mem_fun(*this, &TasklistAppletWidget::update_paging_buttons_state),
+                        false));
 }
 
 void TasklistAppletWidget::on_applet_orient_changed()
 {
-    set_orientation(container.get_orientation());
+    switch (mate_panel_applet_get_orient(applet))
+    {
+    case MATE_PANEL_APPLET_ORIENT_DOWN:
+    case MATE_PANEL_APPLET_ORIENT_UP:
+        set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+        break;
+    case MATE_PANEL_APPLET_ORIENT_LEFT:
+    case MATE_PANEL_APPLET_ORIENT_RIGHT:
+        set_orientation(Gtk::ORIENTATION_VERTICAL);
+        break;
+    }
 }
 
 void TasklistAppletWidget::init_ui()
@@ -100,11 +117,11 @@ void TasklistAppletWidget::init_ui()
                     }
 
                     container.update_orientation();
-                    container.queue_resize();
+                    container.queue_allocate();
                 });
 
 
-    set_orientation(container.get_orientation());
+    on_applet_orient_changed();
 
     container.signal_page_changed().connect(sigc::mem_fun(*this, &TasklistAppletWidget::on_app_buttons_page_changed));
 
@@ -114,27 +131,12 @@ void TasklistAppletWidget::init_ui()
 
 Gtk::Button *TasklistAppletWidget::create_paging_button(std::string icon_resource, std::string tooltip_text)
 {
-    Gtk::Button *button = nullptr;
 
-    auto image = Gtk::make_managed<Gtk::Image>();
-    image->set_pixel_size(16);
-    image->set_from_resource(icon_resource);
+    auto button = Gtk::make_managed<TasklistPagingButton>(applet);
 
-    button = Gtk::make_managed<Gtk::Button>();
-    button->add(*image);
-    button->set_tooltip_text(tooltip_text);
     button->set_size_request(16, 16);
-    button->get_style_context()->add_class("tasklist-arrow-button");
-
-    button->signal_clicked().connect(
-                [this, button]() -> void {
-                    /*
-                     * 获取输入焦点，当鼠标离开任务栏后当前窗口变化时，任务栏应用按钮会自动显示对应的状态
-                     */
-                    mate_panel_applet_request_focus(applet, gtk_get_current_event_time());
-
-                    button->grab_focus();
-                });
+    button->set_icon_image(icon_resource, 16);
+    button->set_tooltip_text(tooltip_text);
 
     return button;
 }
