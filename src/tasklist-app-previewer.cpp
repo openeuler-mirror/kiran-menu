@@ -3,14 +3,11 @@
 #include "global.h"
 
 const int TasklistAppPreviewer::border_spacing = 5;
-const int TasklistAppPreviewer::deferred_time = 400;  //毫秒
 
 TasklistAppPreviewer::TasklistAppPreviewer():
     Gtk::Window(Gtk::WINDOW_POPUP),
-    need_display(true),
     position(Gtk::POS_TOP),
-    relative_to(nullptr),
-    is_idle(true)
+    relative_to(nullptr)
 {
     set_rgba_visual();
 
@@ -41,19 +38,9 @@ void TasklistAppPreviewer::set_app(const std::shared_ptr<Kiran::App> &app_)
     adjust_size();
 }
 
-void TasklistAppPreviewer::set_idle(bool idle)
-{
-    is_idle = idle;
-}
-
 const std::shared_ptr<Kiran::App> TasklistAppPreviewer::get_app() const
 {
     return app.lock();
-}
-
-bool TasklistAppPreviewer::get_idle() const
-{
-    return is_idle;
 }
 
 void TasklistAppPreviewer::set_relative_to(TasklistAppButton *widget, Gtk::PositionType pos)
@@ -151,6 +138,11 @@ void TasklistAppPreviewer::get_preferred_height_vfunc(int &minimum_height, int &
     }
 
     window = relative_to->get_window();
+    if (!window) {
+        minimum_height = natural_height = 0;
+        return;
+    }
+
     monitor = relative_to->get_display()->get_monitor_at_window(window);
     monitor->get_workarea(workarea);
     scroll_window.get_preferred_size(unused_size, natural_size);
@@ -189,6 +181,12 @@ void TasklistAppPreviewer::get_preferred_width_vfunc(int &minimum_width, int &na
         return;
     }
     window = relative_to->get_window();
+
+    if (!window) {
+        minimum_width = natural_width = 0;
+        return;
+    }
+
     scroll_window.get_preferred_size(min_size, natural_size);
 
     monitor = relative_to->get_display()->get_monitor_at_window(window);
@@ -232,13 +230,6 @@ void TasklistAppPreviewer::adjust_size()
     reposition();
 }
 
-bool TasklistAppPreviewer::on_enter_notify_event(GdkEventCrossing *crossing_event)
-{
-    //阻止预览窗口隐藏
-    set_idle(false);
-    return false;
-}
-
 bool TasklistAppPreviewer::on_leave_notify_event(GdkEventCrossing *crossing_event)
 {
     int width, height;
@@ -258,39 +249,16 @@ bool TasklistAppPreviewer::on_leave_notify_event(GdkEventCrossing *crossing_even
     if (has_context_menu_opened())
         return true;
 
-    set_idle(true);
     return false;
-}
-
-void TasklistAppPreviewer::on_child_remove()
-{
-    g_debug("after remove, %d children last\n", box.get_children().size());
-    if (!box.get_children().size()) {
-        //如果当前app没有已打开的窗口，隐藏预览窗口
-        deferred_hide();
-    }
 }
 
 void TasklistAppPreviewer::on_child_context_menu_toggled(bool active)
 {
-    GdkPoint point;
-    GdkRectangle rect;
-
     if (active)
         return;
 
-    auto pointer_device = get_display()->get_default_seat()->get_pointer();
-    pointer_device->get_position(point.x, point.y);
-
-    auto window = get_window();
-    window->get_origin(rect.x, rect.y);
-
-    rect.width = get_allocated_width();
-    rect.height = get_allocated_height();
-
-    if (!KiranHelper::gdk_rectangle_contains_point(&rect, &point)) {
-        set_idle(true);
-        deferred_hide();
+    if (!contains_pointer()) {
+        hide();
     }
 }
 
@@ -308,7 +276,12 @@ void TasklistAppPreviewer::init_ui()
 {
     box.set_spacing(4);
     box.signal_remove().connect(
-                sigc::hide(sigc::mem_fun(*this, &TasklistAppPreviewer::on_child_remove)));
+                [this](Gtk::Widget *child UNUSED) -> void {
+                    if (!box.get_children().size()) {
+                        //如果当前app没有已打开的窗口，隐藏预览窗口
+                        hide();
+                    }
+                });
 
     scroll_window.set_propagate_natural_height(true);
     scroll_window.set_propagate_natural_width(true);
@@ -324,22 +297,23 @@ void TasklistAppPreviewer::init_ui()
     add(scroll_window);
 }
 
-void TasklistAppPreviewer::deferred_hide()
+bool TasklistAppPreviewer::contains_pointer() const
 {
-    Glib::signal_timeout().connect_once(
-                [this]() -> void {
-                    if (get_idle())
-                        hide();
-                }, deferred_time);
-}
+    GdkPoint point;
+    GdkRectangle rect;
+    auto pointer_device = get_display()->get_default_seat()->get_pointer();
 
-void TasklistAppPreviewer::deferred_show()
-{
-    Glib::signal_timeout().connect_once(
-                [this]() -> void {
-                    if (!get_idle())
-                        show();
-                }, deferred_time);
+    if (!get_realized())
+        return false;
+
+    auto window = get_window();
+    pointer_device->get_position(point.x, point.y);
+    window->get_origin(rect.x, rect.y);
+
+    rect.width = get_allocated_width();
+    rect.height = get_allocated_height();
+
+    return KiranHelper::gdk_rectangle_contains_point(&rect, &point);
 }
 
 void TasklistAppPreviewer::load_windows_list()
