@@ -13,7 +13,7 @@ MenuAppLauncherButton::MenuAppLauncherButton(const char *icon_file, const char *
     app = Gio::AppInfo::create_from_commandline(cmdline, std::string(),
                  Gio::APP_INFO_CREATE_SUPPORTS_STARTUP_NOTIFICATION);
 
-    context->add_class("kiran-app-button");
+    context->add_class("menu-app-launcher");
 }
 
 void MenuAppLauncherButton::on_clicked()

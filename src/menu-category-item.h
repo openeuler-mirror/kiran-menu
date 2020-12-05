@@ -7,7 +7,8 @@ class MenuCategoryItem : public MenuListItemWidget
 {
 public:
     MenuCategoryItem(const std::string &name, bool clickable);
-    const std::string &get_category_name();
+    const std::string &get_category_name() const;
+    bool get_clickable() const;
 
 protected:
     virtual bool on_button_press_event(GdkEventButton *button_event) override;

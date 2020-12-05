@@ -10,7 +10,7 @@ MenuPowerButton::MenuPowerButton():
     icon.set_from_resource("/kiran-menu/sidebar/power");
     add(icon);
     set_tooltip_text(_("Power options"));
-    context->add_class("kiran-app-button");
+    context->add_class("menu-app-launcher");
 }
 
 MenuPowerButton::~MenuPowerButton()

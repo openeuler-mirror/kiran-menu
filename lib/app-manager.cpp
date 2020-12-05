@@ -122,6 +122,7 @@ std::shared_ptr<App> AppManager::lookup_app_with_window(std::shared_ptr<Window> 
 
     std::shared_ptr<App> app;
 
+    // 为了提高匹配效率，这里直接从缓存中查找，如果缓存中没有找到，说明是这个窗口是第一次调用该函数
     app = lookup_app_with_xid(window->get_window_group());
     RETURN_VAL_IF_TRUE(app, app);
 
@@ -140,7 +141,12 @@ std::shared_ptr<App> AppManager::lookup_app_with_window(std::shared_ptr<Window> 
     app = get_app_from_env(window);
     RETURN_VAL_IF_TRUE(app, app);
 
-    app = get_app_from_desktop(window);
+    // 遍历所有app，检查是否有应用的属性跟窗口的wm_class属性匹配
+    app = get_app_by_enumeration_apps(window);
+    RETURN_VAL_IF_TRUE(app, app);
+
+    // 遍历所有window，检查是否存在相同的wm_class属性的窗口已经匹配到app
+    app = get_app_by_enumeration_windows(window);
     RETURN_VAL_IF_TRUE(app, app);
 
     app = get_app_from_window_group(window);
@@ -554,7 +560,7 @@ std::shared_ptr<App> AppManager::get_app_from_env(std::shared_ptr<Window> window
     return lookup_app(desktop_id);
 }
 
-std::shared_ptr<App> AppManager::get_app_from_desktop(std::shared_ptr<Window> window)
+std::shared_ptr<App> AppManager::get_app_by_enumeration_apps(std::shared_ptr<Window> window)
 {
     RETURN_VAL_IF_FALSE(window != NULL, nullptr);
 
@@ -568,11 +574,41 @@ std::shared_ptr<App> AppManager::get_app_from_desktop(std::shared_ptr<Window> wi
         auto &locale_name = app->get_locale_name();
         auto exec_name = get_exec_name(exec);
 
-        //g_print("exec_name: %s instance_name: %s group_name: %s locale_name: %s\n", exec_name, instance_name, group_name, locale_name.c_str());
-
         if (exec_name == instance_name || group_name == locale_name)
         {
             return app;
+        }
+    }
+
+    return nullptr;
+}
+
+std::shared_ptr<App> AppManager::get_app_by_enumeration_windows(std::shared_ptr<Window> window)
+{
+    RETURN_VAL_IF_FALSE(window != NULL, nullptr);
+    auto instance_name = window->get_class_instance_name();
+    auto group_name = window->get_class_group_name();
+
+    // 这里通过wnck application来遍历所有窗口
+    // 因为如果是第一次调用，可能还处于"app-opened"处理阶段，此时"window-opened"信号可能还没有到达，WindowManager还没有管理任何窗口
+    // 所以不能通过WindowManager::get_windows获取窗口列表
+    for (auto iter : this->wnck_apps_)
+    {
+        auto wnck_application = wnck_application_get(iter.first);
+        if (wnck_application)
+        {
+            auto wnck_windows = wnck_application_get_windows(wnck_application);
+            for (auto l = wnck_windows; l != NULL; l = l->next)
+            {
+                auto wnck_window = (WnckWindow *)(l->data);
+                auto temp_window = this->window_manager_->create_temp_window(wnck_window);
+                if (temp_window->get_class_instance_name() == instance_name &&
+                    temp_window->get_class_group_name() == group_name)
+                {
+                    auto app = lookup_app_with_xid(temp_window->get_window_group());
+                    RETURN_VAL_IF_TRUE(app, app);
+                }
+            }
         }
     }
     return nullptr;
@@ -599,7 +635,7 @@ std::shared_ptr<App> AppManager::get_app_from_window_group(std::shared_ptr<Windo
         app = get_app_from_env(*iter);
         RETURN_VAL_IF_TRUE(app, app);
 
-        app = get_app_from_desktop(window);
+        app = get_app_by_enumeration_apps(window);
         RETURN_VAL_IF_TRUE(app, app);
     }
     return nullptr;

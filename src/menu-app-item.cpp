@@ -15,7 +15,7 @@ MenuAppItem::MenuAppItem(const std::shared_ptr<Kiran::App> &app_, int _icon_size
 {
     auto context = get_style_context();
 
-    context->add_class("kiran-app-item");
+    context->add_class("menu-app-item");
 
     set_text(app_->get_locale_name());
 
@@ -27,6 +27,7 @@ MenuAppItem::MenuAppItem(const std::shared_ptr<Kiran::App> &app_, int _icon_size
         set_icon(Glib::RefPtr<Gio::Icon>::cast_dynamic(icon));
     }
 
+    set_can_focus(true);
     set_tooltip_text(app_->get_locale_comment());
 
     init_drag_and_drop();
@@ -268,12 +269,12 @@ void MenuAppItem::set_orientation(Gtk::Orientation orient)
 
     if (orient == Gtk::ORIENTATION_VERTICAL) {
         set_icon_size(56);
-        context->remove_class("kiran-app-item");
-        context->add_class("kiran-app-entry");
+        context->remove_class("horizontal");
+        context->add_class("vertical");
     } else {
         set_icon_size(24);
-        context->remove_class("kiran-app-entry");
-        context->add_class("kiran-app-item");
+        context->remove_class("vertical");
+        context->add_class("horizontal");
     }
 
     MenuListItemWidget::set_orientation(orient);

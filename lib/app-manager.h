@@ -73,7 +73,8 @@ private:
     std::shared_ptr<App> lookup_app_with_unrefine_name(const std::string &name);
     std::shared_ptr<App> lookup_app_with_heuristic_name(const std::string &name);
     std::shared_ptr<App> get_app_from_env(std::shared_ptr<Window> window);
-    std::shared_ptr<App> get_app_from_desktop(std::shared_ptr<Window> window);
+    std::shared_ptr<App> get_app_by_enumeration_apps(std::shared_ptr<Window> window);
+    std::shared_ptr<App> get_app_by_enumeration_windows(std::shared_ptr<Window> window);
     std::shared_ptr<App> get_app_from_window_group(std::shared_ptr<Window> window);
 
     void load_desktop_apps();

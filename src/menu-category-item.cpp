@@ -10,7 +10,7 @@ MenuCategoryItem::MenuCategoryItem(const std::string &name,
 {
     auto context = get_style_context();
 
-    context->add_class("kiran-category-item");
+    context->add_class("menu-category-item");
     set_clickable(clickable);
     category_name = name;
 }
@@ -25,9 +25,14 @@ void MenuCategoryItem::set_clickable(bool clickable_)
     set_can_focus(true);
 }
 
-const std::string &MenuCategoryItem::get_category_name()
+const std::string &MenuCategoryItem::get_category_name() const
 {
     return category_name;
+}
+
+bool MenuCategoryItem::get_clickable() const
+{
+    return clickable;
 }
 
 void MenuCategoryItem::set_category_name(const std::string &name)

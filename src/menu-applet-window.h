@@ -2,13 +2,16 @@
 #define MENU_APPLET_WINDOW_H
 
 #include <gtkmm.h>
-#include "kiran-user-info.h"
+#include "menu-user-info.h"
 #include "menu-app-item.h"
 #include "menu-category-item.h"
 #include "menu-profile.h"
+#include "menu-avatar-widget.h"
 
 #include "menu-skeleton.h"
 #include "workarea-monitor.h"
+#include "menu-apps-container.h"
+#include "menu-new-apps-container.h"
 
 
 enum {
@@ -94,13 +97,11 @@ protected:
     virtual bool on_key_press_event(GdkEventKey *key_event) override;
     virtual bool on_button_press_event(GdkEventButton *button_event) override;
     virtual bool on_configure_event(GdkEventConfigure* configure_event) override;
-    virtual void on_realize() override;
-    virtual void on_unrealize() override;
     virtual void get_preferred_height_vfunc(int &min_width, int &natural_width) const override;
     virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
 
     virtual void init_ui();
-
+    virtual void init_avatar_widget();
 
     /**
      * @brief on_active_window_changed 回调函数：系统当前活动窗口发生变化时调用
@@ -118,6 +119,11 @@ protected:
      * @brief on_date_box_clicked 回调函数：点击日期时间标签时调用
      */
     virtual void on_date_box_clicked();
+
+    /**
+     * @brief on_avatar_clicked 回调函数：点击用户头像时调用
+     */
+    virtual void on_avatar_clicked();
 
     /**
      * @brief on_profile_changed 回调函数：当开始菜单设置发生变化时调用
@@ -167,30 +173,40 @@ protected:
      */
     void switch_to_apps_overview(double position, bool animation = true);
 
+    /**
+     * @brief 从指定的app列表中启动第一个当前系统中存在的app
+     * @param app_names   指定的app名称列表，最后一个元素需要以nullptr(NULL)结尾
+     * @return  启动成功返回true，失败返回false
+     */
+    bool launch_app_from_list(const char **app_names);
+
 private:
     Glib::RefPtr<Gtk::Builder> builder;
 
-    Gtk::Box *box;
+    Gtk::Box *main_box;
     Gtk::SearchEntry *search_entry;
     Gtk::Grid *side_box;
     Gtk::Stack *overview_stack, *appview_stack;
-    Gtk::Box *all_apps_box, *new_apps_box;
-    Gtk::Box *favorite_apps_box, *frequent_apps_box;
-    Gtk::Grid *category_overview_box, *search_results_box;
+    Gtk::Box *all_apps_page, *category_overview_page;
     Gtk::Box *compact_tab_box;
     Gtk::Button *compact_apps_button;
     Gtk::Button *compact_favorites_button;
 
+    MenuAppsContainer *compact_favorites_container, *expand_favorites_container;
+    MenuAppsContainer *expand_frequents_container;
+    MenuAppsContainer *search_results_container;
+    MenuAppsContainer *new_apps_container;
+    MenuAvatarWidget  *compact_avatar_widget, *expand_avatar_widget;
+
     Gdk::Rectangle geometry;                                        /*缓存的开始菜单窗口大小*/
     sigc::signal<void,int,int> m_signal_size_changed;               /*开始菜单窗口尺寸变化信号*/
 
-    KiranUserInfo *user_info;                                       /*当前用户信息*/
-    std::vector<std::string> category_names;                        /*应用分类列表*/
-    std::map<std::string, MenuCategoryItem*> category_items;   /*分类名称到分类控件的映射表*/
+    MenuUserInfo user_info;                                       /*当前用户信息*/
+    std::map<std::string, MenuAppsContainer*> category_items;       /*分类名称到分类控件的映射表*/
 
     Gtk::StyleProperty<int> compact_min_height_property, expand_min_height_property;
 
-    MenuProfile profile;           /*首选项*/
+    MenuProfile profile;                 /*首选项*/
     MenuDisplayMode display_mode;       /*当前显示模式*/
     WorkareaMonitor *monitor;           /*屏幕变化监视器*/
 
@@ -213,12 +229,6 @@ private:
      * @brief 加载当前用户信息
      */
     void load_user_info();
-
-
-    MenuAppItem *create_app_item(std::shared_ptr<Kiran::App> app,
-                                      Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL);
-    MenuCategoryItem *create_category_item(const std::string &name,
-                                                bool clickable=true);
 
 
     /**
@@ -246,15 +256,6 @@ private:
                                     const char *tooltip,
                                     int page_index);
 
-    /**
-     * @brief 创建无结果的提示标签
-     * @param prompt_text   提示文本
-     *
-     * @return 返回创建的标签
-     */
-    Gtk::Label* create_empty_prompt_label(const char *prompt_text);
-
-    void init_scrollable_areas();
 };
 
 #endif // MENU_APPLET_WINDOW_H

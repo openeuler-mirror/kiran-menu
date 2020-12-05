@@ -11,9 +11,18 @@ MenuAvatarWidget::MenuAvatarWidget(int size):
     set_valign(Gtk::ALIGN_CENTER);
 }
 
-void MenuAvatarWidget::set_icon(const char *icon_)
+void MenuAvatarWidget::set_icon(const Glib::ustring &icon_)
 {
     icon = icon_;
+}
+
+void MenuAvatarWidget::set_icon_size(int size_) 
+{
+    if (icon_size == size_)
+        return;
+    icon_size = size_;
+    set_size_request(icon_size, icon_size);
+    queue_resize();
 }
 
 bool MenuAvatarWidget::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
@@ -55,13 +64,5 @@ bool MenuAvatarWidget::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
     cr->stroke();
 
     cr->restore();
-    return false;
-}
-
-bool MenuAvatarWidget::on_button_press_event(GdkEventButton *button_event UNUSED)
-{
-    KiranHelper::run_commandline("/usr/bin/mate-about-me");
-    get_toplevel()->hide();
-
     return false;
 }

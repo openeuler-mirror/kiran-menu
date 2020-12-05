@@ -7,14 +7,14 @@ class MenuAvatarWidget : public Gtk::EventBox
 {
 public:
     MenuAvatarWidget(int size);
-    void set_icon(const char *icon);
+    void set_icon(const Glib::ustring &icon_file);
+    void set_icon_size(int size_);
 
 protected:
     virtual bool on_draw(const ::Cairo::RefPtr< ::Cairo::Context >& cr) override;
-    virtual bool on_button_press_event (GdkEventButton* button_event) override;
 
 private:
-    std::string icon;
+    Glib::ustring icon;
     int icon_size;
 };
 
