@@ -1,4 +1,5 @@
 #include "tasklist-paging-button.h"
+#include "global.h"
 
 TasklistPagingButton::TasklistPagingButton(MatePanelApplet *applet_):
     applet(applet_),
