@@ -1,5 +1,6 @@
 #include "menu-apps-container.h"
 #include "kiran-helper.h"
+#include "global.h"
 
 MenuAppsContainer::MenuAppsContainer(MenuAppsContainer::AppIconMode mode_,
                                      const Glib::ustring &category_name,

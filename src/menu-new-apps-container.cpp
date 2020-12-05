@@ -1,5 +1,6 @@
 #include "menu-new-apps-container.h"
 #include "kiran-helper.h"
+#include "global.h"
 #include <glibmm/i18n.h>
 
 bool MenuNewAppsContainer::load_applications(const Kiran::AppVec &apps)
