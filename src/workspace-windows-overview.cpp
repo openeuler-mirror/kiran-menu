@@ -15,7 +15,8 @@
 #define SNAPSHOT_EXTRA_HEIGHT   44          //窗口截图控件除缩略图部分外的额外高度
 
 WorkspaceWindowsOverview::WorkspaceWindowsOverview():
-    layout(Gtk::ORIENTATION_VERTICAL)
+    layout(Gtk::ORIENTATION_VERTICAL),
+    old_allocation(-1, -1, 0, 0)
 {
     add(layout);
 
@@ -34,6 +35,12 @@ WorkspaceWindowsOverview::WorkspaceWindowsOverview():
     add_events(Gdk::BUTTON_PRESS_MASK);
 }
 
+WorkspaceWindowsOverview::~WorkspaceWindowsOverview()
+{
+    if (reload_handler.connected())
+        reload_handler.disconnect();
+}
+
 void WorkspaceWindowsOverview::set_workspace(KiranWorkspacePointer &workspace_)
 {
     workspace = workspace_;
@@ -47,18 +54,27 @@ bool WorkspaceWindowsOverview::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
     return Gtk::EventBox::on_draw(cr);
 }
 
-void WorkspaceWindowsOverview::get_preferred_width_vfunc(int &min_width, int &natural_width) const
+
+void WorkspaceWindowsOverview::on_size_allocate(Gtk::Allocation &allocation)
 {
-    auto allocation = get_parent()->get_allocation();
+    Gtk::Allocation child_allocation = allocation;
 
-    min_width = natural_width = allocation.get_width();
-}
+    set_allocation(allocation);
+    if (old_allocation.get_width() != allocation.get_width() || old_allocation.get_height() != allocation.get_height()) {
+        /* 缩略图区域大小变化时重新排列窗口缩略图 */
+        if (reload_handler.connected())
+            return;
 
-void WorkspaceWindowsOverview::get_preferred_height_vfunc(int &min_height, int &natural_height) const
-{
-    auto allocation = get_parent()->get_allocation();
-
-    min_height = natural_height = allocation.get_height();
+        KiranHelper::remove_all_for_container(layout, true);
+        reload_handler = Glib::signal_idle().connect(
+                sigc::bind_return<bool>(
+                    sigc::mem_fun(*this, &WorkspaceWindowsOverview::reload),
+                    false));
+    }
+    child_allocation.set_x(0);
+    child_allocation.set_y(0);
+    layout.size_allocate(child_allocation);
+    old_allocation = allocation;
 }
 
 bool WorkspaceWindowsOverview::on_button_press_event(GdkEventButton *event)
@@ -81,6 +97,12 @@ void WorkspaceWindowsOverview::reload()
         g_warning("%s: workspace already expired\n", __func__);
         return;
     }
+
+    if (!get_realized())
+        return;
+
+    if (layout.get_allocated_width() <= 1 || layout.get_allocated_height() <= 1)
+        return;
 
     viewport_width = layout.get_allocated_width() * scale_factor - layout.get_margin_left() - layout.get_margin_right();
     viewport_height = layout.get_allocated_height() * scale_factor - layout.get_margin_top() - layout.get_margin_bottom();

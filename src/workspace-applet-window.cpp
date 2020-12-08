@@ -21,6 +21,8 @@ WorkspaceAppletWindow::WorkspaceAppletWindow():
     builder->get_widget<Gtk::Box>("left-layout", left_layout);
     builder->get_widget<Gtk::Box>("right-layout", right_layout);
 
+    overview.set_halign(Gtk::ALIGN_FILL);
+    overview.set_valign(Gtk::ALIGN_FILL);
     right_layout->add(overview);
     content_layout->reparent(*this);
     content_layout->show_all();
@@ -30,24 +32,14 @@ WorkspaceAppletWindow::WorkspaceAppletWindow():
     set_skip_taskbar_hint(true);
     set_decorated(false);
     set_keep_above(true);
-}
 
-void WorkspaceAppletWindow::get_preferred_width_vfunc(int &min_width, int &natural_width) const
-{
-    Gdk::Rectangle geometry;
-    auto monitor = Gdk::Display::get_default()->get_primary_monitor();
+    /* 屏幕和显示器变化时调整窗口大小和位置 */
+    get_screen()->signal_monitors_changed().connect_notify(
+        sigc::mem_fun(*this, &WorkspaceAppletWindow::resize_and_reposition));
+    get_screen()->signal_size_changed().connect_notify(
+        sigc::mem_fun(*this, &WorkspaceAppletWindow::resize_and_reposition));
 
-    monitor->get_geometry(geometry);
-    min_width = natural_width = geometry.get_width();
-}
-
-void WorkspaceAppletWindow::get_preferred_height_vfunc(int &min_height, int &natural_height) const
-{
-    Gdk::Rectangle geometry;
-    auto monitor = Gdk::Display::get_default()->get_primary_monitor();
-
-    monitor->get_geometry(geometry);
-    min_height = natural_height = geometry.get_height();
+    resize_and_reposition();
 }
 
 void WorkspaceAppletWindow::on_realize()
@@ -215,4 +207,14 @@ void WorkspaceAppletWindow::set_on_all_workspaces()
                SubstructureRedirectMask | SubstructureNotifyMask,
                &ev);
     gdk_x11_display_error_trap_pop_ignored(display);
+}
+
+void WorkspaceAppletWindow::resize_and_reposition()
+{
+    Gdk::Rectangle rect;
+    auto monitor = get_display()->get_primary_monitor();
+
+    monitor->get_geometry(rect);
+    move(rect.get_x(), rect.get_y());
+    resize(rect.get_width(), rect.get_height());
 }

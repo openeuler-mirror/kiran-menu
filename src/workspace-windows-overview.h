@@ -9,14 +9,13 @@ class WorkspaceWindowsOverview : public Gtk::EventBox
 {
 public:
     WorkspaceWindowsOverview();
+    ~WorkspaceWindowsOverview();
     void set_workspace(KiranWorkspacePointer &workspace_);
     void reload();
 
 protected:
     virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
-    virtual void get_preferred_width_vfunc(int &min_width, int &natural_width) const override;
-    virtual void get_preferred_height_vfunc(int &min_height, int &natural_height) const override;
-
+    virtual void on_size_allocate(Gtk::Allocation &allocation) override;
     virtual bool on_button_press_event(GdkEventButton *event) override;
 
 
@@ -29,6 +28,9 @@ private:
                        int view_height,
                        int row_spacing,
                        int max_rows = 4);
+
+    Gtk::Allocation old_allocation;
+    sigc::connection reload_handler;
 };
 
 #endif // WORKSPACEWINDOWSOVERVIEW_H
