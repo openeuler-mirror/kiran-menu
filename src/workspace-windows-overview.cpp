@@ -156,6 +156,9 @@ void WorkspaceWindowsOverview::reload()
         y_scale = (viewport_height - (rows - 1) * layout.get_spacing() - rows * SNAPSHOT_EXTRA_HEIGHT * get_scale_factor()) *1.0/rows/max_height;
         scale = std::min(x_scale, y_scale);
 
+        if (scale > 1.0)
+            scale = 1.0;
+
         g_debug("row[%d], real scale %.2lf, x_scale %.2lf, y_scale %.2lf, max_height %d, sum %d\n",
                   index++, scale, x_scale, y_scale, max_height, sum);
 
