@@ -24,6 +24,7 @@ namespace Kiran
 #define KIRAN_TASKBAR_SCHEMA "com.unikylin.kiran.taskbar"
 
 #define TASKBAR_KEY_FIXED_APPS "fixed-apps"
+#define TASKBAR_KEY_SHOW_ACTIVE_WORKSPACE "show-active-workspace-apps"
 
 std::list<int32_t> read_as_to_list_quark(Glib::RefPtr<Gio::Settings> settings,
                                          const std::string &key);

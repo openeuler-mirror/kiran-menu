@@ -1,9 +1,12 @@
 ﻿#include "tasklist-app-button.h"
 #include "window-manager.h"
+#include "workspace-manager.h"
 #include <iostream>
 #include <algorithm>
 #include <gtk/gtkx.h>
 #include "tasklist-buttons-container.h"
+#include "kiran-helper.h"
+
 
 static bool kiran_app_is_active(const std::shared_ptr<Kiran::App> &app)
 {
@@ -23,7 +26,7 @@ static bool kiran_app_needs_attention(const std::shared_ptr<Kiran::App> &app)
     if (!app)
         return false;
 
-    for (auto window: app->get_taskbar_windows()) {
+    for (auto window: KiranHelper::get_taskbar_windows(app)) {
         if (window->needs_attention())
             return true;
     }
@@ -45,7 +48,7 @@ TasklistAppButton::TasklistAppButton(const std::shared_ptr<Kiran::App> &app_, in
 
     get_style_context()->add_class("kiran-tasklist-button");
 
-    auto windows_list = app_->get_taskbar_windows();
+    auto windows_list = KiranHelper::get_taskbar_windows(app_);
     if (windows_list.size() == 0)
         set_tooltip_text(app_->get_locale_name());
 
@@ -188,7 +191,11 @@ bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
         g_warning("%s: failed to load color 'tasklist_app_indicator_color'", __func__);
     }
 
-    windows_count = app_->get_taskbar_windows().size();
+
+    windows_count = KiranHelper::get_taskbar_windows(app_).size();
+    g_debug("app '%s', %d windows, workspace %d", app_->get_name().c_str(), windows_count,
+        Kiran::WorkspaceManager::get_instance()->get_active_workspace()->get_number());
+
     if (kiran_app_is_active(app_)) {
         Gdk::Cairo::set_source_rgba(cr, active_color);
         cr->paint();
@@ -300,7 +307,7 @@ bool TasklistAppButton::on_button_release_event(GdkEventButton *button_event UNU
     }
 
     set_state_flags(get_state_flags() & ~Gtk::STATE_FLAG_ACTIVE, true);
-    auto windows_list = app_->get_taskbar_windows();
+    auto windows_list = KiranHelper::get_taskbar_windows(app_);
     if (windows_list.size() == 0) {
         //无已打开窗口，打开新的应用窗口(仅针对常驻任务栏应用)
         app_->launch();
@@ -428,7 +435,7 @@ void TasklistAppButton::update_windows_icon_geometry()
         origin_y += allocation.get_y();
     }
 
-    for (auto window: get_app()->get_taskbar_windows()) {
+    for (auto window: KiranHelper::get_taskbar_windows(get_app())) {
         window->set_icon_geometry(origin_x * scale_factor,
                                   origin_y * scale_factor,
                                   allocation.get_width() * scale_factor,
@@ -469,7 +476,7 @@ Glib::RefPtr<Gdk::Pixbuf> TasklistAppButton::get_app_icon_pixbuf()
             /*
              * 无法获取到应用图标的情况下，使用应用第一个已打开窗口的图标作为应用图标
              */
-            auto windows = app_->get_taskbar_windows();
+            auto windows = KiranHelper::get_taskbar_windows(app_);
 
             if (windows.size() > 0) {
                 pixbuf = Glib::wrap(windows.front()->get_icon(), true);

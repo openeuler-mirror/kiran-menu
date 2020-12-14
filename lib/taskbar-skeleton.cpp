@@ -18,6 +18,12 @@ TaskBarSkeleton::TaskBarSkeleton(AppManager *app_manager) : app_manager_(app_man
 {
     this->settings_ = Gio::Settings::create(KIRAN_TASKBAR_SCHEMA);
     this->fixed_apps_ = read_as_to_list_quark(this->settings_, TASKBAR_KEY_FIXED_APPS);
+
+    settings_->signal_changed().connect_notify(
+        [this](const Glib::ustring &key) -> void {
+            if (key == TASKBAR_KEY_SHOW_ACTIVE_WORKSPACE)
+                signal_app_show_policy_changed().emit();
+        });
 }
 
 TaskBarSkeleton::~TaskBarSkeleton()
@@ -120,6 +126,15 @@ AppVec TaskBarSkeleton::get_fixed_apps()
         }
     }
     return apps;
+}
+
+TaskBarSkeleton::AppShowPolicy TaskBarSkeleton::get_app_show_policy()
+{
+    bool value = settings_->get_boolean(TASKBAR_KEY_SHOW_ACTIVE_WORKSPACE);
+
+    if (value)
+        return TaskBarSkeleton::POLICY_SHOW_ACTIVE_WORKSPACE;
+    return TaskBarSkeleton::POLICY_SHOW_ALL;
 }
 
 void TaskBarSkeleton::desktop_app_changed()

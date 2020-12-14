@@ -13,6 +13,13 @@ namespace Kiran
 {
 class TaskBarSkeleton
 {
+
+public:
+    typedef enum {
+        POLICY_SHOW_ALL,                /* 显示所有工作区的应用窗口 */
+        POLICY_SHOW_ACTIVE_WORKSPACE,   /* 仅显示当前工作区的应用窗口 */
+        POLICY_INVALID
+    } AppShowPolicy;
 public:
     TaskBarSkeleton(AppManager *app_manager);
     virtual ~TaskBarSkeleton();
@@ -35,11 +42,16 @@ public:
     // 获取固定列表APP
     AppVec get_fixed_apps();
 
+    AppShowPolicy get_app_show_policy();
+
     // 固定APP添加信号
     sigc::signal<void, AppVec> &signal_fixed_app_added() { return this->fixed_app_added_; };
 
     // 固定APP删除信号
     sigc::signal<void, AppVec> &signal_fixed_app_deleted() { return this->fixed_app_deleted_; };
+
+    /* 应用按钮显示策略变化信号 */
+    sigc::signal<void> &signal_app_show_policy_changed() { return this->app_show_policy_changed_;}
 
 private:
     void init();
@@ -51,6 +63,7 @@ private:
 protected:
     sigc::signal<void, AppVec> fixed_app_added_;
     sigc::signal<void, AppVec> fixed_app_deleted_;
+    sigc::signal<void> app_show_policy_changed_;
 
 private:
     static TaskBarSkeleton *instance_;
