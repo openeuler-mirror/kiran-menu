@@ -331,7 +331,7 @@ void TasklistAppPreviewer::load_windows_list()
         box.remove(*child);
         delete child;
     }
-    for (auto window: app_->get_taskbar_windows()) {
+    for (auto window: KiranHelper::get_taskbar_windows(app_)) {
         add_window_thumbnail(window);
     }
     box.show_all();

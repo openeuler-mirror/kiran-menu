@@ -162,6 +162,16 @@ protected:
      */
     void on_active_window_changed(KiranWindowPointer previous, KiranWindowPointer active);
 
+
+    /**
+     * @brief 回调函数：当前活动工作区发生变化时调用
+     * @param last_active   上一个活动工作区
+     * @param active        当前活动工作区
+     * @return (void)
+     */
+    void on_active_workspace_changed(std::shared_ptr<Kiran::Workspace> last_active,
+                                     std::shared_ptr<Kiran::Workspace> active);
+
     /**
      * @brief on_window_opened  回调函数：新窗口打开时调用
      * @param window    新窗口
@@ -186,6 +196,14 @@ protected:
      * @param apps   不再固定到任务栏的应用列表
      */
     virtual void on_fixed_apps_removed(const Kiran::AppVec &apps);
+
+
+    /**
+     * @brief 回调函数: 当任务栏应用按钮显示策略发生变化时调用
+     *        @see Kiran::TaskbarSkeleton::AppShowPolicy
+     * @return
+     */
+    virtual void on_app_show_policy_changed();
 
     /**
      * @brief 确保指定的应用按钮在任务栏上可见。任务栏上空间不足时，通过滚动来保证可见

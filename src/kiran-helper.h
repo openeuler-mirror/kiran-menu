@@ -40,6 +40,10 @@ public:
 
     static void run_commandline(const char *cmdline);
 
+    static bool window_is_on_active_workspace(const std::shared_ptr<Kiran::Window> &window);
+    static Kiran::WindowVec get_active_workspace_windows(const std::shared_ptr<Kiran::App> &app);
+
+    static Kiran::WindowVec get_taskbar_windows(const std::shared_ptr<Kiran::App> &app);
 };
 
 #endif // KIRANHELPER_H

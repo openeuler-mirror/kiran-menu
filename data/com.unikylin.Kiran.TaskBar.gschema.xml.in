@@ -4,5 +4,9 @@
     <key name="fixed-apps" type="as">
       <default>['caja-browser.desktop', 'firefox.desktop', 'mate-terminal.desktop', 'org.gnome.Software.desktop']</default>
     </key>
+    <key name="show-active-workspace-apps" type="b">
+      <default>false</default>
+      <summary>Whether only show apps for current active workspace on the taskbar</summary>
+    </key>
   </schema>
 </schemalist>

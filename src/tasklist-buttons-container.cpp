@@ -1,7 +1,7 @@
 ﻿#include "tasklist-buttons-container.h"
 #include "global.h"
 #include <window-manager.h>
-#include <window.h>
+#include <workspace-manager.h>
 #include "taskbar-skeleton.h"
 #include "menu-skeleton.h"
 
@@ -40,6 +40,15 @@ TasklistButtonsContainer::TasklistButtonsContainer(MatePanelApplet *applet_, int
                 sigc::mem_fun(*this, &TasklistButtonsContainer::on_fixed_apps_added));
     backend->signal_fixed_app_deleted().connect(
                 sigc::mem_fun(*this, &TasklistButtonsContainer::on_fixed_apps_removed));
+
+    /* 响应应用按钮显示策略变化 */
+    backend->signal_app_show_policy_changed().connect(
+        sigc::mem_fun(*this, &TasklistButtonsContainer::on_app_show_policy_changed));
+
+    /* 当前活动工作区变化后，重新加载应用按钮 */
+    auto workspace_manager = Kiran::WorkspaceManager::get_instance();
+    workspace_manager->signal_active_workspace_changed().connect(
+        sigc::mem_fun(*this, &TasklistButtonsContainer::on_active_workspace_changed));
 
     /* 后台应用数据刷新后，需要重新加载数据 */
     auto menu_backend = Kiran::MenuSkeleton::get_instance();
@@ -283,14 +292,29 @@ void TasklistButtonsContainer::on_active_window_changed(KiranWindowPointer previ
     }
 }
 
+void TasklistButtonsContainer::on_active_workspace_changed(std::shared_ptr<Kiran::Workspace> last_active,
+                                     std::shared_ptr<Kiran::Workspace> active)
+{
+    auto backend = Kiran::TaskBarSkeleton::get_instance();
+
+    if (backend->get_app_show_policy() == Kiran::TaskBarSkeleton::POLICY_SHOW_ACTIVE_WORKSPACE) {
+        load_applications();
+    }
+}
+
 void TasklistButtonsContainer::on_window_opened(KiranWindowPointer window)
 {
+    auto backend = Kiran::TaskBarSkeleton::get_instance();
     g_debug("window '%s' opened\n", window->get_name().data());
 
-    /**
+    /*
      * 如果窗口设置了不在工作区或任务栏上显示，就直接跳过
      */ 
     if (window->should_skip_taskbar())
+        return;
+
+    if (backend->get_app_show_policy() == Kiran::TaskBarSkeleton::POLICY_SHOW_ALL ||
+        !KiranHelper::window_is_on_active_workspace(window))
         return;
 
     auto app = window->get_app();
@@ -326,6 +350,11 @@ void TasklistButtonsContainer::on_window_closed(KiranWindowPointer window)
     if (!app)
         return;
 
+    auto backend = Kiran::TaskBarSkeleton::get_instance();
+    if (backend->get_app_show_policy() == Kiran::TaskBarSkeleton::POLICY_SHOW_ALL ||
+        !KiranHelper::window_is_on_active_workspace(window))
+        return;
+
     if (previewer->is_visible() && previewer->get_app() == app) {
         //从预览窗口中删除该窗口的预览图
         previewer->remove_window_thumbnail(window);
@@ -336,7 +365,7 @@ void TasklistButtonsContainer::on_window_closed(KiranWindowPointer window)
         /**
          * 检查对应的应用是否有剩余窗口，如果没有，就删除该应用按钮
          */
-        if (app->get_taskbar_windows().size() == 0) {
+        if (KiranHelper::get_taskbar_windows(app).size() == 0) {
             //检查是否属于常驻任务栏的应用
             if (!KiranHelper::app_is_in_fixed_list(app))
                 remove_app_button(app);
@@ -369,7 +398,7 @@ void TasklistButtonsContainer::move_previewer(TasklistAppButton *target_button)
     if (previewer->has_context_menu_opened())
         return;
 
-    if (!target_app || target_app->get_taskbar_windows().size() == 0) {
+    if (!target_app || KiranHelper::get_taskbar_windows(target_app).size() == 0) {
         g_debug("target app expired or has no windows\n");
         previewer->hide();
         return;
@@ -945,6 +974,8 @@ void TasklistButtonsContainer::load_applications()
     Kiran::TaskBarSkeleton *backend = Kiran::TaskBarSkeleton::get_instance();
     auto app_manager = Kiran::AppManager::get_instance();
 
+    previewer->hide();
+
     /*
      * 删除旧的应用数据和应用按钮
      */
@@ -964,18 +995,31 @@ void TasklistButtonsContainer::load_applications()
 
     //加载当前运行应用
     g_debug("%s: loading running apps ...\n", __FUNCTION__);
-    apps = app_manager->get_running_apps();
-    for (auto app: apps) {
-        if (find_app_button(app)) {
-            g_debug("button for app '%s' already exists, skip ...\n");
-            continue;
+
+    if (backend->get_app_show_policy() == Kiran::TaskBarSkeleton::POLICY_SHOW_ALL)
+    {
+        apps = app_manager->get_running_apps();
+        for (auto app : apps)
+        {
+            if (find_app_button(app))
+            {
+                g_debug("button for app '%s' already exists, skip ...\n");
+                continue;
+            }
+
+            //如果应用的窗口都不需要在任务栏显示，就不在任务栏上显示应用按钮
+            if (KiranHelper::get_taskbar_windows(app).size() == 0)
+                continue;
+
+            add_app_button(app);
         }
+    } else {
+        auto active_workspace = Kiran::WorkspaceManager::get_instance()->get_active_workspace();
 
-        //如果应用的窗口都不需要在任务栏显示，就不在任务栏上显示应用按钮
-        if (app->get_taskbar_windows().size() == 0)
-            continue;
-
-        add_app_button(app);
+        g_return_if_fail(active_workspace != nullptr);
+        for (auto window: active_workspace->get_windows()) {
+            on_window_opened(window);
+        }
     }
 
     previewer->hide();
@@ -1010,11 +1054,16 @@ void TasklistButtonsContainer::on_fixed_apps_removed(const Kiran::AppVec &apps)
                 app->get_taskbar_windows().size());
         TasklistAppButton *button = find_app_button(app);
 
-        if (button && app->get_taskbar_windows().size() == 0) {
+        if (button && KiranHelper::get_taskbar_windows(app).size() == 0) {
             //如果应用已经不再常驻任务栏，而且无已打开窗口，那就将其应用按钮从任务栏上移除
             remove_app_button(app);
         }
     }
+}
+
+void TasklistButtonsContainer::on_app_show_policy_changed()
+{
+    load_applications();
 }
 
 void TasklistButtonsContainer::switch_to_page_of_button(TasklistAppButton *button)

@@ -1,6 +1,7 @@
 #include "kiran-helper.h"
 #include "menu-skeleton.h"
 #include "taskbar-skeleton.h"
+#include "workspace-manager.h"
 
 void KiranHelper::remove_widget(Gtk::Widget &widget)
 {
@@ -155,4 +156,37 @@ void KiranHelper::run_commandline(const char *cmdline)
 
     g_strfreev(tokens);
     Glib::spawn_async(std::string(), args, flags);
+}
+
+bool KiranHelper::window_is_on_active_workspace(const std::shared_ptr<Kiran::Window> &window)
+{
+    auto active_workspace = Kiran::WorkspaceManager::get_instance()->get_active_workspace();
+
+    g_return_val_if_fail(window != nullptr, false);
+    g_return_val_if_fail(active_workspace != nullptr, false);
+
+    return window->get_workspace() == active_workspace;
+}
+
+Kiran::WindowVec KiranHelper::get_active_workspace_windows(const std::shared_ptr<Kiran::App> &app)
+{
+    g_return_val_if_fail(app != nullptr, Kiran::WindowVec());
+    auto windows = app->get_taskbar_windows();
+
+    auto removed = std::remove_if(windows.begin(), windows.end(),
+                                  [](const std::shared_ptr<Kiran::Window> window) -> bool {
+                                      return !window_is_on_active_workspace(window);
+                                  });
+
+    windows.erase(removed, windows.end());
+    return windows;
+}
+
+Kiran::WindowVec KiranHelper::get_taskbar_windows(const std::shared_ptr<Kiran::App> &app)
+{
+    auto backend = Kiran::TaskBarSkeleton::get_instance();
+    if (backend->get_app_show_policy() == Kiran::TaskBarSkeleton::POLICY_SHOW_ACTIVE_WORKSPACE)
+        return KiranHelper::get_active_workspace_windows(app);
+    else
+        return app->get_taskbar_windows();
 }
