@@ -20,6 +20,10 @@ protected:
     virtual bool on_button_press_event(GdkEventButton *button_event) override;
     virtual bool on_key_press_event(GdkEventKey *key_event) override;
     virtual void on_clicked() override;
+    virtual void on_drag_begin(const Glib::RefPtr<Gdk::DragContext> &context) override;
+    virtual void on_drag_data_get(const Glib::RefPtr<Gdk::DragContext> &context, Gtk::SelectionData &selection, guint info, guint timestamp) override;
+    virtual void on_drag_end(const Glib::RefPtr<Gdk::DragContext> &context) override;
+
     virtual void init_drag_and_drop();
 
     bool pin_app_to_taskbar();

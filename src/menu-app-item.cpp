@@ -46,37 +46,6 @@ void MenuAppItem::init_drag_and_drop()
     targets.push_back(target);
     drag_source_set(targets, Gdk::BUTTON1_MASK, Gdk::ACTION_COPY);
 
-   signal_drag_begin().connect(
-        [this](const Glib::RefPtr<Gdk::DragContext> &context) -> void {
-            /**
-             * 设置拖动操作的Icon
-             */
-            auto app = get_app();
-            gtk_drag_set_icon_gicon(context->gobj(), app->get_icon()->gobj(), 0, 0);
-        });
-
-    signal_drag_data_get().connect(
-        [this](const Glib::RefPtr<Gdk::DragContext> &context, Gtk::SelectionData &selection, guint info, guint timestamp) -> void {
-            /**
-             * 将app对应的desktop文件路径传递给目的控件 
-             */
-            auto app = get_app();
-            if (!app) {
-                g_warning("init_drag_and_drop: app alreay expired\n");
-                return;
-            }
-            Glib::ustring uri = Glib::filename_to_uri(app->get_file_name()) + "\r\n";
-
-            selection.set(8, (const guint8*)uri.data(), uri.length());
-        });
-
-    signal_drag_end().connect(
-        [this](const Glib::RefPtr<Gdk::DragContext> &context) -> void {
-            // 让开始菜单窗口重新获取输入焦点
-            Gtk::Container *toplevel = get_toplevel();
-            KiranHelper::grab_input(*toplevel);
-        });
-
     signal_drag_failed().connect(
         [this](const Glib::RefPtr<Gdk::DragContext> &context, Gtk::DragResult result) -> bool {
             g_debug("drag failed, result %d\n", (int)result);
@@ -102,6 +71,38 @@ void MenuAppItem::on_clicked()
      * 启动应用
      */
     launch_app();
+}
+
+void MenuAppItem::on_drag_begin(const Glib::RefPtr<Gdk::DragContext> &context)
+{
+    /*
+     * 设置拖动操作的Icon
+     */
+    auto app = get_app();
+    gtk_drag_set_icon_gicon(context->gobj(), app->get_icon()->gobj(), 0, 0);
+}
+
+void MenuAppItem::on_drag_data_get(const Glib::RefPtr<Gdk::DragContext> &context, Gtk::SelectionData &selection, guint info, guint timestamp)
+{
+    /*
+     * 将app对应的desktop文件路径传递给目的控件
+     */
+    auto app = get_app();
+    if (!app)
+    {
+        g_warning("init_drag_and_drop: app alreay expired\n");
+        return;
+    }
+    Glib::ustring uri = Glib::filename_to_uri(app->get_file_name()) + "\r\n";
+
+    selection.set(8, (const guint8 *)uri.data(), uri.length());
+}
+
+void MenuAppItem::on_drag_end(const Glib::RefPtr<Gdk::DragContext> &context)
+{
+    /* 让开始菜单窗口重新获取输入焦点 */
+    Gtk::Container *toplevel = get_toplevel();
+    KiranHelper::grab_input(*toplevel);
 }
 
 bool MenuAppItem::on_key_press_event(GdkEventKey *key_event)
