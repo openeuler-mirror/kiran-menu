@@ -60,6 +60,14 @@ void WorkspaceWindowsOverview::on_size_allocate(Gtk::Allocation &allocation)
     Gtk::Allocation child_allocation = allocation;
 
     set_allocation(allocation);
+    if (get_realized()) {
+        /* 调整GdkWindow尺寸和位置 */
+        get_window()->move_resize(allocation.get_x(),
+                                  allocation.get_y(),
+                                  allocation.get_width(),
+                                  allocation.get_height());
+    }
+
     if (old_allocation.get_width() != allocation.get_width() || old_allocation.get_height() != allocation.get_height()) {
         /* 缩略图区域大小变化时重新排列窗口缩略图 */
         if (reload_handler.connected())
