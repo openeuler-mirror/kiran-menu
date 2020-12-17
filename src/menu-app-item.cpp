@@ -67,10 +67,11 @@ bool MenuAppItem::on_button_press_event(GdkEventButton *button_event)
 
 void MenuAppItem::on_clicked()
 {
-    /**
+    /*
      * 启动应用
      */
     launch_app();
+    get_toplevel()->hide();
 }
 
 void MenuAppItem::on_drag_begin(const Glib::RefPtr<Gdk::DragContext> &context)
