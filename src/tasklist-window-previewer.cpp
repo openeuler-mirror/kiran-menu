@@ -13,7 +13,7 @@ TasklistWindowPreviewer::TasklistWindowPreviewer(std::shared_ptr<Kiran::Window> 
 
     add_events(Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK | Gdk::BUTTON_PRESS_MASK);
     set_no_show_all(true);
-    set_spacing(10);
+    set_vspacing(10);
 
     //如果窗口管理器混合模式关闭，我们需要隐藏窗口预览图，因为窗口预览图已经无法获取
     signal_composited_changed().connect(sigc::mem_fun(*this, &TasklistWindowPreviewer::on_composite_changed));
@@ -25,7 +25,6 @@ TasklistWindowPreviewer::TasklistWindowPreviewer(std::shared_ptr<Kiran::Window> 
     /*
      * 从样式表中加载提示颜色
      */
-    get_style_context()->add_class("window-previewer");
     if (!get_style_context()->lookup_color("tasklist_attention_color", attention_color))
     {
         g_warning("Failed to load attention-color from style");
@@ -43,7 +42,7 @@ TasklistWindowPreviewer::~TasklistWindowPreviewer()
         window_state_change.disconnect();
 }
 
-bool TasklistWindowPreviewer::draw_snapshot(Gtk::Widget *snapshot_area, const Cairo::RefPtr<Cairo::Context> &cr)
+bool TasklistWindowPreviewer::draw_thumbnail_image(Gtk::Widget *snapshot_area, const Cairo::RefPtr<Cairo::Context> &cr)
 {
     Gtk::Allocation allocation;
     double scale_x, scale_y, scale;
@@ -194,7 +193,7 @@ bool TasklistWindowPreviewer::on_button_press_event(GdkEventButton *button_event
 
 void TasklistWindowPreviewer::on_composite_changed()
 {
-    Gtk::Widget *snapshot_area = get_snapshot_area();
+    Gtk::Widget *snapshot_area = get_thumbnail_area();
     if (is_composited()) {
         snapshot_area->show();
         get_style_context()->remove_class("vertical");

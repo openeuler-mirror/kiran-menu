@@ -20,6 +20,7 @@ WorkspaceAppletWindow::WorkspaceAppletWindow():
     builder->get_widget<Gtk::Box>("content-layout", content_layout);
     builder->get_widget<Gtk::Box>("left-layout", left_layout);
     builder->get_widget<Gtk::Box>("right-layout", right_layout);
+    builder->get_widget<Gtk::Button>("add-button", add_button);
 
     overview.set_halign(Gtk::ALIGN_FILL);
     overview.set_valign(Gtk::ALIGN_FILL);
@@ -39,7 +40,24 @@ WorkspaceAppletWindow::WorkspaceAppletWindow():
     get_screen()->signal_size_changed().connect_notify(
         sigc::mem_fun(*this, &WorkspaceAppletWindow::resize_and_reposition));
 
+    /*
+     * 响应工作区数量变化
+     */
+    auto workspace_manager = Kiran::WorkspaceManager::get_instance();
+    workspace_manager->signal_workspace_created().connect(
+        sigc::mem_fun(*this, &WorkspaceAppletWindow::on_workspace_created));
+    workspace_manager->signal_workspace_destroyed().connect(
+        sigc::mem_fun(*this, &WorkspaceAppletWindow::on_workspace_destroyed));
+
+    add_button->signal_clicked().connect(
+        []() -> void {
+            auto workspace_manager = Kiran::WorkspaceManager::get_instance();
+            auto workspace_count = workspace_manager->get_workspaces().size();
+            workspace_manager->change_workspace_count(++workspace_count);
+        });
+
     resize_and_reposition();
+    get_style_context()->add_class("workspace-previewer");
 }
 
 void WorkspaceAppletWindow::on_realize()
@@ -110,6 +128,16 @@ void WorkspaceAppletWindow::on_unmap()
     Gtk::Window::on_unmap();
 }
 
+void WorkspaceAppletWindow::on_workspace_created(std::shared_ptr<Kiran::Workspace> workspace)
+{
+    Glib::signal_idle().connect_once(sigc::mem_fun(*this, &WorkspaceAppletWindow::update_ui));
+}
+
+void WorkspaceAppletWindow::on_workspace_destroyed(std::shared_ptr<Kiran::Workspace> workspace)
+{
+    Glib::signal_idle().connect_once(sigc::mem_fun(*this, &WorkspaceAppletWindow::update_ui));
+}
+
 void WorkspaceAppletWindow::update_ui()
 {
     ws_list.clear();
@@ -120,6 +148,9 @@ void WorkspaceAppletWindow::update_ui()
     {
         auto thumbnail_area = Gtk::make_managed<WorkspaceThumbnail>(workspace);
 
+        thumbnail_area->set_vexpand(false);
+        thumbnail_area->set_valign(Gtk::ALIGN_START);
+        thumbnail_area->set_margin_top(30);
         left_layout->pack_start(*thumbnail_area, Gtk::PACK_SHRINK);
         ws_list.insert(std::make_pair(workspace->get_number(), thumbnail_area));
 

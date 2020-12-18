@@ -1,17 +1,15 @@
 #include "workspace-thumbnail.h"
 #include "window-manager.h"
 #include "workspace-manager.h"
+#include "global.h"
 #include <gtk/gtkx.h>
 #include <cairomm/xlib_surface.h>
 
-WorkspaceThumbnail::WorkspaceThumbnail(KiranWorkspacePointer &workspace_) :
-    Gtk::Box(Gtk::ORIENTATION_VERTICAL),
-    workspace(workspace_),
-    bg(nullptr),
-    bg_surface(nullptr),
-    is_current(false),
-    drop_check(false),
-    border_width(4)
+WorkspaceThumbnail::WorkspaceThumbnail(KiranWorkspacePointer &workspace_) : workspace(workspace_),
+                                                                            bg(nullptr),
+                                                                            bg_surface(nullptr),
+                                                                            drop_check(false),
+                                                                            border_width(4)
 {
 
     /*背景图片设置变化时重绘背景*/
@@ -19,43 +17,21 @@ WorkspaceThumbnail::WorkspaceThumbnail(KiranWorkspacePointer &workspace_) :
     settings->signal_changed().connect(sigc::hide(sigc::mem_fun(*this, &WorkspaceThumbnail::redraw_background)));
 
     /*屏幕大小变化时重绘背景*/
-    Gdk::Screen::get_default()->signal_size_changed().connect(sigc::mem_fun(*this, &WorkspaceThumbnail::redraw_background));
+    Gdk::Screen::get_default()->signal_size_changed().connect(
+        sigc::mem_fun(*this, &WorkspaceThumbnail::redraw_background));
 
-    set_spacing(10);
-    pack_start(name_label, FALSE, FALSE);
-    pack_end(snapshot_area, FALSE, FALSE);
-    get_style_context()->add_class("workspace-previewer");
+    /* 窗口列表发生变化时重绘缩略图 */
+    workspace_->signal_windows_changes().connect(
+        sigc::mem_fun(*this, &Gtk::Widget::queue_draw));
 
-    name_label.set_xalign(0.0f);
-    name_label.set_ellipsize(Pango::ELLIPSIZE_END);
-    name_label.set_text(workspace_->get_name());
-    snapshot_area.set_size_request(150, 80);
-    snapshot_area.set_relief(Gtk::RELIEF_NONE);
-    snapshot_area.signal_draw().connect(sigc::mem_fun(*this, &WorkspaceThumbnail::draw_snapshot));
-    snapshot_area.get_style_context()->add_class("workspace-thumbnail");
-
-    snapshot_area.signal_clicked().connect([this]() -> void {
-                                                if (workspace.expired())
-                                                    return;
-                                                signal_selected().emit(workspace.lock()->get_number());
-                                           });
-
-    snapshot_area.signal_button_press_event().connect(
-                [this](GdkEventButton *event) -> bool {
-        if (workspace.expired()) {
-            g_warning("workspace already expired");
-            return false;
-        }
-        if (event->type == GDK_2BUTTON_PRESS) {
-            /* Switch to workspace */
-            workspace.lock()->activate(0);
-            get_toplevel()->hide();
-            return true;
-        }
-        return false;
-    });
+    set_vspacing(10);
+    set_title(workspace_->get_name());
+    set_thumbnail_size(150, 80);
+    set_show_icon(false);
 
     init_drag_and_drop();
+
+    get_style_context()->add_class("workspace-thumbnail");
 }
 
 WorkspaceThumbnail::~WorkspaceThumbnail()
@@ -101,78 +77,7 @@ void WorkspaceThumbnail::init_drag_and_drop()
     Gtk::TargetEntry entry("binary/XID", Gtk::TARGET_SAME_APP);
 
     targets.push_back(entry);
-    snapshot_area.drag_dest_set(targets, Gtk::DEST_DEFAULT_HIGHLIGHT, Gdk::ACTION_MOVE);
-    snapshot_area.signal_drag_motion().connect(
-                [this](const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, guint time) -> bool {
-        g_debug("drag motion");
-        drop_check = true;
-
-        snapshot_area.drag_get_data(context, "binary/XID", time);
-        return true;
-    }, false);
-
-    snapshot_area.signal_drag_drop().connect(
-                [this](const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, guint time) -> bool {
-
-        g_debug("drag-drop finished");
-        drop_check = false;
-        snapshot_area.drag_get_data(context, "binary/XID", time);
-        return true;
-    }, false);
-
-    snapshot_area.signal_drag_data_received().connect(
-        [this](const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, const Gtk::SelectionData &selection, guint info, guint time) -> void {
-            Gdk::DragAction action = context->get_selected_action();
-            int length;
-            const guchar *data;
-            const Window *wid;
-
-            if (!drop_check && action != Gdk::ACTION_MOVE) {
-                context->drag_finish(false, false, time);
-                return;
-            }
-
-            data = selection.get_data(length);
-            //传递的数据应该是Window的XID
-            if (length < 0 || length != sizeof(Window)) {
-                if (!drop_check)
-                    context->drag_finish(false, false, time);
-                else
-                    context->drag_refuse(time);
-                return;
-            }
-
-            wid = reinterpret_cast<const Window*>(data);
-
-            auto window = Kiran::WindowManager::get_instance()->get_window(*wid);
-            if (!window) {
-                g_warning("Window with ID 0x%x not found\n", *wid);
-                if (drop_check) {
-                    context->drag_refuse(time);
-                    return;
-                }
-                context->drag_finish(false, false, time);
-                return;
-            }
-
-            if (window->get_workspace() == workspace.lock()) {
-                if (drop_check) {
-                    context->drag_refuse(time);
-                    g_debug("Workspace of window and the target workspace are the same, drag-drop refused!");
-                } else
-                    context->drag_finish(false, false, time);
-                return;
-            }
-
-            if (!drop_check) {
-                //将对应的窗口移动到该工作区
-                window->move_to_workspace(workspace.lock());
-                context->drag_finish(true, true, time);
-            } else {
-                context->drag_status(Gdk::ACTION_MOVE, time);
-            }
-        });
-
+    drag_dest_set(targets, Gtk::DEST_DEFAULT_HIGHLIGHT, Gdk::ACTION_MOVE);
 }
 
 
@@ -186,7 +91,7 @@ bool WorkspaceThumbnail::reload_bg_surface()
      * 计算X和Y两个方向的缩放比例.
      * 为了应对多显示器扩展显示的情况，这里使用screen的大小
      */
-    allocation = snapshot_area.get_allocation();
+    allocation = get_thumbnail_area()->get_allocation();
     surface_width = allocation.get_width() - 2 * border_width;
     surface_height = allocation.get_height() - 2 * border_width;
     x_scale = surface_width  * 1.0/screen->get_width();
@@ -214,7 +119,7 @@ bool WorkspaceThumbnail::reload_bg_surface()
     return bg_surface != nullptr;
 }
 
-bool WorkspaceThumbnail::draw_snapshot(const Cairo::RefPtr<Cairo::Context> &cr)
+bool WorkspaceThumbnail::draw_thumbnail_image(Gtk::Widget *thumbnail_area_, const Cairo::RefPtr<Cairo::Context> &cr)
 {
     auto workspace_ = workspace.lock();
     Display *xdisplay = gdk_x11_get_default_xdisplay();
@@ -228,7 +133,7 @@ bool WorkspaceThumbnail::draw_snapshot(const Cairo::RefPtr<Cairo::Context> &cr)
     if (!workspace_)
         return false;
 
-    allocation = snapshot_area.get_allocation();
+    allocation = thumbnail_area_->get_allocation();
     //调用mate-desktop接口来获取桌面背景图片, 省去缩放等相关操作
     if (!bg_surface)
         reload_bg_surface();
@@ -351,4 +256,118 @@ bool WorkspaceThumbnail::draw_snapshot(const Cairo::RefPtr<Cairo::Context> &cr)
     }
 
     return false;
+}
+
+void WorkspaceThumbnail::on_close_button_clicked()
+{
+    g_return_if_fail(!workspace.expired());
+    auto manager = Kiran::WorkspaceManager::get_instance();
+
+    manager->destroy_workspace(workspace.lock());
+}
+
+void WorkspaceThumbnail::on_thumbnail_clicked()
+{
+    g_message("%s: workspace %s clicked", __func__, workspace.lock()->get_name().c_str());
+    if (workspace.expired())
+        return;
+    signal_clicked().emit(workspace.lock()->get_number());
+}
+
+bool WorkspaceThumbnail::on_button_press_event(GdkEventButton *event)
+{
+    if (workspace.expired())
+    {
+        g_warning("workspace already expired");
+        return false;
+    }
+
+    if (event->type == GDK_2BUTTON_PRESS)
+    {
+        /* Switch to workspace */
+        workspace.lock()->activate(0);
+        get_toplevel()->hide();
+        return true;
+    }
+    return KiranThumbnailWidget::on_button_press_event(event);
+}
+
+bool WorkspaceThumbnail::on_drag_motion(const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, guint time)
+{
+    g_debug("drag motion");
+    drop_check = true;
+
+    drag_get_data(context, "binary/XID", time);
+    return true;
+}
+
+bool WorkspaceThumbnail::on_drag_drop(const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, guint time)
+{
+    g_debug("drag-drop finished");
+    drop_check = false;
+    drag_get_data(context, "binary/XID", time);
+    return true;
+}
+
+void WorkspaceThumbnail::on_drag_data_received(const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, const Gtk::SelectionData &selection, guint info, guint time)
+{
+    Gdk::DragAction action = context->get_selected_action();
+    int length;
+    const guchar *data;
+    const Window *wid;
+
+    if (!drop_check && action != Gdk::ACTION_MOVE)
+    {
+        context->drag_finish(false, false, time);
+        return;
+    }
+
+    data = selection.get_data(length);
+    //传递的数据应该是Window的XID
+    if (length < 0 || length != sizeof(Window))
+    {
+        if (!drop_check)
+            context->drag_finish(false, false, time);
+        else
+            context->drag_refuse(time);
+        return;
+    }
+
+    wid = reinterpret_cast<const Window *>(data);
+
+    auto window = Kiran::WindowManager::get_instance()->get_window(*wid);
+    if (!window)
+    {
+        g_warning("Window with ID 0x%x not found\n", *wid);
+        if (drop_check)
+        {
+            context->drag_refuse(time);
+            return;
+        }
+        context->drag_finish(false, false, time);
+        return;
+    }
+
+    if (window->get_workspace() == workspace.lock())
+    {
+        if (drop_check)
+        {
+            context->drag_refuse(time);
+            g_debug("Workspace of window and the target workspace are the same, drag-drop refused!");
+        }
+        else
+            context->drag_finish(false, false, time);
+        return;
+    }
+
+    if (!drop_check)
+    {
+        //将对应的窗口移动到该工作区
+        window->move_to_workspace(workspace.lock());
+        context->drag_finish(true, true, time);
+    }
+    else
+    {
+        context->drag_status(Gdk::ACTION_MOVE, time);
+    }
 }

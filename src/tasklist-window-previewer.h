@@ -32,7 +32,7 @@ protected:
                                            int& natural_width) const override;
     virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
     virtual bool on_button_press_event(GdkEventButton *event) override;
-    virtual bool draw_snapshot(Gtk::Widget *snapshot_area, const Cairo::RefPtr<Cairo::Context> &cr) override;
+    virtual bool draw_thumbnail_image(Gtk::Widget *snapshot_area, const Cairo::RefPtr<Cairo::Context> &cr) override;
     virtual void on_thumbnail_clicked() override;
     virtual void on_close_button_clicked() override;
 

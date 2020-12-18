@@ -15,7 +15,7 @@ public:
     //窗口预览控件需要销毁
     sigc::signal<void> &signal_delete();
 protected:
-    virtual bool draw_snapshot(Gtk::Widget *area, const Cairo::RefPtr<Cairo::Context> &cr) override;
+    virtual bool draw_thumbnail_image(Gtk::Widget *area, const Cairo::RefPtr<Cairo::Context> &cr) override;
     virtual void get_preferred_width_vfunc(int &min_width, int &natural_width) const override;
     virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
 

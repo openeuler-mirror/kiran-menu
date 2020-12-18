@@ -4,6 +4,7 @@ add_executable(kiran-applet
         kiran-search-entry.cpp
         kiran-opacity-menu.cpp
         kiran-applet-button.cpp
+        kiran-thumbnail-widget.cpp
         window-thumbnail-widget.cpp
         menu-user-info.cpp
         menu-list-item-widget.cpp

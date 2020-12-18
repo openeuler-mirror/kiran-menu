@@ -17,15 +17,14 @@ WorkspaceWindowThumbnail::WorkspaceWindowThumbnail(KiranWindowPointer &win_, dou
     set_hexpand(false);
     set_vexpand(false);
     set_margin_top(10);
-    set_spacing(10);
+    set_vspacing(10);
 
-    get_style_context()->add_class("workspace-window-snapshot");
     init_drag_and_drop();
 
     int scale_factor = get_scale_factor();
     window_width = WINDOW_WIDTH(win_);
     window_height = WINDOW_HEIGHT(win_);
-    set_snapshot_size(static_cast<int>(window_width/scale_factor  * scale),
+    set_thumbnail_size(static_cast<int>(window_width/scale_factor  * scale),
                       static_cast<int>(window_height/scale_factor * scale));
 }
 
@@ -40,7 +39,7 @@ sigc::signal<void> &WorkspaceWindowThumbnail::signal_delete()
     return m_signal_delete;
 }
 
-bool WorkspaceWindowThumbnail::draw_snapshot(Gtk::Widget *area, const Cairo::RefPtr<Cairo::Context> &cr)
+bool WorkspaceWindowThumbnail::draw_thumbnail_image(Gtk::Widget *area, const Cairo::RefPtr<Cairo::Context> &cr)
 {
     auto context = get_style_context();
     Gtk::Allocation allocation;
