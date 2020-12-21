@@ -271,7 +271,7 @@ void WorkspaceThumbnail::on_thumbnail_clicked()
     g_message("%s: workspace %s clicked", __func__, workspace.lock()->get_name().c_str());
     if (workspace.expired())
         return;
-    signal_clicked().emit(workspace.lock()->get_number());
+    signal_selected().emit(workspace.lock()->get_number());
 }
 
 bool WorkspaceThumbnail::on_button_press_event(GdkEventButton *event)
