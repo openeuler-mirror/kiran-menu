@@ -1,3 +1,9 @@
+/**
+ * @file workspace-thumbnail.h
+ * @brief 工作区缩略图控件
+ * @author songchuanfei <songchuanfei@kylinos.com.cn>
+ * @copyright (c) 2020 KylinSec. All rights reserved.
+ */
 #ifndef WORKSPACE_THUMBNAIL_INCLUDE_H
 #define WORKSPACE_THUMBNAIL_INCLUDE_H
 
@@ -13,14 +19,37 @@
 class WorkspaceThumbnail : public KiranThumbnailWidget
 {
 public:
+    /**
+     * @brief 构造函数
+     * @param workspace_ 需要关联的工作区对象
+     */
     WorkspaceThumbnail(KiranWorkspacePointer &workspace_);
     ~WorkspaceThumbnail() override;
 
-    void set_current(bool current);
-    bool get_is_current();
-    sigc::signal<void, int> signal_selected();
+    /**
+     * @brief 设置该控件为选中状态.
+     *        选中状态下，缩略图会绘制边框.
+     *
+     * @param selected  是否为选中状态
+     */
+    void set_selected(bool selected);
+
+    /**
+     * @brief  获取当前控件的选中状态
+     * @return 已选中返回true，否则返回false
+     */
+    bool is_selected() const;
+
+    /**
+     * @brief 获取关联的工作区对象
+     * @return  返回关联的工作区对象
+     */
     KiranWorkspacePointer get_workspace();
 
+    /**
+     * @brief 重新绘制工作区缩略图背景
+     *        通常在桌面壁纸变化时调用
+     */
     void redraw_background();
 
 protected:
@@ -33,24 +62,29 @@ protected:
     virtual void on_close_button_clicked() override;
     virtual void on_thumbnail_clicked() override;
 
+    /**
+     * @brief 重新加载缩略图背景
+     * @return 加载成功返回true，失败返回false
+     */
     bool reload_bg_surface();
+
+    /**
+     * @brief 初始化拖放支持，允许将窗口缩略图拖到工作区缩略图上进行窗口的移动
+     */
     void init_drag_and_drop();
     
 private:
-    std::weak_ptr<Kiran::Workspace> workspace;
-    MateBG *bg;
-    cairo_surface_t *bg_surface;
-    Glib::RefPtr<Gio::Settings> settings;
-    int surface_width, surface_height;
-    double surface_scale;
+    Glib::RefPtr<Gio::Settings> settings;           /* 桌面背景设置，用于监控桌面壁纸变化 */
+    std::weak_ptr<Kiran::Workspace> workspace;      /* 关联的工作区对象 */
 
-    bool is_current;
-    int border_width;
+    cairo_surface_t *bg_surface;                    /* 桌面背景 */
+    double surface_scale;                           /* 绘制窗口缩略图时的缩放比例 */
+    int surface_width, surface_height;              /* 缓存的bg_surface的宽度和高度 */
+    int border_width;                               /* 选中时绘制的缩略图图片边框宽度 */
 
-    Gtk::Widget *thumbnail_area;
+    Gtk::Widget *thumbnail_area;                    /* 缩略图绘制区域 */
 
-    bool drop_check;
-    sigc::signal<void, int> m_signal_selected;
+    bool drop_check;                                /* 当前是否处于拖放检测状态，用于区分motion和drop操作 */
 };
 
 #endif

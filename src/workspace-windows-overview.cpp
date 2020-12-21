@@ -11,7 +11,7 @@
 #define ROW_SPACING             10          //每行窗口截图之间的竖直间隔
 #define COLUMN_SPACING          10          //每个窗口截图中间的水平间隔
 
-//FIXME 能否通过动态获取的方式来拿到窗口缩略图上方的title区域高度
+/* FIXME:  能否通过动态获取的方式来拿到窗口缩略图上方的title区域高度 */
 #define SNAPSHOT_EXTRA_HEIGHT   44          //窗口截图控件除缩略图部分外的额外高度
 
 WorkspaceWindowsOverview::WorkspaceWindowsOverview():
@@ -44,7 +44,7 @@ WorkspaceWindowsOverview::~WorkspaceWindowsOverview()
 void WorkspaceWindowsOverview::set_workspace(KiranWorkspacePointer &workspace_)
 {
     workspace = workspace_;
-    Glib::signal_idle().connect_once(sigc::mem_fun(*this, &WorkspaceWindowsOverview::reload));
+    Glib::signal_idle().connect_once(sigc::mem_fun(*this, &WorkspaceWindowsOverview::reload_thumbnails));
 }
 
 bool WorkspaceWindowsOverview::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
@@ -76,7 +76,7 @@ void WorkspaceWindowsOverview::on_size_allocate(Gtk::Allocation &allocation)
         KiranHelper::remove_all_for_container(layout, true);
         reload_handler = Glib::signal_idle().connect(
                 sigc::bind_return<bool>(
-                    sigc::mem_fun(*this, &WorkspaceWindowsOverview::reload),
+                    sigc::mem_fun(*this, &WorkspaceWindowsOverview::reload_thumbnails),
                     false));
     }
     child_allocation.set_x(0);
@@ -92,7 +92,7 @@ bool WorkspaceWindowsOverview::on_button_press_event(GdkEventButton *event)
     return false;
 }
 
-void WorkspaceWindowsOverview::reload()
+void WorkspaceWindowsOverview::reload_thumbnails()
 {
     std::vector<int> width_vector;
     Kiran::WindowVec windows;

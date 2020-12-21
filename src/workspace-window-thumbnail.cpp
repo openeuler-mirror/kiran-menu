@@ -34,11 +34,6 @@ WorkspaceWindowThumbnail::~WorkspaceWindowThumbnail()
         cairo_surface_destroy(thumbnail_surface);
 }
 
-sigc::signal<void> &WorkspaceWindowThumbnail::signal_delete()
-{
-    return m_signal_delete;
-}
-
 bool WorkspaceWindowThumbnail::draw_thumbnail_image(Gtk::Widget *area, const Cairo::RefPtr<Cairo::Context> &cr)
 {
     auto context = get_style_context();
@@ -110,7 +105,7 @@ void WorkspaceWindowThumbnail::get_preferred_width_vfunc(int &min_width, int &na
 
 void WorkspaceWindowThumbnail::on_drag_data_delete(const Glib::RefPtr<Gdk::DragContext> &context)
 {
-    m_signal_delete.emit();
+    /* do nothing */
 }
 
 void WorkspaceWindowThumbnail::on_drag_data_get(const Glib::RefPtr<Gdk::DragContext> &context, Gtk::SelectionData &selection_data, guint info, guint time)

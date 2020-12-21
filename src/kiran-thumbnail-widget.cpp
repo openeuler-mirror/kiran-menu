@@ -125,7 +125,7 @@ bool KiranThumbnailWidget::on_motion_notify_event(GdkEventMotion *motion_event)
 void KiranThumbnailWidget::on_clicked()
 {
     GdkEvent *event = gtk_get_current_event();
-    if (event->type == GDK_BUTTON_RELEASE && close_area->is_visible()) {
+    if (event && event->type == GDK_BUTTON_RELEASE && close_area->is_visible()) {
         Gtk::Allocation close_rect;
         Gtk::Allocation allocation;
 

@@ -6,15 +6,14 @@
 #include <cairomm/xlib_surface.h>
 
 WorkspaceThumbnail::WorkspaceThumbnail(KiranWorkspacePointer &workspace_) : workspace(workspace_),
-                                                                            bg(nullptr),
                                                                             bg_surface(nullptr),
                                                                             drop_check(false),
                                                                             border_width(4)
 {
-
     /*背景图片设置变化时重绘背景*/
     settings = Gio::Settings::create("org.mate.background");
-    settings->signal_changed().connect(sigc::hide(sigc::mem_fun(*this, &WorkspaceThumbnail::redraw_background)));
+    settings->signal_changed().connect(
+        sigc::hide(sigc::mem_fun(*this, &WorkspaceThumbnail::redraw_background)));
 
     /*屏幕大小变化时重绘背景*/
     Gdk::Screen::get_default()->signal_size_changed().connect(
@@ -36,28 +35,28 @@ WorkspaceThumbnail::WorkspaceThumbnail(KiranWorkspacePointer &workspace_) : work
 
 WorkspaceThumbnail::~WorkspaceThumbnail()
 {
-    if (bg_surface) {
+    if (bg_surface)
+    {
         cairo_surface_destroy(bg_surface);
     }
 }
 
-void WorkspaceThumbnail::set_current(bool current)
+void WorkspaceThumbnail::set_selected(bool selected)
 {
-    if (is_current == current)
+    if (is_selected() == selected)
         return;
 
-    is_current = current;
+    if (selected)
+        set_state_flags(Gtk::STATE_FLAG_SELECTED, false);
+    else
+        set_state_flags(get_state_flags() & ~Gtk::STATE_FLAG_SELECTED, true);
+
     queue_draw();
 }
 
-bool WorkspaceThumbnail::get_is_current()
+bool WorkspaceThumbnail::is_selected() const
 {
-    return is_current;
-}
-
-sigc::signal<void, int> WorkspaceThumbnail::signal_selected()
-{
-    return m_signal_selected;
+    return get_state_flags() & Gtk::STATE_FLAG_SELECTED;
 }
 
 KiranWorkspacePointer WorkspaceThumbnail::get_workspace()
@@ -80,11 +79,11 @@ void WorkspaceThumbnail::init_drag_and_drop()
     drag_dest_set(targets, Gtk::DEST_DEFAULT_HIGHLIGHT, Gdk::ACTION_MOVE);
 }
 
-
 bool WorkspaceThumbnail::reload_bg_surface()
 {
     Gtk::Allocation allocation;
     double x_scale, y_scale;
+    MateBG *bg = nullptr;
     auto screen = get_screen();
 
     /**
@@ -94,8 +93,8 @@ bool WorkspaceThumbnail::reload_bg_surface()
     allocation = get_thumbnail_area()->get_allocation();
     surface_width = allocation.get_width() - 2 * border_width;
     surface_height = allocation.get_height() - 2 * border_width;
-    x_scale = surface_width  * 1.0/screen->get_width();
-    y_scale = surface_height * 1.0/screen->get_height();
+    x_scale = surface_width * 1.0 / screen->get_width();
+    y_scale = surface_height * 1.0 / screen->get_height();
     surface_scale = MIN(x_scale, y_scale);
 
     surface_width = static_cast<int>(screen->get_width() * surface_scale);
@@ -139,8 +138,8 @@ bool WorkspaceThumbnail::draw_thumbnail_image(Gtk::Widget *thumbnail_area_, cons
         reload_bg_surface();
 
     //背景图片居中显示
-    surface_offset_x = (allocation.get_width() - surface_width)/2.0;
-    surface_offset_y = (allocation.get_height() - surface_height)/2.0;
+    surface_offset_x = (allocation.get_width() - surface_width) / 2.0;
+    surface_offset_y = (allocation.get_height() - surface_height) / 2.0;
     surface = new Cairo::ImageSurface(bg_surface, false);
     cr->set_source(Cairo::RefPtr<Cairo::ImageSurface>(surface),
                    surface_offset_x,
@@ -150,8 +149,9 @@ bool WorkspaceThumbnail::draw_thumbnail_image(Gtk::Widget *thumbnail_area_, cons
     cr->rectangle(surface_offset_x, surface_offset_y, surface_width, surface_height);
     cr->clip();
 
-#if 1
+    /* TODO: 从gsettings中读取设置，确定是否要在工作区缩略图中绘制窗口缩略图。绘制窗口缩略图太耗资源 */
 
+#if 0
     /**
      * 此处调用GDK接口来按照堆叠顺序获取窗口列表(靠底层的窗口在列表的靠前位置)，然后再进行过滤
      * 
@@ -187,16 +187,19 @@ bool WorkspaceThumbnail::draw_thumbnail_image(Gtk::Widget *thumbnail_area_, cons
         cr->scale(surface_scale, surface_scale);
 
         /*window size from X server know nothing about scale*/
-        if (drawable != None) {
+        if (drawable != None)
+        {
             auto surface = Cairo::XlibSurface::create(xdisplay,
-                                                  drawable,
-                                                  attrs.visual,
-                                                  attrs.width,
-                                                  attrs.height);
-            cr->scale(1.0/scale_factor, 1.0/scale_factor);
+                                                      drawable,
+                                                      attrs.visual,
+                                                      attrs.width,
+                                                      attrs.height);
+            cr->scale(1.0 / scale_factor, 1.0 / scale_factor);
             cr->set_source(surface, rect.get_x(), rect.get_y());
             cr->paint();
-        } else {
+        }
+        else
+        {
             auto icon_pixbuf = Glib::wrap(window->get_icon(), true);
             if (!icon_pixbuf)
                 icon_pixbuf = Gtk::IconTheme::get_default()->load_icon(
@@ -207,20 +210,21 @@ bool WorkspaceThumbnail::draw_thumbnail_image(Gtk::Widget *thumbnail_area_, cons
             else
                 icon_pixbuf = icon_pixbuf->scale_simple(16 * scale_factor, 16 * scale_factor, Gdk::INTERP_BILINEAR);
 
-            cr->scale(1.0/scale_factor, 1.0/scale_factor);
+            cr->scale(1.0 / scale_factor, 1.0 / scale_factor);
             cr->set_source_rgba(0.0, 0.0, 0.0, 0.5);
             cr->rectangle(rect.get_x(), rect.get_y(), rect.get_width(), rect.get_height());
             cr->fill();
             cr->restore();
             cr->save();
 
-            if (icon_pixbuf) {
+            if (icon_pixbuf)
+            {
                 double icon_offset_x, icon_offset_y;
 
                 icon_offset_x = (rect.get_width() * surface_scale - icon_pixbuf->get_width()) / 2.0;
                 icon_offset_y = (rect.get_height() * surface_scale - icon_pixbuf->get_height()) / 2.0;
                 cr->translate(surface_offset_x, surface_offset_y);
-                cr->scale(1.0/scale_factor, 1.0/scale_factor);
+                cr->scale(1.0 / scale_factor, 1.0 / scale_factor);
                 Gdk::Cairo::set_source_pixbuf(cr,
                                               icon_pixbuf,
                                               rect.get_x() * surface_scale + icon_offset_x,
@@ -233,20 +237,22 @@ bool WorkspaceThumbnail::draw_thumbnail_image(Gtk::Widget *thumbnail_area_, cons
 
 #endif
     cr->reset_clip();
-    if (is_current) {
-        //FIXME, read color and border_width from css style
+    if (is_selected())
+    {
         /* 绘制选中后的边框 */
         Gdk::RGBA color("#ff0000");
         get_style_context()->lookup_color("thumbnail-hover-color", color);
 
         cr->set_line_width(border_width);
         Gdk::Cairo::set_source_rgba(cr, color);
-        cr->rectangle(border_width/2.0,
-                      border_width/2.0,
+        cr->rectangle(border_width / 2.0,
+                      border_width / 2.0,
                       allocation.get_width() - border_width,
                       allocation.get_height() - border_width);
         cr->stroke();
-    } else {
+    }
+    else
+    {
         cr->set_source_rgba(0.0, 0.0, 0.0, 0.3);
         cr->rectangle(border_width,
                       border_width,
@@ -268,10 +274,7 @@ void WorkspaceThumbnail::on_close_button_clicked()
 
 void WorkspaceThumbnail::on_thumbnail_clicked()
 {
-    g_message("%s: workspace %s clicked", __func__, workspace.lock()->get_name().c_str());
-    if (workspace.expired())
-        return;
-    signal_selected().emit(workspace.lock()->get_number());
+    /* NOTHING */
 }
 
 bool WorkspaceThumbnail::on_button_press_event(GdkEventButton *event)
@@ -284,7 +287,7 @@ bool WorkspaceThumbnail::on_button_press_event(GdkEventButton *event)
 
     if (event->type == GDK_2BUTTON_PRESS)
     {
-        /* Switch to workspace */
+        /* 双击时切换到对应的工作区 */
         workspace.lock()->activate(0);
         get_toplevel()->hide();
         return true;
@@ -350,6 +353,7 @@ void WorkspaceThumbnail::on_drag_data_received(const Glib::RefPtr<Gdk::DragConte
 
     if (window->get_workspace() == workspace.lock())
     {
+        /* 不允许将窗口移动到其所在的工作区，禁止拖放操作 */
         if (drop_check)
         {
             context->drag_refuse(time);
