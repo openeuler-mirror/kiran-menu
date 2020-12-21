@@ -121,11 +121,6 @@ protected:
     virtual void on_date_box_clicked();
 
     /**
-     * @brief on_avatar_clicked 回调函数：点击用户头像时调用
-     */
-    virtual void on_avatar_clicked();
-
-    /**
      * @brief on_profile_changed 回调函数：当开始菜单设置发生变化时调用
      * @param changed_key   变化的gsettings 键名
      */
@@ -173,11 +168,7 @@ protected:
      */
     void switch_to_apps_overview(double position, bool animation = true);
 
-    /**
-     * @brief 从指定的app列表中启动第一个当前系统中存在的app
-     * @param app_names   指定的app名称列表，最后一个元素需要以nullptr(NULL)结尾
-     * @return  启动成功返回true，失败返回false
-     */
+
     bool launch_app_from_list(const char **app_names);
 
 private:
@@ -201,7 +192,7 @@ private:
     Gdk::Rectangle geometry;                                        /*缓存的开始菜单窗口大小*/
     sigc::signal<void,int,int> m_signal_size_changed;               /*开始菜单窗口尺寸变化信号*/
 
-    MenuUserInfo user_info;                                       /*当前用户信息*/
+
     std::map<std::string, MenuAppsContainer*> category_items;       /*分类名称到分类控件的映射表*/
 
     Gtk::StyleProperty<int> compact_min_height_property, expand_min_height_property;
@@ -221,14 +212,9 @@ private:
     void load_all_apps();
 
     /**
-     * @brief 加载当前用户信息和头像
+     * @brief 加载日期信息
      */
     void load_date_info();
-
-    /**
-     * @brief 加载当前用户信息
-     */
-    void load_user_info();
 
 
     /**

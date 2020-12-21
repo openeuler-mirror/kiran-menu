@@ -190,3 +190,23 @@ Kiran::WindowVec KiranHelper::get_taskbar_windows(const std::shared_ptr<Kiran::A
     else
         return app->get_taskbar_windows();
 }
+
+
+bool KiranHelper::launch_app_from_list(const char **app_names)
+{
+    std::shared_ptr<Kiran::App> app;
+    auto app_manager = Kiran::AppManager::get_instance();
+
+    for (int i = 0; app_names[i] != nullptr; i++) {
+        app = app_manager->lookup_app(std::string(app_names[i]) + ".desktop");
+        if (app)
+            break;
+    }
+
+    if (app) {
+        app->launch();
+        return true;
+    }
+
+    return false;
+}

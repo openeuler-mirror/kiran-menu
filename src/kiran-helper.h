@@ -41,6 +41,13 @@ public:
 
     static void run_commandline(const char *cmdline);
 
+    /**
+     * @brief 从指定的app列表中启动第一个当前系统中存在的app
+     * @param app_names   指定的app名称列表，最后一个元素需要以nullptr(NULL)结尾
+     * @return  启动成功返回true，失败返回false
+     */
+    static bool launch_app_from_list(const char **app_names);
+
     static bool window_is_on_active_workspace(const std::shared_ptr<Kiran::Window> &window);
     static Kiran::WindowVec get_active_workspace_windows(const std::shared_ptr<Kiran::App> &app);
 
