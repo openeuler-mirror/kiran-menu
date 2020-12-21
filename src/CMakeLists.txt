@@ -40,11 +40,17 @@ add_executable(kiran-applet
 )
 
 target_compile_features(kiran-applet PUBLIC cxx_std_11)
+
+if(BUILD_WITH_KIRANACCOUNTS)
+target_sources(kiran-applet PUBLIC kiran-accounts-user.c kiran-accounts-manager.c)
+pkg_search_module(ACCOUNTSSERVICE REQUIRED kiran-cc-daemon)
+else()
+pkg_search_module(ACCOUNTSSERVICE REQUIRED accountsservice)
+endif()
 install(TARGETS kiran-applet DESTINATION "${CMAKE_INSTALL_PREFIX}/libexec/mate-panel/")
 
 pkg_search_module(MATEPANEL REQUIRED libmatepanelapplet-4.0)
 pkg_search_module(GTKMM REQUIRED gtkmm-3.0)
-pkg_search_module(ACCOUNTSSERVICE REQUIRED accountsservice)
 pkg_search_module(MATEDESKTOP REQUIRED mate-desktop-2.0)
 
 

@@ -3,6 +3,7 @@
 
 #include <gtkmm.h>
 #include <app-manager.h>
+#include "global.h"
 
 using KiranAppPointer = std::shared_ptr<Kiran::App>;
 using KiranWindowPointer = std::shared_ptr<Kiran::Window>;

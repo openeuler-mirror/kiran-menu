@@ -11,30 +11,31 @@
   * gtk3-devel >= 3.22
   * gtkmm30-devel
   * cairomm-devel
-  * accountsservice-devel
+  * libX11-devel
+  * libxcb-devel
   * gtk-update-icon-cache
-
+  * accountsservice-devel
 ## 编译安装
 ```
-   # yum install mate-panel-devel cmake gettext libwnck3-devel glib2 gcc-c++ gtkmm30-devel cairomm-devel accountsservice-devel mate-desktop-devel gtk-update-icon-cache libX11-devel libxcb-devel
    # mkdir build
-   # cd build && cmake -DCMAKE_INSTALL_PREFIX=/usr ..
+   # cd build && cmake -DCMAKE_INSTALL_PREFIX=/usr .. -DBUILD_WITH_ACCOUNTSSERVICE=on
    # make
    # sudo make install
    # sudo glib-compile-schemas /usr/share/glib-2.0/schemas/
    # sudo gtk-update-icon-cache -f /usr/share/icons/hicolor/
 ```
-
-## 运行测试
-```
-    # cd build && ./test/start-menu/test-start-menu
-```
+> 插件默认依赖`accountsservice`来提供当前用户的账户信息。
+  如果需要用`kiran-session-daemon`来替代`accountsservice`来提供账户信息，请安装 `kiran-cc-daemon-devel`，并将编译指令中的`BUILD_WITH_ACCOUNTSSERVICE`参数替换为`BUILD_WITH_KIRANACCOUNTS`
 
 ## 运行
-1. 安装运行依赖
+1. 安装以下运行依赖:
 
-```
-    # yum install mate-screensaver accountsservice mate-session-manager mate-control-center caja yelp
-```
+* mate-screensaver
+* accountsservice 或 kiran-session-daemon
+* mate-session-manager
+* mate-control-center
+* caja
+* yelp
+
 2. 右击面板，选择"添加到面板"
 3. 在对话框中找到 "Kiran开始菜单"，"Kiran应用窗口切换插件"或"Kiran工作区切换插件”, 点击 "添加" 按钮即可

@@ -3,7 +3,14 @@
 
 #include <sigc++/sigc++.h>
 #include <sys/types.h>
+#include "../config.h"
+
+#ifdef BUILD_WITH_KIRANACCOUNTS
+#include "kiran-accounts-manager.h"
+#else
 #include <act/act.h>
+#endif
+
 
 class MenuUserInfo : public sigc::trackable
 {
@@ -28,9 +35,14 @@ private:
   sigc::signal<void> m_signal_changed;
 
   uid_t uid;
+#ifdef BUILD_WITH_ACCOUNTSSERVICE
   ActUser *user;
+#else
+  KiranAccountsUser *user;
+#endif
 
   guint handler_id;
+  int load_state;
 };
 
 #endif // MENU_USER_INFO_H

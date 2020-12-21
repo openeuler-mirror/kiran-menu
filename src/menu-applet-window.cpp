@@ -57,7 +57,6 @@ MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type):
 
     //加载当前用户信息
     set_display_mode(profile.get_display_mode());
-    Glib::signal_idle().connect_once(sigc::mem_fun(*this, &MenuAppletWindow::load_user_info));
 }
 
 MenuAppletWindow::~MenuAppletWindow()
@@ -752,11 +751,13 @@ void MenuAppletWindow::load_favorite_apps()
 void MenuAppletWindow::load_user_info()
 {
     if (!user_info.is_ready()) {
-        user_info.load();
+        g_debug("%s: data is not ready, request to load", __func__);
         user_info.signal_ready().connect(sigc::mem_fun(*this, &MenuAppletWindow::load_user_info));
+        user_info.load();
         return;
     }
 
+    g_debug("%s: data is ready, display user info", __func__);
     if (display_mode == DISPLAY_MODE_COMPACT) {
         //在头像的tooltip中提示用户名
         if (compact_avatar_widget == nullptr)
