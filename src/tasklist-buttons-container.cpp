@@ -26,6 +26,8 @@ TasklistButtonsContainer::TasklistButtonsContainer(MatePanelApplet *applet_, int
 {
     init_ui();
 
+    g_signal_connect_after(applet_, "change-size", G_CALLBACK(::on_applet_size_change), this);
+
     //响应窗口变化信号
     auto window_manager = Kiran::WindowManager::get_instance();
     window_manager->signal_active_window_changed().connect(
@@ -476,12 +478,13 @@ void TasklistButtonsContainer::on_applet_size_change()
 {
     int applet_size = get_applet_size();
 
+    LOG_DEBUG("applet size changed to %d", applet_size);
     for (auto child: get_children()) {
         TasklistAppButton *button = dynamic_cast<TasklistAppButton*>(child);
         button->set_size(applet_size);
     }
 
-    queue_resize();
+    queue_allocate();
 }
 
 int TasklistButtonsContainer::get_applet_size() const
