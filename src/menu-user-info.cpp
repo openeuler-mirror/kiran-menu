@@ -1,4 +1,5 @@
 #include "menu-user-info.h"
+#include "log.h"
 #include <iostream>
 
 enum {
@@ -92,6 +93,6 @@ sigc::signal<void> MenuUserInfo::signal_changed()
 void MenuUserInfo::on_changed(MenuUserInfo *info)
 {
 
-    g_message("got changed signal for user information");
+    LOG_MESSAGE("got changed signal for user information");
     info->signal_changed().emit();
 }

@@ -6,6 +6,7 @@
 #include "global.h"
 #include <gtk/gtkx.h>
 #include "window-manager.h"
+#include "log.h"
 
 
 #include <unistd.h>
@@ -13,8 +14,6 @@
 #include <glibmm/i18n.h>
 #include "global.h"
 #include "menu-apps-container.h"
-
-
 
 #define NEW_APPS_MAX_SIZE 3
 
@@ -291,7 +290,7 @@ void MenuAppletWindow::on_date_box_clicked()
         nullptr};
 
     if (!KiranHelper::launch_app_from_list(app_names))
-        g_warning("Failed to launch datetime manage tools");
+        LOG_WARNING("Failed to launch datetime manage tools");
 
     hide();
 }
@@ -398,7 +397,7 @@ void MenuAppletWindow::switch_to_category_overview(const std::string &selected_c
         item->show_all();
 
         if (item->get_category_name() == selected_category) {
-            g_debug("found target category: '%s'", item->get_category_name().c_str());
+            LOG_DEBUG("found target category: '%s'", item->get_category_name().c_str());
             selected_item = item;
         }
         item->signal_clicked().connect(sigc::bind<const std::string&, bool>(
@@ -435,10 +434,10 @@ void MenuAppletWindow::switch_to_apps_overview(const std::string &selected_categ
             switch_to_apps_overview(adjusted_pos, animation);
 
             //将指定的分类标签控件添加焦点
-            g_debug("grab focus for category '%s'\n", selected_category.c_str());
+            LOG_DEBUG("grab focus for category '%s'\n", selected_category.c_str());
             item->get_children().front()->grab_focus();
         } else
-            g_warning("invalid category name: '%s'\n", selected_category.c_str());
+            LOG_WARNING("invalid category name: '%s'\n", selected_category.c_str());
     }
 }
 
@@ -601,7 +600,7 @@ Gtk::Button* MenuAppletWindow::create_page_button(const char *icon_resource,
         image->set_pixel_size(16);
         image->set_from_resource(icon_resource);
     } catch (const Glib::Error &e) {
-        g_warning("Failed to load resouce '%s': %s", icon_resource, e.what().c_str());
+        LOG_WARNING("Failed to load resouce '%s': %s", icon_resource, e.what().c_str());
     }
 
     button->set_always_show_image(true);
@@ -762,13 +761,13 @@ void MenuAppletWindow::set_display_mode(MenuDisplayMode mode)
         expand_panel->set_visible(true);
         compact_tab_box->set_visible(false);
         get_preferred_width(min_width, natural_width);
-        g_debug("min-width: %d, workarea %d x %d", min_width,
+        LOG_DEBUG("min-width: %d, workarea %d x %d", min_width,
                 rect.get_width(),
                 rect.get_height());
 
         if (min_width > rect.get_width()) {
             /*当前屏幕宽度小于扩展模式的最小宽度，切换到紧凑模式*/
-            g_warning("%s: min width for expand mode exceeds monitor size, switch to compact mode now\n", __func__);
+            LOG_WARNING("min width for expand mode exceeds monitor size, switch to compact mode now");
             set_display_mode(DISPLAY_MODE_COMPACT);
             return;
         }

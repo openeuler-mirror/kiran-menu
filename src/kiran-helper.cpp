@@ -2,6 +2,7 @@
 #include "menu-skeleton.h"
 #include "taskbar-skeleton.h"
 #include "workspace-manager.h"
+#include "log.h"
 
 void KiranHelper::remove_widget(Gtk::Widget &widget)
 {
@@ -89,13 +90,13 @@ bool KiranHelper::add_app_to_fixed_list(const std::shared_ptr<Kiran::App> &app)
 {
     auto backend = Kiran::TaskBarSkeleton::get_instance();
 
-    g_debug("%s: add app into fixed list\n", __func__);
+    LOG_DEBUG("add app into fixed list");
     return backend->add_fixed_app(app->get_desktop_id());
 }
 
 bool KiranHelper::remove_app_from_fixed_list(const std::shared_ptr<Kiran::App> &app)
 {
-    g_debug("%s: remove app from fixed list\n", __func__);
+    LOG_DEBUG("remove app from fixed list");
 
     auto backend = Kiran::TaskBarSkeleton::get_instance();
 

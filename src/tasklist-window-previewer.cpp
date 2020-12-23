@@ -1,4 +1,5 @@
 #include "tasklist-window-previewer.h"
+#include "log.h"
 #include <gtk/gtkx.h>
 #include <cairomm/xlib_surface.h>
 #include <iostream>
@@ -27,7 +28,7 @@ TasklistWindowPreviewer::TasklistWindowPreviewer(std::shared_ptr<Kiran::Window> 
      */
     if (!get_style_context()->lookup_color("tasklist_attention_color", attention_color))
     {
-        g_warning("Failed to load attention-color from style");
+        LOG_WARNING("Failed to load attention-color from style");
     }
 
     on_composite_changed();
@@ -102,7 +103,7 @@ bool TasklistWindowPreviewer::draw_thumbnail_image(Gtk::Widget *snapshot_area, c
             cairo_surface_destroy(thumbnail);
         }
     } catch (const Glib::Error &e) {
-        g_warning("Error occured while trying to draw window thumbnail: %s", e.what().c_str());
+        LOG_WARNING("Error occured while trying to draw window thumbnail: %s", e.what().c_str());
     }
 
     return false;
@@ -150,7 +151,7 @@ void TasklistWindowPreviewer::on_thumbnail_clicked()
     if (window)
         window->activate(0);
     else
-        g_warning("%s: window already deleted!!!\n", __PRETTY_FUNCTION__);
+        LOG_WARNING("window already expired!!!");
 }
 
 void TasklistWindowPreviewer::on_close_button_clicked()

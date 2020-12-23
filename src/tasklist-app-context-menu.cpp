@@ -3,6 +3,7 @@
 #include <menu-skeleton.h>
 #include <glib/gi18n.h>
 #include "kiran-helper.h"
+#include "log.h"
 
 TasklistAppContextMenu::TasklistAppContextMenu(const std::shared_ptr<Kiran::App> &app_)
 {
@@ -21,7 +22,7 @@ void TasklistAppContextMenu::refresh()
     KiranHelper::remove_all_for_container(*this);
 
     if (!app_) {
-        g_warning("KiranAppContextMenu: found finalized app\n");
+        LOG_WARNING("KiranAppContextMenu: found finalized app\n");
         return;
     }
 

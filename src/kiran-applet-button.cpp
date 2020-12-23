@@ -1,4 +1,5 @@
 #include "kiran-applet-button.h"
+#include "log.h"
 
 #define BUTTON_MARGIN 6
 
@@ -87,7 +88,7 @@ void KiranAppletButton::generate_pixbuf()
 {
     int scale = get_scale_factor();
 
-    g_message("generate pixbuf for button, resource %s\n",
+    LOG_MESSAGE("generate pixbuf for button, resource %s\n",
               icon_resource.c_str());
     icon_pixbuf = Gdk::Pixbuf::create_from_resource(icon_resource,
                                                     icon_size * scale,

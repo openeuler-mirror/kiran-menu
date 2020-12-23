@@ -1,4 +1,5 @@
 #include "kiran-accounts-user.h"
+#include "log.h"
 #include <gio/gio.h>
 
 struct _KiranAccountsUserPrivate{
@@ -78,7 +79,7 @@ static void on_dbus_properties_changed(KiranAccountsUser *user, GVariant *change
         GVariant *value;
         const char *name;
         g_variant_get(child, "{sv}", &name, &value);
-        g_message("key '%s' changed", name);
+        LOG_MESSAGE("key '%s' changed", name);
         g_variant_unref(value);
         g_variant_unref(child);
     }
@@ -97,7 +98,7 @@ static void on_dbus_proxy_ready(GObject *source_obj, GAsyncResult *result, gpoin
     priv->dbus_proxy = g_dbus_proxy_new_for_bus_finish(result, &error);
     if (error) {
         priv->dbus_proxy = NULL;
-        g_warning("Failed to connect to dbus: %s", error->message);
+        LOG_WARNING("Failed to connect to dbus: %s", error->message);
         g_error_free(error);
         return;
     }

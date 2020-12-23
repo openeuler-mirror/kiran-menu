@@ -1,4 +1,5 @@
 #include "kiran-accounts-manager.h"
+#include "log.h"
 #include <gio/gio.h>
 
 struct _KiranAccountsManagerPrivate {
@@ -18,7 +19,7 @@ static void on_dbus_proxy_ready(GObject *source_object, GAsyncResult *result, gp
 
     priv->dbus_proxy = g_dbus_proxy_new_for_bus_finish(result, &error);
     if (!priv->dbus_proxy) {
-        g_warning("Failed to create dbus proxy for accounts manager: %s", error->message);
+        LOG_WARNING("Failed to create dbus proxy for accounts manager: %s", error->message);
         g_error_free(error);
         priv->loaded = FALSE;
         return;
@@ -41,7 +42,7 @@ void kiran_accounts_manager_init(KiranAccountsManager *self)
                                                      NULL,
                                                      &error);
     if (error) {
-        g_warning("Failed to create dbus proxy for accounts manager: %s", error->message);
+        LOG_WARNING("Failed to create dbus proxy for accounts manager: %s", error->message);
         g_error_free(error);
         priv->loaded = FALSE;
         return;
@@ -82,7 +83,7 @@ KiranAccountsUser *kiran_accounts_manager_get_user_by_id(KiranAccountsManager *s
 
     if (error)
     {
-        g_warning("Failed to get object path for user %d: %s", uid, error->message),
+        LOG_WARNING("Failed to get object path for user %d: %s", uid, error->message),
         g_error_free(error);
     } else {
         const char *object_path;

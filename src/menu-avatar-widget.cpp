@@ -1,6 +1,7 @@
 #include "menu-avatar-widget.h"
 #include "kiran-helper.h"
 #include "../config.h"
+#include "log.h"
 #include <iostream>
 
 MenuAvatarWidget::MenuAvatarWidget(int size) : user_info(getuid()),
@@ -23,7 +24,7 @@ void MenuAvatarWidget::load_user_info_()
     if (!user_info.is_ready())
     {
         /* 用户信息尚未加载完全，延后加载 */
-        g_debug("%s: data is not ready, request to load", __func__);
+        LOG_DEBUG("data is not ready, request to load");
         user_info.signal_ready().connect(
             sigc::mem_fun(*this, &MenuAvatarWidget::load_user_info));
         user_info.load();
@@ -74,7 +75,7 @@ bool MenuAvatarWidget::on_draw(const ::Cairo::RefPtr<Cairo::Context> &cr)
     catch (const Glib::Error &e)
     {
         /* 加载默认头像 */
-        g_warning("Failed to load avatar: %s", e.what().c_str());
+        LOG_WARNING("Failed to load avatar: %s", e.what().c_str());
         pixbuf = Gdk::Pixbuf::create_from_resource("/kiran-menu/icon/avatar",
                                                    allocation.get_width() * scale,
                                                    allocation.get_height() * scale);
@@ -112,5 +113,5 @@ void MenuAvatarWidget::on_clicked()
         nullptr};
 
     if (!KiranHelper::launch_app_from_list(app_names))
-        g_warning("Failed to launch avatar or account manage tools");
+        LOG_WARNING("Failed to launch avatar or account manage tools");
 }

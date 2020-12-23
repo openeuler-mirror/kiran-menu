@@ -4,6 +4,7 @@
 #include "window_arrange.h"
 #include <algorithm>
 #include "global.h"
+#include "log.h"
 
 #define MIN_VIEW_WIDTH          80          //窗口截图的最小宽度
 #define MIN_VIEW_HEIGHT         150         //窗口截图的最小高度
@@ -102,7 +103,7 @@ void WorkspaceWindowsOverview::reload_thumbnails()
 
     KiranHelper::remove_all_for_container(layout, true);
     if (workspace.expired()) {
-        g_warning("%s: workspace already expired\n", __func__);
+        LOG_WARNING("workspace already expired");
         return;
     }
 
@@ -133,7 +134,7 @@ void WorkspaceWindowsOverview::reload_thumbnails()
      * FIXME: max_rows应当根据屏幕高度动态调整
      */
     rows = calculate_rows(windows, viewport_width, viewport_height, layout.get_spacing(), 4);
-    g_debug("viewport size %d x %d, rows %d",
+    LOG_DEBUG("viewport size %d x %d, rows %d",
               viewport_width,
               viewport_height,
               rows);
@@ -189,7 +190,7 @@ void WorkspaceWindowsOverview::reload_thumbnails()
         if (scale > 1.0)
             scale = 1.0;
 
-        g_debug("row[%d], real scale %.2lf, x_scale %.2lf, y_scale %.2lf, max_height %d, sum %d\n",
+        LOG_DEBUG("row[%d], real scale %.2lf, x_scale %.2lf, y_scale %.2lf, max_height %d, sum %d\n",
                   index++, scale, x_scale, y_scale, max_height, sum);
 
         Gtk::Box *row_box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL);

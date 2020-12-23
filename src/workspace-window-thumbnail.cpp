@@ -2,7 +2,7 @@
 #include "kiran-helper.h"
 #include <gtk/gtkx.h>
 #include <cairo/cairo-xlib.h>
-#include <X11/Xlib.h>
+#include "log.h"
 
 WorkspaceWindowThumbnail::WorkspaceWindowThumbnail(KiranWindowPointer &win_, double scale_):
     Glib::ObjectBase("WorkspaceWindowSnapshot"),
@@ -43,7 +43,7 @@ bool WorkspaceWindowThumbnail::draw_thumbnail_image(Gtk::Widget *area, const Cai
     int scale_factor = get_scale_factor();
     
     if (!window) {
-        g_warning("%s: window expired\n", __func__);
+        LOG_WARNING("window expired\n");
         return true;
     }
 
@@ -70,7 +70,7 @@ bool WorkspaceWindowThumbnail::draw_thumbnail_image(Gtk::Widget *area, const Cai
         Gdk::RGBA color("#ff0000");
         Gdk::Rectangle rect;
         if (!context->lookup_color("thumbnail-hover-color", color)) {
-            g_warning("Failed to load snapshot hover color from style files\n");
+            LOG_WARNING("Failed to load snapshot hover color from style files\n");
         }
 
         Gdk::Cairo::set_source_rgba(cr, color);
@@ -239,7 +239,7 @@ void WorkspaceWindowThumbnail::init_drag_and_drop()
 bool WorkspaceWindowThumbnail::on_drag_failed(const Glib::RefPtr< Gdk::DragContext > &context UNUSED,
                                               Gtk::DragResult result UNUSED)
 {
-    g_debug("drag failed");
+    LOG_DEBUG("drag failed");
     show_thumbnail = true;
     queue_draw();
     return true;

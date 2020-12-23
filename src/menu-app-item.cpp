@@ -4,6 +4,7 @@
 #include <glibmm/i18n.h>
 #include <sys/stat.h>
 #include "global.h"
+#include "log.h"
 #include <taskbar-skeleton.h>
 
 #define MENU_ITEM_COUNT G_N_ELEMENTS(item_labels)
@@ -22,7 +23,7 @@ MenuAppItem::MenuAppItem(const std::shared_ptr<Kiran::App> &app_, int _icon_size
     if (app_->get_icon()) {
         set_icon(app_->get_icon());
     } else {
-        g_message("app '%s' has no icon\n", app_->get_file_name().data());
+        LOG_MESSAGE("app '%s' has no icon\n", app_->get_file_name().data());
         auto icon = Gio::ThemedIcon::create("application-x-executable");
         set_icon(Glib::RefPtr<Gio::Icon>::cast_dynamic(icon));
     }
@@ -48,7 +49,7 @@ void MenuAppItem::init_drag_and_drop()
 
     signal_drag_failed().connect(
         [this](const Glib::RefPtr<Gdk::DragContext> &context, Gtk::DragResult result) -> bool {
-            g_debug("drag failed, result %d\n", (int)result);
+            LOG_DEBUG("drag failed, result %d\n", (int)result);
             return true;
         });
 }
@@ -91,7 +92,7 @@ void MenuAppItem::on_drag_data_get(const Glib::RefPtr<Gdk::DragContext> &context
     auto app = get_app();
     if (!app)
     {
-        g_warning("init_drag_and_drop: app alreay expired\n");
+        LOG_WARNING("init_drag_and_drop: app alreay expired\n");
         return;
     }
     Glib::ustring uri = Glib::filename_to_uri(app->get_file_name()) + "\r\n";
@@ -185,7 +186,7 @@ bool MenuAppItem::pin_app_to_taskbar()
     auto backend = Kiran::TaskBarSkeleton::get_instance();
 
     if (!app_) {
-        g_warning("%s: app already expired\n", __FUNCTION__);
+        LOG_WARNING("%s: app already expired\n", __FUNCTION__);
         return false;
     }
 
@@ -197,7 +198,7 @@ bool MenuAppItem::unpin_app_from_taskbar()
     auto backend = Kiran::TaskBarSkeleton::get_instance();
 
     if (!app_) {
-        g_warning("%s: app already expired\n", __FUNCTION__);
+        LOG_WARNING("%s: app already expired\n", __FUNCTION__);
         return false;
     }
 
@@ -211,7 +212,7 @@ bool MenuAppItem::add_app_to_desktop()
     std::shared_ptr<Kiran::App> app_;
 
     if (app.expired()) {
-        g_warning("%s: app already expired\n", __FUNCTION__);
+        LOG_WARNING("%s: app already expired\n", __FUNCTION__);
         return false;
     }
 
@@ -226,7 +227,7 @@ bool MenuAppItem::add_app_to_desktop()
             return true;
 
         if (!src_file->copy(dest_file, flags)) {
-            g_warning("Failed to copy file");
+            LOG_WARNING("Failed to copy file");
             return false;
 	}
 
@@ -234,7 +235,7 @@ bool MenuAppItem::add_app_to_desktop()
         chmod(dest_file->get_path().data(), 0755);
         return true;
     } catch (const Glib::Error &e) {
-        g_warning("Error occured while trying to copy desktop file: %s", e.what().c_str());
+        LOG_WARNING("Error occured while trying to copy desktop file: %s", e.what().c_str());
         return false;
     }
 }
@@ -285,7 +286,7 @@ void MenuAppItem::set_orientation(Gtk::Orientation orient)
 void MenuAppItem::launch_app()
 {
     if (app.expired()) {
-        g_warning("%s: app already expired\n", __FUNCTION__);
+        LOG_WARNING("%s: app already expired\n", __FUNCTION__);
         return;
     }
 

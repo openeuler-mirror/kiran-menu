@@ -1,4 +1,5 @@
 #include "menu-profile.h"
+#include <log.h>
 
 const Glib::ustring default_page_key = "default-page";
 const Glib::ustring display_mode_key = "display-mode";
@@ -53,6 +54,7 @@ void MenuProfile::set_display_mode(MenuDisplayMode new_mode)
 
 void MenuProfile::on_settings_changed(const Glib::ustring &key)
 {
-    g_message("settings key '%s' changed\n", key.data());
+    LOG_DEBUG("settings key '%s' changed\n", key.data());
     m_signal_changed.emit(key);
 }
+

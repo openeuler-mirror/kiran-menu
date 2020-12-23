@@ -4,6 +4,7 @@
 #include <workspace-manager.h>
 #include "taskbar-skeleton.h"
 #include "menu-skeleton.h"
+#include "log.h"
 
 #define PREVIEWER_ANIMATION_TIMEOUT 300
 
@@ -134,7 +135,7 @@ void TasklistButtonsContainer::add_app_button(const KiranAppPointer &app)
 
     //建立app和应用按钮之间的映射
     app_buttons.insert(std::make_pair(app, button));
-    g_debug("Add app button '%s'(%p)\n", app->get_name().data(), app.get());
+    LOG_DEBUG("Add app button '%s'(%p)\n", app->get_name().data(), app.get());
 
 }
 
@@ -207,11 +208,11 @@ void TasklistButtonsContainer::remove_app_button(const KiranAppPointer &app)
 
     auto button = find_app_button(app);
     if (!button) {
-        g_warning("%s: no button for app '%s'\n", __PRETTY_FUNCTION__, app->get_name().data());
+        LOG_WARNING("no button for app '%s'", app->get_name().data());
         return;
     }
 
-    g_debug("remove button for app '%s'\n", app->get_name().data());
+    LOG_DEBUG("remove button for app '%s'", app->get_name().data());
     remove(*button);
     app_buttons.erase(app);
 
@@ -266,7 +267,7 @@ void TasklistButtonsContainer::on_active_window_changed(KiranWindowPointer previ
     if (current_app != active_app) {
         //active app changed
 
-        g_debug("active app changed, new '%s', old '%s'\n",
+        LOG_DEBUG("active app changed, new '%s', old '%s'\n",
                   current_app?current_app->get_name().data():"null",
                   active_app?active_app->get_name().data():"null");
 
@@ -305,7 +306,7 @@ void TasklistButtonsContainer::on_active_workspace_changed(std::shared_ptr<Kiran
 void TasklistButtonsContainer::on_window_opened(KiranWindowPointer window)
 {
     auto backend = Kiran::TaskBarSkeleton::get_instance();
-    g_debug("window '%s' opened\n", window->get_name().data());
+    LOG_DEBUG("window '%s' opened\n", window->get_name().data());
 
     /*
      * 如果窗口设置了不在工作区或任务栏上显示，就直接跳过
@@ -319,7 +320,7 @@ void TasklistButtonsContainer::on_window_opened(KiranWindowPointer window)
 
     auto app = window->get_app();
     if (!app) {
-        g_warning("no app found for new window '%s'\n", window->get_name().data());
+        LOG_WARNING("no app found for new window '%s'\n", window->get_name().data());
         return;
     }
 
@@ -328,7 +329,7 @@ void TasklistButtonsContainer::on_window_opened(KiranWindowPointer window)
         add_app_button(app);
     }
     else {
-        g_debug("app button already exists\n");
+        LOG_DEBUG("app button already exists\n");
         app_button->set_has_tooltip(false);
 
         /**
@@ -399,7 +400,7 @@ void TasklistButtonsContainer::move_previewer(TasklistAppButton *target_button)
         return;
 
     if (!target_app || KiranHelper::get_taskbar_windows(target_app).size() == 0) {
-        g_debug("target app expired or has no windows\n");
+        LOG_DEBUG("target app expired or has no windows\n");
         previewer->hide();
         return;
     }
@@ -509,7 +510,7 @@ void TasklistButtonsContainer::get_preferred_width_vfunc(int &min_width, int &na
     } else {
         min_width = natural_width = get_applet_size();
     }
-    //g_message("%s: container min %d, natural %d\n", __func__, min_width, natural_width);
+    //LOG_MESSAGE("container min %d, natural %d\n", min_width, natural_width);
 }
 
 void TasklistButtonsContainer::get_preferred_height_vfunc(int &min_height, int &natural_height) const
@@ -633,7 +634,7 @@ void TasklistButtonsContainer::on_size_allocate(Gtk::Allocation &allocation)
         Gtk::Allocation child_allocation;
         auto button = dynamic_cast<TasklistAppButton*>(child);
 
-//        g_message("button '%s', x %d, y %d", button->get_app()->get_name().c_str(),
+//        LOG_MESSAGE("button '%s', x %d, y %d", button->get_app()->get_name().c_str(),
 //                    child_property_x(*child).get_value(),
 //                  child_property_y(*child).get_value());
 
@@ -830,7 +831,7 @@ void TasklistButtonsContainer::on_drag_data_received(const Glib::RefPtr<Gdk::Dra
      */
     auto app = Kiran::AppManager::get_instance()->lookup_app(desktop_id);
     if (!app) {
-        g_warning("app '%s' not found", app->get_name().c_str());
+        LOG_WARNING("app '%s' not found", app->get_name().c_str());
         if (drag_checking)
             context->drag_refuse(time);
         else
@@ -840,7 +841,7 @@ void TasklistButtonsContainer::on_drag_data_received(const Glib::RefPtr<Gdk::Dra
 
     auto result = app_buttons.find(app);
     if (result == app_buttons.end()) {
-        g_warning("button for app '%s' not found", app->get_name().c_str());
+        LOG_WARNING("button for app '%s' not found", app->get_name().c_str());
         if (drag_checking)
             context->drag_refuse(time);
         else
@@ -897,7 +898,7 @@ void TasklistButtonsContainer::on_drag_data_received(const Glib::RefPtr<Gdk::Dra
                             put_child_before(child, source_widget);
                         break;
                     default:
-                        g_critical("shouldn't get here");
+                        LOG_CRITICAL("shouldn't get here");
                         break;
                     }
                 }
@@ -987,14 +988,14 @@ void TasklistButtonsContainer::load_applications()
 
 
     //加载常驻任务栏应用
-    g_debug("%s: loading fixed apps ...\n", __FUNCTION__);
+    LOG_DEBUG("%s: loading fixed apps ...\n", __FUNCTION__);
     apps = backend->get_fixed_apps();
     for (auto app: apps) {
         add_app_button(app);
     }
 
     //加载当前运行应用
-    g_debug("%s: loading running apps ...\n", __FUNCTION__);
+    LOG_DEBUG("%s: loading running apps ...\n", __FUNCTION__);
 
     if (backend->get_app_show_policy() == Kiran::TaskBarSkeleton::POLICY_SHOW_ALL)
     {
@@ -1003,7 +1004,7 @@ void TasklistButtonsContainer::load_applications()
         {
             if (find_app_button(app))
             {
-                g_debug("button for app '%s' already exists, skip ...\n");
+                LOG_DEBUG("button for app '%s' already exists, skip ...\n");
                 continue;
             }
 
@@ -1032,10 +1033,9 @@ void TasklistButtonsContainer::load_applications()
  */
 void TasklistButtonsContainer::on_fixed_apps_added(const Kiran::AppVec &apps)
 {
-    g_debug("Got fixed apps added signal\n");
+    LOG_DEBUG("Got fixed apps added signal\n");
     for (auto app: apps) {
-        g_debug("%s: add fixed app '%s'\n", __func__,
-                app->get_name().data());
+        LOG_DEBUG("add fixed app '%s'", app->get_name().data());
         TasklistAppButton *button = find_app_button(app);
         if (!button) {
             //如果应用需要常驻任务栏，而且目前应用未打开，那就将其应用按钮添加到任务栏
@@ -1046,10 +1046,9 @@ void TasklistButtonsContainer::on_fixed_apps_added(const Kiran::AppVec &apps)
 
 void TasklistButtonsContainer::on_fixed_apps_removed(const Kiran::AppVec &apps)
 {
-    g_debug("Got fixed apps removed signal\n");
+    LOG_DEBUG("Got fixed apps removed signal\n");
     for (auto app: apps) {
-        g_debug("%s: remove fixed app '%s', %d windows found\n",
-                __func__,
+        LOG_DEBUG("remove fixed app '%s', %d windows found\n",
                 app->get_name().data(),
                 app->get_taskbar_windows().size());
         TasklistAppButton *button = find_app_button(app);
@@ -1079,8 +1078,7 @@ void TasklistButtonsContainer::switch_to_page_of_button(TasklistAppButton *butto
     child_allocation = button->get_allocation();
 
     if (child_allocation.get_width() <= 1) {
-        g_warning("%s: button not realized, allocation (%d, %d), %d x %d",
-                  __func__,
+        LOG_WARNING("button not realized, allocation (%d, %d), %d x %d",
                   child_allocation.get_x(),
                   child_allocation.get_y(),
                   child_allocation.get_width(),

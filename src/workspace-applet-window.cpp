@@ -6,6 +6,7 @@
 #include "workspace-windows-overview.h"
 #include "kiran-helper.h"
 #include "global.h"
+#include "log.h"
 #include <X11/Xlib.h>
 
 #define MATE_DESKTOP_USE_UNSTABLE_API
@@ -90,7 +91,7 @@ bool WorkspaceAppletWindow::on_key_press_event(GdkEventKey *event)
             if (workspace)
                 workspace->activate(0);
             else
-                g_warning("workspace with number %d not found", selected_workspace);
+                LOG_WARNING("workspace with number %d not found", selected_workspace);
         }
         hide();
         return true;
@@ -208,7 +209,7 @@ void WorkspaceAppletWindow::update_workspace(int workspace_num)
     WorkspaceThumbnail *thumbnail = nullptr;
     auto iter = workspaces_table.find(workspace_num);
     if (G_UNLIKELY(iter == workspaces_table.end())) {
-        g_warning("workspace with num %d not found in cached thumbnails\n", workspace_num);
+        LOG_WARNING("workspace with num %d not found in cached thumbnails\n", workspace_num);
         return;
     }
 

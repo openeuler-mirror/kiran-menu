@@ -1,4 +1,5 @@
 #include "kiran-thumbnail-widget.h"
+#include "log.h"
 
 KiranThumbnailWidget::KiranThumbnailWidget():
     show_close_button(true),
@@ -14,7 +15,7 @@ KiranThumbnailWidget::KiranThumbnailWidget():
 
         thumbnail_area->get_style_context()->add_class("thumbnail_area");
     } catch (const Glib::Exception &e) {
-        g_error("Error occured while trying to load ui file: %s\n", e.what().c_str());
+        LOG_ERROR("Error occured while trying to load ui file: %s\n", e.what().c_str());
         return;
     }
 

@@ -6,7 +6,7 @@
 #include <gtk/gtkx.h>
 #include "tasklist-buttons-container.h"
 #include "kiran-helper.h"
-
+#include "log.h"
 
 static bool kiran_app_is_active(const std::shared_ptr<Kiran::App> &app)
 {
@@ -162,7 +162,7 @@ bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
 
     auto app_ = get_app();
     if (!app_) {
-        g_warning("%s: app already expired!!\n", __FUNCTION__);
+        LOG_WARNING("%s: app already expired!!\n", __FUNCTION__);
         return false;
     }
 
@@ -173,7 +173,7 @@ bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
         return false;
     }
 
-    g_debug("indicator size %d\n", indicator_size);
+    LOG_DEBUG("indicator size %d\n", indicator_size);
 
     allocation = get_allocation();
     context->set_state(get_state_flags());
@@ -184,16 +184,16 @@ bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
      * 从样式中加载活动窗口背景色和指示器颜色
      */
     if (!context->lookup_color("tasklist_app_active_color", active_color)) {
-        g_warning("%s: failed to load color 'tasklist_app_active_color'", __func__);
+        LOG_WARNING("failed to load color 'tasklist_app_active_color'");
     }
 
     if (!context->lookup_color("tasklist_app_indicator_color", indicator_color)) {
-        g_warning("%s: failed to load color 'tasklist_app_indicator_color'", __func__);
+        LOG_WARNING("failed to load color 'tasklist_app_indicator_color'");
     }
 
 
     windows_count = KiranHelper::get_taskbar_windows(app_).size();
-    g_debug("app '%s', %d windows, workspace %d", app_->get_name().c_str(), windows_count,
+    LOG_DEBUG("app '%s', %d windows, workspace %d", app_->get_name().c_str(), windows_count,
         Kiran::WorkspaceManager::get_instance()->get_active_workspace()->get_number());
 
     if (kiran_app_is_active(app_)) {
@@ -271,7 +271,7 @@ bool TasklistAppButton::on_button_press_event(GdkEventButton *button_event)
     auto app_ = get_app();
 
     if (!app_) {
-        g_warning("%s: app already expired", __FUNCTION__);
+        LOG_WARNING("%s: app already expired", __FUNCTION__);
         return false;
     }
     event = reinterpret_cast<GdkEvent*>(button_event);
@@ -302,7 +302,7 @@ bool TasklistAppButton::on_button_release_event(GdkEventButton *button_event UNU
     auto app_ = get_app();
 
     if (!app_) {
-        g_warning("%s: app already expired", __FUNCTION__);
+        LOG_WARNING("%s: app already expired", __FUNCTION__);
         return false;
     }
 
@@ -362,7 +362,7 @@ void TasklistAppButton::on_drag_data_get(const Glib::RefPtr<Gdk::DragContext> &c
 {
     auto app = get_app();
     if (!app) {
-        g_warning("%s: app expired, return nothing");
+        LOG_WARNING("app expired, return nothing");
         selection_data.set(8, nullptr, 0);
     }
 
@@ -484,7 +484,7 @@ Glib::RefPtr<Gdk::Pixbuf> TasklistAppButton::get_app_icon_pixbuf()
             }
         }
     } catch (const Glib::Error &e) {
-        g_warning("Error occured while trying to load app icon: %s", e.what().c_str());
+        LOG_WARNING("Error occured while trying to load app icon: %s", e.what().c_str());
         pixbuf.clear();
     }
 
@@ -558,7 +558,7 @@ void TasklistAppButton::draw_attentions(const Cairo::RefPtr<Cairo::Context> &cr)
      */
     if (!get_style_context()->lookup_color("tasklist_attention_color", attention_color))
     {
-        g_warning("Failed to load attention-color from style");
+        LOG_WARNING("Failed to load attention-color from style");
     }
 
     attention_color.set_alpha(1.0);

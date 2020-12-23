@@ -2,6 +2,7 @@
 #include "window-manager.h"
 #include "workspace-manager.h"
 #include "global.h"
+#include "log.h"
 #include <gtk/gtkx.h>
 #include <cairomm/xlib_surface.h>
 
@@ -281,7 +282,7 @@ bool WorkspaceThumbnail::on_button_press_event(GdkEventButton *event)
 {
     if (workspace.expired())
     {
-        g_warning("workspace already expired");
+        LOG_WARNING("workspace already expired");
         return false;
     }
 
@@ -297,7 +298,7 @@ bool WorkspaceThumbnail::on_button_press_event(GdkEventButton *event)
 
 bool WorkspaceThumbnail::on_drag_motion(const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, guint time)
 {
-    g_debug("drag motion");
+    LOG_DEBUG("drag motion");
     drop_check = true;
 
     drag_get_data(context, "binary/XID", time);
@@ -306,7 +307,7 @@ bool WorkspaceThumbnail::on_drag_motion(const Glib::RefPtr<Gdk::DragContext> &co
 
 bool WorkspaceThumbnail::on_drag_drop(const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, guint time)
 {
-    g_debug("drag-drop finished");
+    LOG_DEBUG("drag-drop finished");
     drop_check = false;
     drag_get_data(context, "binary/XID", time);
     return true;
@@ -341,7 +342,7 @@ void WorkspaceThumbnail::on_drag_data_received(const Glib::RefPtr<Gdk::DragConte
     auto window = Kiran::WindowManager::get_instance()->get_window(*wid);
     if (!window)
     {
-        g_warning("Window with ID 0x%x not found\n", *wid);
+        LOG_WARNING("Window with ID 0x%x not found\n", *wid);
         if (drop_check)
         {
             context->drag_refuse(time);
@@ -357,7 +358,7 @@ void WorkspaceThumbnail::on_drag_data_received(const Glib::RefPtr<Gdk::DragConte
         if (drop_check)
         {
             context->drag_refuse(time);
-            g_debug("Workspace of window and the target workspace are the same, drag-drop refused!");
+            LOG_DEBUG("Workspace of window and the target workspace are the same, drag-drop refused!");
         }
         else
             context->drag_finish(false, false, time);
