@@ -730,7 +730,7 @@ void MenuAppletWindow::set_display_mode(MenuDisplayMode mode)
     Glib::RefPtr<Gdk::Monitor> monitor;
     Glib::RefPtr<Gdk::Display> display;
 
-    if (display_mode == mode)
+    if (get_realized() && display_mode == mode)
         return;
 
     if (get_realized()) {
