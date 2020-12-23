@@ -316,7 +316,7 @@ void TasklistButtonsContainer::on_window_opened(KiranWindowPointer window)
     if (window->should_skip_taskbar())
         return;
 
-    if (backend->get_app_show_policy() == Kiran::TaskBarSkeleton::POLICY_SHOW_ALL ||
+    if (backend->get_app_show_policy() != Kiran::TaskBarSkeleton::POLICY_SHOW_ALL &&
         !KiranHelper::window_is_on_active_workspace(window))
         return;
 
@@ -354,7 +354,7 @@ void TasklistButtonsContainer::on_window_closed(KiranWindowPointer window)
         return;
 
     auto backend = Kiran::TaskBarSkeleton::get_instance();
-    if (backend->get_app_show_policy() == Kiran::TaskBarSkeleton::POLICY_SHOW_ALL ||
+    if (backend->get_app_show_policy() != Kiran::TaskBarSkeleton::POLICY_SHOW_ALL &&
         !KiranHelper::window_is_on_active_workspace(window))
         return;
 
