@@ -23,6 +23,24 @@ public:
      */
     void set_workspace(KiranWorkspacePointer &workspace_);
 
+    /**
+     * @brief 设置缩略图之间的纵向间距
+     * @param spacing 新的间距
+     */
+    void set_row_spacing(int spacing);
+
+    /**
+     * @brief 设置缩略图之间的横向间距
+     * @param spacing 新的间距
+     */
+    void set_column_spacing(int spacing);
+
+    /**
+     * @brief 设置缩略图显示的最大行数
+     * @param max_rows_ 最大行数
+     */
+    void set_max_rows(int max_rows_);
+
 protected:
     virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
     virtual void on_size_allocate(Gtk::Allocation &allocation) override;
@@ -38,15 +56,11 @@ protected:
      * @param windows       要显示缩略图的窗口列表
      * @param view_width    显示区域宽度
      * @param view_height   显示区域高度
-     * @param row_spacing   缩略图显示的行间距
-     * @param max_rows      缩略图显示的最大行数
      * @return 显示所需的行数
      */
     int calculate_rows(std::vector<std::shared_ptr<Kiran::Window>> &windows,
                        int view_width,
-                       int view_height,
-                       int row_spacing,
-                       int max_rows = 4);
+                       int view_height);
 
 private:
     std::weak_ptr<Kiran::Workspace> workspace;      /* 当前显示的工作区 */
@@ -54,6 +68,9 @@ private:
     sigc::connection reload_handler;                /* 缩略图加载处理器，用来避免重复加载 */
 
     Gtk::Box layout;                                /* 窗口布局 */
+
+    int row_spacing, column_spacing;                /* 缩略图之间横向间距和纵向间距 */
+    int max_rows;                                   /* 缩略图显示的最大行数 */
 };
 
 #endif // WORKSPACEWINDOWSOVERVIEW_H
