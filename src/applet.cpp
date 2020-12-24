@@ -20,6 +20,8 @@
 #define APPLET_RESOURCE_PATH   PACKAGE_DATA_DIR "/kiran-applet.gresource"
 #define GETTEXT_PACKAGE		   PACKAGE_NAME
 
+#define COPYRIGHT              "Copyright ©2020 KylinSec. All rights reserved."
+
 static Atom atom_mate_panel_action_kiran_menu  = None;
 static Atom atom_mate_panel_action  = None;
 
@@ -131,7 +133,7 @@ static void show_applet_about_dialog(const char *program_name,
 
     gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), PACKAGE_VERSION);
     gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(dialog),
-                                   "Copyright © KylinSec Co., Ltd. 2020. All rights reserved.");
+                                   COPYRIGHT);
     gtk_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
 }
