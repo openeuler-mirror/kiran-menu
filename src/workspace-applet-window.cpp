@@ -238,6 +238,11 @@ void WorkspaceAppletWindow::resize_and_reposition()
     auto monitor = get_display()->get_primary_monitor();
 
     monitor->get_geometry(rect);
+
+    /* 清空缩略图，确保窗口resize的时候，不会受到之前缩略图控件尺寸的影响 */
+    overview_area.clear();
+
     move(rect.get_x(), rect.get_y());
+    g_debug("screen size changed to %d x %d, resize and reposition applet window now", rect.get_width(), rect.get_height());
     resize(rect.get_width(), rect.get_height());
 }

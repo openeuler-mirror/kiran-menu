@@ -41,6 +41,11 @@ public:
      */
     void set_max_rows(int max_rows_);
 
+    /**
+     * @brief 清除所有的窗口缩略图，不再显示
+     */
+    void clear();
+
 protected:
     virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
     virtual void on_size_allocate(Gtk::Allocation &allocation) override;

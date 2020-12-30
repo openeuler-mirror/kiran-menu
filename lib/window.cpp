@@ -533,7 +533,7 @@ void Window::process_events(GdkXEvent* xevent, GdkEvent* event)
 {
     auto x_event = (XEvent *)xevent;
 
-    if (x_event->type == MapNotify)
+    if (x_event->type == MapNotify || x_event->type == ConfigureNotify)
     {
         this->update_window_pixmap();
     }

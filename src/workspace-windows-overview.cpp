@@ -69,6 +69,11 @@ void WorkspaceWindowsOverview::set_max_rows(int max_rows_)
         queue_resize();
 }
 
+void WorkspaceWindowsOverview::clear()
+{
+    KiranHelper::remove_all_for_container(layout, true);
+}
+
 bool WorkspaceWindowsOverview::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
 {
     if (workspace.expired())
@@ -93,9 +98,15 @@ void WorkspaceWindowsOverview::on_size_allocate(Gtk::Allocation &allocation)
     if (old_allocation.get_width() != allocation.get_width() || old_allocation.get_height() != allocation.get_height()) {
         /* 缩略图区域大小变化时重新排列窗口缩略图 */
         if (reload_handler.connected())
+        {
+            g_debug("workspace overview allocate, reloading thumbnails already scheduled");
             return;
+        }
 
-        KiranHelper::remove_all_for_container(layout, true);
+        g_debug("workspace overview allocate %d x %d, schedule for reloading thumbnails",
+                allocation.get_width(),
+                allocation.get_height());
+        clear();
         reload_handler = Glib::signal_idle().connect(
                 sigc::bind_return<bool>(
                     sigc::mem_fun(*this, &WorkspaceWindowsOverview::reload_thumbnails),
@@ -122,7 +133,7 @@ void WorkspaceWindowsOverview::reload_thumbnails()
     int rows = 1;                                           //窗口的显示行数
     int scale_factor = get_scale_factor();
 
-    KiranHelper::remove_all_for_container(layout, true);
+    clear();
     if (workspace.expired()) {
         LOG_WARNING("workspace already expired");
         return;
