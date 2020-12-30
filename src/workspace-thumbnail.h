@@ -47,10 +47,10 @@ public:
     KiranWorkspacePointer get_workspace();
 
     /**
-     * @brief 重新绘制工作区缩略图背景
+     * @brief 回调函数: 重新绘制工作区缩略图背景
      *        通常在桌面壁纸变化时调用
      */
-    void redraw_background();
+    void on_background_changed();
 
 protected:
     virtual bool on_button_press_event(GdkEventButton *event_button) override;
@@ -61,6 +61,14 @@ protected:
     virtual bool draw_thumbnail_image(Gtk::Widget *snapshot_area, const Cairo::RefPtr<Cairo::Context> &cr) override;
     virtual void on_close_button_clicked() override;
     virtual void on_thumbnail_clicked() override;
+
+    /**
+     * @brief 回调函数: 当插件设置发生变化时调用
+     * @see Gio::Settings::signal_changed()
+     * @param key 发生变化的Gsettings键名
+     * @return 无
+     */
+    virtual void on_settings_changed(const Glib::ustring &key);
 
     /**
      * @brief 重新加载缩略图背景
@@ -74,7 +82,8 @@ protected:
     void init_drag_and_drop();
     
 private:
-    Glib::RefPtr<Gio::Settings> settings;           /* 桌面背景设置，用于监控桌面壁纸变化 */
+    Glib::RefPtr<Gio::Settings> bg_settings;        /* 桌面背景设置，用于监控桌面壁纸变化 */
+    Glib::RefPtr<Gio::Settings> applet_settings;    /* 工作区切换插件设置 */
     std::weak_ptr<Kiran::Workspace> workspace;      /* 关联的工作区对象 */
 
     cairo_surface_t *bg_surface;                    /* 桌面背景 */
@@ -85,6 +94,7 @@ private:
     Gtk::Widget *thumbnail_area;                    /* 缩略图绘制区域 */
 
     bool drop_check;                                /* 当前是否处于拖放检测状态，用于区分motion和drop操作 */
+    bool draw_windows;                              /* 是否在工作区缩略图中绘制窗口缩略图 */
 };
 
 #endif

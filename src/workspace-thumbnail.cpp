@@ -6,19 +6,30 @@
 #include <gtk/gtkx.h>
 #include <cairomm/xlib_surface.h>
 
+#define BACKGROUND_SETTINGS_PATH    "org.mate.background"
+#define WORKSPACE_SETTINGS_PATH     "com.unikylin.kiran.workspace-switcher"
+#define DRAW_WINDOWS_KEY            "draw-windows-in-thumbnails"
+
 WorkspaceThumbnail::WorkspaceThumbnail(KiranWorkspacePointer &workspace_) : workspace(workspace_),
                                                                             bg_surface(nullptr),
                                                                             drop_check(false),
+                                                                            draw_windows(false),
                                                                             border_width(4)
 {
     /*背景图片设置变化时重绘背景*/
-    settings = Gio::Settings::create("org.mate.background");
-    settings->signal_changed().connect(
-        sigc::hide(sigc::mem_fun(*this, &WorkspaceThumbnail::redraw_background)));
+    bg_settings = Gio::Settings::create(BACKGROUND_SETTINGS_PATH);
+    bg_settings->signal_changed().connect(
+        sigc::hide(sigc::mem_fun(*this, &WorkspaceThumbnail::on_background_changed)));
+
+    /* 插件设置变化时重绘 */
+    applet_settings = Gio::Settings::create(WORKSPACE_SETTINGS_PATH);
+    draw_windows = applet_settings->get_boolean(DRAW_WINDOWS_KEY);
+    applet_settings->signal_changed().connect(
+        sigc::mem_fun(*this, &WorkspaceThumbnail::on_settings_changed));
 
     /*屏幕大小变化时重绘背景*/
     Gdk::Screen::get_default()->signal_size_changed().connect(
-        sigc::mem_fun(*this, &WorkspaceThumbnail::redraw_background));
+        sigc::mem_fun(*this, &WorkspaceThumbnail::on_background_changed));
 
     /* 窗口列表发生变化时重绘缩略图 */
     workspace_->signal_windows_changes().connect(
@@ -65,7 +76,7 @@ KiranWorkspacePointer WorkspaceThumbnail::get_workspace()
     return workspace.lock();
 }
 
-void WorkspaceThumbnail::redraw_background()
+void WorkspaceThumbnail::on_background_changed()
 {
     reload_bg_surface();
     queue_draw();
@@ -150,107 +161,109 @@ bool WorkspaceThumbnail::draw_thumbnail_image(Gtk::Widget *thumbnail_area_, cons
     cr->rectangle(surface_offset_x, surface_offset_y, surface_width, surface_height);
     cr->clip();
 
-    /* TODO: 从gsettings中读取设置，确定是否要在工作区缩略图中绘制窗口缩略图。绘制窗口缩略图太耗资源 */
-
-#if 0
-    /**
-     * 此处调用GDK接口来按照堆叠顺序获取窗口列表(靠底层的窗口在列表的靠前位置)，然后再进行过滤
-     * 
-     */
-    for (auto gdk_window : screen->get_window_stack())
+    if (draw_windows)
     {
-        Kiran::WindowGeometry geometry;
-        Window wid = GDK_WINDOW_XID(gdk_window->gobj());
-        XWindowAttributes attrs;
-        Gdk::Rectangle rect;
-
-        int workspace_id = static_cast<int>(gdk_x11_window_get_desktop(gdk_window->gobj()));
-        auto window = Kiran::WindowManager::get_instance()->get_window(wid);
-        if (!window)
-            continue;
-        XGetWindowAttributes(xdisplay, wid, &attrs);
-
-        /**
-         *  仅绘制位于当前工作区或设置了所有工作区可见的非最小化窗口
+        /*
+         * 此处调用GDK接口来按照堆叠顺序获取窗口列表(靠底层的窗口在列表的靠前位置)，然后再进行过滤
          */
-        if (window->is_minimized() || window->get_xid() == GDK_WINDOW_XID(get_toplevel()->get_window()->gobj()) ||
-            (workspace_->get_number() != workspace_id && !window->is_pinned()))
-            continue;
-
-        if (window->get_window_type() == WNCK_WINDOW_DOCK || window->get_window_type() == WNCK_WINDOW_DESKTOP)
-            continue;
-
-        KiranHelper::geometry_to_rect(window->get_geometry(), rect);
-        Drawable drawable = window->get_pixmap();
-
-        cr->save();
-        cr->translate(surface_offset_x, surface_offset_y);
-        cr->scale(surface_scale, surface_scale);
-
-        /*window size from X server know nothing about scale*/
-        if (drawable != None)
+        for (auto gdk_window : screen->get_window_stack())
         {
-            auto surface = Cairo::XlibSurface::create(xdisplay,
-                                                      drawable,
-                                                      attrs.visual,
-                                                      attrs.width,
-                                                      attrs.height);
-            cr->scale(1.0 / scale_factor, 1.0 / scale_factor);
-            cr->set_source(surface, rect.get_x(), rect.get_y());
-            cr->paint();
-        }
-        else
-        {
-            auto icon_pixbuf = Glib::wrap(window->get_icon(), true);
-            if (!icon_pixbuf)
-                icon_pixbuf = Gtk::IconTheme::get_default()->load_icon(
-                    "x-executable",
-                    16,
-                    scale_factor,
-                    Gtk::ICON_LOOKUP_FORCE_SIZE);
-            else
-                icon_pixbuf = icon_pixbuf->scale_simple(16 * scale_factor, 16 * scale_factor, Gdk::INTERP_BILINEAR);
+            Kiran::WindowGeometry geometry;
+            Window wid = GDK_WINDOW_XID(gdk_window->gobj());
+            XWindowAttributes attrs;
+            Gdk::Rectangle rect;
 
-            cr->scale(1.0 / scale_factor, 1.0 / scale_factor);
-            cr->set_source_rgba(0.0, 0.0, 0.0, 0.5);
-            cr->rectangle(rect.get_x(), rect.get_y(), rect.get_width(), rect.get_height());
-            cr->fill();
-            cr->restore();
+            int workspace_id = static_cast<int>(gdk_x11_window_get_desktop(gdk_window->gobj()));
+            auto window = Kiran::WindowManager::get_instance()->get_window(wid);
+            if (!window)
+                continue;
+            XGetWindowAttributes(xdisplay, wid, &attrs);
+
+            /*
+             *  仅绘制位于当前工作区或设置了所有工作区可见的非最小化窗口
+             */
+            if (window->is_minimized() || window->get_xid() == GDK_WINDOW_XID(get_toplevel()->get_window()->gobj()) ||
+                (workspace_->get_number() != workspace_id && !window->is_pinned()))
+                continue;
+
+            if (window->get_window_type() == WNCK_WINDOW_DOCK || window->get_window_type() == WNCK_WINDOW_DESKTOP)
+                continue;
+
+            KiranHelper::geometry_to_rect(window->get_geometry(), rect);
+            Drawable drawable = window->get_pixmap();
+
             cr->save();
+            cr->translate(surface_offset_x, surface_offset_y);
+            cr->scale(surface_scale, surface_scale);
 
-            if (icon_pixbuf)
+            /*window size from X server know nothing about scale*/
+            if (drawable != None)
             {
-                double icon_offset_x, icon_offset_y;
-
-                icon_offset_x = (rect.get_width() * surface_scale - icon_pixbuf->get_width()) / 2.0;
-                icon_offset_y = (rect.get_height() * surface_scale - icon_pixbuf->get_height()) / 2.0;
-                cr->translate(surface_offset_x, surface_offset_y);
+                auto surface = Cairo::XlibSurface::create(xdisplay,
+                                                          drawable,
+                                                          attrs.visual,
+                                                          attrs.width,
+                                                          attrs.height);
                 cr->scale(1.0 / scale_factor, 1.0 / scale_factor);
-                Gdk::Cairo::set_source_pixbuf(cr,
-                                              icon_pixbuf,
-                                              rect.get_x() * surface_scale + icon_offset_x,
-                                              rect.get_y() * surface_scale + icon_offset_y);
+                cr->set_source(surface, rect.get_x(), rect.get_y());
                 cr->paint();
             }
-        }
-        cr->restore();
-    }
+            else
+            {
+                auto icon_pixbuf = Glib::wrap(window->get_icon(), true);
+                if (!icon_pixbuf)
+                    icon_pixbuf = Gtk::IconTheme::get_default()->load_icon(
+                        "x-executable",
+                        16,
+                        scale_factor,
+                        Gtk::ICON_LOOKUP_FORCE_SIZE);
+                else
+                    icon_pixbuf = icon_pixbuf->scale_simple(16 * scale_factor, 16 * scale_factor, Gdk::INTERP_BILINEAR);
 
-#endif
+                cr->scale(1.0 / scale_factor, 1.0 / scale_factor);
+                cr->set_source_rgba(0.0, 0.0, 0.0, 0.5);
+                cr->rectangle(rect.get_x(), rect.get_y(), rect.get_width(), rect.get_height());
+                cr->fill();
+                cr->restore();
+                cr->save();
+
+                if (icon_pixbuf)
+                {
+                    double icon_offset_x, icon_offset_y;
+
+                    icon_offset_x = (rect.get_width() * surface_scale - icon_pixbuf->get_width()) / 2.0;
+                    icon_offset_y = (rect.get_height() * surface_scale - icon_pixbuf->get_height()) / 2.0;
+                    cr->translate(surface_offset_x, surface_offset_y);
+                    cr->scale(1.0 / scale_factor, 1.0 / scale_factor);
+                    Gdk::Cairo::set_source_pixbuf(cr,
+                                                  icon_pixbuf,
+                                                  rect.get_x() * surface_scale + icon_offset_x,
+                                                  rect.get_y() * surface_scale + icon_offset_y);
+                    cr->paint();
+                }
+            }
+            cr->restore();
+        }
+    }
     cr->reset_clip();
     if (is_selected())
     {
         /* 绘制选中后的边框 */
-        Gdk::RGBA color("#ff0000");
-        get_style_context()->lookup_color("thumbnail-hover-color", color);
+        Gdk::RGBA color;
+        auto context = get_style_context();
 
-        cr->set_line_width(border_width);
-        Gdk::Cairo::set_source_rgba(cr, color);
-        cr->rectangle(border_width / 2.0,
-                      border_width / 2.0,
-                      allocation.get_width() - border_width,
-                      allocation.get_height() - border_width);
-        cr->stroke();
+        if (context->lookup_color("thumbnail-hover-color", color))
+        {
+            Gdk::Cairo::set_source_rgba(cr, color);
+
+            cr->set_line_width(border_width);
+            cr->rectangle(border_width / 2.0,
+                          border_width / 2.0,
+                          allocation.get_width() - border_width,
+                          allocation.get_height() - border_width);
+            cr->stroke();
+        } else
+            LOG_WARNING("color 'thumbnail-hover-color' not found");
     }
     else
     {
@@ -276,6 +289,17 @@ void WorkspaceThumbnail::on_close_button_clicked()
 void WorkspaceThumbnail::on_thumbnail_clicked()
 {
     /* NOTHING */
+}
+
+void WorkspaceThumbnail::on_settings_changed(const Glib::ustring &key)
+{
+    if (key == DRAW_WINDOWS_KEY) {
+        bool new_value = applet_settings->get_boolean(DRAW_WINDOWS_KEY);
+        if (new_value != draw_windows) {
+            LOG_DEBUG("key '%s' changed to %d", DRAW_WINDOWS_KEY, new_value);
+            queue_draw();
+        }
+    }
 }
 
 bool WorkspaceThumbnail::on_button_press_event(GdkEventButton *event)

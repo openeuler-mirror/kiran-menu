@@ -37,6 +37,11 @@ install(FILES "com.unikylin.Kiran.TaskBar.gschema.xml.in"
     RENAME "com.unikylin.Kiran.TaskBar.gschema.xml" 
 )
 
+install(FILES "com.unikylin.Kiran.WorkspaceSwitcher.gschema.xml.in"
+    DESTINATION  ${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas/
+    RENAME "com.unikylin.Kiran.WorkspaceSwitcher.gschema.xml"
+)
+
 install(FILES "menu-menu.ui.xml" "tasklist-menu.ui.xml" "workspace-switcher-menu.ui.xml"
         DESTINATION "${CMAKE_INSTALL_PREFIX}/share/${CMAKE_PROJECT_NAME}")
 

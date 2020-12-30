@@ -52,4 +52,5 @@
 |开始菜单|com.unikylin.Kiran.StartMenu.profile.default-page      |   开始菜单紧凑模式下显示的默认页面, "favorite apps"表示收藏页，"all apps"表示应用列表页| 2.2.0 |
 |开始菜单|com.unikylin.Kiran.StartMenu.profile.background-opacity|  开始菜单窗口不透明度，有效范围为0.0 ~ 1.0         | 2.2.0|
 |开始菜单|com.unikylin.Kiran.StartMenu.profile.display-mode      |   开始菜单显示模式，compact为紧凑模式，expand为扩展模式| 2.2.0|
-|窗口切换预览|com.unikylin.kiran.taskbar show-active-workspace-apps  |   任务栏上是否只显示当前活动工作区窗口的应用按钮 | 2.2.1  | 
+|窗口切换预览|com.unikylin.kiran.taskbar.show-active-workspace-apps  |   任务栏上是否只显示当前活动工作区窗口的应用按钮 | 2.2.1  | 
+|工作区切换|com.unikylin.kiran.workspace-switcher.draw-windows-in-thumbnails  |   是否在工作区缩略图中绘制窗口缩略图 | 2.2.1  | 
