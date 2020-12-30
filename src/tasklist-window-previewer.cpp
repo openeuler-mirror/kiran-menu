@@ -154,14 +154,6 @@ void TasklistWindowPreviewer::on_thumbnail_clicked()
         LOG_WARNING("window already expired!!!");
 }
 
-void TasklistWindowPreviewer::on_close_button_clicked()
-{
-    auto window = get_window_();
-    if (window) {
-        window->close();
-    }
-}
-
 bool TasklistWindowPreviewer::on_button_press_event(GdkEventButton *button_event)
 {
     GdkEvent *event;

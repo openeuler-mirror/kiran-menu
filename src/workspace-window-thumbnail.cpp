@@ -155,14 +155,6 @@ void WorkspaceWindowThumbnail::on_drag_begin(const Glib::RefPtr<Gdk::DragContext
     queue_draw();
 }
 
-void WorkspaceWindowThumbnail::on_close_button_clicked()
-{
-    auto window = get_window_();
-    if (window) {
-        window->close();
-    }
-}
-
 void WorkspaceWindowThumbnail::on_thumbnail_clicked()
 {
     auto window = get_window_();

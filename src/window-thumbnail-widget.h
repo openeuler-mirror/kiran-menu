@@ -30,6 +30,8 @@ public:
     KiranWindowPointer get_window_() const;
 
 protected:
+    virtual void on_close_button_clicked() override;
+
     /**
      * @brief 回调函数，绘制窗口图标时调用
      * @param icon_area           图标区域控件，实际为DrawingArea
@@ -45,6 +47,7 @@ protected:
      * @return                    继续后续的绘制返回false,否则返回true
      */
     virtual bool draw_thumbnail_image(Gtk::Widget *snapshot_area, const Cairo::RefPtr<Cairo::Context> &cr);
+
 
     /**
      * @brief 根据窗口标题，更新标题标签内容

@@ -51,16 +51,7 @@ public:
 protected:
     virtual bool on_enter_notify_event(GdkEventCrossing* crossing_event) override;
     virtual bool on_leave_notify_event(GdkEventCrossing* crossing_event) override;
-    virtual bool on_motion_notify_event(GdkEventMotion* motion_event) override;
     virtual void on_clicked() override;
-
-    /**
-     * @brief 回调函数，绘制关闭按钮时调用
-     * @param close_area          关闭按钮控件，实际为DrawingArea
-     * @param cr                  绘制相关的Cairo上下文
-     * @return                    继续后续的绘制返回false,否则返回true
-     */
-    virtual bool draw_close_button(Gtk::Widget *close_area, const Cairo::RefPtr<Cairo::Context> &cr);
 
     /**
      * @brief 回调函数，绘制窗口图标时调用
@@ -108,6 +99,8 @@ protected:
      */
     Gtk::Widget *get_thumbnail_area();
 
+    void reposition_close_button();
+
 private:
     Glib::RefPtr<Gtk::Builder> builder;
 
@@ -115,11 +108,11 @@ private:
     Gtk::Label *title_label;            /* 标题标签 */
     Gtk::DrawingArea *icon_area;        /* 图标绘制区域 */
     Gtk::DrawingArea *thumbnail_area;   /* 缩略图绘制区域 */
-    Gtk::DrawingArea *close_area;       /* 关闭按钮绘制区域 */
+    Gtk::Button *close_button;       /* 关闭按钮绘制区域 */
 
 
     bool show_close_button;             /* 是否绘制关闭按钮 */
-    bool show_icon;                     /* 是否绘制图标 */
+    bool show_icon_image;               /* 是否绘制图标 */
 };
 
 

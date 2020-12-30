@@ -37,11 +37,6 @@ protected:
     virtual bool draw_thumbnail_image(Gtk::Widget *area, const Cairo::RefPtr<Cairo::Context> &cr) override;
 
     /**
-     * @see KiranThumbnailWidget::on_close_button_clicked
-     */
-    virtual void on_close_button_clicked() override;
-
-    /**
      * @see KiranThumbnailWidget::on_thumbnail_clicked
      */
     virtual void on_thumbnail_clicked() override;

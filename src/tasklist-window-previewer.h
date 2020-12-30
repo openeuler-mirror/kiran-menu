@@ -34,7 +34,6 @@ protected:
     virtual bool on_button_press_event(GdkEventButton *event) override;
     virtual bool draw_thumbnail_image(Gtk::Widget *snapshot_area, const Cairo::RefPtr<Cairo::Context> &cr) override;
     virtual void on_thumbnail_clicked() override;
-    virtual void on_close_button_clicked() override;
 
     /**
      * @brief on_composite_changed  回调函数，窗口管理器复合状态(composite)打开或关闭时调用

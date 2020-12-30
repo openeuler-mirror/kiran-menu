@@ -1119,7 +1119,7 @@ void TasklistButtonsContainer::init_ui()
 
     previewer = new TasklistAppPreviewer();
     previewer->signal_leave_notify_event().connect_notify(
-                sigc::hide(sigc::mem_fun(*this, &TasklistButtonsContainer::schedule_pointer_check)));
+                sigc::hide(sigc::mem_fun(*this, &TasklistButtonsContainer::schedule_pointer_check)), true);
 }
 
 void TasklistButtonsContainer::move_to_next_page()

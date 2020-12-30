@@ -18,6 +18,14 @@ KiranWindowPointer WindowThumbnailWidget::get_window_() const
     return window.lock();
 }
 
+void WindowThumbnailWidget::on_close_button_clicked()
+{
+    auto window = get_window_();
+    if (!window)
+        return;
+    window->close();
+}
+
 void WindowThumbnailWidget::update_title()
 {
     if (window.expired())
