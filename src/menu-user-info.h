@@ -35,10 +35,10 @@ private:
   sigc::signal<void> m_signal_changed;
 
   uid_t uid;
-#ifdef BUILD_WITH_ACCOUNTSSERVICE
-  ActUser *user;
-#else
+#ifdef BUILD_WITH_KIRANACCOUNTS
   KiranAccountsUser *user;
+#else
+  ActUser *user;
 #endif
 
   guint handler_id;
