@@ -32,5 +32,6 @@
   </gresource>
   <gresource prefix="/kiran-workspace/">
     <file alias="icon/button">images/workspace-switcher.svg</file>
+    <file alias="icon/add">images/plus.png</file>
   </gresource>
 </gresources>

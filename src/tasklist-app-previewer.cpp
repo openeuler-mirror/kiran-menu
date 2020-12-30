@@ -1,6 +1,7 @@
 #include "tasklist-app-previewer.h"
 #include <window-manager.h>
 #include "global.h"
+#include "log.h"
 
 const int TasklistAppPreviewer::border_spacing = 5;
 
@@ -67,7 +68,7 @@ void TasklistAppPreviewer::reposition()
     relative_window->get_origin(parent_x, parent_y);
     parent_allocation = relative_to->get_allocation();
 
-    g_debug("parent %p, geometry: (%d, %d), offset(%d, %d), size %d x %d, previewer size %d x %d\n",
+    LOG_DEBUG("parent %p, geometry: (%d, %d), offset(%d, %d), size %d x %d, previewer size %d x %d\n",
             relative_to,
             parent_x, parent_y,
             parent_allocation.get_x(),
@@ -108,7 +109,7 @@ void TasklistAppPreviewer::reposition()
     auto monitor = display->get_monitor_at_window(relative_window);
 
     monitor->get_workarea(workarea);
-    g_debug("%s: workarea (%d, %d), %d x %d, position %d x %d\n", __FUNCTION__,
+    LOG_DEBUG("%s: workarea (%d, %d), %d x %d, position %d x %d\n", __FUNCTION__,
             workarea.get_x(), workarea.get_y(),
             workarea.get_width(), workarea.get_height(),
             new_x, new_y);
@@ -267,7 +268,7 @@ void TasklistAppPreviewer::set_rgba_visual()
     //FIXME, 使用default_screen是否合适??
     auto visual = get_screen()->get_rgba_visual();
     if (!visual)
-        g_warning("no rgba visual found\n");
+        LOG_WARNING("no rgba visual found\n");
     else
         gtk_widget_set_visual(reinterpret_cast<GtkWidget*>(gobj()), visual->gobj());
 }
@@ -323,7 +324,7 @@ void TasklistAppPreviewer::load_windows_list()
     win_previewers.clear();
 
     if (!app_) {
-        g_warning("%s: app already expired\n", __FUNCTION__);
+        LOG_WARNING("%s: app already expired\n", __FUNCTION__);
         return;
     }
 

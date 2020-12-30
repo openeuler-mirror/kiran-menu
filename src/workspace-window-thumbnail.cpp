@@ -2,7 +2,7 @@
 #include "kiran-helper.h"
 #include <gtk/gtkx.h>
 #include <cairo/cairo-xlib.h>
-#include <X11/Xlib.h>
+#include "log.h"
 
 WorkspaceWindowThumbnail::WorkspaceWindowThumbnail(KiranWindowPointer &win_, double scale_):
     Glib::ObjectBase("WorkspaceWindowSnapshot"),
@@ -17,15 +17,14 @@ WorkspaceWindowThumbnail::WorkspaceWindowThumbnail(KiranWindowPointer &win_, dou
     set_hexpand(false);
     set_vexpand(false);
     set_margin_top(10);
-    set_spacing(10);
+    set_vspacing(10);
 
-    get_style_context()->add_class("workspace-window-snapshot");
     init_drag_and_drop();
 
     int scale_factor = get_scale_factor();
     window_width = WINDOW_WIDTH(win_);
     window_height = WINDOW_HEIGHT(win_);
-    set_snapshot_size(static_cast<int>(window_width/scale_factor  * scale),
+    set_thumbnail_size(static_cast<int>(window_width/scale_factor  * scale),
                       static_cast<int>(window_height/scale_factor * scale));
 }
 
@@ -35,12 +34,7 @@ WorkspaceWindowThumbnail::~WorkspaceWindowThumbnail()
         cairo_surface_destroy(thumbnail_surface);
 }
 
-sigc::signal<void> &WorkspaceWindowThumbnail::signal_delete()
-{
-    return m_signal_delete;
-}
-
-bool WorkspaceWindowThumbnail::draw_snapshot(Gtk::Widget *area, const Cairo::RefPtr<Cairo::Context> &cr)
+bool WorkspaceWindowThumbnail::draw_thumbnail_image(Gtk::Widget *area, const Cairo::RefPtr<Cairo::Context> &cr)
 {
     auto context = get_style_context();
     Gtk::Allocation allocation;
@@ -49,7 +43,7 @@ bool WorkspaceWindowThumbnail::draw_snapshot(Gtk::Widget *area, const Cairo::Ref
     int scale_factor = get_scale_factor();
     
     if (!window) {
-        g_warning("%s: window expired\n", __func__);
+        LOG_WARNING("window expired\n");
         return true;
     }
 
@@ -76,7 +70,7 @@ bool WorkspaceWindowThumbnail::draw_snapshot(Gtk::Widget *area, const Cairo::Ref
         Gdk::RGBA color("#ff0000");
         Gdk::Rectangle rect;
         if (!context->lookup_color("thumbnail-hover-color", color)) {
-            g_warning("Failed to load snapshot hover color from style files\n");
+            LOG_WARNING("Failed to load snapshot hover color from style files\n");
         }
 
         Gdk::Cairo::set_source_rgba(cr, color);
@@ -111,7 +105,7 @@ void WorkspaceWindowThumbnail::get_preferred_width_vfunc(int &min_width, int &na
 
 void WorkspaceWindowThumbnail::on_drag_data_delete(const Glib::RefPtr<Gdk::DragContext> &context)
 {
-    m_signal_delete.emit();
+    /* do nothing */
 }
 
 void WorkspaceWindowThumbnail::on_drag_data_get(const Glib::RefPtr<Gdk::DragContext> &context, Gtk::SelectionData &selection_data, guint info, guint time)
@@ -159,14 +153,6 @@ void WorkspaceWindowThumbnail::on_drag_begin(const Glib::RefPtr<Gdk::DragContext
     context->set_icon(target_surface);
     show_thumbnail = false;
     queue_draw();
-}
-
-void WorkspaceWindowThumbnail::on_close_button_clicked()
-{
-    auto window = get_window_();
-    if (window) {
-        window->close();
-    }
 }
 
 void WorkspaceWindowThumbnail::on_thumbnail_clicked()
@@ -245,7 +231,7 @@ void WorkspaceWindowThumbnail::init_drag_and_drop()
 bool WorkspaceWindowThumbnail::on_drag_failed(const Glib::RefPtr< Gdk::DragContext > &context UNUSED,
                                               Gtk::DragResult result UNUSED)
 {
-    g_debug("drag failed");
+    LOG_DEBUG("drag failed");
     show_thumbnail = true;
     queue_draw();
     return true;

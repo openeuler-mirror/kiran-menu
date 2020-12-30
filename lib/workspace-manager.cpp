@@ -113,6 +113,42 @@ std::shared_ptr<Workspace> WorkspaceManager::get_workspace(int32_t number)
     return nullptr;
 }
 
+void WorkspaceManager::destroy_workspace(std::shared_ptr<Workspace> workspace)
+{
+    int workspace_no;
+    std::shared_ptr<Workspace> prev_workspace, current_workspace;
+    auto workspaces_list = get_workspaces();
+
+    g_return_if_fail(workspace != nullptr);
+
+    workspace_no = workspace->get_number();
+    for (int i = workspace_no - 1; ; i++) {
+        if (i < 0)
+            continue;
+
+        prev_workspace = get_workspace(i);
+        current_workspace = get_workspace(i + 1);
+        if (prev_workspace == nullptr || current_workspace == nullptr) {
+            break;
+        }
+
+        for (auto window: current_workspace->get_windows()) {
+
+            /* 过滤掉Dock窗口、Desktop窗口和在所有工作区中显示的窗口 */
+            if (window->get_window_type() == WNCK_WINDOW_DOCK || window->get_window_type() == WNCK_WINDOW_DESKTOP)
+                continue;
+
+            if (window->is_pinned())
+                continue;
+
+            window->move_to_workspace(prev_workspace);
+        }
+    }
+
+    /* 调整工作区数量，移除最后一个工作区 */
+    change_workspace_count(workspaces_list.size() - 1);
+}
+
 std::shared_ptr<Workspace> WorkspaceManager::lookup_workspace(WnckWorkspace *wnck_workspace)
 {
     RETURN_VAL_IF_FALSE(wnck_workspace != NULL, nullptr);

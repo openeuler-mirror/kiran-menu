@@ -8,25 +8,74 @@
 #include "kiran-power.h"
 #include <X11/Xlib.h>
 #include <gtk/gtkx.h>
+#include <zlog_ex.h>
 
 #include "tasklist-applet-widget.h"
 #include "app-manager.h"
 #include "core_worker.h"
 #include "workspace-applet-button.h"
 #include "global.h"
+#include "log.h"
 
 #define APPLET_RESOURCE_PATH   PACKAGE_DATA_DIR "/kiran-applet.gresource"
 #define GETTEXT_PACKAGE		   PACKAGE_NAME
 
+#define COPYRIGHT              "Copyright ©2020 KylinSec. All rights reserved."
+
 static Atom atom_mate_panel_action_kiran_menu  = None;
 static Atom atom_mate_panel_action  = None;
+
+static void log_handler(const gchar *log_domain,
+                        GLogLevelFlags log_level,
+                        const gchar *message,
+                        gpointer user_data)
+{
+    switch (log_level & G_LOG_LEVEL_MASK)
+    {
+    case G_LOG_LEVEL_DEBUG:
+        dzlog_debug("[%s]: %s", log_domain, message);
+        break;
+    case G_LOG_LEVEL_ERROR:
+        dzlog_error("[%s]: %s", log_domain, message);
+        break;
+    case G_LOG_LEVEL_INFO:
+        dzlog_info("[%s]: %s", log_domain, message);
+        break;
+    case G_LOG_LEVEL_MESSAGE:
+        dzlog_notice("[%s]: %s", log_domain, message);
+        break;
+    case G_LOG_LEVEL_WARNING:
+        dzlog_warn("[%s]: %s", log_domain, message);
+        break;
+    case G_LOG_LEVEL_CRITICAL:
+        dzlog_fatal("[%s]: %s", log_domain, message);
+        break;
+    default:
+        break;
+    }
+}
+
+static void log_init()
+{
+    static bool inited = false;
+    const char *zlog_config;
+
+    if (inited)
+        return;
+
+    zlog_config = g_getenv("ZLOG_CONF");
+    dzlog_init_ex(zlog_config, "kiran-session-app", "kiran-applet", "kiran-applet");
+
+    g_log_set_default_handler(log_handler, NULL);
+    inited = true;
+}
 
 bool load_resources(const std::string &resource_file) {
     try {
         auto resource = Gio::Resource::create_from_file(resource_file);
         resource->register_global();
     } catch (const Glib::Error &e) {
-        g_error("Failed to load resource file: '%s'", e.what().c_str());
+        LOG_ERROR("Failed to load resource file: '%s'", e.what().c_str());
         return false;
     }
 
@@ -42,7 +91,7 @@ bool load_css_styles(const char *name)
                                                    provider,
                                                    GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     } catch (const Glib::Error &e) {
-        g_error("Failed to load style file: '%s'", e.what().c_str());
+        LOG_ERROR("Failed to load style file: '%s'", e.what().c_str());
         return false;
     }
     return true;
@@ -55,12 +104,12 @@ static GdkFilterReturn key_event_filter(GdkXEvent *xevent, GdkEvent *event, gpoi
 
     if (x_event->type == ClientMessage)
     {
-        g_debug("got client message\n");
+        LOG_DEBUG("got client message\n");
 
         if (x_event->xclient.message_type == atom_mate_panel_action &&
             x_event->xclient.data.l[0] == atom_mate_panel_action_kiran_menu)
         {
-            g_debug("it is kiran menu event\n");
+            LOG_DEBUG("it is kiran menu event\n");
             button->set_active(!button->get_active());
         }
     }
@@ -84,7 +133,7 @@ static void show_applet_about_dialog(const char *program_name,
 
     gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), PACKAGE_VERSION);
     gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(dialog),
-                                   "Copyright © KylinSec Co., Ltd. 2020. All rights reserved.");
+                                   COPYRIGHT);
     gtk_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
 }
@@ -170,7 +219,7 @@ kiran_menu_applet_fill (MatePanelApplet *applet,
     if (strcmp(iid, "KiranMenuApplet") &&
             strcmp(iid, "KiranTasklistApplet") &&
             strcmp(iid, "KiranWorkspaceApplet")) {
-        g_warning("not match id\n");
+        LOG_WARNING("not match id\n");
         return FALSE;
     }
 
@@ -179,6 +228,7 @@ kiran_menu_applet_fill (MatePanelApplet *applet,
     bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
     textdomain (GETTEXT_PACKAGE);
 
+    log_init();
 
     Gtk::Main::init_gtkmm_internals();
     if (!backend_inited) {

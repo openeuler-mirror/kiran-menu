@@ -7,7 +7,7 @@ WorkspaceAppletButton::WorkspaceAppletButton(MatePanelApplet *applet_):
 
     applet_window.signal_unmap_event().connect(
                 [this](GdkEventAny *event) -> bool {
-        this->set_active(false);
+        set_active(false);
         return false;
     });
 }

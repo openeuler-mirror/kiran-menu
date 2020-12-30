@@ -6,6 +6,7 @@
 #include "global.h"
 #include <gtk/gtkx.h>
 #include "window-manager.h"
+#include "log.h"
 
 
 #include <unistd.h>
@@ -14,14 +15,11 @@
 #include "global.h"
 #include "menu-apps-container.h"
 
-
-
 #define NEW_APPS_MAX_SIZE 3
 
 MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type):
     Glib::ObjectBase("KiranMenuWindow"),
     Gtk::Window(window_type),
-    user_info(getuid()),
     compact_min_height_property(*this, "compact-min-height", 0),
     expand_min_height_property(*this, "expand-min-height", 0),
     compact_apps_button(nullptr),
@@ -57,7 +55,6 @@ MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type):
 
     //加载当前用户信息
     set_display_mode(profile.get_display_mode());
-    Glib::signal_idle().connect_once(sigc::mem_fun(*this, &MenuAppletWindow::load_user_info));
 }
 
 MenuAppletWindow::~MenuAppletWindow()
@@ -231,8 +228,8 @@ void MenuAppletWindow::init_avatar_widget()
     if (display_mode == DISPLAY_MODE_COMPACT && compact_avatar_widget == nullptr)
     {
         compact_avatar_widget = Gtk::make_managed<MenuAvatarWidget>(36);
-        compact_avatar_widget->signal_button_press_event().connect_notify(
-            sigc::hide(sigc::mem_fun(*this, &MenuAppletWindow::on_avatar_clicked)));
+        compact_avatar_widget->signal_clicked().connect(
+            sigc::mem_fun(*this, &Gtk::Widget::hide));
 
         builder->get_widget("compact-avatar-box", avatar_box);
         avatar_box->add(*compact_avatar_widget);
@@ -241,12 +238,20 @@ void MenuAppletWindow::init_avatar_widget()
 
     if (display_mode == DISPLAY_MODE_EXPAND && expand_avatar_widget == nullptr)
     {
+        Gtk::Label *name_label;
+
         expand_avatar_widget = Gtk::make_managed<MenuAvatarWidget>(60);
         expand_avatar_widget->set_vexpand(true);
-        expand_avatar_widget->signal_button_press_event().connect_notify(
-            sigc::hide(sigc::mem_fun(*this, &MenuAppletWindow::on_avatar_clicked)));
+        expand_avatar_widget->signal_clicked().connect(
+            sigc::mem_fun(*this, &Gtk::Widget::hide));
 
+        builder->get_widget<Gtk::Label>("username-label", name_label);
         builder->get_widget("expand-avatar-box", avatar_box);
+
+        name_label->set_markup(Glib::ustring::compose("%1, <b>%2</b>",
+                                                      _("Hello"),
+                                                      g_getenv("USER")));
+
         avatar_box->add(*expand_avatar_widget);
         avatar_box->show_all();
     }
@@ -284,22 +289,8 @@ void MenuAppletWindow::on_date_box_clicked()
         "system-config-date",
         nullptr};
 
-    if (!launch_app_from_list(app_names))
-        g_warning("Failed to launch datetime manage tools");
-
-    hide();
-}
-
-void MenuAppletWindow::on_avatar_clicked()
-{
-    const char *app_names[] = {
-        "kiran-account-manager",
-        "mate-about-me",
-        "system-config-users",
-        nullptr};
-
-    if (!launch_app_from_list(app_names))
-        g_warning("Failed to launch avatar or account manage tools");
+    if (!KiranHelper::launch_app_from_list(app_names))
+        LOG_WARNING("Failed to launch datetime manage tools");
 
     hide();
 }
@@ -406,7 +397,7 @@ void MenuAppletWindow::switch_to_category_overview(const std::string &selected_c
         item->show_all();
 
         if (item->get_category_name() == selected_category) {
-            g_debug("found target category: '%s'", item->get_category_name().c_str());
+            LOG_DEBUG("found target category: '%s'", item->get_category_name().c_str());
             selected_item = item;
         }
         item->signal_clicked().connect(sigc::bind<const std::string&, bool>(
@@ -443,10 +434,10 @@ void MenuAppletWindow::switch_to_apps_overview(const std::string &selected_categ
             switch_to_apps_overview(adjusted_pos, animation);
 
             //将指定的分类标签控件添加焦点
-            g_debug("grab focus for category '%s'\n", selected_category.c_str());
+            LOG_DEBUG("grab focus for category '%s'\n", selected_category.c_str());
             item->get_children().front()->grab_focus();
         } else
-            g_warning("invalid category name: '%s'\n", selected_category.c_str());
+            LOG_WARNING("invalid category name: '%s'\n", selected_category.c_str());
     }
 }
 
@@ -462,25 +453,6 @@ void MenuAppletWindow::switch_to_apps_overview(double position, bool animation)
         auto adjustment = all_apps_area->get_vadjustment();
         adjustment->set_value(position);
     }
-}
-
-bool MenuAppletWindow::launch_app_from_list(const char **app_names)
-{
-    std::shared_ptr<Kiran::App> app;
-    auto app_manager = Kiran::AppManager::get_instance();
-
-    for (int i = 0; app_names[i] != nullptr; i++) {
-        app = app_manager->lookup_app(std::string(app_names[i]) + ".desktop");
-        if (app)
-            break;
-    }
-
-    if (app) {
-        app->launch();
-        return true;
-    }
-
-    return false;
 }
 
 bool MenuAppletWindow::on_map_event(GdkEventAny *any_event)
@@ -628,7 +600,7 @@ Gtk::Button* MenuAppletWindow::create_page_button(const char *icon_resource,
         image->set_pixel_size(16);
         image->set_from_resource(icon_resource);
     } catch (const Glib::Error &e) {
-        g_warning("Failed to load resouce '%s': %s", icon_resource, e.what().c_str());
+        LOG_WARNING("Failed to load resouce '%s': %s", icon_resource, e.what().c_str());
     }
 
     button->set_always_show_image(true);
@@ -749,31 +721,6 @@ void MenuAppletWindow::load_favorite_apps()
         expand_favorites_container->load_applications(apps_list);
 }
 
-void MenuAppletWindow::load_user_info()
-{
-    if (!user_info.is_ready()) {
-        user_info.load();
-        user_info.signal_ready().connect(sigc::mem_fun(*this, &MenuAppletWindow::load_user_info));
-        return;
-    }
-
-    if (display_mode == DISPLAY_MODE_COMPACT) {
-        //在头像的tooltip中提示用户名
-        if (compact_avatar_widget == nullptr)
-            return;
-        compact_avatar_widget->set_icon(user_info.get_iconfile());
-        compact_avatar_widget->set_tooltip_text(user_info.get_username());
-    } else {
-        Gtk::Label *name_label;
-
-        if (expand_avatar_widget == nullptr)
-            return;
-        builder->get_widget<Gtk::Label>("username-label", name_label);
-        name_label->set_markup(Glib::ustring::compose("%1, <b>%2</b>", _("Hello"), user_info.get_username()));
-        expand_avatar_widget->set_icon(user_info.get_iconfile());
-    }
-}
-
 void MenuAppletWindow::set_display_mode(MenuDisplayMode mode)
 {
     Gtk::Box *compact_avatar_box;
@@ -783,7 +730,7 @@ void MenuAppletWindow::set_display_mode(MenuDisplayMode mode)
     Glib::RefPtr<Gdk::Monitor> monitor;
     Glib::RefPtr<Gdk::Display> display;
 
-    if (display_mode == mode)
+    if (get_realized() && display_mode == mode)
         return;
 
     if (get_realized()) {
@@ -814,13 +761,13 @@ void MenuAppletWindow::set_display_mode(MenuDisplayMode mode)
         expand_panel->set_visible(true);
         compact_tab_box->set_visible(false);
         get_preferred_width(min_width, natural_width);
-        g_debug("min-width: %d, workarea %d x %d", min_width,
+        LOG_DEBUG("min-width: %d, workarea %d x %d", min_width,
                 rect.get_width(),
                 rect.get_height());
 
         if (min_width > rect.get_width()) {
             /*当前屏幕宽度小于扩展模式的最小宽度，切换到紧凑模式*/
-            g_warning("%s: min width for expand mode exceeds monitor size, switch to compact mode now\n", __func__);
+            LOG_WARNING("min width for expand mode exceeds monitor size, switch to compact mode now");
             set_display_mode(DISPLAY_MODE_COMPACT);
             return;
         }
@@ -839,9 +786,8 @@ void MenuAppletWindow::set_display_mode(MenuDisplayMode mode)
     natural_height = std::min(natural_height, rect.get_height());
     resize(natural_width, natural_height);
 
-    /* 重新加载应用数据和用户头像等信息 */
+    /* 重新加载应用数据等信息 */
     Glib::signal_idle().connect_once(sigc::mem_fun(*this, &MenuAppletWindow::reload_apps_data));
-    Glib::signal_idle().connect_once(sigc::mem_fun(*this, &MenuAppletWindow::load_user_info));
 }
 
 void MenuAppletWindow::load_date_info()

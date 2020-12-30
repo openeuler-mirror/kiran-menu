@@ -4,6 +4,7 @@
 #include <glibmm/i18n.h>
 #include <sys/stat.h>
 #include "global.h"
+#include "log.h"
 #include <taskbar-skeleton.h>
 
 #define MENU_ITEM_COUNT G_N_ELEMENTS(item_labels)
@@ -22,7 +23,7 @@ MenuAppItem::MenuAppItem(const std::shared_ptr<Kiran::App> &app_, int _icon_size
     if (app_->get_icon()) {
         set_icon(app_->get_icon());
     } else {
-        g_message("app '%s' has no icon\n", app_->get_file_name().data());
+        LOG_MESSAGE("app '%s' has no icon\n", app_->get_file_name().data());
         auto icon = Gio::ThemedIcon::create("application-x-executable");
         set_icon(Glib::RefPtr<Gio::Icon>::cast_dynamic(icon));
     }
@@ -46,40 +47,9 @@ void MenuAppItem::init_drag_and_drop()
     targets.push_back(target);
     drag_source_set(targets, Gdk::BUTTON1_MASK, Gdk::ACTION_COPY);
 
-   signal_drag_begin().connect(
-        [this](const Glib::RefPtr<Gdk::DragContext> &context) -> void {
-            /**
-             * 设置拖动操作的Icon
-             */
-            auto app = get_app();
-            gtk_drag_set_icon_gicon(context->gobj(), app->get_icon()->gobj(), 0, 0);
-        });
-
-    signal_drag_data_get().connect(
-        [this](const Glib::RefPtr<Gdk::DragContext> &context, Gtk::SelectionData &selection, guint info, guint timestamp) -> void {
-            /**
-             * 将app对应的desktop文件路径传递给目的控件 
-             */
-            auto app = get_app();
-            if (!app) {
-                g_warning("init_drag_and_drop: app alreay expired\n");
-                return;
-            }
-            Glib::ustring uri = Glib::filename_to_uri(app->get_file_name()) + "\r\n";
-
-            selection.set(8, (const guint8*)uri.data(), uri.length());
-        });
-
-    signal_drag_end().connect(
-        [this](const Glib::RefPtr<Gdk::DragContext> &context) -> void {
-            // 让开始菜单窗口重新获取输入焦点
-            Gtk::Container *toplevel = get_toplevel();
-            KiranHelper::grab_input(*toplevel);
-        });
-
     signal_drag_failed().connect(
         [this](const Glib::RefPtr<Gdk::DragContext> &context, Gtk::DragResult result) -> bool {
-            g_debug("drag failed, result %d\n", (int)result);
+            LOG_DEBUG("drag failed, result %d\n", (int)result);
             return true;
         });
 }
@@ -98,10 +68,43 @@ bool MenuAppItem::on_button_press_event(GdkEventButton *button_event)
 
 void MenuAppItem::on_clicked()
 {
-    /**
+    /*
      * 启动应用
      */
     launch_app();
+    get_toplevel()->hide();
+}
+
+void MenuAppItem::on_drag_begin(const Glib::RefPtr<Gdk::DragContext> &context)
+{
+    /*
+     * 设置拖动操作的Icon
+     */
+    auto app = get_app();
+    gtk_drag_set_icon_gicon(context->gobj(), app->get_icon()->gobj(), 0, 0);
+}
+
+void MenuAppItem::on_drag_data_get(const Glib::RefPtr<Gdk::DragContext> &context, Gtk::SelectionData &selection, guint info, guint timestamp)
+{
+    /*
+     * 将app对应的desktop文件路径传递给目的控件
+     */
+    auto app = get_app();
+    if (!app)
+    {
+        LOG_WARNING("init_drag_and_drop: app alreay expired\n");
+        return;
+    }
+    Glib::ustring uri = Glib::filename_to_uri(app->get_file_name()) + "\r\n";
+
+    selection.set(8, (const guint8 *)uri.data(), uri.length());
+}
+
+void MenuAppItem::on_drag_end(const Glib::RefPtr<Gdk::DragContext> &context)
+{
+    /* 让开始菜单窗口重新获取输入焦点 */
+    Gtk::Container *toplevel = get_toplevel();
+    KiranHelper::grab_input(*toplevel);
 }
 
 bool MenuAppItem::on_key_press_event(GdkEventKey *key_event)
@@ -183,7 +186,7 @@ bool MenuAppItem::pin_app_to_taskbar()
     auto backend = Kiran::TaskBarSkeleton::get_instance();
 
     if (!app_) {
-        g_warning("%s: app already expired\n", __FUNCTION__);
+        LOG_WARNING("%s: app already expired\n", __FUNCTION__);
         return false;
     }
 
@@ -195,7 +198,7 @@ bool MenuAppItem::unpin_app_from_taskbar()
     auto backend = Kiran::TaskBarSkeleton::get_instance();
 
     if (!app_) {
-        g_warning("%s: app already expired\n", __FUNCTION__);
+        LOG_WARNING("%s: app already expired\n", __FUNCTION__);
         return false;
     }
 
@@ -209,7 +212,7 @@ bool MenuAppItem::add_app_to_desktop()
     std::shared_ptr<Kiran::App> app_;
 
     if (app.expired()) {
-        g_warning("%s: app already expired\n", __FUNCTION__);
+        LOG_WARNING("%s: app already expired\n", __FUNCTION__);
         return false;
     }
 
@@ -224,7 +227,7 @@ bool MenuAppItem::add_app_to_desktop()
             return true;
 
         if (!src_file->copy(dest_file, flags)) {
-            g_warning("Failed to copy file");
+            LOG_WARNING("Failed to copy file");
             return false;
 	}
 
@@ -232,7 +235,7 @@ bool MenuAppItem::add_app_to_desktop()
         chmod(dest_file->get_path().data(), 0755);
         return true;
     } catch (const Glib::Error &e) {
-        g_warning("Error occured while trying to copy desktop file: %s", e.what().c_str());
+        LOG_WARNING("Error occured while trying to copy desktop file: %s", e.what().c_str());
         return false;
     }
 }
@@ -283,7 +286,7 @@ void MenuAppItem::set_orientation(Gtk::Orientation orient)
 void MenuAppItem::launch_app()
 {
     if (app.expired()) {
-        g_warning("%s: app already expired\n", __FUNCTION__);
+        LOG_WARNING("%s: app already expired\n", __FUNCTION__);
         return;
     }
 

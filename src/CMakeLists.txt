@@ -1,9 +1,12 @@
 cmake_minimum_required(VERSION 3.0)
 
-add_executable(kiran-applet
+set (TARGET_NAME kiran-applet)
+
+add_executable(${TARGET_NAME}
         kiran-search-entry.cpp
         kiran-opacity-menu.cpp
         kiran-applet-button.cpp
+        kiran-thumbnail-widget.cpp
         window-thumbnail-widget.cpp
         menu-user-info.cpp
         menu-list-item-widget.cpp
@@ -38,29 +41,38 @@ add_executable(kiran-applet
         applet.cpp
 )
 
-target_compile_features(kiran-applet PUBLIC cxx_std_11)
-install(TARGETS kiran-applet DESTINATION "${CMAKE_INSTALL_PREFIX}/libexec/mate-panel/")
+target_compile_features(${TARGET_NAME} PUBLIC cxx_std_11)
+
+if(BUILD_WITH_KIRANACCOUNTS)
+target_sources(${TARGET_NAME} PUBLIC kiran-accounts-user.c kiran-accounts-manager.c)
+pkg_search_module(ACCOUNTSSERVICE REQUIRED kiran-cc-daemon)
+else()
+pkg_search_module(ACCOUNTSSERVICE REQUIRED accountsservice)
+endif()
+install(TARGETS ${TARGET_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/libexec/mate-panel/")
 
 pkg_search_module(MATEPANEL REQUIRED libmatepanelapplet-4.0)
 pkg_search_module(GTKMM REQUIRED gtkmm-3.0)
-pkg_search_module(ACCOUNTSSERVICE REQUIRED accountsservice)
 pkg_search_module(MATEDESKTOP REQUIRED mate-desktop-2.0)
+pkg_search_module(ZLOG REQUIRED zlog)
 
 
 include_directories(${CMAKE_BINARY_DIR})
 
-target_compile_options(kiran-applet PUBLIC "-g" "-L${PROJECT_BINARY_DIR}/lib")
-target_include_directories(kiran-applet PUBLIC "${PROJECT_SOURCE_DIR}/lib"
+target_compile_options(${TARGET_NAME} PUBLIC "-L${PROJECT_BINARY_DIR}/lib" -DG_LOG_DOMAIN=\"${TARGET_NAME}\")
+target_include_directories(${TARGET_NAME} PUBLIC "${PROJECT_SOURCE_DIR}/lib"
             "${MATEPANEL_INCLUDE_DIRS}"
             "${GTKMM_INCLUDE_DIRS}"
             "${MATEDESKTOP_INCLUDE_DIRS}"
             "${ACCOUNTSSERVICE_INCLUDE_DIRS}"
+            "${ZLOG_INCLUDE_DIRS}"
             "${PROJECT_SOURCE_DIR}"
             "${PROJECT_BINARY_DIR}/src")
 
-target_link_libraries(kiran-applet PUBLIC "${MATEPANEL_LIBRARIES}")
-target_link_libraries(kiran-applet PUBLIC "${GTKMM_LIBRARIES}")
-target_link_libraries(kiran-applet PUBLIC "${MATEDESKTOP_LIBRARIES}")
-target_link_libraries(kiran-applet PUBLIC "${ACCOUNTSSERVICE_LIBRARIES}")
-target_link_libraries(kiran-applet PRIVATE kiran-menu-backend)
-target_link_libraries(kiran-applet PUBLIC "X11")
+target_link_libraries(${TARGET_NAME} PUBLIC "${MATEPANEL_LIBRARIES}")
+target_link_libraries(${TARGET_NAME} PUBLIC "${GTKMM_LIBRARIES}")
+target_link_libraries(${TARGET_NAME} PUBLIC "${MATEDESKTOP_LIBRARIES}")
+target_link_libraries(${TARGET_NAME} PUBLIC "${ACCOUNTSSERVICE_LIBRARIES}")
+target_link_libraries(${TARGET_NAME} PRIVATE kiran-menu-backend)
+target_link_libraries(${TARGET_NAME} PUBLIC "X11")
+target_link_libraries(${TARGET_NAME} PUBLIC "${ZLOG_LIBRARIES}")

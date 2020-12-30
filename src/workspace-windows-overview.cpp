@@ -4,19 +4,20 @@
 #include "window_arrange.h"
 #include <algorithm>
 #include "global.h"
+#include "log.h"
 
 #define MIN_VIEW_WIDTH          80          //窗口截图的最小宽度
 #define MIN_VIEW_HEIGHT         150         //窗口截图的最小高度
-#define WIN_SIZE_UNIT           100
-#define ROW_SPACING             10          //每行窗口截图之间的竖直间隔
-#define COLUMN_SPACING          10          //每个窗口截图中间的水平间隔
 
-//FIXME 能否通过动态获取的方式来拿到窗口缩略图上方的title区域高度
+/* FIXME:  能否通过动态获取的方式来拿到窗口缩略图上方的title区域高度 */
 #define SNAPSHOT_EXTRA_HEIGHT   44          //窗口截图控件除缩略图部分外的额外高度
 
 WorkspaceWindowsOverview::WorkspaceWindowsOverview():
     layout(Gtk::ORIENTATION_VERTICAL),
-    old_allocation(-1, -1, 0, 0)
+    old_allocation(-1, -1, 0, 0),
+    row_spacing(15),
+    column_spacing(15),
+    max_rows(4)
 {
     add(layout);
 
@@ -30,7 +31,7 @@ WorkspaceWindowsOverview::WorkspaceWindowsOverview():
     layout.set_margin_right(24);
     layout.set_margin_top(20);
     layout.set_margin_bottom(20);
-    layout.set_spacing(10);
+    layout.set_spacing(row_spacing);
 
     add_events(Gdk::BUTTON_PRESS_MASK);
 }
@@ -44,7 +45,33 @@ WorkspaceWindowsOverview::~WorkspaceWindowsOverview()
 void WorkspaceWindowsOverview::set_workspace(KiranWorkspacePointer &workspace_)
 {
     workspace = workspace_;
-    Glib::signal_idle().connect_once(sigc::mem_fun(*this, &WorkspaceWindowsOverview::reload));
+    Glib::signal_idle().connect_once(sigc::mem_fun(*this, &WorkspaceWindowsOverview::reload_thumbnails));
+}
+
+void WorkspaceWindowsOverview::set_row_spacing(int spacing)
+{
+    row_spacing = spacing;
+    if (get_realized())
+        queue_resize();
+}
+
+void WorkspaceWindowsOverview::set_column_spacing(int spacing)
+{
+    column_spacing = spacing;
+    if (get_realized())
+        queue_resize();
+}
+
+void WorkspaceWindowsOverview::set_max_rows(int max_rows_) 
+{
+    max_rows = max_rows_;
+    if (get_realized())
+        queue_resize();
+}
+
+void WorkspaceWindowsOverview::clear()
+{
+    KiranHelper::remove_all_for_container(layout, true);
 }
 
 bool WorkspaceWindowsOverview::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
@@ -60,15 +87,29 @@ void WorkspaceWindowsOverview::on_size_allocate(Gtk::Allocation &allocation)
     Gtk::Allocation child_allocation = allocation;
 
     set_allocation(allocation);
+    if (get_realized()) {
+        /* 调整GdkWindow尺寸和位置 */
+        get_window()->move_resize(allocation.get_x(),
+                                  allocation.get_y(),
+                                  allocation.get_width(),
+                                  allocation.get_height());
+    }
+
     if (old_allocation.get_width() != allocation.get_width() || old_allocation.get_height() != allocation.get_height()) {
         /* 缩略图区域大小变化时重新排列窗口缩略图 */
         if (reload_handler.connected())
+        {
+            g_debug("workspace overview allocate, reloading thumbnails already scheduled");
             return;
+        }
 
-        KiranHelper::remove_all_for_container(layout, true);
+        g_debug("workspace overview allocate %d x %d, schedule for reloading thumbnails",
+                allocation.get_width(),
+                allocation.get_height());
+        clear();
         reload_handler = Glib::signal_idle().connect(
                 sigc::bind_return<bool>(
-                    sigc::mem_fun(*this, &WorkspaceWindowsOverview::reload),
+                    sigc::mem_fun(*this, &WorkspaceWindowsOverview::reload_thumbnails),
                     false));
     }
     child_allocation.set_x(0);
@@ -84,7 +125,7 @@ bool WorkspaceWindowsOverview::on_button_press_event(GdkEventButton *event)
     return false;
 }
 
-void WorkspaceWindowsOverview::reload()
+void WorkspaceWindowsOverview::reload_thumbnails()
 {
     std::vector<int> width_vector;
     Kiran::WindowVec windows;
@@ -92,9 +133,9 @@ void WorkspaceWindowsOverview::reload()
     int rows = 1;                                           //窗口的显示行数
     int scale_factor = get_scale_factor();
 
-    KiranHelper::remove_all_for_container(layout, true);
+    clear();
     if (workspace.expired()) {
-        g_warning("%s: workspace already expired\n", __func__);
+        LOG_WARNING("workspace already expired");
         return;
     }
 
@@ -104,8 +145,8 @@ void WorkspaceWindowsOverview::reload()
     if (layout.get_allocated_width() <= 1 || layout.get_allocated_height() <= 1)
         return;
 
-    viewport_width = layout.get_allocated_width() * scale_factor - layout.get_margin_left() - layout.get_margin_right();
-    viewport_height = layout.get_allocated_height() * scale_factor - layout.get_margin_top() - layout.get_margin_bottom();
+    viewport_width = layout.get_allocated_width() - layout.get_margin_left() - layout.get_margin_right();
+    viewport_height = layout.get_allocated_height() - layout.get_margin_top() - layout.get_margin_bottom();
 
     /**
      * 过滤掉需要跳过工作区显示的窗口
@@ -121,11 +162,11 @@ void WorkspaceWindowsOverview::reload()
         return;
 
     /*
-     * 计算合适的窗口显示行数，最大显示行数为4
+     * 计算合适的窗口显示行数
      * FIXME: max_rows应当根据屏幕高度动态调整
      */
-    rows = calculate_rows(windows, viewport_width, viewport_height, layout.get_spacing(), 4);
-    g_debug("viewport size %d x %d, rows %d",
+    rows = calculate_rows(windows, viewport_width, viewport_height);
+    LOG_DEBUG("viewport size %d x %d, rows %d",
               viewport_width,
               viewport_height,
               rows);
@@ -174,19 +215,19 @@ void WorkspaceWindowsOverview::reload()
          * 计算每行横向和纵向的实际缩放比(去掉窗口之间的间隔)，取两者的最小值,
          * 确保该行最大高度的窗口缩放后也可以正常显示
          */
-        x_scale = (viewport_width - (row.size() - 1) * ROW_SPACING) * 1.0/sum;
-        y_scale = (viewport_height - (rows - 1) * layout.get_spacing() - rows * SNAPSHOT_EXTRA_HEIGHT * get_scale_factor()) *1.0/rows/max_height;
+        x_scale = (viewport_width - (row.size() - 1) * column_spacing) * scale_factor * 1.0/sum;
+        y_scale = (viewport_height - rows * (row_spacing + SNAPSHOT_EXTRA_HEIGHT) + row_spacing) * scale_factor * 1.0/rows/max_height;
         scale = std::min(x_scale, y_scale);
 
         if (scale > 1.0)
             scale = 1.0;
 
-        g_debug("row[%d], real scale %.2lf, x_scale %.2lf, y_scale %.2lf, max_height %d, sum %d\n",
+        LOG_DEBUG("row[%d], real scale %.2lf, x_scale %.2lf, y_scale %.2lf, max_height %d, sum %d\n",
                   index++, scale, x_scale, y_scale, max_height, sum);
 
         Gtk::Box *row_box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL);
         row_box->set_halign(Gtk::ALIGN_START);
-        row_box->set_spacing(COLUMN_SPACING);
+        row_box->set_spacing(column_spacing);
         for (auto index: row) {
             auto thumbnail = Gtk::make_managed<WorkspaceWindowThumbnail>(windows.at(index), scale);
             row_box->pack_start(*thumbnail, Gtk::PACK_SHRINK);
@@ -201,9 +242,7 @@ void WorkspaceWindowsOverview::reload()
 
 int WorkspaceWindowsOverview::calculate_rows(std::vector<std::shared_ptr<Kiran::Window> > &windows,
                                              int viewport_width,
-                                             int viewport_height,
-                                             int row_spacing,
-                                             int max_rows)
+                                             int viewport_height)
 {
     int rows = 1;
     double scale_delta = 0;                                 //每行宽度缩放比和高度缩放比的差值
@@ -231,18 +270,19 @@ int WorkspaceWindowsOverview::calculate_rows(std::vector<std::shared_ptr<Kiran::
      * 2、最大高度的窗口经过缩放后也在行高的范围内，同时最接近行高
      *
      */
-
+    int scale_factor = get_scale_factor();
     bool found_ok = false;
     do {
         double x_scale, y_scale;
 
-        x_scale = viewport_width * rows * 1.0/sum_width;        //宽度缩放比
-        y_scale = (viewport_height - (rows - 1) * row_spacing - rows * SNAPSHOT_EXTRA_HEIGHT * get_scale_factor()) * 1.0/(rows * max_height);    //高度缩放比
+        x_scale = viewport_width * rows * scale_factor * 1.0/sum_width;        //宽度缩放比
+        y_scale = (viewport_height - rows * (row_spacing + SNAPSHOT_EXTRA_HEIGHT) + row_spacing) * scale_factor * 1.0/(rows * max_height);    //高度缩放比
 
-        if (x_scale <= y_scale && min_width * x_scale > MIN_VIEW_WIDTH && min_height * x_scale > MIN_VIEW_HEIGHT) {
+        if (x_scale <= y_scale && min_width * x_scale > MIN_VIEW_WIDTH * scale_factor && min_height * x_scale > MIN_VIEW_HEIGHT * scale_factor) {
             found_ok = true;
         }
 
+        /* 随着行数的增加，x_scale逐渐增大， y_scale逐渐减小，当两者最接近时窗口缩略图的显示效果最好。*/
         if (x_scale > y_scale) {
             if (scale_delta < std::abs(x_scale - y_scale) && found_ok)
                 rows--;
@@ -254,6 +294,10 @@ int WorkspaceWindowsOverview::calculate_rows(std::vector<std::shared_ptr<Kiran::
     } while (rows <= max_rows);
 
     rows = std::max(rows, 1);
-
-    return std::min(rows, max_rows);
+    /* FIXME: 如果按照最大行数依旧无法找到满足条件的缩放比，是否可以考虑滚动??? */
+    if (rows > max_rows) {
+        LOG_WARNING("No valid rows count found, use max_rows %d", max_rows);
+        rows = max_rows;
+    }
+    return rows;
 }

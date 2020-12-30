@@ -97,6 +97,7 @@ bool MenuAppsContainer::load_applications(const Kiran::AppVec &apps)
             apps_box.set_min_children_per_line(1);
             apps_box.set_max_children_per_line(1);
         }
+        apps_box.set_homogeneous(true);
 
         item = Gtk::manage(item);
         box_child->set_can_focus(false);

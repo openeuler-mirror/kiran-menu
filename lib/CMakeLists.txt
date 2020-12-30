@@ -40,7 +40,8 @@ target_compile_options(${TARGET_NAME} PUBLIC
     -DWNCK_I_KNOW_THIS_IS_UNSTABLE)
 
 target_compile_options(${TARGET_NAME} PRIVATE
-    -L${DEP_LIBDIR})
+    -L${DEP_LIBDIR}
+    -DG_LOG_DOMAIN=\"${TARGET_NAME}\")
 
 target_link_libraries(${TARGET_NAME} PRIVATE
     ${GTHREAD_LIBRARIES}

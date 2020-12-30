@@ -210,31 +210,6 @@ button.toggle.menu-expand-button:focus{
 }
 
 
-button.window-previewer.vertical:hover, button.window-previewer.horizontal:hover, button.window-previewer:hover {
-    border: 1px solid gray;
-    border-radius: 0px;
-    border-color: rgba(46,179,255, 0.6);
-    background: rgba(255, 255, 255, 0.1);
-}
-
-button.window-previewer {
-    border-radius: 6px;
-    min-width: 200px;
-    background: transparent;
-    color: #ffffff;
-    padding: 8px;
-}
-
-button.window-previewer.vertical {
-    border: 1px solid transparent;
-}
-
-button.window-previewer.horizontal {
-    /*border: 1px solid rgba(255, 255, 255, 0.2);*/
-    border: 1px solid transparent;
-    min-height: 140px;
-}
-
 
 window.app-previewer {
     /*background: transparent;*/
@@ -243,35 +218,55 @@ window.app-previewer {
     border-radius: 0px;
 }
 
+window.app-previewer button.window-thumbnail {
+    border-radius: 0px;
+    min-width: 200px;
+    background: transparent;
+    color: #ffffff;
+    padding: 8px;
+}
+
+window.app-previewer button.window-thumbnail.vertical {
+    border: 1px solid transparent;
+}
+
+window.app-previewer button.window-thumbnail.horizontal {
+    /*border: 1px solid rgba(255, 255, 255, 0.2);*/
+    border: 1px solid transparent;
+    min-height: 140px;
+}
+
+window.app-previewer button.window-thumbnail.vertical:hover,
+window.app-previewer button.window-thumbnail.horizontal:hover,
+window.app-previewer button.window-thumbnail:hover {
+    border: 1px solid gray;
+    border-radius: 0px;
+    border-color: rgba(46,179,255, 0.6);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+
 window.app-previewer scrolledwindow, window.app-previewer viewport {
     background: transparent;
     border: none;
 }
 
-button.previewer-close-btn{
+button.kiran-thumbnail button.close-btn {
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 22px 22px;
+    background-image: url("/kiran-tasklist/icon/close_normal");
     border: none;
-    box-shadow: none;
-    border-image: none;
-    background-position: center;
-    background-repeat: no-repeat no-repeat;
     padding: 0px;
 }
 
-button.previewer-close-btn {
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: contain;
-    background-image: url("/kiran-tasklist/icon/close_normal");
-    min-width: 16px;
-    min-height: 16px;
-}
-
-button.previewer-close-btn:hover{
+button.kiran-thumbnail button.close-btn:hover{
     background-image: url("/kiran-tasklist/icon/close_prelight");
     padding: 0px;
 }
 
-button.previewer-close-btn:active {
+button.kiran-thumbnail button.close-btn:active {
     background-image: url("/kiran-tasklist/icon/close_active");
     padding: 0px;
 }
@@ -366,42 +361,6 @@ scrollbar.horizontal slider:active, scrollbar.horizontal slider:hover, scrollbar
     border-color: rgba(0, 0, 0, 0.8);
 }
 
-
-/* workspace */
-
-.workspace-list-box {
-    background: rgba(0, 0, 0, 0.7);
-    padding-left: 20px;
-    padding-right: 20px;
-}
-
-.workspace-previewer {
-    color: #ffffff;
-    margin-top: 30px;
-}
-
-
-.workspace-thumbnail, .workspace-thumbnail:hover {
-    border: none;
-    border-image: none;
-    box-shadow: none;
-    border-radius: 0px;
-    background: transparent;
-    padding: 0px;
-}
-
-button.workspace-window-snapshot, button.workspace-window-snapshot:hover {
-    color: #ffffff;
-    border: none;
-    padding: 0px;
-    box-shadow: none;
-    border-image: none;
-    background: transparent;
-    text-shadow: -1px 1px 2px alpha(#000000, 0.6), 1px 1px 2px alpha(#000000, 0.6),
-                1px -1px 2px alpha(#000000, 0.6), -1px -1px 2px alpha(#000000, 0.6);
-    font-size: 13px;
-}
-
 button.tasklist-arrow-button {
     padding: 0px;
     min-width: 16px;
@@ -416,5 +375,48 @@ button.tasklist-arrow-button:hover {
 
 button.tasklist-arrow-button:disabled {
     /*background: rgba(255, 255, 255, 0.2);*/
+    border: none;
+}
+
+/* workspace */
+
+window.workspace-previewer .workspace-list-box {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+
+
+window.workspace-previewer button.workspace-thumbnail {
+    background: transparent;
+    color: #ffffff;
+    border: none;
+}
+
+window.workspace-previewer button.workspace-thumbnail:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: transparent;
+}
+
+window.workspace-previewer button.window-thumbnail,
+window.workspace-previewer button.window-thumbnail:hover {
+    color: #ffffff;
+    border: none;
+    padding: 0px;
+    box-shadow: none;
+    border-image: none;
+    background: transparent;
+    text-shadow: -1px 1px 2px alpha(#000000, 0.6), 1px 1px 2px alpha(#000000, 0.6),
+                1px -1px 2px alpha(#000000, 0.6), -1px -1px 2px alpha(#000000, 0.6);
+    font-size: 13px;
+}
+
+window.workspace-previewer button#add-button {
+    background: transparent;
+    color: #ffffff;
+    border: none;
+}
+
+window.workspace-previewer button#add-button:hover {
+    background: rgba(255, 255, 255, 0.15);
     border: none;
 }

@@ -11,21 +11,9 @@
 
 namespace Kiran
 {
-class ScreenLogger : public Kiran::ILogger
-{
-public:
-    void write_log(const char* buff, uint32_t len)
-    {
-        g_print("%s", buff);
-    }
-};
 
 void init_backend_system()
 {
-    Log::global_init();
-
-    Kiran::Log::get_instance()->set_logger(new ScreenLogger());
-
     ScreenManager::global_init();
 
     WindowManager::global_init(ScreenManager::get_instance());
@@ -54,8 +42,6 @@ void deinit_backend_system()
     WindowManager::global_deinit();
 
     ScreenManager::global_deinit();
-
-    Log::global_deinit();
 }
 
 }  // namespace Kiran

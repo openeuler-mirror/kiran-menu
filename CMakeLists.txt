@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.0)
 
 project(kiran-applet VERSION 2.2.0)
 
+option(BUILD_WITH_ACCOUNTSSERVICE "Build with accountsservice" OFF)
+option(BUILD_WITH_KIRANACCOUNTS "Build with kiran session daemon" OFF)
 
 find_package(PkgConfig)
 
