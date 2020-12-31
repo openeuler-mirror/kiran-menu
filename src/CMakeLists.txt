@@ -51,6 +51,13 @@ pkg_search_module(ACCOUNTSSERVICE REQUIRED accountsservice)
 endif()
 install(TARGETS ${TARGET_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/libexec/mate-panel/")
 
+include(CheckIncludeFiles)
+
+CHECK_INCLUDE_FILES(zlog_ex.h HAVE_ZLOG_HEADERS)
+if (NOT HAVE_ZLOG_HEADERS)
+    message(FATAL_ERROR "zlog_ex.h not found")
+endif (NOT HAVE_ZLOG_HEADERS)
+
 pkg_search_module(MATEPANEL REQUIRED libmatepanelapplet-4.0)
 pkg_search_module(GTKMM REQUIRED gtkmm-3.0)
 pkg_search_module(MATEDESKTOP REQUIRED mate-desktop-2.0)
