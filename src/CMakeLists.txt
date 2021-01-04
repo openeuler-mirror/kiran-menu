@@ -41,6 +41,32 @@ add_executable(${TARGET_NAME}
         workspace/window_arrange.cpp
         workspace/workspace-applet-button.cpp
         workspace/workspace-applet.cpp
+        tray/kiran-notify-icon.c
+        tray/kiran-notify-icon.h
+        tray/kiran-notify-icon-window.c
+        tray/kiran-notify-icon-window.h
+        tray/kiran-sn-icon.c
+        tray/kiran-sn-icon.h
+        tray/kiran-sn-icon-menu.c
+        tray/kiran-sn-icon-menu.h
+        tray/kiran-sn-tray-manager.c
+        tray/kiran-sn-tray-manager.h
+        tray/kiran-sn-watcher.c
+        tray/kiran-sn-watcher.h
+        tray/kiran-tray-applet.c
+        tray/kiran-tray.c
+        tray/kiran-tray.h
+        tray/kiran-tray-manager.c
+        tray/kiran-tray-manager.h
+        tray/kiran-x11-tray-icon.c
+        tray/kiran-x11-tray-icon.h
+        tray/kiran-x11-tray-manager.c
+        tray/kiran-x11-tray-manager.h
+        tray/kiran-x11-tray-socket.c
+        tray/kiran-x11-tray-socket.h
+        kiran-sn-host-gen.c
+        kiran-sn-item-gen.c
+        kiran-sn-watcher-gen.c
         applet.cpp
 )
 
@@ -66,6 +92,36 @@ pkg_search_module(GTKMM REQUIRED gtkmm-3.0)
 pkg_search_module(MATEDESKTOP REQUIRED mate-desktop-2.0)
 pkg_search_module(ZLOG REQUIRED zlog)
 
+pkg_search_module(GLIB2 REQUIRED glib-2.0)
+pkg_search_module(GOBJECT2 REQUIRED gobject-2.0)
+pkg_search_module(GTK3 REQUIRED gtk+-3.0)
+pkg_search_module(DBUSMENU_GLIB REQUIRED dbusmenu-glib-0.4)
+pkg_search_module(LIBXML2 REQUIRED libxml-2.0)
+
+find_library(LIBX11 X11)
+find_library(LIBM m)
+find_program(GDBUS_CODEGEN "gdbus-codegen")
+
+if (NOT GDBUS_CODEGEN)
+message(FATAL_ERROR "gdbus-codegen program not found")
+else()
+message("found ${GDBUS_CODEGEN}")
+endif (NOT GDBUS_CODEGEN)
+
+add_custom_command(OUTPUT kiran-sn-host-gen.c kiran-sn-host-gen.h
+    COMMAND ${GDBUS_CODEGEN} --c-namespace KiranSn --generate-c-code kiran-sn-host-gen  ${PROJECT_SOURCE_DIR}/data/org.kde.StatusNotifierHost.xml
+    DEPENDS ${PROJECT_SOURCE_DIR}/data/org.kde.StatusNotifierHost.xml
+)
+
+add_custom_command(OUTPUT kiran-sn-item-gen.c kiran-sn-item-gen.h
+    COMMAND ${GDBUS_CODEGEN} --c-namespace KiranSn --generate-c-code kiran-sn-item-gen  ${PROJECT_SOURCE_DIR}/data/org.kde.StatusNotifierItem.xml
+    DEPENDS  ${PROJECT_SOURCE_DIR}/data/org.kde.StatusNotifierWatcher.xml
+)
+
+add_custom_command(OUTPUT kiran-sn-watcher-gen.c kiran-sn-watcher-gen.h
+    COMMAND ${GDBUS_CODEGEN} --c-namespace KiranSn --generate-c-code kiran-sn-watcher-gen  ${PROJECT_SOURCE_DIR}/data/org.kde.StatusNotifierWatcher.xml
+    DEPENDS  ${PROJECT_SOURCE_DIR}/data/org.kde.StatusNotifierWatcher.xml
+)
 
 include_directories(${CMAKE_BINARY_DIR})
 
@@ -76,6 +132,11 @@ target_include_directories(${TARGET_NAME} PUBLIC "${PROJECT_SOURCE_DIR}/lib"
             "${MATEDESKTOP_INCLUDE_DIRS}"
             "${ACCOUNTSSERVICE_INCLUDE_DIRS}"
             "${ZLOG_INCLUDE_DIRS}"
+            "${GTK3_INCLUDE_DIRS}"
+            "${DBUSMENU_GLIB_INCLUDE_DIRS}"
+            "${LIBXML2_INCLUDE_DIRS}"
+            "${GOBJECT2_INCLUDE_DIRS}"
+            "${GLIB2_INCLUDE_DIRS}"
             "${PROJECT_SOURCE_DIR}"
             "${PROJECT_SOURCE_DIR}/src/common"
             "${PROJECT_BINARY_DIR}/src")
@@ -84,7 +145,12 @@ target_link_libraries(${TARGET_NAME} PUBLIC "${MATEPANEL_LIBRARIES}"
             "${GTKMM_LIBRARIES}"
             "${MATEDESKTOP_LIBRARIES}"
             "${ACCOUNTSSERVICE_LIBRARIES}"
+            "${DBUSMENU_GLIB_LIBRARIES}"
+            "${LIBXML2_LIBRARIES}"
+            "${GOBJECT2_LIBRARIES}"
+            "${GLIB2_LIBRARIES}"
             "${ZLOG_LIBRARIES}"
-            "X11")
+            "X11"
+            "m")
 
 target_link_libraries(${TARGET_NAME} PRIVATE kiran-menu-backend)

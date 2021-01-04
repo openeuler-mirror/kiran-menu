@@ -28,3 +28,11 @@ Description=Kiran Workspace switching applet
 Description[zh_CN]=Kiran工作区切换插件
 Icon=kiran-workspace-switcher
 MateComponentId=OAFIID:KiranWorkspaceApplet;
+
+[KiranTrayApplet]
+Name=KiranTray
+Name[zh_CN]=Kiran系统托盘
+Description=The kiran system tray for notify icon
+Description[zh_CN]=显示通知图标
+Icon=mate-panel-tray
+MateComponentId=OAFIID:MATE_KiranTrayApplet

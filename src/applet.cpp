@@ -11,6 +11,7 @@
 #include "menu/menu-applet.h"
 #include "tasklist/tasklist-applet.h"
 #include "workspace/workspace-applet.h"
+#include "tray/kiran-tray-applet.h"
 #include "common/kiran-power.h"
 #include "common/global.h"
 
@@ -99,8 +100,8 @@ kiran_applet_factory (MatePanelApplet *applet,
 
     if (strcmp(iid, "KiranMenuApplet") &&
             strcmp(iid, "KiranTasklistApplet") &&
-            strcmp(iid, "KiranWorkspaceApplet")) {
-        LOG_WARNING("not match id\n");
+            strcmp(iid, "KiranWorkspaceApplet") &&
+            strcmp(iid, "KiranTrayApplet")) {
         return FALSE;
     }
 
@@ -109,18 +110,17 @@ kiran_applet_factory (MatePanelApplet *applet,
     bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
     textdomain (GETTEXT_PACKAGE);
 
-    log_init();
-
     Gtk::Main::init_gtkmm_internals();
     if (!backend_inited) {
-    	Kiran::init_backend_system();
+        log_init();
+        Kiran::init_backend_system();
         backend_inited = true;
     }
 
     if (!load_resources(APPLET_RESOURCE_PATH))
         return FALSE;
 
-    load_css_styles("/kiran-applet/applet.css");
+    load_css_styles("/kiran-applet/css/applet.css");
 
     if (!strcmp(iid, "KiranMenuApplet")) {
         //开始菜单插件
@@ -129,6 +129,8 @@ kiran_applet_factory (MatePanelApplet *applet,
         tasklist_applet_fill(applet);
     } else if (!strcmp(iid, "KiranWorkspaceApplet")) {
         workspace_applet_fill(applet);
+    } else if (!strcmp(iid, "KiranTrayApplet")) {
+        fill_tray_applet(applet);
     } else {
         /* Should not reach here */
         g_warn_if_reached();
