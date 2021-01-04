@@ -1,3 +1,5 @@
+#include <app-manager.h>
+
 #include "kiran-notify-icon.h"
 #include "kiran-x11-tray-icon.h"
 #include "kiran-x11-tray-socket.h"
@@ -135,7 +137,7 @@ kiran_x11_tray_icon_leave_notify_event (GtkWidget *widget,
     GtkStateFlags flags;
 
     flags = gtk_widget_get_state_flags (widget);
-    flags = flags & ~GTK_STATE_FLAG_PRELIGHT;
+    flags = (GtkStateFlags)(flags & ~GTK_STATE_FLAG_PRELIGHT);
 
     gtk_widget_set_state_flags (widget, flags, TRUE); 
 
@@ -160,7 +162,7 @@ kiran_x11_tray_icon_focus_out_event (GtkWidget *widget,
     GtkStateFlags flags;
 
     flags = gtk_widget_get_state_flags (widget);
-    flags = flags & ~GTK_STATE_FLAG_PRELIGHT;
+    flags = (GtkStateFlags)(flags & ~GTK_STATE_FLAG_PRELIGHT);
     gtk_widget_set_state_flags (widget, flags, TRUE); 
 
     return FALSE;
@@ -378,7 +380,7 @@ kiran_x11_tray_icon_new (Window icon_window)
     char *res_class = NULL;
     guint i;
 
-    icon = g_object_new (KIRAN_TYPE_X11_TRAY_ICON, NULL);
+    icon = reinterpret_cast<KiranX11TrayIcon*>(g_object_new (KIRAN_TYPE_X11_TRAY_ICON, NULL));
     icon->priv->icon_window = icon_window;
 
 
@@ -398,9 +400,15 @@ kiran_x11_tray_icon_new (Window icon_window)
 	    break;
         }
     }
+
     
-    if (!icon->priv->id)
-        icon->priv->id = res_name;
+    if (!icon->priv->id) {
+        auto app = Kiran::AppManager::get_instance()->lookup_app_with_xid(icon_window);
+        if (app) {
+            const char *res_name = app->get_desktop_id().c_str();
+            icon->priv->id = g_strdup(res_name);
+	}
+    }
     else
         g_free (res_name);
     

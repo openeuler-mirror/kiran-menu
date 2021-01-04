@@ -133,16 +133,23 @@ fill_tray_applet (MatePanelApplet *applet)
                               mate_panel_applet_get_orient (MATE_PANEL_APPLET (applet)),
                               kcd);
 
+    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+
     action_group = gtk_action_group_new ("KiranTrayApplet Menu Actions");
     gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
     gtk_action_group_add_actions (action_group,
                                   kiran_tray_menu_actions,
                                   G_N_ELEMENTS (kiran_tray_menu_actions),
                                   kcd);
+    G_GNUC_END_IGNORE_DEPRECATIONS
+
     mate_panel_applet_setup_menu (MATE_PANEL_APPLET (kcd->applet),
                                   "<menuitem name=\"Kiran Tray About Item\" action=\"KiranTrayAbout\" />",
                                   action_group);
 
+
+    mate_panel_applet_set_flags (MATE_PANEL_APPLET (kcd->applet), 
+		    		 MATE_PANEL_APPLET_HAS_HANDLE|MATE_PANEL_APPLET_EXPAND_MINOR);
 
     return TRUE;
 }

@@ -58,7 +58,7 @@ add_executable(${TARGET_NAME}
         tray/kiran-tray.h
         tray/kiran-tray-manager.c
         tray/kiran-tray-manager.h
-        tray/kiran-x11-tray-icon.c
+        tray/kiran-x11-tray-icon.cpp
         tray/kiran-x11-tray-icon.h
         tray/kiran-x11-tray-manager.c
         tray/kiran-x11-tray-manager.h
