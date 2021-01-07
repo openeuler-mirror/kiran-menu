@@ -13,6 +13,13 @@ bool MenuNewAppsContainer::load_applications(const Kiran::AppVec &apps)
 
     apps_box.set_min_children_per_line(1);
     apps_box.set_max_children_per_line(1);
+
+    if (apps.size() == 0)
+    {
+        hide();
+        return true;
+    };
+
     for (auto app : apps)
     {
         auto child_box = Gtk::make_managed<Gtk::FlowBoxChild>();
