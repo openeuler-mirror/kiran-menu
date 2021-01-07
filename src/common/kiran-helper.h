@@ -54,4 +54,8 @@ public:
     static Kiran::WindowVec get_taskbar_windows(const std::shared_ptr<Kiran::App> &app);
 };
 
+void show_applet_about_dialog(const char *program_name,
+                              const char *icon_name,
+                              const char *comments);
+
 #endif // KIRANHELPER_H

@@ -3,6 +3,7 @@
 #include "taskbar-skeleton.h"
 #include "workspace-manager.h"
 #include "log.h"
+#include "config.h"
 
 void KiranHelper::remove_widget(Gtk::Widget &widget)
 {
@@ -210,4 +211,23 @@ bool KiranHelper::launch_app_from_list(const char **app_names)
     }
 
     return false;
+}
+
+void show_applet_about_dialog(const char *program_name,
+                                     const char *icon_name,
+                                     const char *comments)
+{
+    GtkWidget *dialog;
+
+    dialog = gtk_about_dialog_new();
+
+    gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(dialog), program_name);
+    gtk_about_dialog_set_logo_icon_name(GTK_ABOUT_DIALOG(dialog), icon_name);
+    gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG(dialog), comments);
+
+    gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), PACKAGE_VERSION);
+    gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(dialog),
+                                   COPYRIGHT);
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
 }

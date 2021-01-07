@@ -1,8 +1,10 @@
 
 #define DATA_DIR        	  "@CMAKE_INSTALL_PREFIX@/share/"
-#define PACKAGE_NAME    	  "@CMAKE_PROJECT_NAME@"
-#define PACKAGE_DATA_DIR	  DATA_DIR "@CMAKE_PROJECT_NAME@"
+#define PACKAGE_NAME    	  "@PROJECT_NAME@"
+#define PACKAGE_DATA_DIR	  DATA_DIR "@PROJECT_NAME@"
 #define PACKAGE_VERSION           "@PROJECT_VERSION@"
+#define GETTEXT_PACKAGE		   PACKAGE_NAME
+#define COPYRIGHT              "Copyright ©2020 KylinSec. All rights reserved."
 
 #cmakedefine BUILD_WITH_ACCOUNTSSERVICE
 #cmakedefine BUILD_WITH_KIRANACCOUNTS
