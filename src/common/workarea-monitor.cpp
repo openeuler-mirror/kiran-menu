@@ -19,10 +19,19 @@ GdkFilterReturn event_filter(GdkXEvent *ev, GdkEvent *event, gpointer data)
     return GDK_FILTER_CONTINUE;
 }
 
-WorkareaMonitor::WorkareaMonitor(Glib::RefPtr<Gdk::Screen> &screen)
+WorkareaMonitor::WorkareaMonitor(Glib::RefPtr<Gdk::Screen> &screen_):
+	screen(screen_)
 {
     auto root = screen->get_root_window();
     root->add_filter(event_filter, this);
+}
+
+WorkareaMonitor::~WorkareaMonitor()
+{
+    auto root = screen->get_root_window();
+
+    signal_size_changed().clear();
+    root->remove_filter(event_filter, this);
 }
 
 sigc::signal<void> WorkareaMonitor::signal_size_changed()

@@ -52,6 +52,11 @@ static GtkActionGroup *create_action_group()
     return action_group;
 }
 
+static void on_applet_finalized(gpointer data, GObject *object)
+{
+    gdk_window_remove_filter(nullptr, key_event_filter, data);
+}
+
 gboolean menu_applet_fill(MatePanelApplet *applet)
 {
     Display *xdisplay = gdk_x11_get_default_xdisplay();
@@ -73,5 +78,6 @@ gboolean menu_applet_fill(MatePanelApplet *applet)
                                            PACKAGE_DATA_DIR "/menu-menu.ui.xml",
                                            create_action_group());
 
+    g_object_weak_ref(G_OBJECT(applet), (GWeakNotify)on_applet_finalized, button);
     return TRUE;
 }
