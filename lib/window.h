@@ -29,6 +29,7 @@ public:
     Window() = delete;
     Window(const Window& window) = delete;
     Window(WnckWindow* window);
+    Window(gulong xid);
     virtual ~Window();
 
     static std::shared_ptr<Window> create(WnckWindow* wnck_window);
@@ -156,6 +157,7 @@ private:
 private:
     WnckWindow* wnck_window_;
     GdkWindow* gdk_window_;
+    gulong xid_;
 
     int32_t last_workspace_number_;
 
