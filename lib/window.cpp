@@ -35,6 +35,7 @@ Window::Window(WnckWindow *wnck_window) : wnck_window_(wnck_window),
                                           geometry_changed_handler_(0),
                                           state_changed_handler(0)
 {
+    xid_ = wnck_window_get_xid(wnck_window_);
     auto workspace = this->get_workspace();
     if (workspace)
     {
@@ -46,6 +47,42 @@ Window::Window(WnckWindow *wnck_window) : wnck_window_(wnck_window),
     this->workspace_changed_handler_ = g_signal_connect(this->wnck_window_, "workspace-changed", G_CALLBACK(Window::workspace_changed), NULL);
     this->geometry_changed_handler_ = g_signal_connect(this->wnck_window_, "geometry-changed", G_CALLBACK(Window::geometry_changed), NULL);
     this->state_changed_handler = g_signal_connect(this->wnck_window_, "state-changed", G_CALLBACK(Window::state_changed), NULL);
+    this->update_window_pixmap();
+}
+
+Window::Window(gulong xid) : wnck_window_(nullptr),
+                             gdk_window_(NULL),
+                             xid_(xid),
+                             last_workspace_number_(-1),
+                             last_is_pinned_(false),
+                             pixmap_(None),
+                             last_geometry_(0, 0, 0, 0),
+                             name_changed_handler_(0),
+                             workspace_changed_handler_(0),
+                             geometry_changed_handler_(0),
+                             state_changed_handler(0)
+{
+    wnck_window_ = wnck_window_get(xid);
+    gdk_window_ = gdk_x11_window_lookup_for_display(gdk_display_get_default(), xid);
+    if (gdk_window_ != nullptr)
+        g_object_ref(gdk_window_);
+
+    auto workspace = this->get_workspace();
+    if (workspace)
+    {
+        this->last_workspace_number_ = workspace->get_number();
+    }
+    this->last_is_pinned_ = this->is_pinned();
+
+    if (wnck_window_ != nullptr)
+    {
+        this->name_changed_handler_ = g_signal_connect(this->wnck_window_, "name-changed", G_CALLBACK(Window::name_changed), NULL);
+        this->workspace_changed_handler_ = g_signal_connect(this->wnck_window_, "workspace-changed", G_CALLBACK(Window::workspace_changed), NULL);
+        this->geometry_changed_handler_ = g_signal_connect(this->wnck_window_, "geometry-changed", G_CALLBACK(Window::geometry_changed), NULL);
+        this->state_changed_handler = g_signal_connect(this->wnck_window_, "state-changed", G_CALLBACK(Window::state_changed), NULL);
+    } else {
+        LOG_WARNING("No WnckWindow found for Window with ID 0x%x", xid);
+    }
     this->update_window_pixmap();
 }
 
@@ -85,20 +122,26 @@ Window::~Window()
         if (this->state_changed_handler)
             g_signal_handler_disconnect(this->wnck_window_, this->state_changed_handler);
     }
+
+    if (gdk_window_ != nullptr)
+        g_object_unref(gdk_window_);
 }
 
 std::string Window::get_name()
 {
+    g_return_val_if_fail(this->wnck_window_ != nullptr, "");
     RET_WRAP_NULL(wnck_window_get_name(this->wnck_window_));
 }
 
 std::string Window::get_icon_name()
 {
+    g_return_val_if_fail(this->wnck_window_ != nullptr, "");
     RET_WRAP_NULL(wnck_window_get_icon_name(this->wnck_window_));
 }
 
 GdkPixbuf *Window::get_icon()
 {
+    g_return_val_if_fail(this->wnck_window_ != nullptr, nullptr);
     return wnck_window_get_icon(this->wnck_window_);
 }
 
@@ -136,12 +179,15 @@ std::shared_ptr<App> Window::get_app()
 
 uint64_t Window::get_xid()
 {
-    return (uint64_t)wnck_window_get_xid(this->wnck_window_);
+    g_return_val_if_fail(this->wnck_window_ != nullptr || this->gdk_window_ != nullptr, 0);
+    return xid_;
 }
 
 WindowVec Window::get_group_windows()
 {
     WindowVec windows;
+
+    g_return_val_if_fail(this->wnck_window_ != nullptr, WindowVec());
     auto group = wnck_window_get_class_group(this->wnck_window_);
     if (!group)
     {
@@ -164,22 +210,26 @@ WindowVec Window::get_group_windows()
 
 std::shared_ptr<Window> Window::get_transient()
 {
+    g_return_val_if_fail(this->wnck_window_ != nullptr, std::shared_ptr<Window>());
     auto wnck_window = wnck_window_get_transient(this->wnck_window_);
     return WindowManager::get_instance()->lookup_window(wnck_window);
 }
 
 std::string Window::get_class_group_name()
 {
+    g_return_val_if_fail(this->wnck_window_ != nullptr, "");
     RET_WRAP_NULL(wnck_window_get_class_group_name(this->wnck_window_));
 }
 
 bool Window::needs_attention()
 {
+    g_return_val_if_fail(this->wnck_window_ != nullptr, false);
     return wnck_window_needs_attention(this->wnck_window_);
 }
 
 std::string Window::get_class_instance_name()
 {
+    g_return_val_if_fail(this->wnck_window_ != nullptr, "");
     RET_WRAP_NULL(wnck_window_get_class_instance_name(this->wnck_window_));
 }
 
@@ -225,32 +275,39 @@ int32_t Window::get_pid()
 
 WnckWindowType Window::get_window_type()
 {
+    g_return_val_if_fail(this->wnck_window_ != nullptr, WNCK_WINDOW_NORMAL);
     return wnck_window_get_window_type(this->wnck_window_);
 }
 
 bool Window::is_pinned()
 {
+    g_return_val_if_fail(this->wnck_window_ != nullptr, false);
     return wnck_window_is_pinned(this->wnck_window_);
 }
 
 bool Window::is_above()
 {
+    g_return_val_if_fail(this->wnck_window_ != nullptr, false);
     return wnck_window_is_above(this->wnck_window_);
 }
 
 bool Window::is_skip_pager()
 {
+    g_return_val_if_fail(this->wnck_window_ != nullptr, false);
     return wnck_window_is_skip_pager(this->wnck_window_);
 }
 
 bool Window::is_skip_taskbar()
 {
+    g_return_val_if_fail(this->wnck_window_ != nullptr, false);
     return wnck_window_is_skip_tasklist(this->wnck_window_);
 }
 
 void Window::activate(uint32_t timestamp)
 {
     SETTINGS_PROFILE("xid: %" PRIu64 ", timestamp: %d.", this->get_xid(), timestamp);
+
+    g_return_if_fail(this->wnck_window_ != nullptr);
 
     WnckWindowState state = wnck_window_get_state(wnck_window_);
     auto workspace = get_workspace();
@@ -279,69 +336,110 @@ void Window::activate(uint32_t timestamp)
 void Window::unminimize(uint32_t timestamp)
 {
     SETTINGS_PROFILE("xid: %" PRIu64 ", timestamp: %d.", this->get_xid(), timestamp);
-    wnck_window_unminimize(this->wnck_window_, timestamp);
+    if (this->wnck_window_ != nullptr)
+        wnck_window_unminimize(this->wnck_window_, timestamp);
+    else
+        gdk_window_deiconify(gdk_window_);
 }
 
 bool Window::is_minimized()
 {
-    return wnck_window_is_minimized(this->wnck_window_);
+    if (this->wnck_window_ != nullptr)
+        return wnck_window_is_minimized(this->wnck_window_);
+    else {
+        GdkWindowState state = gdk_window_get_state(gdk_window_);
+
+        return  (state & GDK_WINDOW_STATE_ICONIFIED) != 0;
+    }
 }
 
 void Window::minimize()
 {
     SETTINGS_PROFILE("xid: %" PRIu64 ".", this->get_xid());
-    wnck_window_minimize(this->wnck_window_);
+    if (this->wnck_window_ != nullptr)
+        wnck_window_minimize(this->wnck_window_);
+    else
+        gdk_window_iconify(gdk_window_);
 }
 
 bool Window::is_maximized()
 {
-    return wnck_window_is_maximized(this->wnck_window_);
+    if (this->wnck_window_ != nullptr)
+        return wnck_window_is_maximized(this->wnck_window_);
+    else {
+        GdkWindowState state = gdk_window_get_state(gdk_window_);
+
+        return  (state & GDK_WINDOW_STATE_MAXIMIZED) != 0;
+    }
 }
 
 void Window::maximize()
 {
     SETTINGS_PROFILE("xid: %" PRIu64 ".", this->get_xid());
-    wnck_window_maximize(this->wnck_window_);
+    if (this->wnck_window_ != nullptr)
+        wnck_window_maximize(this->wnck_window_);
+    else
+        gdk_window_maximize(gdk_window_);
 }
 
 void Window::unmaximize()
 {
     SETTINGS_PROFILE("xid: %" PRIu64 ".", this->get_xid());
-    wnck_window_unmaximize(this->wnck_window_);
+    if (this->wnck_window_ != nullptr)
+        wnck_window_unmaximize(this->wnck_window_);
+    else
+        gdk_window_unmaximize(gdk_window_);
 }
 
 bool Window::is_shaded()
 {
+    g_return_val_if_fail(this->wnck_window_ != nullptr, false);
     return wnck_window_is_shaded(this->wnck_window_);
 }
 
 void Window::pin()
 {
     SETTINGS_PROFILE("xid: %" PRIu64 ".", this->get_xid());
-    return wnck_window_pin(this->wnck_window_);
+    if (this->wnck_window_ != nullptr)
+        return wnck_window_pin(this->wnck_window_);
+    else
+        gdk_window_stick(gdk_window_);
 }
 
 void Window::unpin()
 {
     SETTINGS_PROFILE("xid: %" PRIu64 ".", this->get_xid());
-    return wnck_window_unpin(this->wnck_window_);
+    if (this->wnck_window_ != nullptr)
+        return wnck_window_unpin(this->wnck_window_);
+    else
+        gdk_window_unstick(gdk_window_);
 }
 
 void Window::make_above()
 {
     SETTINGS_PROFILE("xid: %" PRIu64 ".", this->get_xid());
-    wnck_window_make_above(this->wnck_window_);
+    if (this->wnck_window_ != nullptr)
+        wnck_window_make_above(this->wnck_window_);
+    else
+        gdk_window_set_keep_above(gdk_window_, true);
 }
 
 void Window::make_unabove()
 {
     SETTINGS_PROFILE("xid: %" PRIu64 ".", this->get_xid());
-    wnck_window_unmake_above(this->wnck_window_);
+    if (this->wnck_window_ != nullptr)
+        wnck_window_unmake_above(this->wnck_window_);
+    else
+        gdk_window_set_keep_above(gdk_window_, false);
 }
 
 bool Window::is_active()
 {
-    return wnck_window_is_active(this->wnck_window_);
+    if (this->wnck_window_ != nullptr)
+        return wnck_window_is_active(this->wnck_window_);
+    else {
+        return gdk_screen_get_active_window(gdk_window_get_screen(gdk_window_)) == gdk_window_;
+    }
 }
 
 void Window::move_to_workspace(std::shared_ptr<Workspace> workspace)
@@ -350,11 +448,16 @@ void Window::move_to_workspace(std::shared_ptr<Workspace> workspace)
                      this->get_xid(),
                      workspace ? workspace->get_number() : -1);
 
-    wnck_window_move_to_workspace(this->wnck_window_, workspace->workspace_);
+    if (this->wnck_window_ != nullptr)
+        wnck_window_move_to_workspace(this->wnck_window_, workspace->workspace_);
+    else {
+        gdk_x11_window_move_to_desktop(gdk_window_, workspace->get_number());
+    }
 }
 
 uint64_t Window::get_window_group()
 {
+    g_return_val_if_fail(this->wnck_window_ != nullptr, 0);
     return wnck_window_get_group_leader(this->wnck_window_);
 }
 
@@ -362,6 +465,7 @@ void Window::close()
 {
     SETTINGS_PROFILE("xid: %" PRIu64 ", name: %s.", this->get_xid(), this->get_name().c_str());
 
+    g_return_if_fail(this->wnck_window_ != nullptr);
     uint64_t now = Glib::DateTime::create_now_local().to_unix();
     wnck_window_close(this->wnck_window_, now);
 }
@@ -369,22 +473,37 @@ void Window::close()
 WindowGeometry Window::get_geometry()
 {
     int x, y, w, h;
-    wnck_window_get_geometry(this->wnck_window_, &x, &y, &w, &h);
+    if (this->wnck_window_ != nullptr)
+        wnck_window_get_geometry(this->wnck_window_, &x, &y, &w, &h);
+    else
+        gdk_window_get_geometry(gdk_window_, &x, &y, &w, &h);
     return std::make_tuple(x, y, w, h);
 }
 
 WindowGeometry Window::get_client_window_geometry()
 {
     int x, y, w, h;
-    wnck_window_get_client_window_geometry(this->wnck_window_, &x, &y, &w, &h);
+    if (this->wnck_window_ != nullptr)
+        wnck_window_get_client_window_geometry(this->wnck_window_, &x, &y, &w, &h);
+    else
+        gdk_window_get_geometry(gdk_window_, &x, &y, &w, &h);
     return std::make_tuple(x, y, w, h);
 }
 
 std::shared_ptr<Workspace> Window::get_workspace()
 {
-    auto wnck_workspace = wnck_window_get_workspace(this->wnck_window_);
-
-    return WorkspaceManager::get_instance()->lookup_workspace(wnck_workspace);
+    if (wnck_window_ != nullptr)
+    {
+        auto wnck_workspace = wnck_window_get_workspace(this->wnck_window_);
+        return WorkspaceManager::get_instance()->lookup_workspace(wnck_workspace);
+    }
+    else
+    {
+        /* 从GDK接口获取工作区 */
+        g_return_val_if_fail(gdk_window_ != nullptr, std::shared_ptr<Workspace>());
+        guint32 workspace_no = gdk_x11_window_get_desktop(gdk_window_);
+        return WorkspaceManager::get_instance()->get_workspace(workspace_no);
+    }
 }
 
 void Window::flush_workspace()
@@ -566,14 +685,14 @@ bool Window::update_window_pixmap()
 void Window::set_on_visible_workspace(bool on)
 {
     if (on)
-        wnck_window_pin(this->wnck_window_);
+        this->pin();
     else
-        wnck_window_unpin(this->wnck_window_);
+        this->unpin();
 }
 
 bool Window::get_on_visible_workspace()
 {
-    return wnck_window_is_pinned(this->wnck_window_);
+    return is_pinned();
 }
 
 bool Window::should_skip_taskbar()
@@ -585,6 +704,7 @@ bool Window::should_skip_taskbar()
 
 void Window::set_icon_geometry(int x, int y, int width, int height)
 {
+    g_return_if_fail(this->wnck_window_ != nullptr);
     wnck_window_set_icon_geometry(this->wnck_window_,
                                   x,
                                   y,
