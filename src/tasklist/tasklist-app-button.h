@@ -38,6 +38,12 @@ public:
     bool get_context_menu_opened();
 
     /**
+     * @brief update_windows_icon_geometry
+     *        更新应用所有窗口的最小化位置
+     */
+    void update_windows_icon_geometry();
+
+    /**
      * @brief signal_context_menu_toggled 信号，应用按钮右键菜单打开或关闭时触发，bool参数对应右键菜单的打开状态
      * @return 信号
      */
@@ -79,11 +85,6 @@ protected:
      */
     virtual Gtk::Orientation get_orientation() const;
 
-    /**
-     * @brief update_windows_icon_geometry
-     *        更新应用所有窗口的最小化位置
-     */
-    void update_windows_icon_geometry();
 
     /**
      * @brief get_app_icon_pixbuf 获取应用按钮的图标

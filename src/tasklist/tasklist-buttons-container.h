@@ -96,6 +96,7 @@ protected:
     virtual void on_remove(Gtk::Widget *child) override;
     virtual void on_map() override;
     virtual void on_realize() override;
+    virtual void on_unrealize() override;
 
 
     virtual bool on_drag_motion (const Glib::RefPtr< Gdk::DragContext >& context,
@@ -118,6 +119,11 @@ protected:
      * @brief on_orientation_changed 应用按钮排列方向发生变化时的回调函数
      */
     virtual void on_orientation_changed();
+
+    /**
+     * @brief 初始化分页状态变化的监视器
+     */
+    virtual void init_paging_monitor();
 
 
     /**
@@ -322,6 +328,7 @@ private:
 
     sigc::connection pointer_check;         //预览窗口显示状态切换检查定时器
     sigc::connection paging_notify;          //应用按钮页面发生变化时的回调函数
+    sigc::connection adjustment_changed;    //分页数据发生变化时的回调函数
 };
 
 #endif // TASKLIST_BUTTONS_CONTAINER_H

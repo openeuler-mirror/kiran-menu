@@ -552,12 +552,17 @@ void TasklistButtonsContainer::on_size_allocate(Gtk::Allocation &allocation)
                               allocation.get_y(),
                               allocation.get_width(),
                               allocation.get_height());
-    get_bin_window()->resize(allocation.get_width(),
-                             allocation.get_height());
 
     n_child = children.size();
-    if (n_child == 0)
+    if (n_child == 0) {
+        guint real_width, real_height;
+
+        /* 调整bin_window的大小 */
+        get_size(real_width, real_height);
+        get_bin_window()->resize(std::max((int)real_width, allocation.get_width()),
+                                 std::max((int)real_height, allocation.get_height()));
         return;
+    }
 
     /*
      * 由于所有child的尺寸都应该相同, 尺寸信息取第一个child的最小和最大尺寸即可
@@ -578,25 +583,6 @@ void TasklistButtonsContainer::on_size_allocate(Gtk::Allocation &allocation)
         child_computed_size = std::min(child_computed_size, child_max_size);
         n_child_page = n_child;
     } else {
-#if 0
-        /*
-         * 在child间隔不变的情况下，调整child尺寸，确保每页的child个数尽量多，同时剩余空间尽量小
-         */
-        int min_delta = G_MAXINT, best_width = child_min_size;
-        for (child_computed_size = child_min_size; child_computed_size <= child_max_size; child_computed_size += 2) {
-            int delta;
-
-            n_child_page = (parent_size + child_spacing)/(child_computed_size + child_spacing);
-            delta = (parent_size + child_spacing)%(child_computed_size + child_spacing);
-
-            if (delta < min_delta) {
-                best_width = child_computed_size;
-                min_delta = delta;
-            }
-        }
-        child_computed_size = best_width;
-        n_child_page = (parent_size + child_spacing)/(child_computed_size + child_spacing);
-#else
         /*
          * 计算每页能放的child的最大个数，同时调整child间距，使其排列更均匀
          */
@@ -608,7 +594,6 @@ void TasklistButtonsContainer::on_size_allocate(Gtk::Allocation &allocation)
                 break;
             }
         }
-#endif
     }
 
     child_index = 0;
@@ -636,10 +621,6 @@ void TasklistButtonsContainer::on_size_allocate(Gtk::Allocation &allocation)
     for (auto child: children) {
         Gtk::Allocation child_allocation;
         auto button = dynamic_cast<TasklistAppButton*>(child);
-
-//        LOG_MESSAGE("button '%s', x %d, y %d", button->get_app()->get_name().c_str(),
-//                    child_property_x(*child).get_value(),
-//                  child_property_y(*child).get_value());
 
         if (child_index % n_child_page == 0) {
             /* 新的页面，child需要排在开头 */
@@ -672,12 +653,14 @@ void TasklistButtonsContainer::on_size_allocate(Gtk::Allocation &allocation)
     if (child_total_size % page_size != 0)
         child_total_size = (child_total_size / page_size + 1) * page_size;
 
+    /* 对GtkLayout调用set_size()时，bin_window会自动做resize */
     if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL)
         set_size(static_cast<unsigned int>(child_total_size),
                  static_cast<unsigned int>(allocation.get_height()));
     else
         set_size(static_cast<unsigned int>(allocation.get_width()),
                  static_cast<unsigned int>(child_total_size));
+
 }
 
 void TasklistButtonsContainer::on_add(Gtk::Widget *child)
@@ -710,20 +693,18 @@ void TasklistButtonsContainer::on_realize()
 {
     Gtk::Layout::on_realize();
 
-    /*
-     * 监控滚动区域变化(包括滚动区域本身和当前值)，大小变化和child变化都会导致滚动区域发生变化
-     */
-    auto adjustment = get_adjustment();
-    adjustment->signal_changed().connect(
-                [this]() -> void {
-                    signal_page_changed().emit();
-                    ensure_active_app_button_visible();
-                });
+    init_paging_monitor();
+}
 
-    adjustment->signal_value_changed().connect(
-                [this]() -> void {
-                    signal_page_changed().emit();
-                });
+void TasklistButtonsContainer::on_unrealize()
+{
+    if (adjustment_changed.connected())
+        adjustment_changed.disconnect();
+
+    if (paging_notify.connected())
+        paging_notify.disconnect();
+
+    Gtk::Layout::on_unrealize();
 }
 
 void TasklistButtonsContainer::put_child_before(Gtk::Widget *source, Gtk::Widget *dest)
@@ -950,14 +931,7 @@ void TasklistButtonsContainer::on_orientation_changed()
      *  滚动方向发生变化后，adjustment对象也会发生变化.
      *  因此需要重新连接信号
      */
-    if (paging_notify.connected())
-        paging_notify.disconnect();
-
-    paging_notify = adjustment->signal_value_changed().connect(
-        [this]() -> void {
-            previewer->hide();
-            signal_page_changed().emit();
-        });
+    init_paging_monitor();
 
     if (get_realized()) {
         /* 调整应用按钮大小 */
@@ -965,6 +939,36 @@ void TasklistButtonsContainer::on_orientation_changed()
             button->queue_resize();
         }
     }
+}
+
+void TasklistButtonsContainer::init_paging_monitor()
+{
+    /*
+     * 监控滚动区域变化(包括滚动区域本身和当前值)，大小变化和child变化都会导致滚动区域发生变化
+     */
+    auto adjustment = get_adjustment();
+
+    if (adjustment_changed.connected())
+        adjustment_changed.disconnect();
+    adjustment_changed = adjustment->signal_changed().connect(
+                [this]() -> void {
+                    signal_page_changed().emit();
+                    ensure_active_app_button_visible();
+                });
+
+    if (paging_notify.connected())
+        paging_notify.disconnect();
+    paging_notify = adjustment->signal_value_changed().connect(
+        [this]() -> void {
+            signal_page_changed().emit();
+
+            /* 要重新定位面板上应用按钮对应的所有窗口最小化时的位置 */
+            for (auto child: get_children()) {
+                auto button = dynamic_cast<TasklistAppButton*>(child);
+                Glib::signal_idle().connect_once(
+                    sigc::mem_fun(*button, &TasklistAppButton::update_windows_icon_geometry));
+            }
+        });
 }
 
 
