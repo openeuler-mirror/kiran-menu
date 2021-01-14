@@ -88,6 +88,8 @@ bool MenuAppsContainer::load_applications(const Kiran::AppVec &apps)
             item = create_app_item(app, Gtk::ORIENTATION_VERTICAL);
             item->set_vexpand(false);
             item->set_valign(Gtk::ALIGN_START);
+            apps_box.set_min_children_per_line(1);
+            apps_box.set_max_children_per_line(4);
         }
         else
         {
