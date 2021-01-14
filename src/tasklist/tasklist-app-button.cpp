@@ -58,21 +58,14 @@ TasklistAppButton::TasklistAppButton(const std::shared_ptr<Kiran::App> &app_, in
     }
 
     auto window_manager = Kiran::WindowManager::get_instance();
-    window_opened_handler = window_manager->signal_window_opened().connect(
-        [this](const std::shared_ptr<Kiran::Window> &window) -> void {
-            if (window && window->get_app() == get_app())
-                window->signal_state_changed().connect(
-                    sigc::mem_fun(*this, &TasklistAppButton::on_windows_state_changed));
-        });
+    window_manager->signal_window_opened().connect(
+        sigc::mem_fun(*this, &TasklistAppButton::on_window_opened));
 }
 
 TasklistAppButton::~TasklistAppButton()
 {
     if (context_menu)
         delete context_menu;
-
-    if (window_opened_handler.connected())
-        window_opened_handler.disconnect();
 }
 
 void TasklistAppButton::set_size(int size)
@@ -389,6 +382,13 @@ void TasklistAppButton::on_drag_end(const Glib::RefPtr<Gdk::DragContext> &contex
     dragging = false;
     set_state_flags(get_state_flags() & ~Gtk::STATE_FLAG_ACTIVE, true);
     queue_draw();
+}
+
+void TasklistAppButton::on_window_opened(const std::shared_ptr<Kiran::Window> &window)
+{
+    if (window && window->get_app() == get_app())
+        window->signal_state_changed().connect(
+            sigc::mem_fun(*this, &TasklistAppButton::on_windows_state_changed));
 }
 
 const std::shared_ptr<Kiran::App> TasklistAppButton::get_app()

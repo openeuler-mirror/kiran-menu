@@ -80,6 +80,12 @@ protected:
     virtual void on_drag_end(const Glib::RefPtr< Gdk::DragContext >& context) override;
 
     /**
+     * @brief 回调函数: 新窗口打开时调用
+     * @param window 新打开的窗口
+     */
+    virtual void on_window_opened(const std::shared_ptr<Kiran::Window> &window);
+
+    /**
      * @brief get_orientation  获取应用按钮的排列方向
      * @return 返回按钮的排列方向
      */
@@ -122,8 +128,6 @@ private:
     bool dragging;                                      //当前是否处于被拖动状态
     sigc::connection    draw_attention_flicker;         //需要用户注意时的闪烁绘制定时器
     sigc::connection    draw_attention_normal;          //需要用户注意时的最终绘制定时器
-    sigc::connection    window_opened_handler;          //窗口打开时的回调
-
 
     sigc::signal<void, bool> m_signal_context_menu_toggled;
 };
