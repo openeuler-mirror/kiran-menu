@@ -97,8 +97,7 @@ void MenuAppletWindow::get_preferred_height_vfunc(int &min_height, int &natural_
         min_height_from_css = compact_min_height_property.get_value();
 
     /* 最小高度不能超过屏幕高度 */
-    min_height = std::max(min_height_from_css, min_height);
-    min_height = std::min(workarea.get_height(), min_height);
+    min_height = std::min(workarea.get_height(), min_height_from_css);
 
     /* 自然高度不能小于最小高度 */
     natural_height = std::max(min_height, natural_height);
@@ -730,17 +729,13 @@ void MenuAppletWindow::set_display_mode(MenuDisplayMode mode)
     Glib::RefPtr<Gdk::Monitor> monitor;
     Glib::RefPtr<Gdk::Display> display;
 
-    if (get_realized() && display_mode == mode)
-        return;
-
     if (get_realized()) {
         display = get_display();
     } else
         display = Gdk::Display::get_default();
 
     display_mode = mode;
-    monitor = display->get_primary_monitor();
-    monitor->get_workarea(rect);
+    display->get_primary_monitor()->get_workarea(rect);
 
     builder->get_widget("compact-avatar-box", compact_avatar_box);
     builder->get_widget("expand-panel", expand_panel);
