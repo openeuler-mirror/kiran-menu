@@ -5,7 +5,7 @@
       <default>[]</default>
     </key>
     <key name="favorite-apps" type="as">
-      <default>['caja-browser.desktop', 'firefox.desktop', 'mate-terminal.desktop', 'org.gnome.Software.desktop']</default>
+      <default>[]</default>
     </key>
     <key name="new-apps" type="as">
       <default>[]</default>
