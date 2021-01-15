@@ -63,7 +63,7 @@ Window::Window(gulong xid) : wnck_window_(nullptr),
                              state_changed_handler(0)
 {
     wnck_window_ = wnck_window_get(xid);
-    gdk_window_ = gdk_x11_window_lookup_for_display(gdk_display_get_default(), xid);
+    gdk_window_ = gdk_x11_window_foreign_new_for_display(gdk_display_get_default(), xid);
     if (gdk_window_ != nullptr)
         g_object_ref(gdk_window_);
 

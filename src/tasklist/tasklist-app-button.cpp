@@ -73,6 +73,10 @@ TasklistAppButton::~TasklistAppButton()
 
     if (window_opened_handler.connected())
         window_opened_handler.disconnect();
+
+    for (auto window: KiranHelper::get_taskbar_windows(get_app())) {
+        window->signal_state_changed().clear();
+    }
 }
 
 void TasklistAppButton::set_size(int size)
@@ -527,7 +531,8 @@ void TasklistAppButton::on_windows_state_changed()
              */
             draw_attention_normal = Glib::signal_timeout().connect(
                 [this]() -> bool {
-                    draw_attention_flicker.disconnect();
+		    if (draw_attention_flicker.connected())
+		    	draw_attention_flicker.disconnect();
                     if (kiran_app_needs_attention(get_app()))
                         state = APP_BUTTON_STATE_ATTENTION;
                     else

@@ -53,7 +53,8 @@ struct _KiranNotifyIconInterface
 
     const gchar * 	      (* get_id)		(KiranNotifyIcon *icon);
     const gchar * 	      (* get_name)		(KiranNotifyIcon *icon);
-    GdkPixbuf *               (* get_icon)      	(KiranNotifyIcon *icon);
+    const gchar *             (* get_icon)      	(KiranNotifyIcon *icon);
+    const gchar *             (* get_app_category)      (KiranNotifyIcon *icon);
     KiranNotifyIconCategory   (* get_category)		(KiranNotifyIcon *icon);
     KiranNotifyIconWay        (* get_way)		(KiranNotifyIcon *icon);
 };
@@ -62,8 +63,9 @@ GType			kiran_notify_icon_get_type (void);
 
 const gchar 		*kiran_notify_icon_get_id (KiranNotifyIcon *icon);
 const gchar 		*kiran_notify_icon_get_name (KiranNotifyIcon *icon);
-GdkPixbuf   		*kiran_notify_icon_get_icon (KiranNotifyIcon *icon);
+const gchar   		*kiran_notify_icon_get_icon (KiranNotifyIcon *icon);
 KiranNotifyIconCategory kiran_notify_icon_get_category (KiranNotifyIcon *icon);
+const gchar             *kiran_notify_icon_get_app_category (KiranNotifyIcon *icon);
 KiranNotifyIconWay      kiran_notify_icon_get_way (KiranNotifyIcon *icon);
 gint		        kiran_notify_icon_compare (KiranNotifyIcon *icon_a,
 					           KiranNotifyIcon *icon_b);

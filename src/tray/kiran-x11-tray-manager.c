@@ -231,6 +231,9 @@ kiran_x11_tray_manager_handle_dock_request (KiranX11TrayManager  *manager,
     }
 
     icon = kiran_x11_tray_icon_new (icon_window); 
+    if (!icon)
+	return;
+
     socket = kiran_x11_tray_icon_get_socket (KIRAN_X11_TRAY_ICON (icon));
 
     kiran_tray_manager_emit_icon_added (KIRAN_TRAY_MANAGER (manager), KIRAN_NOTIFY_ICON (icon)); 

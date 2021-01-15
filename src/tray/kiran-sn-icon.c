@@ -1,4 +1,5 @@
 #include <math.h>
+#include <glib/gstdio.h>
 #include "kiran-notify-icon.h"
 #include "kiran-sn-icon.h"
 #include "kiran-sn-item-gen.h"
@@ -40,8 +41,9 @@ struct _KiranSnIconPrivate
     GtkMenu *gmenu;
     gint update_id;
     gchar *name;
-    GdkPixbuf *icon;
     KiranNotifyIconCategory category;
+    gchar *app_category;
+    gchar *icon;
 };
 
 enum
@@ -67,9 +69,10 @@ static guint signals[LAST_SIGNAL] = { 0 };
 static void  kiran_notify_icon_init (KiranNotifyIconInterface *iface);
 static const gchar *kiran_sn_icon_get_id (KiranNotifyIcon *icon);
 static KiranNotifyIconCategory kiran_sn_icon_get_category (KiranNotifyIcon *icon);
+static const gchar *kiran_sn_icon_get_app_category (KiranNotifyIcon *icon);
 static KiranNotifyIconWay kiran_sn_icon_get_way (KiranNotifyIcon *icon);
 static const gchar *kiran_sn_icon_get_name (KiranNotifyIcon *icon);
-static GdkPixbuf *kiran_sn_icon_get_icon (KiranNotifyIcon *icon);
+static const gchar *kiran_sn_icon_get_icon (KiranNotifyIcon *icon);
 static KiranSnIconPixmap **icon_pixmap_new (GVariant *variant);
 static void icon_pixmap_free (KiranSnIconPixmap **data);
 
@@ -84,6 +87,7 @@ kiran_notify_icon_init (KiranNotifyIconInterface *iface)
 {
     iface->get_id = kiran_sn_icon_get_id;
     iface->get_category = kiran_sn_icon_get_category;
+    iface->get_app_category = kiran_sn_icon_get_app_category;
     iface->get_name = kiran_sn_icon_get_name; 
     iface->get_icon = kiran_sn_icon_get_icon; 
     iface->get_way = kiran_sn_icon_get_way;
@@ -105,6 +109,14 @@ kiran_sn_icon_get_category (KiranNotifyIcon *icon)
     return priv->category;
 }
 
+static const gchar *
+kiran_sn_icon_get_app_category (KiranNotifyIcon *icon)
+{
+    KiranSnIconPrivate *priv = KIRAN_SN_ICON (icon)->priv;
+
+    return priv->app_category;
+}
+
 static KiranNotifyIconWay
 kiran_sn_icon_get_way (KiranNotifyIcon *icon)
 {
@@ -119,7 +131,7 @@ kiran_sn_icon_get_name (KiranNotifyIcon *icon)
     return priv->name;
 }
 
-static GdkPixbuf *
+static const gchar *
 kiran_sn_icon_get_icon (KiranNotifyIcon *icon)
 {
     KiranSnIconPrivate *priv = KIRAN_SN_ICON (icon)->priv;
@@ -509,6 +521,9 @@ update (KiranSnIcon *icon)
         }
         gtk_image_set_from_pixbuf_with_scale (GTK_IMAGE (priv->image), pixbuf, scale);
         g_object_unref (pixbuf);
+
+	g_free (priv->icon);
+	priv->icon = g_strdup (priv->icon_name);
     }
     else if (priv->icon_pixmap != NULL && priv->icon_pixmap[0] != NULL)
     {
@@ -521,6 +536,30 @@ update (KiranSnIcon *icon)
         {
 	    cairo_surface_set_device_scale(surface, scale, scale);
             gtk_image_set_from_surface (GTK_IMAGE (priv->image), surface);
+	    
+	    g_free (priv->icon);
+	    priv->icon = g_strdup_printf ("%s/.config/kiran-tray/icon/%s.png",
+                                                g_get_home_dir(),
+                                                priv->id);
+
+	    
+	    if (!g_file_test (priv->icon, G_FILE_TEST_EXISTS))
+	    {
+		gchar *dir = NULL;
+	
+	        dir = g_strdup_printf ("%s/.config/kiran-tray/icon", g_get_home_dir ());
+		if (dir)
+		{		
+	            if (!g_file_test (dir, G_FILE_TEST_EXISTS))
+	            {
+	                g_mkdir_with_parents (dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	            }
+	            free (dir);
+		}
+
+	        cairo_surface_write_to_png (surface, priv->icon);
+	    }
+
             cairo_surface_destroy (surface);
         }
     }
@@ -812,6 +851,8 @@ get_all_cb (GObject      *source_object,
             priv->item_is_menu = g_variant_get_boolean (value);
         else if (g_strcmp0 (key, "Title") == 0)
             priv->name = g_variant_dup_string (value, NULL);
+        else if (g_strcmp0 (key, "Category") == 0)
+            priv->app_category = g_variant_dup_string (value, NULL);
 
 	g_variant_unref (value);
 	g_free (key);
@@ -1012,7 +1053,8 @@ kiran_sn_icon_finalize (GObject *object)
     g_clear_pointer (&priv->tooltip, kiran_sn_tooltip_free);
     g_clear_pointer (&priv->menu, g_free);
     g_clear_pointer (&priv->name, g_free);
-    g_clear_pointer (&priv->icon, g_object_unref);
+    g_clear_pointer (&priv->app_category, g_free);
+    g_clear_pointer (&priv->icon, g_free);
 
 
     G_OBJECT_CLASS (kiran_sn_icon_parent_class)->finalize (object);
@@ -1264,9 +1306,11 @@ kiran_sn_icon_init (KiranSnIcon *self)
     priv->icon_size = 16;
     priv->effective_icon_size = 16;
     priv->update_id = 0;
-    priv->icon= NULL;
     priv->id = NULL;
-    priv->category = KIRAN_NOTIFY_ICON_CATEGORY_SYSTEM_SERVICES;
+    priv->icon_name = NULL;
+    priv->category = KIRAN_NOTIFY_ICON_CATEGORY_APPLICATION_STATUS;
+    priv->app_category = NULL;
+    priv->icon = NULL;
 
     priv->image = gtk_image_new ();
     gtk_container_add (GTK_CONTAINER (self), priv->image);

@@ -15,7 +15,10 @@
 
 #define ROOT_NODE_NAME "apps"
 #define APP_NODE_NAME "app"
-#define APP_ID_NODE_NAME "app_id"
+#define APP_ID_NODE_NAME "id" 
+#define APP_ICON_NODE_NAME "icon" /*应用图标 */
+#define APP_TITLE_NODE_NAME "title" /*应用名称*/
+#define APP_CATEGORY_NODE_NAME "category" /*应用分类 */
 
 
 struct _KiranTrayPrivate
@@ -537,13 +540,40 @@ kiran_tray_get_icon_type (GSettings *settings, const char *id)
     return ret;
 }
 
+static xmlNodePtr
+create_app_node (KiranNotifyIcon *icon)
+{
+    xmlNodePtr node;
+    KiranNotifyIconCategory icon_cate;
+    const char *id;
+    const char *icon_name;
+    const char *name;
+    const char *app_category;
+
+    id = kiran_notify_icon_get_id (icon);
+    icon_name = kiran_notify_icon_get_icon (icon);
+    name = kiran_notify_icon_get_name (icon);
+    app_category = kiran_notify_icon_get_app_category (icon);
+
+    node = xmlNewNode (NULL, (const xmlChar *)APP_NODE_NAME);
+    xmlNewTextChild (node, NULL, (const xmlChar *)APP_ID_NODE_NAME, (const xmlChar *)id);
+    xmlNewTextChild (node, NULL, (const xmlChar *)APP_ICON_NODE_NAME, (const xmlChar *)icon_name);
+    xmlNewTextChild (node, NULL, (const xmlChar *)APP_TITLE_NODE_NAME, (const xmlChar *)name);
+    xmlNewTextChild (node, NULL, (const xmlChar *)APP_CATEGORY_NODE_NAME, (const xmlChar *)app_category);
+
+    return node;
+} 
+
 static void
-record_tray_notify_icon_id (const gchar *id)
+record_tray_notify_icon (KiranNotifyIcon  *icon)
 {
     gchar *docname = NULL;
     xmlDocPtr doc;
     xmlNodePtr root_node;
     xmlNodePtr node;
+    const char *id;
+
+    id = kiran_notify_icon_get_id (icon);
 
     docname = g_strdup_printf ("%s/.config/kiran-tray/apps.xml", g_get_home_dir ());
     if (docname == NULL)
@@ -589,9 +619,7 @@ record_tray_notify_icon_id (const gchar *id)
     {
 	doc = xmlNewDoc ((const xmlChar *)"1.0");
 	root_node = xmlNewNode (NULL, (const xmlChar *)ROOT_NODE_NAME);
-
-	node = xmlNewNode (NULL, (const xmlChar *)APP_NODE_NAME);
-	xmlNewTextChild (node, NULL, (const xmlChar *)APP_ID_NODE_NAME, (const xmlChar *)id);
+ 	node = create_app_node (icon);
 	xmlAddChild (root_node, node);
 
 	xmlDocSetRootElement (doc, root_node);
@@ -604,14 +632,14 @@ record_tray_notify_icon_id (const gchar *id)
 	{
 	    if (g_remove (docname) == 0)
 	    {
-	        record_tray_notify_icon_id (id);
+	        record_tray_notify_icon (icon);
 	    }
 	}
 	else
 	{
 	    if (xmlStrcmp(root_node->name, (const xmlChar *)ROOT_NODE_NAME))
             {
-		record_tray_notify_icon_id (id);
+		record_tray_notify_icon (icon);
             }
 	    else
 	    {
@@ -644,8 +672,7 @@ record_tray_notify_icon_id (const gchar *id)
 
 		if (!is_exist)
 		{
-                    node = xmlNewNode (NULL, (const xmlChar *)APP_NODE_NAME);
-                    xmlNewTextChild (node, NULL, (const xmlChar *)APP_ID_NODE_NAME, (const xmlChar *)id);
+		    node = create_app_node (icon);
                     xmlAddChild (root_node, node);
 	            xmlSaveFormatFileEnc (docname, doc, "UTF-8", 1);
 		}
@@ -656,6 +683,19 @@ record_tray_notify_icon_id (const gchar *id)
     //关闭文档指针，并清除文档中所有节点动态申请的内存
     xmlFreeDoc (doc);
     g_free (docname);
+}
+
+static void
+kiran_tray_notify_icon_map_callback (GtkWidget *widget,
+			             gpointer  user_data)
+{
+    KiranNotifyIcon *icon = KIRAN_NOTIFY_ICON (widget);
+
+    /* 当窗口保存图标时才进行记录 */
+    if (kiran_notify_icon_get_icon (icon))
+    {
+        record_tray_notify_icon (icon);
+    }
 }
 
 static void
@@ -676,9 +716,13 @@ kiran_tray_notify_icon_added (KiranTrayManager *manager,
     id = kiran_notify_icon_get_id (icon);
     type = kiran_tray_get_icon_type (priv->settings, id);
 
+    /* 系统已知的通知图标如声音，网络，电池等不需要记录 */
     if (kiran_notify_icon_get_category (icon) != KIRAN_NOTIFY_ICON_CATEGORY_HARDWARE)
     {
-        record_tray_notify_icon_id (id);
+        g_signal_connect (icon, 
+		          "map", 
+		          G_CALLBACK (kiran_tray_notify_icon_map_callback), 
+		          NULL);
     }
 
     if (type == ICON_SHOW_IN_PANEL)

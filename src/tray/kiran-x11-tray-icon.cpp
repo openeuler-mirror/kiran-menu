@@ -1,4 +1,5 @@
 #include <app-manager.h>
+#include <glib/gstdio.h>
 
 #include "kiran-notify-icon.h"
 #include "kiran-x11-tray-icon.h"
@@ -10,9 +11,12 @@ struct _KiranX11TrayIconPrivate
     gchar *id;
     gchar *name;
     KiranNotifyIconCategory category;
-    GdkPixbuf *icon;
+    gchar *icon;
     GtkWidget *socket;
     gboolean has_alpha;
+    gchar *app_category;
+
+    gboolean has_desktop; /* 是否找到对应窗口的桌面文件 */
 };
 
 enum
@@ -25,8 +29,9 @@ static void                    kiran_notify_icon_init (KiranNotifyIconInterface 
 static const char              *kiran_x11_tray_icon_get_id (KiranNotifyIcon *icon);
 static const char              *kiran_x11_tray_icon_get_name (KiranNotifyIcon *icon);
 static KiranNotifyIconCategory kiran_x11_tray_icon_get_category (KiranNotifyIcon *icon);
+static const char              *kiran_x11_tray_icon_get_app_category (KiranNotifyIcon *icon);
 static KiranNotifyIconWay kiran_x11_tray_icon_get_way (KiranNotifyIcon *icon);
-static GdkPixbuf               *kiran_x11_tray_icon_get_icon (KiranNotifyIcon *icon);
+static const char              *kiran_x11_tray_icon_get_icon (KiranNotifyIcon *icon);
 
 #define KIRAN_X11_TRAY_ICON_GET_PRIVATE(o) 	(G_TYPE_INSTANCE_GET_PRIVATE ((o), KIRAN_TYPE_X11_TRAY_ICON, KiranX11TrayIconPrivate))
 
@@ -41,6 +46,7 @@ kiran_notify_icon_init (KiranNotifyIconInterface *iface)
    iface->get_name = kiran_x11_tray_icon_get_name; 
    iface->get_icon = kiran_x11_tray_icon_get_icon; 
    iface->get_category = kiran_x11_tray_icon_get_category; 
+   iface->get_app_category = kiran_x11_tray_icon_get_app_category; 
    iface->get_way = kiran_x11_tray_icon_get_way; 
 }
 
@@ -71,12 +77,10 @@ kiran_x11_tray_icon_finalize (GObject *object)
 {
     KiranX11TrayIconPrivate *priv = KIRAN_X11_TRAY_ICON (object)->priv;
 
-    if (priv->id)
-	g_free (priv->id);
-    if (priv->name)
-	g_free (priv->name);
-    if (priv->icon)
-	g_object_unref (priv->icon);
+    g_free (priv->id);
+    g_free (priv->name);
+    g_free (priv->icon);
+    g_free (priv->app_category);
 }
 
 static void
@@ -127,6 +131,50 @@ kiran_x11_tray_icon_draw (GtkWidget *widget,
     kiran_x11_tray_socket_draw_on_parent (KIRAN_X11_TRAY_SOCKET (priv->socket),
 		   		          widget,
 					  cr); 
+    if (!priv->has_desktop)
+    {
+	/* 如果没有对应的桌面文件， 则保存一张对应的窗口图片 */
+
+	if (!g_file_test (priv->icon, G_FILE_TEST_EXISTS))
+ 	{
+	    /* 还没有保存过， 则进行保存 */
+            GdkWindow *gdk_window;
+            cairo_t *cairo;
+            cairo_surface_t *surface;
+            
+	    gdk_window = gtk_widget_get_window (priv->socket);
+	    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+            cairo = gdk_cairo_create (gdk_window);
+	    G_GNUC_END_IGNORE_DEPRECATIONS
+
+            if (cairo)
+            {
+                surface = cairo_get_target (cairo);
+                if (surface)
+		{
+                    gchar *dir = NULL;
+            
+                    dir = g_strdup_printf ("%s/.config/kiran-tray/icon", g_get_home_dir ());
+                    if (dir == NULL)
+                    {
+                        cairo_destroy (cairo);
+                        return TRUE;
+                    }
+            
+                    if (!g_file_test (dir, G_FILE_TEST_EXISTS))
+                    {
+                        g_mkdir_with_parents (dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+                    }
+                    free (dir);
+
+            	    cairo_surface_write_to_png (surface, priv->icon);
+		}
+
+                cairo_destroy (cairo);
+            }
+        }
+    }
+
     return TRUE;
 }
 
@@ -208,8 +256,9 @@ kiran_x11_tray_icon_init (KiranX11TrayIcon *self)
     priv->name = NULL;
     priv->icon = NULL;
     priv->category = KIRAN_NOTIFY_ICON_CATEGORY_APPLICATION_STATUS;
+    priv->app_category = NULL;
     priv->has_alpha = TRUE;
-    
+    priv->has_desktop = TRUE; 
 }
 
 static char *
@@ -241,7 +290,7 @@ _get_wmclass (Display *xdisplay,
   
     ch.res_name = NULL;
     ch.res_class = NULL;
-  
+
     display = gdk_display_get_default ();
     gdk_x11_display_error_trap_push (display);
     XGetClassHint (xdisplay, xwindow, &ch);
@@ -341,13 +390,21 @@ kiran_x11_tray_icon_get_category (KiranNotifyIcon *icon)
     return priv->category;
 }
 
+static const char *
+kiran_x11_tray_icon_get_app_category (KiranNotifyIcon *icon)
+{
+    KiranX11TrayIconPrivate *priv = KIRAN_X11_TRAY_ICON (icon)->priv;
+
+    return priv->app_category;
+}
+
 static KiranNotifyIconWay
 kiran_x11_tray_icon_get_way (KiranNotifyIcon *icon)
 {
     return KIRAN_NOTIFY_ICON_WAY_X11;
 }
 
-static GdkPixbuf *
+static const char *
 kiran_x11_tray_icon_get_icon (KiranNotifyIcon *icon)
 {
     KiranX11TrayIconPrivate *priv = KIRAN_X11_TRAY_ICON (icon)->priv;
@@ -375,16 +432,43 @@ GtkWidget *
 kiran_x11_tray_icon_new (Window icon_window)
 {
     KiranX11TrayIcon *icon;
+    XWindowAttributes window_attributes;
+    Display *xdisplay;
     GdkDisplay *display; 
+    GdkScreen *screen;
+    GdkVisual *visual;
     char *res_name = NULL;
     char *res_class = NULL;
     guint i;
+    gint result;
+
+    display = gdk_display_get_default ();
+    screen = gdk_display_get_default_screen (display);
+    xdisplay = GDK_SCREEN_XDISPLAY (screen);
+
+    if (!GDK_IS_X11_DISPLAY (display))
+    {
+	g_warning ("kiran tray only works on X11");
+	return NULL;
+    }
+
+    gdk_x11_display_error_trap_push (display);
+    result = XGetWindowAttributes (xdisplay, icon_window,
+		    		   &window_attributes);
+    gdk_x11_display_error_trap_pop_ignored (display);
+
+    if (!result) /* 窗口已经销毁 */
+	return NULL;
+
+    visual = gdk_x11_screen_lookup_visual (screen,
+		    			   window_attributes.visual->visualid);
+
+    if (!visual)
+	return NULL;
 
     icon = reinterpret_cast<KiranX11TrayIcon*>(g_object_new (KIRAN_TYPE_X11_TRAY_ICON, NULL));
     icon->priv->icon_window = icon_window;
 
-
-    display = gtk_widget_get_display (GTK_WIDGET (icon));
     _get_wmclass (GDK_DISPLAY_XDISPLAY (display),
             icon_window,
             &res_class,
@@ -401,16 +485,43 @@ kiran_x11_tray_icon_new (Window icon_window)
         }
     }
 
-    
     if (!icon->priv->id) {
-        auto app = Kiran::AppManager::get_instance()->lookup_app_with_xid(icon_window);
-        if (app) {
-            const char *res_name = app->get_desktop_id().c_str();
+	auto app = Kiran::AppManager::get_instance()->lookup_app_with_xid(icon_window);
+
+	if (!app) {
+		auto window = std::make_shared<Kiran::Window>(icon_window);
+	        app = Kiran::AppManager::get_instance()->lookup_app_with_window(window);
+	}
+
+	if (app) {
+            const char *id = app->get_desktop_id().c_str();
+            const char *name = app->get_name().c_str();
+            const char *category = app->get_categories().c_str();
+	    const char *icon_name = app->get_icon()->to_string().c_str();
+
+            icon->priv->id = g_strdup(id);
+            icon->priv->icon = g_strdup(icon_name);
+            icon->priv->name = g_strdup(name);
+            icon->priv->app_category = g_strdup(category);
+	    
+	}
+	else
+	{
+	    //未找到对应的desktop文件
             icon->priv->id = g_strdup(res_name);
+            icon->priv->name = g_strdup(res_name);
+	    icon->priv->app_category = g_strdup ("ApplicationStatus");
+	    icon->priv->icon = g_strdup_printf ("%s/.config/kiran-tray/icon/%s.png", 
+			    			g_get_home_dir(), 
+						icon->priv->id); 
+
+	    icon->priv->has_desktop = FALSE;
 	}
     }
     else
+    {
         g_free (res_name);
+    }
     
     g_free (res_class);
 

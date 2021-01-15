@@ -35,7 +35,7 @@ kiran_notify_icon_get_name (KiranNotifyIcon *icon)
     return iface->get_name (icon);
 }
 
-GdkPixbuf *
+const gchar*
 kiran_notify_icon_get_icon (KiranNotifyIcon *icon)
 {
     KiranNotifyIconInterface *iface;
@@ -59,6 +59,19 @@ kiran_notify_icon_get_category (KiranNotifyIcon *icon)
     g_return_val_if_fail (iface->get_category != NULL, KIRAN_NOTIFY_ICON_CATEGORY_APPLICATION_STATUS);
 
     return iface->get_category (icon);
+}
+
+const gchar *
+kiran_notify_icon_get_app_category (KiranNotifyIcon *icon)
+{
+    KiranNotifyIconInterface *iface;
+
+    g_return_val_if_fail (KIRAN_IS_NOTIFY_ICON (icon), NULL);
+
+    iface = KIRAN_NOTIFY_ICON_GET_IFACE (icon);
+    g_return_val_if_fail (iface->get_category != NULL, NULL);
+
+    return iface->get_app_category (icon);
 }
 
 KiranNotifyIconWay    
