@@ -25,7 +25,7 @@ void kiran_accounts_user_init(KiranAccountsUser *self)
 {
     KiranAccountsUserPrivate *priv;
 
-    priv = kiran_accounts_user_get_instance_private(self);
+    priv = (KiranAccountsUserPrivate*)kiran_accounts_user_get_instance_private(self);
     memset(priv, 0, sizeof(KiranAccountsUserPrivate));
 }
 
@@ -34,7 +34,7 @@ void kiran_accounts_user_finalize(GObject *kobj)
     KiranAccountsUser *self = KIRAN_ACCOUNTS_USER(kobj);
     KiranAccountsUserPrivate *priv;
 
-    priv = kiran_accounts_user_get_instance_private(self);
+    priv = (KiranAccountsUserPrivate*)kiran_accounts_user_get_instance_private(self);
 
     g_free(priv->object_path);
 
@@ -89,7 +89,7 @@ static void on_dbus_properties_changed(KiranAccountsUser *user, GVariant *change
 
 static void on_dbus_proxy_ready(GObject *source_obj, GAsyncResult *result, gpointer userdata)
 {
-    KiranAccountsUser *self = userdata;
+    KiranAccountsUser *self = (KiranAccountsUser*)userdata;
     KiranAccountsUserPrivate *priv;
     GError *error = NULL;
     
@@ -138,7 +138,7 @@ GVariant *kiran_accounts_user_get_property(KiranAccountsUser *user, const char *
     if (!KIRAN_ACCOUNTS_IS_USER(user))
         return NULL;
 
-    priv = kiran_accounts_user_get_instance_private(user);
+    priv = (KiranAccountsUserPrivate*)kiran_accounts_user_get_instance_private(user);
     if (!priv->dbus_proxy)
         return NULL;
     
@@ -188,7 +188,7 @@ gboolean kiran_accounts_user_get_is_loaded(KiranAccountsUser *user)
     if (!KIRAN_ACCOUNTS_IS_USER(user))
         return FALSE;
 
-    priv = kiran_accounts_user_get_instance_private(user);
+    priv = (KiranAccountsUserPrivate*)kiran_accounts_user_get_instance_private(user);
     return priv->is_loaded;
 }
 
@@ -255,7 +255,7 @@ KiranAccountsPasswordMode kiran_accounts_user_get_password_mode(KiranAccountsUse
 
     if (variant)
         g_variant_unref(variant);
-    return mode;
+    return (KiranAccountsPasswordMode)mode;
 }
 KiranAccountsAccountType kiran_accounts_user_get_account_type(KiranAccountsUser *user)
 {
@@ -270,5 +270,5 @@ KiranAccountsAccountType kiran_accounts_user_get_account_type(KiranAccountsUser 
 
     if (variant)
         g_variant_unref(variant);
-    return account_type;
+    return (KiranAccountsAccountType)account_type;
 }

@@ -7,14 +7,14 @@ struct _KiranAccountsManagerPrivate {
     gboolean loaded;
 };
 
-#define KIRAN_ACCOUNTS_MANAGER_PRIVATE(o)   kiran_accounts_manager_get_instance_private(o)
+#define KIRAN_ACCOUNTS_MANAGER_PRIVATE(o)   (KiranAccountsManagerPrivate*)kiran_accounts_manager_get_instance_private(o)
 
 G_DEFINE_TYPE_WITH_PRIVATE(KiranAccountsManager, kiran_accounts_manager, G_TYPE_OBJECT)
 
 static void on_dbus_proxy_ready(GObject *source_object, GAsyncResult *result, gpointer userdata)
 {
     GError *error = NULL;
-    KiranAccountsManager *self = userdata;
+    KiranAccountsManager *self = (KiranAccountsManager*)userdata;
     KiranAccountsManagerPrivate *priv = KIRAN_ACCOUNTS_MANAGER_PRIVATE(self);
 
     priv->dbus_proxy = g_dbus_proxy_new_for_bus_finish(result, &error);
@@ -34,7 +34,7 @@ void kiran_accounts_manager_init(KiranAccountsManager *self)
     KiranAccountsManagerPrivate *priv = KIRAN_ACCOUNTS_MANAGER_PRIVATE(self);
 
     priv->dbus_proxy = g_dbus_proxy_new_for_bus_sync(G_BUS_TYPE_SYSTEM,
-                                                     0,
+                                                     G_DBUS_PROXY_FLAGS_NONE,
                                                      NULL,
                                                      KIRAN_ACCOUNTS_BUS,
                                                      KIRAN_ACCOUNTS_PATH,
@@ -83,7 +83,7 @@ KiranAccountsUser *kiran_accounts_manager_get_user_by_id(KiranAccountsManager *s
 
     if (error)
     {
-        LOG_WARNING("Failed to get object path for user %d: %s", uid, error->message),
+        LOG_WARNING("Failed to get object path for user %d: %s", uid, error->message);
         g_error_free(error);
     } else {
         const char *object_path;
@@ -99,7 +99,7 @@ KiranAccountsManager *kiran_accounts_manager_get_default()
 {
     static KiranAccountsManager *manager = NULL;
     if (!manager) {
-        manager = g_object_new(KIRAN_ACCOUNTS_TYPE_MANAGER, NULL);
+        manager = (KiranAccountsManager*)g_object_new(KIRAN_ACCOUNTS_TYPE_MANAGER, NULL);
     }
 
     return manager;

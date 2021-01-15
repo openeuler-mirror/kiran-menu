@@ -49,7 +49,7 @@ add_executable(${TARGET_NAME}
 target_compile_features(${TARGET_NAME} PUBLIC cxx_std_11)
 
 if(BUILD_WITH_KIRANACCOUNTS)
-target_sources(${TARGET_NAME} PUBLIC kiran-accounts-user.c kiran-accounts-manager.c)
+target_sources(${TARGET_NAME} PUBLIC menu/kiran-accounts-user.cpp menu/kiran-accounts-manager.cpp)
 pkg_search_module(ACCOUNTSSERVICE REQUIRED kiran-cc-daemon)
 else()
 pkg_search_module(ACCOUNTSSERVICE REQUIRED accountsservice)
