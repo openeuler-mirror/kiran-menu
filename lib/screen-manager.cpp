@@ -9,12 +9,22 @@
 
 #include "lib/screen-manager.h"
 
+void on_show_desktop_changed (WnckScreen *screen,
+               gpointer    user_data)
+{
+    Kiran::ScreenManager *manager = reinterpret_cast<Kiran::ScreenManager*>(user_data);
+
+    manager->signal_show_desktop_changed().emit(wnck_screen_get_showing_desktop(screen));
+}
+
 namespace Kiran
 {
 ScreenManager::ScreenManager()
 {
     wnck_set_client_type(WNCK_CLIENT_TYPE_PAGER);
     this->screen_ = wnck_screen_get_default();
+
+    g_signal_connect(this->screen_, "showing-desktop-changed", G_CALLBACK(on_show_desktop_changed), this);
 }
 
 ScreenManager::~ScreenManager()
@@ -39,6 +49,17 @@ void ScreenManager::force_update()
     wnck_screen_force_update(this->screen_);
 
     this->force_update_.emit();
+}
+
+void ScreenManager::set_show_desktop(bool show)
+{
+    g_return_if_fail(this->screen_ != NULL);
+    wnck_screen_toggle_showing_desktop(this->screen_, show);
+}
+
+bool ScreenManager::get_show_desktop()
+{
+    return wnck_screen_get_showing_desktop(this->screen_);
 }
 
 }  // namespace Kiran

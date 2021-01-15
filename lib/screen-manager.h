@@ -30,8 +30,13 @@ public:
     // WindowManager/AppManager通过捕获opened/closed信号来建立对wnck_window/wnck_appplication的创建和销毁。
     void force_update();
 
+    /*设置是否显示桌面(隐藏所有窗口)*/
+    void set_show_desktop(bool show);
+    bool get_show_desktop();
+
     // 调用force_update函数触发的信号
     sigc::signal<void> &signal_force_update() { return this->force_update_; }
+    sigc::signal<void, bool> signal_show_desktop_changed() { return this->show_desktop_changed; }
 
 private:
     ScreenManager();
@@ -42,5 +47,6 @@ private:
     WnckScreen *screen_;
 
     sigc::signal<void> force_update_;
+    sigc::signal<void, bool> show_desktop_changed;
 };
 }  // namespace Kiran

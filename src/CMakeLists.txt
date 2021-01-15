@@ -41,6 +41,8 @@ add_executable(${TARGET_NAME}
         workspace/window_arrange.cpp
         workspace/workspace-applet-button.cpp
         workspace/workspace-applet.cpp
+        showdesktop/showdesktop-applet-button.cpp
+        showdesktop/showdesktop-applet.cpp
         applet.cpp
 )
 

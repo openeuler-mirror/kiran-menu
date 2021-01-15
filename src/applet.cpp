@@ -11,6 +11,7 @@
 #include "menu/menu-applet.h"
 #include "tasklist/tasklist-applet.h"
 #include "workspace/workspace-applet.h"
+#include "showdesktop/showdesktop-applet.h"
 #include "common/kiran-power.h"
 #include "common/global.h"
 
@@ -97,13 +98,6 @@ kiran_applet_factory (MatePanelApplet *applet,
 {
     static int backend_inited = false;
 
-    if (strcmp(iid, "KiranMenuApplet") &&
-            strcmp(iid, "KiranTasklistApplet") &&
-            strcmp(iid, "KiranWorkspaceApplet")) {
-        LOG_WARNING("not match id\n");
-        return FALSE;
-    }
-
     setlocale(LC_MESSAGES, "");
     bindtextdomain(GETTEXT_PACKAGE, DATA_DIR "/locale");
     bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
@@ -129,7 +123,9 @@ kiran_applet_factory (MatePanelApplet *applet,
         tasklist_applet_fill(applet);
     } else if (!strcmp(iid, "KiranWorkspaceApplet")) {
         workspace_applet_fill(applet);
-    } else {
+    } else if (!strcmp(iid, "KiranShowDesktopApplet")) {
+        showdesktop_applet_fill(applet);
+    }else {
         /* Should not reach here */
         g_warn_if_reached();
     }

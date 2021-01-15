@@ -28,3 +28,11 @@ Description=Kiran Workspace switching applet
 Description[zh_CN]=Kiran工作区切换插件
 Icon=kiran-workspace-switcher
 MateComponentId=OAFIID:KiranWorkspaceApplet;
+
+[KiranShowDesktopApplet]
+Name=Kiran Show Desktop applet
+Name[zh_CN]=Kiran显示桌面插件
+Description=Kiran Show desktop applet
+Description[zh_CN]=Kiran显示桌面插件
+Icon=user-desktop
+MateComponentId=OAFIID:KiranShowDesktopApplet;
