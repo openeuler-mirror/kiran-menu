@@ -132,7 +132,7 @@ bool KiranPower::can_suspend()
         result = proxy->call_sync("CanSuspend").get_child();
         data = Glib::VariantBase::cast_dynamic<Glib::Variant<Glib::ustring>>(result).get();
 
-        return (data == "yes");
+        return (data != "na");
     } catch (const Gio::DBus::Error &e) {
         //如果获取失败，就假设其可以挂起，由挂起操作调用时做检查
         std::cerr<<"Failed to query CanSuspend: "<<e.what().data()<<std::endl;
@@ -156,7 +156,7 @@ bool KiranPower::can_hibernate()
         result = proxy->call_sync("CanHibernate").get_child();
         data = Glib::VariantBase::cast_dynamic<Glib::Variant<Glib::ustring>>(result).get();
 
-        return (data == "yes");
+        return (data != "na");
     } catch (const Gio::DBus::Error &e) {
         //如果获取失败，就假设其可以挂起，由挂起操作调用时做检查
         std::cerr<<"Failed to query CanSuspend: "<<e.what().data()<<std::endl;
