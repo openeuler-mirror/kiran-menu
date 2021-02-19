@@ -11,6 +11,8 @@ add_executable(${TARGET_NAME}
         common/kiran-thumbnail-widget.cpp
         common/window-thumbnail-widget.cpp
         common/workarea-monitor.cpp
+        menu/recent-files-list-box.cpp
+        menu/recent-files-widget.cpp
         menu/menu-user-info.cpp
         menu/menu-list-item-widget.cpp
         menu/menu-app-launcher-button.cpp
@@ -71,7 +73,7 @@ pkg_search_module(ZLOG REQUIRED zlog)
 
 include_directories(${CMAKE_BINARY_DIR})
 
-target_compile_options(${TARGET_NAME} PUBLIC "-L${PROJECT_BINARY_DIR}/lib" -DG_LOG_DOMAIN=\"${TARGET_NAME}\")
+target_compile_options(${TARGET_NAME} PUBLIC -g "-L${PROJECT_BINARY_DIR}/lib" -DG_LOG_DOMAIN=\"${TARGET_NAME}\")
 target_include_directories(${TARGET_NAME} PUBLIC "${PROJECT_SOURCE_DIR}/lib"
             "${MATEPANEL_INCLUDE_DIRS}"
             "${GTKMM_INCLUDE_DIRS}"

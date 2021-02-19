@@ -156,6 +156,36 @@ msgstr "收藏夹列表为空"
 msgid "No frequently used apps!"
 msgstr "暂无常用应用信息"
 
+msgid "The Recently files list is empty!"
+msgstr "暂无最近访问的文档信息"
+
+msgid "System Warning"
+msgstr "系统提示"
+
+msgid "All recent files information will be lost.\nAre you sure to clear the whole lists?"
+msgstr "所有的最近访问的文档信息将会丢失。\n确定要清空整个列表吗?"
+
+msgid "Favorite applications"
+msgstr "收藏夹应用"
+
+msgid "Recent files"
+msgstr "最近访问文档"
+
+msgid "Search files"
+msgstr "搜索文件"
+
+msgid "Open File"
+msgstr "打开文件"
+
+msgid "Open File Location"
+msgstr "打开文件所在目录"
+
+msgid "Remove from list"
+msgstr "从最近访问列表中移除"
+
+msgid "Clear the whole list"
+msgstr "清空最近访问列表"
+
 msgid "Switch user"
 msgstr "切换用户"
 
@@ -215,6 +245,4 @@ msgstr "Kiran工作区切换插件"
 
 msgid "Workspace switcher designed for Kiran Desktop"
 msgstr "专为Kiran桌面设计的工作区切换插件"
-
-
 

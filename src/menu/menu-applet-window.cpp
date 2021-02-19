@@ -14,6 +14,7 @@
 #include <glibmm/i18n.h>
 #include "global.h"
 #include "menu-apps-container.h"
+#include "recent-files-widget.h"
 
 #define NEW_APPS_MAX_SIZE 3
 
@@ -22,8 +23,6 @@ MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type):
     Gtk::Window(window_type),
     compact_min_height_property(*this, "compact-min-height", 0),
     expand_min_height_property(*this, "expand-min-height", 0),
-    compact_apps_button(nullptr),
-    compact_favorites_button(nullptr),
     compact_avatar_widget(nullptr),
     expand_avatar_widget(nullptr)
 {
@@ -138,28 +137,34 @@ bool MenuAppletWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
 
 void MenuAppletWindow::init_ui()
 {
-    Gtk::Box *search_box;
+    Gtk::Box *search_box, *main_box;
     Gtk::EventBox *date_box;
-    Gtk::Box *expand_panel, *compact_favorites_page, *search_results_page;
-    Gtk::ScrolledWindow *all_apps_scrolled, *category_overview_scrolled;
+    Gtk::Box *expand_panel, *search_results_page;
+    Gtk::ScrolledWindow *all_apps_scrolled;
+    Gtk::Box *recent_files_view;
 
     init_window_visual();
 
     builder = Gtk::Builder::create_from_resource("/kiran-menu/ui/menu");
     builder->get_widget<Gtk::Box>("menu-container", main_box);
-    builder->get_widget<Gtk::Grid>("sidebar-box", side_box);
-    builder->get_widget<Gtk::Stack>("overview-stack", overview_stack);
-    builder->get_widget<Gtk::Stack>("apps-view-stack", appview_stack);
+    builder->get_widget<Gtk::Stack>("menu-view-stack", menu_view_stack);
+    builder->get_widget<Gtk::Stack>("apps-list-stack", apps_list_stack);
 
-    builder->get_widget<Gtk::Box>("compact-tab-box", compact_tab_box);
     builder->get_widget<Gtk::Box>("search-box", search_box);
     builder->get_widget<Gtk::EventBox>("date-box", date_box);
 
     builder->get_widget<Gtk::Box>("expand-panel", expand_panel);
-    builder->get_widget<Gtk::Box>("compact-favorites-page", compact_favorites_page);
+    builder->get_widget<Gtk::Box>("compact-favorites-view", compact_favorites_view);
     builder->get_widget<Gtk::Box>("search-results-page", search_results_page);
+    builder->get_widget<Gtk::Box>("recent-files-view", recent_files_view);
     builder->get_widget<Gtk::ScrolledWindow>("all-apps-scroll", all_apps_scrolled);
-    builder->get_widget<Gtk::ScrolledWindow>("category-overview-scroll", category_overview_scrolled);
+    builder->get_widget<Gtk::ScrolledWindow>("category-list-scroll", category_list_scrolled);
+
+    category_list_scrolled->get_style_context()->add_class("category-list-box");
+
+    /* 最近访问文档列表 */
+    auto widget = Gtk::make_managed<RecentFilesWidget>();
+    recent_files_view->add(*widget);
 
     /* 扩展模式下的常用应用布局 */
     expand_frequents_container = Gtk::make_managed<MenuAppsContainer>(MenuAppsContainer::ICON_MODE_LARGE, _("Frequently used"), false, false);
@@ -180,17 +185,13 @@ void MenuAppletWindow::init_ui()
     compact_favorites_container->set_draw_frame(false);
     compact_favorites_container->set_auto_hide(false);
     compact_favorites_container->set_empty_prompt_text(_("No favorite apps found"));
-    compact_favorites_page->pack_start(*compact_favorites_container, Gtk::PACK_EXPAND_WIDGET);
+    compact_favorites_view->pack_start(*compact_favorites_container, Gtk::PACK_EXPAND_WIDGET);
 
     /* 系统应用列表布局 */
     all_apps_page = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
     all_apps_scrolled->add(*all_apps_page);
     new_apps_container = Gtk::make_managed<MenuNewAppsContainer>(NEW_APPS_MAX_SIZE);
     all_apps_page->pack_start(*new_apps_container, Gtk::PACK_SHRINK);
-
-    /* 分类选择布局 */
-    category_overview_page = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
-    category_overview_scrolled->add(*category_overview_page);
 
     /* 搜索结果布局 */
     search_results_container = Gtk::make_managed<MenuAppsContainer>(MenuAppsContainer::ICON_MODE_SMALL, _("Search Results"), false, true);
@@ -312,6 +313,15 @@ void MenuAppletWindow::init_window_visual()
     gtk_widget_set_visual(widget, rgba_visual->gobj());
 }
 
+/* app列表页Stack */
+#define SEARCH_RESULTS_PAGE     "search-results-page"
+#define APPS_LIST_PAGE          "all-apps-page"
+
+/* 顶层Stack */
+#define ALL_APPS_VIEW           "all-apps-view"
+#define COMPACT_FAVORITES_VIEW  "compact-favorites-view"
+#define RECENTLY_FILES_VIEW     "recently-files-view"
+
 void MenuAppletWindow::on_search_change()
 {
     if (search_entry->get_text_length() == 0) {
@@ -324,7 +334,7 @@ void MenuAppletWindow::on_search_change()
     search_results_container->remove_data("first-item");
 
     //切换到搜索结果页面
-    set_stack_current_index(appview_stack, PAGE_SEARCH_RESULT, false);
+    apps_list_stack->set_visible_child(SEARCH_RESULTS_PAGE);
 
     //搜索时忽略关键字大小写
     auto apps_list = Kiran::MenuSkeleton::get_instance()->search_app(search_entry->get_text().data(), true);
@@ -335,7 +345,7 @@ void MenuAppletWindow::on_search_change()
 
 void MenuAppletWindow::activate_search_result()
 {
-    if (get_stack_current_index(appview_stack) != PAGE_SEARCH_RESULT)
+    if (apps_list_stack->get_visible_child_name() == SEARCH_RESULTS_PAGE)
         return;
 
     if (!search_entry->has_focus())
@@ -346,30 +356,10 @@ void MenuAppletWindow::activate_search_result()
         app->launch();
 }
 
-int MenuAppletWindow::get_stack_current_index(Gtk::Stack *stack)
-{
-    Gtk::Widget *child = stack->get_visible_child();
-
-    return stack->child_property_position(*child).get_value();
-}
-
-void MenuAppletWindow::set_stack_current_index(Gtk::Stack *stack, int index, bool animation)
-{
-    for (auto child: stack->get_children()) {
-        int pos;
-
-        pos = stack->child_property_position(*child).get_value();
-        if (pos == index) {
-            stack->set_visible_child(*child);
-            break;
-        }
-    }
-}
-
 void MenuAppletWindow::on_search_stop()
 {
     /*返回应用列表页面，并清空搜索内容*/
-    set_stack_current_index(appview_stack, PAGE_ALL_APPS_LIST, false);
+    apps_list_stack->set_visible_child(APPS_LIST_PAGE);
     search_entry->set_text("");
 }
 
@@ -378,8 +368,10 @@ void MenuAppletWindow::switch_to_category_overview(const std::string &selected_c
 {
     MenuCategoryItem *selected_item = nullptr;
 
-    KiranHelper::remove_all_for_container(*category_overview_page);
+    KiranHelper::remove_all_for_container(*category_list_scrolled, false);
 
+    auto category_list_box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
+    category_list_scrolled->add(*category_list_box);
     /*
      * 从app列表控件中读取应用分类，以确保遍历的顺序与app列表中显示的
      * 顺序保持一致，因为从category_items读取无法保证一致性。
@@ -403,9 +395,9 @@ void MenuAppletWindow::switch_to_category_overview(const std::string &selected_c
                                            sigc::mem_fun<const std::string&>(*this, &MenuAppletWindow::switch_to_apps_overview),
                                            item->get_category_name(),
                                            true));
-        category_overview_page->add(*item);
+        category_list_box->add(*item);
     }
-    set_stack_current_index(overview_stack, VIEW_CATEGORY_SELECTION, true);
+    category_list_scrolled->show_all();
 
     if (selected_item)
         selected_item->grab_focus();
@@ -445,7 +437,9 @@ void MenuAppletWindow::switch_to_apps_overview(double position, bool animation)
     Gtk::ScrolledWindow *all_apps_area;
 
     //切换到应用程序列表
-    set_stack_current_index(overview_stack, VIEW_APPS_LIST, animation);
+    category_list_scrolled->set_visible(false);
+    menu_view_stack->set_visible_child(ALL_APPS_VIEW);
+    apps_list_stack->set_visible_child(APPS_LIST_PAGE);
     if (position >= 0) {
         builder->get_widget<Gtk::ScrolledWindow>("all-apps-scroll", all_apps_area);
 
@@ -458,12 +452,10 @@ bool MenuAppletWindow::on_map_event(GdkEventAny *any_event)
 {
     Gtk::Window::on_map_event(any_event);
 
-    /**
+    /*
      * 获取当前系统的鼠标事件，这样才能在鼠标点击窗口外部时及时隐藏窗口
      */
     KiranHelper::grab_input(*this);
-
-    //gtk_grab_add(GTK_WIDGET(this->gobj()));
 
     //应用列表滚动到开始位置
     switch_to_apps_overview(0, false);
@@ -472,8 +464,6 @@ bool MenuAppletWindow::on_map_event(GdkEventAny *any_event)
 
     if (display_mode == DISPLAY_MODE_EXPAND || profile.get_default_page() == PAGE_ALL_APPS)
         search_entry->grab_focus();
-    else
-        compact_favorites_button->clicked();
     return true;
 }
 
@@ -525,44 +515,34 @@ bool MenuAppletWindow::on_configure_event(GdkEventConfigure *configure_event)
 
 bool MenuAppletWindow::on_key_press_event(GdkEventKey *key_event)
 {
-    if (key_event->keyval == GDK_KEY_Escape) {
-        switch (get_stack_current_index(overview_stack)) {
-        case VIEW_APPS_LIST:
-            /**
+    if (key_event->keyval == GDK_KEY_Escape)
+    {
+        if (category_list_scrolled->is_visible())
+        {
+            /*当前处于分类选择视图, 返回应用视图*/
+            switch_to_apps_overview(-1, false);
+        }
+
+        if (menu_view_stack->get_visible_child_name() == APPS_LIST_PAGE)
+        {
+            /*
              * 当前位于应用列表视图.
              * 无搜索结果时，按下ESC键隐藏开始菜单窗口.否则停止搜索。
              */
-
-            if (get_stack_current_index(appview_stack) != PAGE_SEARCH_RESULT)
+            if (apps_list_stack->get_visible_child_name() == SEARCH_RESULTS_PAGE)
                 hide();
             else
                 on_search_stop();
-            return true;
-        case VIEW_CATEGORY_SELECTION:
-            /*当前处于分类选择视图, 返回应用视图*/
-            switch_to_apps_overview(-1, false);
-            return true;
-        default:
-            hide();
-            return true;
         }
+        else
+            hide();
 
-    } else if (key_event->keyval == GDK_KEY_Super_L || key_event->keyval == GDK_KEY_Super_R) {
+        return true;
+    }
+    else if (key_event->keyval == GDK_KEY_Super_L || key_event->keyval == GDK_KEY_Super_R)
+    {
         hide();
         return true;
-    } else {
-        if (search_entry->handle_event(key_event) == GDK_EVENT_STOP) {
-            /**
-             * 优先搜索框处理，同时让搜索框获取焦点
-             * 搜索框获取焦点时，原来的输入框内容会被选中,
-             * 因此需要调用select_region来取消选中
-             */
-            if (!search_entry->is_focus()) {
-                search_entry->grab_focus();
-                search_entry->select_region(-1, -1);
-            }
-            return true;
-        }
     }
 
     //传递给子控件处理
@@ -588,38 +568,11 @@ Gtk::Button *MenuAppletWindow::create_launcher_button(const char *icon_resource,
     return button;
 }
 
-Gtk::Button* MenuAppletWindow::create_page_button(const char *icon_resource,
-                                                 const char *tooltip,
-                                                 int page_index)
-{
-    Gtk::Button *button = Gtk::make_managed<Gtk::Button>();
-    Gtk::Image *image = Gtk::make_managed<Gtk::Image>();
-
-    try {
-        image->set_pixel_size(16);
-        image->set_from_resource(icon_resource);
-    } catch (const Glib::Error &e) {
-        LOG_WARNING("Failed to load resouce '%s': %s", icon_resource, e.what().c_str());
-    }
-
-    button->set_always_show_image(true);
-    button->set_image(*image);
-    button->set_tooltip_text(tooltip);
-    button->get_style_context()->add_class("menu-app-launcher");
-
-    button->signal_clicked().connect(
-                [this, page_index]() -> void{
-                    set_stack_current_index(overview_stack, page_index, true);
-                    search_entry->grab_focus();
-                });
-
-    return button;
-}
-
 void MenuAppletWindow::add_sidebar_buttons()
 {
     Gtk::Separator *separator;
     Gtk::Button *power_btn, *launcher_btn;
+    Gtk::Grid *side_box = nullptr;
 
     separator= Gtk::make_managed<Gtk::Separator>(Gtk::ORIENTATION_HORIZONTAL);
     separator->set_margin_start(9);
@@ -627,19 +580,10 @@ void MenuAppletWindow::add_sidebar_buttons()
     separator->set_margin_top(5);
     separator->set_margin_bottom(5);
 
-    power_btn = Gtk::make_managed<MenuPowerButton>();
+    builder->get_widget<Gtk::Grid>("sidebar-box", side_box);
+
     side_box->set_orientation(Gtk::ORIENTATION_VERTICAL);
-
-    compact_favorites_button = create_page_button("/kiran-menu/icon/favorite",
-                                                  _("Favorites"),
-                                                  VIEW_COMPACT_FAVORITES);
-    compact_apps_button = create_page_button("/kiran-menu/icon/list",
-                                             _("All applications"),
-                                             VIEW_APPS_LIST);
-
-    compact_tab_box->add(*compact_favorites_button);
-    compact_tab_box->add(*compact_apps_button);
-    compact_tab_box->add(*separator);
+    side_box->add(*separator);
 
     launcher_btn = create_launcher_button("/kiran-menu/sidebar/home-dir",
                                           _("Home Directory"),
@@ -661,6 +605,7 @@ void MenuAppletWindow::add_sidebar_buttons()
                                           "mate-screensaver-command -l");
     side_box->add(*launcher_btn);
 
+    power_btn = Gtk::make_managed<MenuPowerButton>();
     side_box->add(*power_btn);
 
     side_box->show_all();
@@ -723,7 +668,7 @@ void MenuAppletWindow::load_favorite_apps()
 void MenuAppletWindow::set_display_mode(MenuDisplayMode mode)
 {
     Gtk::Box *compact_avatar_box;
-    Gtk::Box *expand_panel, *compact_tab_box;
+    Gtk::Box *expand_panel;
     int min_width, natural_width, min_height, natural_height;
     Gdk::Rectangle rect;
     Glib::RefPtr<Gdk::Monitor> monitor;
@@ -739,22 +684,23 @@ void MenuAppletWindow::set_display_mode(MenuDisplayMode mode)
 
     builder->get_widget("compact-avatar-box", compact_avatar_box);
     builder->get_widget("expand-panel", expand_panel);
-    builder->get_widget("compact-tab-box", compact_tab_box);
 
     if(display_mode == DISPLAY_MODE_COMPACT) {
         //紧凑模式下隐藏右侧面板
+        compact_favorites_view->set_visible(true);
         compact_avatar_box->set_visible(true);
         expand_panel->set_visible(false);
-        compact_tab_box->set_visible(true);
 
-        if (profile.get_default_page() == PAGE_ALL_APPS)
-            compact_apps_button->clicked();
-        else
-            compact_favorites_button->clicked();
+        if (profile.get_default_page() == PAGE_ALL_APPS) {
+            menu_view_stack->set_visible_child(ALL_APPS_VIEW);
+            apps_list_stack->set_visible_child(APPS_LIST_PAGE);
+        } else
+            menu_view_stack->set_visible_child(COMPACT_FAVORITES_VIEW);
     } else {
         compact_avatar_box->set_visible(false);
+        compact_favorites_view->set_visible(false);
         expand_panel->set_visible(true);
-        compact_tab_box->set_visible(false);
+
         get_preferred_width(min_width, natural_width);
         LOG_DEBUG("min-width: %d, workarea %d x %d", min_width,
                 rect.get_width(),
@@ -765,6 +711,9 @@ void MenuAppletWindow::set_display_mode(MenuDisplayMode mode)
             LOG_WARNING("min width for expand mode exceeds monitor size, switch to compact mode now");
             set_display_mode(DISPLAY_MODE_COMPACT);
             return;
+        } else {
+            menu_view_stack->set_visible_child(ALL_APPS_VIEW);
+            apps_list_stack->set_visible_child(APPS_LIST_PAGE);
         }
 
         Glib::signal_idle().connect_once(sigc::mem_fun(*this, &MenuAppletWindow::load_date_info));

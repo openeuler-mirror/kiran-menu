@@ -450,6 +450,64 @@ button.toggle.kiran-showdesktop-button:active
     background: rgba(255, 255, 255, 0.4);
 }
 
+scrolledwindow.category-list-box, scrolledwindow.category-list-box viewport {
+    background: rgba(28, 28, 28, 0.9);
+}
+
+.stack-switcher button{
+    background: none;
+    border: none;
+    border-radius: 0px;
+    min-height: 30px;
+}
+
+.stack-switcher button:hover{
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    border-radius: 0px;
+    box-shadow: none;
+}
+
+.stack-switcher button:active, .stack-switcher button:checked{
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    box-shadow: none;
+}
+
+list.menu-recent-list {
+    border: none;
+    background: none;
+    margin: 10px 0px 10px 0px;
+    padding: 0px;
+}
+
+list.menu-recent-list row {
+    background: transparent;
+    color: #ffffff;
+    padding: 2px 10px 2px 10px;
+    margin: 0px;
+    min-height: 40px;
+    border-width: 0px;
+    border-right: 3px solid transparent;
+}
+
+list.menu-recent-list row image:first-child {
+    padding: 0px;
+    margin-right: 8px;
+}
+
+list.menu-recent-list row:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-width: 0px;
+    border-right: 3px solid #2eb3ff;
+}
+
+list.menu-recent-list row:selected {
+    background: rgba(255, 255, 255, 0.20);
+    border-width: 0px;
+    border-right: 3px solid #2eb3ff;
+}
+
 scrolledwindow, scrolledwindow viewport {
     background: none;
     border: none;

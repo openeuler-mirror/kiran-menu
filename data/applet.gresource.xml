@@ -19,8 +19,6 @@
     <file alias="icon/group">images/group.svg</file>
     <file alias="icon/expand">images/expand.svg</file>
     <file alias="icon/shrink">images/shrink.svg</file>
-    <file alias="icon/favorite">images/favorite.svg</file>
-    <file alias="icon/list">images/list.svg</file>
    </gresource>
    <gresource prefix="/kiran-tasklist/">
     <file alias="icon/executable">images/executable.svg</file>

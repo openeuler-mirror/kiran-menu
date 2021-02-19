@@ -13,18 +13,6 @@
 #include "menu-apps-container.h"
 #include "menu-new-apps-container.h"
 
-
-enum {
-    VIEW_APPS_LIST = 0,         /* 应用列表视图 */
-    VIEW_CATEGORY_SELECTION,    /* 分类选择跳转视图 */
-    VIEW_COMPACT_FAVORITES      /* 紧凑模式下的收藏夹视图 */
-};
-
-enum {
-    PAGE_ALL_APPS_LIST = 0,     /*所有应用页面 */
-    PAGE_SEARCH_RESULT          /*搜索结果页面*/
-};
-
 class MenuAppletWindow : public Gtk::Window
 {
 public:
@@ -172,16 +160,17 @@ protected:
     bool launch_app_from_list(const char **app_names);
 
 private:
+    void create_category_list_page();
+
+private:
     Glib::RefPtr<Gtk::Builder> builder;
 
-    Gtk::Box *main_box;
     Gtk::SearchEntry *search_entry;
-    Gtk::Grid *side_box;
-    Gtk::Stack *overview_stack, *appview_stack;
-    Gtk::Box *all_apps_page, *category_overview_page;
-    Gtk::Box *compact_tab_box;
-    Gtk::Button *compact_apps_button;
-    Gtk::Button *compact_favorites_button;
+    Gtk::Stack *menu_view_stack, *apps_list_stack;
+    Gtk::Box *all_apps_page;                            /* */
+    Gtk::Box *compact_favorites_view;                   /* 紧凑模式下的收藏夹页面 */
+
+    Gtk::ScrolledWindow *category_list_scrolled;
 
     MenuAppsContainer *compact_favorites_container, *expand_favorites_container;
     MenuAppsContainer *expand_frequents_container;
