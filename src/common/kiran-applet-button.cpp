@@ -18,6 +18,8 @@ KiranAppletButton::KiranAppletButton(MatePanelApplet *applet_)
     applet = applet_;
     g_object_ref(applet);
     g_signal_connect_after(applet, "change-size", G_CALLBACK(on_applet_size_change), this);
+
+    get_style_context()->add_class("kiran-applet-button");
 }
 
 KiranAppletButton::~KiranAppletButton()

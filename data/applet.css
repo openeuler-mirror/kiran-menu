@@ -6,6 +6,15 @@
 
 * {
     font-family: "Noto Sans CJK SC";
+    text-shadow: none;
+    box-shadow: none;
+    -gtk-icon-shadow: none;
+    -gtk-icon-effect: none;
+}
+
+button.kiran-applet-button {
+    border-radius: 0px;
+    border: none;
 }
 
 /* 开始菜单主窗口 */
@@ -57,7 +66,7 @@ button.menu-app-item.horizontal:hover, button.menu-category-item:hover {
 button.menu-app-item.horizontal {
     min-height: 40px;
     padding: 0px;
-    padding-left: 25px;
+    padding-left: 24px;
     -gtkmm__CustomObject_KiranMenuAppItem-icon-spacing: 12px;
 }
 button.menu-category-item {
@@ -78,10 +87,7 @@ button.menu-app-item.vertical {
     -gtkmm__CustomObject_KiranMenuAppItem-icon-spacing: 8px;
     -gtkmm__CustomObject_KiranMenuAppItem-max-width: 88px;
     -gtkmm__CustomObject_KiranMenuAppItem-max-height: 100px;
-    padding-left: 8px;
-    padding-right: 8px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding: 10px 8px 10px 8px;
     border-image: none;
     outline: none;
     background: transparent;
@@ -136,14 +142,15 @@ window#menu-applet-window separator.horizontal, window.menu-applet-window separa
 
 /* 开始菜单应用搜索框 */
 entry.menu-search-entry {
-    margin-left: 10px;
-    margin-right: 10px;
+    margin: 10px 10px 10px 10px;
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 3px;
     background: rgba(255, 255, 255, 0.1);
     color: white;
-    padding-left: 10px;
-    box-shadow: none
+    padding: 3px 10px 3px 10px;
+    box-shadow: none;
+    caret-color: #ffffff;
+    min-height: 24px;
 }
 entry.menu-search-entry:focus {
     border: 1px solid rgba(255, 255, 255, 0.3);
@@ -197,15 +204,21 @@ button.toggle.menu-expand-button:focus{
 }
 
 
-.kiran-tasklist-button {
+button.kiran-tasklist-button {
+    border: none;
+    border-radius: 0px;
     background: transparent;
     -gtkmm__CustomObject_KiranTasklistAppButton-indicator-size: 4px;
 }
-.kiran-tasklist-button:hover{
+button.kiran-tasklist-button:hover{
+    border: none;
+    border-radius: 0px;
     background: rgba(255, 255, 255, 0.2);
 }
 
-.kiran-tasklist-button:active{
+button.kiran-tasklist-button:active{
+    border: none;
+    border-radius: 0px;
     background: rgba(255, 255, 255, 0.35);
 }
 
@@ -304,6 +317,7 @@ menu.opacity-menu menuitem:hover {
 scrollbar {
     -GtkScrollbar-has-backward-stepper: 0;
     -GtkScrollbar-has-forward-stepper: 0;
+    border-radius: 0px;
 }
 
 scrollbar.horizontal, scrollbar.vertical{
@@ -318,13 +332,13 @@ scrollbar.horizontal {
     margin-bottom: 3px;
 }
 
-scrollbar.vertical {
+scrollbar.vertical, scrollbar.vertical trough {
     min-width:5px;
 }
 
 
 scrollbar.horizontal trough, scrollbar.vertical trough {
-   background: transparent;
+   background: none;
    border-image: none;
    border: none;
 }
@@ -339,9 +353,8 @@ scrollbar.horizontal button, scrollbar.horizontal button {
 scrollbar.horizontal slider, scrollbar.vertical slider {
     background: rgba(255, 255, 255, 0.2);
     border-image: none;
-    border-width: 1px;
-    border-radius: 5px;
-    border-color: rgba(0, 0, 0, 0.2);
+    border: none;
+    border-radius: 0px;
 }
 
 scrollbar.horizontal slider {
@@ -356,9 +369,8 @@ scrollbar.vertical slider {
 
 scrollbar.horizontal slider:active, scrollbar.horizontal slider:hover, scrollbar.vertical slider:active, scrollbar.vertical slider:hover{
     background-color: rgba(255, 255, 255, 0.3);
-    border-width: 1px;
-    border-radius: 5px;
-    border-color: rgba(0, 0, 0, 0.8);
+    border: none;
+    border-radius: 0px;
 }
 
 button.tasklist-arrow-button {
@@ -436,4 +448,9 @@ button.toggle.kiran-showdesktop-button:checked,
 button.toggle.kiran-showdesktop-button:active
 {
     background: rgba(255, 255, 255, 0.4);
+}
+
+scrolledwindow, scrolledwindow viewport {
+    background: none;
+    border: none;
 }
