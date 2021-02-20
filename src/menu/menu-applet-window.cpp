@@ -585,6 +585,16 @@ void MenuAppletWindow::add_sidebar_buttons()
     side_box->set_orientation(Gtk::ORIENTATION_VERTICAL);
     side_box->add(*separator);
 
+    launcher_btn = create_launcher_button("/kiran-menu/sidebar/run",
+                                          _("Run"),
+                                          "mate-panel --run-dialog");
+    side_box->add(*launcher_btn);
+
+    launcher_btn = create_launcher_button("/kiran-menu/sidebar/search-files",
+                                          _("Search Files"),
+                                          "mate-search-tool");
+    side_box->add(*launcher_btn);
+
     launcher_btn = create_launcher_button("/kiran-menu/sidebar/home-dir",
                                           _("Home Directory"),
                                           "caja");

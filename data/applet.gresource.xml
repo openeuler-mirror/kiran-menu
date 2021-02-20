@@ -7,6 +7,8 @@
   </gresource>
   <gresource prefix="/kiran-menu/">
     <file alias="action/search">images/search.svg</file>
+    <file alias="sidebar/search-files">images/search-files.svg</file>
+    <file alias="sidebar/run">images/run.svg</file>
     <file alias="sidebar/help">images/help.svg</file>
     <file alias="sidebar/home-dir">images/home-dir.svg</file>
     <file alias="sidebar/settings">images/settings.svg</file>
