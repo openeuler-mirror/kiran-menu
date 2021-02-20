@@ -200,3 +200,18 @@ bool KiranPower::can_reboot()
 {
     return !read_boolean_key_from_gsettings("disable-reboot", false);
 }
+
+bool KiranPower::lock_screen()
+{
+    std::vector<std::string> argv;
+
+    argv.push_back("mate-screensaver-command");
+    argv.push_back("-l");
+
+    try {
+        Glib::spawn_async("", argv, Glib::SPAWN_SEARCH_PATH | Glib::SPAWN_STDOUT_TO_DEV_NULL);
+        return true;
+    } catch (const Glib::SpawnError &e) {
+        return false;
+    }
+}

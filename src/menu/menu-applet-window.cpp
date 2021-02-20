@@ -610,11 +610,6 @@ void MenuAppletWindow::add_sidebar_buttons()
                                   "mate-system-monitor");
     side_box->add(*launcher_btn);
 
-    launcher_btn = create_launcher_button("/kiran-menu/sidebar/lock",
-                                          _("Lock Screen"),
-                                          "mate-screensaver-command -l");
-    side_box->add(*launcher_btn);
-
     power_btn = Gtk::make_managed<MenuPowerButton>();
     side_box->add(*power_btn);
 

@@ -65,7 +65,7 @@ msgid "Control center"
 msgstr "控制面板"
 
 #: src/kiranmenuwindow.cpp:398
-msgid "Lock Screen"
+msgid "Lock screen"
 msgstr "锁定屏幕"
 
 #: src/kiranappitem.cpp:74

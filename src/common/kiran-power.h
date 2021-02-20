@@ -15,6 +15,7 @@ bool shutdown();
 bool reboot();
 bool logout(int mode);
 bool switch_user();
+bool lock_screen();
 
 bool can_suspend();
 bool can_hibernate();

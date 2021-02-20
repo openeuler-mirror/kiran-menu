@@ -7,6 +7,11 @@
 
 MenuPowerMenu::MenuPowerMenu()
 {
+    auto lock_item = Gtk::make_managed<Gtk::MenuItem>(_("Lock screen"));
+    lock_item->signal_activate().connect(sigc::hide_return(
+        sigc::ptr_fun(&KiranPower::lock_screen)));
+    append(*lock_item);
+
     if (KiranPower::can_switchuser()) {
         switchuser_item = Gtk::make_managed<Gtk::MenuItem>(_("Switch user"));
         switchuser_item->signal_activate().connect(sigc::hide_return(
