@@ -98,22 +98,21 @@ protected:
     virtual void on_realize() override;
     virtual void on_unrealize() override;
 
+    virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
 
-    virtual bool on_drag_motion (const Glib::RefPtr< Gdk::DragContext >& context,
-                                 int x,
-                                 int y,
-                                 guint time) override;
-    virtual void on_drag_data_received(const Glib::RefPtr<Gdk::DragContext> &context,
-                                       int x,
-                                       int y,
-                                       const Gtk::SelectionData &selection_data,
-                                       guint info,
-                                       guint time) override;
+    /**
+     * @brief 回调函数，当应用按钮child被拖动时调用
+     * @param child 被拖动的应用按钮
+     * @param x     拖动后按钮child的x坐标(基于当前控件)
+     * @param y     拖动后按钮child的y坐标(基于当前控件)
+     */
+    virtual void on_button_drag_motion (Gtk::Widget *child, int x, int y);
 
-    virtual bool on_drag_drop(const Glib::RefPtr< Gdk::DragContext >& context,
-                              int x,
-                              int y,
-                              guint time) override;
+    /**
+     * @brief 回调函数，当应用按钮child拖放结束时调用
+     * @param child 被拖动的应用按钮
+     */
+    virtual void on_button_drag_end(Gtk::Widget *child);
 
     /**
      * @brief on_orientation_changed 应用按钮排列方向发生变化时的回调函数
@@ -289,11 +288,6 @@ protected:
     Glib::RefPtr<Gtk::Adjustment> get_adjustment();
 
     /**
-     * @brief init_drag_and_drop 添加拖放支持
-     */
-    void init_drag_and_drop();
-
-    /**
      * @brief get_child_geometry 获取给定控件的大小和位置信息，位置信息是基于root窗口坐标
      * @param child         待获取信息的控件
      * @param rect          用来存放控件信息的结构体
@@ -307,6 +301,13 @@ protected:
      * @param pointer_y     鼠标Y坐标
      */
     void get_pointer_position(int &pointer_x, int &pointer_y);
+
+    /**
+     * @brief reorder_child 按钮拖动时，根据鼠标移动方向和鼠标当前位置，重新排列放置子控件widget
+     * @param widget        被拖动的应用按钮
+     * @param motion_dir    按钮拖动方向
+     */
+    void reorder_child(Gtk::Widget *widget, PointerMotionDirection motion_dir);
 
 
 private:
@@ -322,13 +323,13 @@ private:
 
     Glib::Property<Gtk::Orientation> m_property_orient;     //应用按钮排列方向
 
-    Gdk::Point pointer_pos;                 //上次收到拖动事件时的鼠标位置
-    bool drag_checking;                     //是否处于拖动检查过程中
-    PointerMotionDirection motion_dir;      //拖动过程中的鼠标移动方向
-
     sigc::connection pointer_check;         //预览窗口显示状态切换检查定时器
     sigc::connection paging_notify;          //应用按钮页面发生变化时的回调函数
     sigc::connection adjustment_changed;    //分页数据发生变化时的回调函数
+
+    Gtk::Widget *dragging_source;
+    Glib::RefPtr<Gdk::Pixbuf> dragging_icon;
+    Gdk::Point dragging_pos;
 };
 
 #endif // TASKLIST_BUTTONS_CONTAINER_H

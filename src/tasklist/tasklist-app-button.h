@@ -20,6 +20,22 @@ public:
     ~TasklistAppButton() override;
 
     /**
+     * @brief 按钮拖动信号，对应的参数分别为拖动后按钮相对于父窗口的x坐标和y坐标
+     */
+    sigc::signal<void, int, int> signal_drag_update();
+
+    /**
+     * @brief 按钮拖动结束信号
+     */
+    sigc::signal<void> signal_drag_end();
+
+    /**
+     * @brief get_app_icon_pixbuf 获取应用按钮的图标
+     * @return 应用对应的图标
+     */
+    Glib::RefPtr<Gdk::Pixbuf> get_app_icon_pixbuf();
+
+    /**
      * @brief set_size 设置按钮尺寸
      * @param size  要设置的尺寸
      */
@@ -63,21 +79,13 @@ protected:
     virtual void on_size_allocate(Gtk::Allocation &allocation) override;
     virtual bool on_draw(const::Cairo::RefPtr<Cairo::Context> &cr) override;
     virtual bool on_button_press_event(GdkEventButton *button_event) override;
-    virtual bool on_button_release_event(GdkEventButton *button_event) override;
+    virtual void on_clicked() override;
 
     virtual bool on_enter_notify_event(GdkEventCrossing *crossing_event) override;
-    virtual bool on_leave_notify_event(GdkEventCrossing *crossing_event) override;
-
     virtual void on_map() override;
 
-    virtual void on_drag_begin(const Glib::RefPtr<Gdk::DragContext> &context) override;
-    virtual void on_drag_data_get (const Glib::RefPtr< Gdk::DragContext >& context,
-                                   Gtk::SelectionData& selection_data,
-                                   guint info,
-                                   guint time) override;
-
-    virtual void on_drag_data_delete(const Glib::RefPtr<Gdk::DragContext> &context) override;
-    virtual void on_drag_end(const Glib::RefPtr< Gdk::DragContext >& context) override;
+    virtual void on_gesture_drag_update(double x, double y);
+    virtual void on_gesture_drag_end(double x, double y);
 
     /**
      * @brief 回调函数: 新窗口打开时调用
@@ -90,19 +98,6 @@ protected:
      * @return 返回按钮的排列方向
      */
     virtual Gtk::Orientation get_orientation() const;
-
-
-    /**
-     * @brief get_app_icon_pixbuf 获取应用按钮的图标
-     * @return 应用对应的图标
-     */
-    Glib::RefPtr<Gdk::Pixbuf> get_app_icon_pixbuf();
-
-    /**
-     * @brief init_drag_and_drop 初始化拖动支持
-     */
-    void init_drag_and_drop();
-
 
     /**
      * @brief 回调函数：按钮所属应用的窗口中任一窗口状态发生变化时调用
@@ -126,10 +121,16 @@ private:
 
     AppButtonState state;                               //按钮显示状态
     bool dragging;                                      //当前是否处于被拖动状态
+    bool pressed;                                       //当前是否处于按下的状态
+    GdkPoint drag_point;
     sigc::connection    draw_attention_flicker;         //需要用户注意时的闪烁绘制定时器
     sigc::connection    draw_attention_normal;          //需要用户注意时的最终绘制定时器
 
+
+    Glib::RefPtr<Gtk::GestureDrag> gesture;                     //拖动的事件
     sigc::signal<void, bool> m_signal_context_menu_toggled;
+    sigc::signal<void, int, int> m_signal_drag_update;
+    sigc::signal<void> m_signal_drag_end;
 };
 
 #endif // TASKLIST_APP_BUTTON_H

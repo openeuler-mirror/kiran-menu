@@ -40,11 +40,9 @@ TasklistAppButton::TasklistAppButton(const std::shared_ptr<Kiran::App> &app_, in
     app(app_),
     context_menu(nullptr),
     applet_size(size_),
-    dragging(false),
     state(APP_BUTTON_STATE_NORMAL)
 {
-    init_drag_and_drop();
-    add_events(Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
+    add_events(Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::BUTTON_PRESS_MASK);
 
     get_style_context()->add_class("kiran-tasklist-button");
 
@@ -60,12 +58,32 @@ TasklistAppButton::TasklistAppButton(const std::shared_ptr<Kiran::App> &app_, in
     auto window_manager = Kiran::WindowManager::get_instance();
     window_manager->signal_window_opened().connect(
         sigc::mem_fun(*this, &TasklistAppButton::on_window_opened));
+
+    /* 响应拖放操作 */
+    gesture = Gtk::GestureDrag::create(*this);
+    gesture->set_propagation_phase(Gtk::PHASE_CAPTURE);
+
+    gesture->signal_drag_update().connect(
+        sigc::mem_fun(*this, &TasklistAppButton::on_gesture_drag_update));
+
+    gesture->signal_drag_end().connect(
+        sigc::mem_fun(*this, &TasklistAppButton::on_gesture_drag_end));
 }
 
 TasklistAppButton::~TasklistAppButton()
 {
     if (context_menu)
         delete context_menu;
+}
+
+sigc::signal<void, int, int> TasklistAppButton::signal_drag_update()
+{
+    return m_signal_drag_update;
+}
+
+sigc::signal<void> TasklistAppButton::signal_drag_end()
+{
+    return m_signal_drag_end;
 }
 
 void TasklistAppButton::set_size(int size)
@@ -156,13 +174,6 @@ bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
     auto app_ = get_app();
     if (!app_) {
         LOG_WARNING("%s: app already expired!!\n", __FUNCTION__);
-        return false;
-    }
-
-    if (dragging) {
-        /*
-         * 正在拖动过程中，不绘制内容
-         */
         return false;
     }
 
@@ -260,14 +271,17 @@ bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
 
 bool TasklistAppButton::on_button_press_event(GdkEventButton *button_event)
 {
-    GdkEvent *event = nullptr;
+    GdkEvent *event = gtk_get_current_event();
     auto app_ = get_app();
+
+    LOG_WARNING("button pressed");
+    pressed = true;
 
     if (!app_) {
         LOG_WARNING("%s: app already expired", __FUNCTION__);
         return false;
     }
-    event = reinterpret_cast<GdkEvent*>(button_event);
+
     if (gdk_event_triggers_context_menu(event)) {
         if (context_menu == nullptr) {
             context_menu = new TasklistAppContextMenu(app_);
@@ -285,26 +299,29 @@ bool TasklistAppButton::on_button_press_event(GdkEventButton *button_event)
         m_signal_context_menu_toggled.emit(true);
         return true;
     }
-    set_state_flags(Gtk::STATE_FLAG_ACTIVE, false);
 
-    return false;
+    return Gtk::Button::on_button_press_event(button_event);
 }
 
-bool TasklistAppButton::on_button_release_event(GdkEventButton *button_event UNUSED)
+void TasklistAppButton::on_clicked()
 {
     auto app_ = get_app();
 
+    Gtk::Button::on_clicked();
+
+    if (!pressed)
+        return;
+
     if (!app_) {
         LOG_WARNING("%s: app already expired", __FUNCTION__);
-        return false;
+        return;
     }
 
-    set_state_flags(get_state_flags() & ~Gtk::STATE_FLAG_ACTIVE, true);
     auto windows_list = KiranHelper::get_taskbar_windows(app_);
     if (windows_list.size() == 0) {
         //无已打开窗口，打开新的应用窗口(仅针对常驻任务栏应用)
         app_->launch();
-        return true;
+        return;
     }
 
     if (windows_list.size() == 1)
@@ -312,9 +329,7 @@ bool TasklistAppButton::on_button_release_event(GdkEventButton *button_event UNU
         /* 当前应用只有一个窗口，不需要显示预览窗口，返回true */
         auto first = windows_list.at(0);
         first->activate(0);
-        return false;
     }
-    return false;
 }
 
 bool TasklistAppButton::on_enter_notify_event(GdkEventCrossing *crossing_event)
@@ -325,63 +340,33 @@ bool TasklistAppButton::on_enter_notify_event(GdkEventCrossing *crossing_event)
     return Gtk::Button::on_enter_notify_event(crossing_event);
 }
 
-bool TasklistAppButton::on_leave_notify_event(GdkEventCrossing *crossing_event UNUSED)
-{
-    return Gtk::Button::on_leave_notify_event(crossing_event);
-}
-
 void TasklistAppButton::on_map()
 {
     on_windows_state_changed();
     Gtk::Button::on_map();
 }
 
-void TasklistAppButton::on_drag_begin(const Glib::RefPtr<Gdk::DragContext> &context)
+void TasklistAppButton::on_gesture_drag_update(double x, double y)
 {
-    auto pixbuf = get_app_icon_pixbuf();
+    Gtk::Allocation allocation;
 
-    /*
-     * 将应用图标作为拖动的图标，鼠标位于图标中心位置
-     */
-    context->set_icon(pixbuf, pixbuf->get_width()/2, pixbuf->get_height()/2);
-    dragging = true;
-    queue_draw();
+    /* 设置拖动过程中的光标样式 */
+    auto cursor = Gdk::Cursor::create(get_display(), "move");
+    get_window()->set_cursor(cursor);
+
+    /* 清除pressed标识，确保拖动释放后不会触发clicked事件 */
+    pressed = false;
+    allocation = get_allocation();
+    signal_drag_update().emit(allocation.get_x() + x, allocation.get_y() + y);
 }
 
-void TasklistAppButton::on_drag_data_get(const Glib::RefPtr<Gdk::DragContext> &context,
-                                         Gtk::SelectionData &selection_data,
-                                         guint info,
-                                         guint time)
+void TasklistAppButton::on_gesture_drag_end(double x, double y)
 {
-    auto app = get_app();
-    if (!app) {
-        LOG_WARNING("app expired, return nothing");
-        selection_data.set(8, nullptr, 0);
-    }
+    /* 恢复光标样式 */
+    auto cursor = Gdk::Cursor::create(get_display(), "default");
 
-    /* 传递内容为应用的desktop ID */
-    const char *raw_data = app->get_desktop_id().c_str();
-    selection_data.set(8, (const guchar*)raw_data, strlen(raw_data));
-}
-
-void TasklistAppButton::on_drag_data_delete(const Glib::RefPtr<Gdk::DragContext> &context)
-{
-    /*
-     * 拖动结束，恢复显示按钮图标
-     */
-    dragging = false;
-    set_state_flags(get_state_flags() & ~Gtk::STATE_FLAG_ACTIVE, true);
-    queue_draw();
-}
-
-void TasklistAppButton::on_drag_end(const Glib::RefPtr<Gdk::DragContext> &context)
-{
-    /*
-     * 拖动结束，恢复显示按钮图标
-     */
-    dragging = false;
-    set_state_flags(get_state_flags() & ~Gtk::STATE_FLAG_ACTIVE, true);
-    queue_draw();
+    get_window()->set_cursor(cursor);
+    signal_drag_end().emit();
 }
 
 void TasklistAppButton::on_window_opened(const std::shared_ptr<Kiran::Window> &window)
@@ -497,15 +482,6 @@ Glib::RefPtr<Gdk::Pixbuf> TasklistAppButton::get_app_icon_pixbuf()
     }
 
     return pixbuf;
-}
-
-void TasklistAppButton::init_drag_and_drop()
-{
-    Gtk::TargetEntry entry("binary/app-id", Gtk::TARGET_SAME_APP);
-    std::vector<Gtk::TargetEntry> targets;
-
-    targets.push_back(entry);
-    drag_source_set(targets, Gdk::BUTTON1_MASK, Gdk::ACTION_MOVE);
 }
 
 void TasklistAppButton::on_windows_state_changed()
