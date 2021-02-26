@@ -61,17 +61,13 @@ void TasklistAppContextMenu::refresh()
     if (!KiranHelper::app_is_in_favorite(app_)) {
         item = Gtk::make_managed<Gtk::MenuItem>(_("Add to favorites"));
         item->signal_activate().connect(
-                    [this]() -> void {
-                        if (!app.expired())
-                            KiranHelper::add_app_to_favorite(app.lock());
-                    });
+            sigc::hide_return(
+                sigc::bind(sigc::ptr_fun(KiranHelper::add_app_to_favorite), app.lock())));
     } else {
         item = Gtk::make_managed<Gtk::MenuItem>(_("Remove from favorites"));
         item->signal_activate().connect(
-                    [this]() -> void {
-                        if (!app.expired())
-                            KiranHelper::remove_app_from_favorite(app.lock());
-                    });
+            sigc::hide_return(
+                sigc::bind(sigc::ptr_fun(KiranHelper::remove_app_from_favorite), app.lock())));
     }
 
     if (app_->get_kind() == Kiran::AppKind::FAKE_DESKTOP) {
@@ -85,17 +81,13 @@ void TasklistAppContextMenu::refresh()
     if (!KiranHelper::app_is_in_fixed_list(app_)) {
         item = Gtk::make_managed<Gtk::MenuItem>(_("Pin to taskbar"));
         item->signal_activate().connect(
-                    [this]() -> void {
-                        if (!app.expired())
-                            KiranHelper::add_app_to_fixed_list(app.lock());
-                    });
+            sigc::hide_return(
+                sigc::bind(sigc::ptr_fun(KiranHelper::add_app_to_fixed_list), app.lock())));
     } else {
         item = Gtk::make_managed<Gtk::MenuItem>(_("Unpin to taskbar"));
         item->signal_activate().connect(
-                    [this]() -> void {
-                        if (!app.expired())
-                            KiranHelper::remove_app_from_fixed_list(app.lock());
-                    });
+            sigc::hide_return(
+                sigc::bind(sigc::ptr_fun(KiranHelper::remove_app_from_fixed_list), app.lock())));
     }
 
     if (app_->get_kind() == Kiran::AppKind::FAKE_DESKTOP) {

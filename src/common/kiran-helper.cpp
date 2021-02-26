@@ -64,9 +64,8 @@ bool KiranHelper::app_is_in_favorite(const std::shared_ptr<Kiran::App> &app)
 bool KiranHelper::add_app_to_favorite(const std::shared_ptr<Kiran::App> &app)
 {
     auto backend = Kiran::MenuSkeleton::get_instance();
-    if (!app)
-        return true;
 
+    g_return_val_if_fail(app, false);
     return backend->add_favorite_app(app->get_desktop_id());
 }
 
@@ -74,9 +73,7 @@ bool KiranHelper::remove_app_from_favorite(const std::shared_ptr<Kiran::App> &ap
 {
     auto backend = Kiran::MenuSkeleton::get_instance();
 
-    if (!app)
-        return true;
-
+    g_return_val_if_fail(app, false);
     return backend->del_favorite_app(app->get_desktop_id());
 }
 
@@ -84,6 +81,7 @@ bool KiranHelper::app_is_in_fixed_list(const std::shared_ptr<Kiran::App> &app)
 {
     auto backend = Kiran::TaskBarSkeleton::get_instance();
 
+    g_return_val_if_fail(app, false);
     return backend->lookup_fixed_app(app->get_desktop_id()) != nullptr;
 }
 
@@ -92,12 +90,15 @@ bool KiranHelper::add_app_to_fixed_list(const std::shared_ptr<Kiran::App> &app)
     auto backend = Kiran::TaskBarSkeleton::get_instance();
 
     LOG_DEBUG("add app into fixed list");
+    g_return_val_if_fail(app, false);
     return backend->add_fixed_app(app->get_desktop_id());
 }
 
 bool KiranHelper::remove_app_from_fixed_list(const std::shared_ptr<Kiran::App> &app)
 {
     LOG_DEBUG("remove app from fixed list");
+
+    g_return_val_if_fail(app, false);
 
     auto backend = Kiran::TaskBarSkeleton::get_instance();
 
