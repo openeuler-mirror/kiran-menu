@@ -103,6 +103,9 @@ public:
     // 判断是否应该在菜单中显示
     bool should_show();
 
+    // 是否为当前活动应用（当前活动窗口是否属于该应用)
+    bool is_active();
+
     // 获取当前App对应的已打开的窗口列表
     WindowVec get_windows();
 

@@ -119,6 +119,19 @@ bool App::should_show()
     return (this->desktop_app_->should_show() && !this->x_kiran_no_display_);
 }
 
+bool App::is_active() 
+{
+    auto window_manager = Kiran::WindowManager::get_instance();
+    auto active_window = window_manager->get_active_window();
+
+    if (active_window) {
+        if (!active_window->should_skip_taskbar())
+            return active_window->get_app().get() == this;
+    }
+
+    return false;
+}
+
 WindowVec App::get_windows()
 {
     WindowVec windows;

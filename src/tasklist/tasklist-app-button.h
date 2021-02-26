@@ -114,6 +114,7 @@ protected:
 
 private:
     void init_dnd();
+    bool needs_attention();
 
 private:
     TasklistAppContextMenu *context_menu;               //右键菜单

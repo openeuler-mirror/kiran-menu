@@ -8,32 +8,6 @@
 #include "kiran-helper.h"
 #include "log.h"
 
-static bool kiran_app_is_active(const std::shared_ptr<Kiran::App> &app)
-{
-    auto window_manager = Kiran::WindowManager::get_instance();
-    auto active_window = window_manager->get_active_window();
-
-    if (active_window) {
-        if (!KiranHelper::window_is_ignored(active_window))
-            return active_window->get_app() == app;
-    }
-
-    return false;
-}
-
-static bool kiran_app_needs_attention(const std::shared_ptr<Kiran::App> &app)
-{
-    if (!app)
-        return false;
-
-    for (auto window: KiranHelper::get_taskbar_windows(app)) {
-        if (window->needs_attention())
-            return true;
-    }
-
-    return false;
-}
-
 TasklistAppButton::TasklistAppButton(const std::shared_ptr<Kiran::App> &app_, int size_):
     Glib::ObjectBase("KiranTasklistAppButton"),
     indicator_size_property(*this, "indicator-size", G_MAXINT32),
@@ -202,7 +176,7 @@ bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
     LOG_DEBUG("app '%s', %d windows, workspace %d", app_->get_name().c_str(), windows_count,
         Kiran::WorkspaceManager::get_instance()->get_active_workspace()->get_number());
 
-    if (kiran_app_is_active(app_)) {
+    if (app_->is_active()) {
         Gdk::Cairo::set_source_rgba(cr, active_color);
         cr->paint();
 
@@ -503,8 +477,7 @@ Glib::RefPtr<Gdk::Pixbuf> TasklistAppButton::get_app_icon_pixbuf()
 
 void TasklistAppButton::on_windows_state_changed()
 {
-    bool need = kiran_app_needs_attention(app.lock());
-    if (need) {
+    if (needs_attention()) {
         if (!draw_attention_flicker.connected())
         {
             state = APP_BUTTON_STATE_FLICKER;
@@ -521,7 +494,7 @@ void TasklistAppButton::on_windows_state_changed()
             draw_attention_normal = Glib::signal_timeout().connect(
                 [this]() -> bool {
                     draw_attention_flicker.disconnect();
-                    if (kiran_app_needs_attention(get_app()))
+                    if (needs_attention())
                         state = APP_BUTTON_STATE_ATTENTION;
                     else
                         state = APP_BUTTON_STATE_NORMAL;
@@ -580,4 +553,18 @@ void TasklistAppButton::init_dnd()
 
     targets.push_back(Gtk::TargetEntry("text/uri-list", Gtk::TARGET_OTHER_APP));
     drag_dest_set(targets, Gtk::DEST_DEFAULT_ALL, Gdk::ACTION_COPY);
+}
+
+bool TasklistAppButton::needs_attention() 
+{
+    auto app_ = get_app();
+    if (!app_)
+        return false;
+
+    for (auto window: KiranHelper::get_taskbar_windows(app_)) {
+        if (window->needs_attention())
+            return true;
+    }
+
+    return false;
 }
