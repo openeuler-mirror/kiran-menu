@@ -36,14 +36,25 @@ void TasklistAppContextMenu::refresh()
         append(*item);
     }
 
-    item = Gtk::make_managed<Gtk::MenuItem>(_("Close all windows"));
-    item->signal_activate().connect(
-                [this]() -> void {
-                    if (!app.expired())
-                        app.lock()->close_all_windows();
-                });
+    /* 已打开窗口应用显示 "关闭所有窗口"选项，无窗口应用显示"启动"选项 */
     if (app_->get_taskbar_windows().size() == 0)
-        item->set_sensitive(false);
+    {
+        item = Gtk::make_managed<Gtk::MenuItem>(_("Launch"));
+        item->signal_activate().connect(
+            [this]() -> void {
+                auto app_ = app.lock();
+                if (app_)
+                    app_->launch();
+            });
+    } else {
+        item = Gtk::make_managed<Gtk::MenuItem>(_("Close all windows"));
+        item->signal_activate().connect(
+            [this]() -> void {
+                auto app_ = app.lock();
+                if (app_)
+                    app_->close_all_windows();
+            });
+    }
     append(*item);
 
 
