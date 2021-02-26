@@ -68,6 +68,8 @@ TasklistAppButton::TasklistAppButton(const std::shared_ptr<Kiran::App> &app_, in
 
     gesture->signal_drag_end().connect(
         sigc::mem_fun(*this, &TasklistAppButton::on_gesture_drag_end));
+
+    init_dnd();
 }
 
 TasklistAppButton::~TasklistAppButton()
@@ -369,6 +371,21 @@ void TasklistAppButton::on_gesture_drag_end(double x, double y)
     signal_drag_end().emit();
 }
 
+void TasklistAppButton::on_drag_data_received(const Glib::RefPtr< Gdk::DragContext >& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time)
+{
+#ifdef DEBUG
+    for (auto uri: selection_data.get_uris()) {
+        LOG_WARNING("got uri '%s'", uri.c_str());
+    }
+#endif
+
+    auto app = get_app();
+    if (app)
+        app->launch_uris(selection_data.get_uris());
+
+    context->drag_finish(true, false, time);
+}
+
 void TasklistAppButton::on_window_opened(const std::shared_ptr<Kiran::Window> &window)
 {
     if (window && window->get_app() == get_app())
@@ -555,4 +572,12 @@ void TasklistAppButton::draw_attentions(const Cairo::RefPtr<Cairo::Context> &cr)
         cr->paint();
     }
     cr->restore();
+}
+
+void TasklistAppButton::init_dnd()
+{
+    std::vector<Gtk::TargetEntry> targets;
+
+    targets.push_back(Gtk::TargetEntry("text/uri-list", Gtk::TARGET_OTHER_APP));
+    drag_dest_set(targets, Gtk::DEST_DEFAULT_ALL, Gdk::ACTION_COPY);
 }

@@ -87,6 +87,8 @@ protected:
     virtual void on_gesture_drag_update(double x, double y);
     virtual void on_gesture_drag_end(double x, double y);
 
+    virtual void on_drag_data_received(const Glib::RefPtr< Gdk::DragContext >& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time) override;
+
     /**
      * @brief 回调函数: 新窗口打开时调用
      * @param window 新打开的窗口
@@ -109,6 +111,9 @@ protected:
      * @param cr on_draw()信号中的Cairo上下文
      */
     void draw_attentions(const Cairo::RefPtr<Cairo::Context> &cr);
+
+private:
+    void init_dnd();
 
 private:
     TasklistAppContextMenu *context_menu;               //右键菜单

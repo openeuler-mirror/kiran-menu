@@ -233,6 +233,40 @@ bool App::launch()
     return res;
 }
 
+bool App::launch_uris(const Glib::ListHandle< std::string >& uris)
+{
+    SETTINGS_PROFILE("id: %s.", this->desktop_id_.c_str());
+
+    g_return_val_if_fail(this->desktop_app_, false);
+    g_warn_if_fail(uris.size() > 0);
+
+    bool res = false;
+    std::string error;
+    auto app_context = Gdk::Display::get_default()->get_app_launch_context();
+
+    try
+    {
+        std::vector<Glib::RefPtr<Gio::File> > files;
+        res = this->desktop_app_->launch_uris(uris, app_context);
+    }
+    catch (const Glib::Error &e)
+    {
+        res = false;
+        error = e.what().raw();
+    }
+
+    if (res)
+    {
+        this->launched_.emit(this->shared_from_this());
+    }
+    else
+    {
+        this->launch_failed_.emit(this->shared_from_this());
+        LOG_WARNING("failed to launch uris: %s", error.c_str());
+    }
+    return res;
+}
+
 void App::launch_action(const std::string &action_name)
 {
     SETTINGS_PROFILE("id: %s.", this->desktop_id_.c_str());

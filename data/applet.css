@@ -216,13 +216,13 @@ button.kiran-tasklist-button:hover{
     background: rgba(255, 255, 255, 0.2);
 }
 
-button.kiran-tasklist-button:active{
+button.kiran-tasklist-button:active,
+button.kiran-tasklist-button:drop(active)
+{
     border: none;
     border-radius: 0px;
     background: rgba(255, 255, 255, 0.35);
 }
-
-
 
 window.app-previewer {
     /*background: transparent;*/
