@@ -356,6 +356,13 @@ void MenuAppletWindow::activate_search_result()
         app->launch();
 }
 
+void MenuAppletWindow::on_realize()
+{
+    Gtk::Window::on_realize();
+    /* 跳过窗口管理器，避免在使用mutter窗口管理器时开始菜单弹出的动画效果 */
+    get_window()->set_override_redirect(true);
+}
+
 void MenuAppletWindow::on_search_stop()
 {
     /*返回应用列表页面，并清空搜索内容*/

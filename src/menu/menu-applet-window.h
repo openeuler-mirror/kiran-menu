@@ -79,6 +79,7 @@ public:
     void set_stack_current_index(Gtk::Stack *stack, int page, bool animation);
 
 protected:
+    virtual void on_realize() override;
     virtual bool on_map_event(GdkEventAny *any_event) override;
     virtual bool on_unmap_event(GdkEventAny *any_event) override;
     virtual bool on_leave_notify_event(GdkEventCrossing *crossing_event) override;
