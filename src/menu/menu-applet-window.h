@@ -20,13 +20,6 @@ public:
     ~MenuAppletWindow() override;
 
     /**
-     * @brief 开始菜单窗口变化信号
-     *
-     * @return 返回信号，第二个和第三个int分别代表新的宽度和高度
-     */
-    sigc::signal<void,int,int> signal_size_changed();
-
-    /**
      * @brief 重新加载所有的应用信息，包括收藏夹、常用应用和新安装应用
      */
     void reload_apps_data();
@@ -85,7 +78,6 @@ protected:
     virtual bool on_leave_notify_event(GdkEventCrossing *crossing_event) override;
     virtual bool on_key_press_event(GdkEventKey *key_event) override;
     virtual bool on_button_press_event(GdkEventButton *button_event) override;
-    virtual bool on_configure_event(GdkEventConfigure* configure_event) override;
     virtual void get_preferred_height_vfunc(int &min_width, int &natural_width) const override;
     virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
 
@@ -178,10 +170,6 @@ private:
     MenuAppsContainer *search_results_container;
     MenuAppsContainer *new_apps_container;
     MenuAvatarWidget  *compact_avatar_widget, *expand_avatar_widget;
-
-    Gdk::Rectangle geometry;                                        /*缓存的开始菜单窗口大小*/
-    sigc::signal<void,int,int> m_signal_size_changed;               /*开始菜单窗口尺寸变化信号*/
-
 
     std::map<std::string, MenuAppsContainer*> category_items;       /*分类名称到分类控件的映射表*/
 
