@@ -67,6 +67,8 @@ TasklistButtonsContainer::TasklistButtonsContainer(MatePanelApplet *applet_, int
     add_events(Gdk::STRUCTURE_MASK | Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
 
     active_app = get_current_active_app();
+
+    init_dnd();
 }
 
 TasklistButtonsContainer::~TasklistButtonsContainer()
@@ -723,6 +725,13 @@ void TasklistButtonsContainer::on_unrealize()
 
 bool TasklistButtonsContainer::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
 {
+    /* 绘制背景 */
+    get_style_context()->render_background(cr,
+                                           0,
+                                           0,
+                                           get_allocated_width(),
+                                           get_allocated_height());
+
     for (auto child : get_children())
     {
         /* 对于正处于拖动过程中的按钮不进行绘制 */
@@ -757,6 +766,43 @@ bool TasklistButtonsContainer::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
     }
 
     return false;
+}
+
+void TasklistButtonsContainer::on_drag_data_received(const Glib::RefPtr<Gdk::DragContext> &context,
+                                                     int x,
+                                                     int y,
+                                                     const Gtk::SelectionData &selection_data,
+                                                     guint info,
+                                                     guint time)
+{
+    auto app_manager = Kiran::AppManager::get_instance();
+    for (auto uri: selection_data.get_uris()) {
+        try
+        {
+            auto file = Gio::File::create_for_uri(uri);
+            auto info = file->query_info(G_FILE_ATTRIBUTE_STANDARD_TYPE);
+
+            if (!info || info->get_type() == Gio::FILE_TYPE_DIRECTORY)
+                continue;
+
+            auto source_app = Gio::DesktopAppInfo::create_from_filename(file->get_path());
+            if (source_app)
+            {
+                auto app = app_manager->lookup_app(source_app->get_id());
+                if (app)
+                    KiranHelper::add_app_to_fixed_list(app);
+                else
+                    LOG_WARNING("Failed to add fixed apps: app with id '%s' not found", source_app->get_id().c_str());
+            }
+            else
+                LOG_WARNING("Failed to add fixed apps: can not create app for desktop file '%s'", uri.c_str());
+        }
+        catch (const Gio::Error &e)
+        {
+            LOG_WARNING("Failed to query information for '%s'", uri.c_str());
+            continue;
+        }
+   }
 }
 
 void TasklistButtonsContainer::put_child_before(Gtk::Widget *source, Gtk::Widget *dest)
@@ -1255,4 +1301,12 @@ void TasklistButtonsContainer::reorder_child(Gtk::Widget *widget, PointerMotionD
                 put_child_after(widget, nullptr);
         }
     }
+}
+
+void TasklistButtonsContainer::init_dnd()
+{
+    std::vector<Gtk::TargetEntry> targets;
+
+    targets.push_back(Gtk::TargetEntry("text/uri-list", Gtk::TARGET_OTHER_APP));
+    drag_dest_set(targets, Gtk::DEST_DEFAULT_ALL, Gdk::ACTION_COPY);
 }

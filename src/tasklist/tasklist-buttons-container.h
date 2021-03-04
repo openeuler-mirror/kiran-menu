@@ -99,6 +99,7 @@ protected:
     virtual void on_unrealize() override;
 
     virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
+    virtual void on_drag_data_received(const Glib::RefPtr< Gdk::DragContext >& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time) override;
 
     /**
      * @brief 回调函数，当应用按钮child被拖动时调用
@@ -309,6 +310,8 @@ protected:
      */
     void reorder_child(Gtk::Widget *widget, PointerMotionDirection motion_dir);
 
+private:
+    void init_dnd();
 
 private:
     MatePanelApplet *applet;                //所属的面板插件

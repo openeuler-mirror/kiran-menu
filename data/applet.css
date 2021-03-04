@@ -203,6 +203,13 @@ button.toggle.menu-expand-button:focus{
     border-image: none;
 }
 
+.tasklist-widget {
+    background: none;
+}
+
+.tasklist-widget:drop(active) {
+    background: rgba(255, 255, 255, 0.15);
+}
 
 button.kiran-tasklist-button {
     border: none;
