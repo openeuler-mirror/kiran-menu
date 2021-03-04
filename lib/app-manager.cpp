@@ -13,6 +13,7 @@
 
 #include <cinttypes>
 #include <sstream>
+#include <glib/gstdio.h>
 
 #include "lib/common.h"
 #include "lib/log.h"
@@ -20,13 +21,22 @@
 namespace Kiran
 {
 #define SNAP_SECURITY_LABEL_PREFIX "snap."
+#define USER_APP_DIR  ".config/kiran-applets/applications/"
 
-AppManager::AppManager(WindowManager *window_manager) : window_manager_(window_manager)
+AppManager::AppManager(WindowManager *window_manager) :
+    window_manager_(window_manager),
+    system_app_monitor(nullptr),
+    user_app_monitor(nullptr)
 {
 }
 
 AppManager::~AppManager()
 {
+    if (system_app_monitor)
+        g_object_unref(system_app_monitor);
+    
+    if (user_app_monitor)
+        g_object_unref(user_app_monitor);
 }
 
 AppManager *AppManager::instance_ = nullptr;
@@ -53,7 +63,7 @@ AppVec AppManager::get_apps_by_kind(AppKind kind)
 
     for (auto iter = this->apps_.begin(); iter != this->apps_.end(); ++iter)
     {
-        if (iter->second->get_kind() == kind)
+        if (((int)iter->second->get_kind() & (int)kind) != 0)
         {
             apps.push_back(iter->second);
         }
@@ -202,9 +212,17 @@ void AppManager::init()
 
     load_desktop_apps();
 
-    auto monitor = g_app_info_monitor_get();
-    g_return_if_fail(monitor != NULL);
-    g_signal_connect(monitor, "changed", G_CALLBACK(AppManager::desktop_app_changed), this);
+    /* 监控用户应用目录 */
+    GFile* user_app_dir = g_file_new_for_path("");
+    user_app_monitor = g_file_monitor_directory(user_app_dir, G_FILE_MONITOR_NONE, NULL, NULL);
+    g_return_if_fail(user_app_monitor != NULL);
+    g_signal_connect_swapped(user_app_monitor, "changed", G_CALLBACK(AppManager::desktop_app_changed), this);
+    g_object_unref(user_app_dir);
+
+    /* 监控系统应用变化 */
+    system_app_monitor = g_app_info_monitor_get();
+    g_return_if_fail(system_app_monitor != NULL);
+    g_signal_connect_swapped(system_app_monitor, "changed", G_CALLBACK(AppManager::desktop_app_changed), this);
 
     auto screen = wnck_screen_get_default();
     g_return_if_fail(screen != NULL);
@@ -641,12 +659,87 @@ std::shared_ptr<App> AppManager::get_app_from_window_group(std::shared_ptr<Windo
     return nullptr;
 }
 
+std::string AppManager::gen_userapp_id(const std::string &desktop_id) 
+{
+    /* 移除.desktop后缀 */
+    std::string desktop_name;
+
+    auto index = desktop_id.rfind(".desktop");
+    if (index != std::string::npos)
+    {
+        desktop_name = desktop_id.substr(0, index);
+    } else
+        desktop_name = desktop_id;
+
+    auto pattern = Glib::ustring::compose("userapp-%1-XXXXXX.desktop", desktop_name.c_str());
+    auto pattern_str = g_strdup(pattern.c_str());
+    int fd = mkstemps(pattern_str, 8);
+    if (fd != -1)
+        close(fd);
+    
+    return pattern_str;
+}
+
+std::string AppManager::get_userapp_dir_path() 
+{
+    return Glib::ustring::compose("%1/" USER_APP_DIR, g_get_home_dir()).raw();
+}
+
+std::string AppManager::create_userapp_from_uri(const std::string &uri) 
+{
+    Glib::RefPtr<Gio::File> source_file, dest_file;
+    std::string new_id, dest_path, userapp_dir;
+
+    source_file = Gio::File::create_for_uri(uri); 
+    if (!source_file)
+        return "";
+    
+    auto source_app = Gio::DesktopAppInfo::create_from_filename(source_file->get_path());
+    if (!source_app)
+        return "";
+
+    /* 生成新Desktop文件名称 */
+    new_id = gen_userapp_id(source_app->get_id());
+    userapp_dir = get_userapp_dir_path();
+    dest_path = Glib::ustring::compose("%1/%2", userapp_dir, new_id);
+
+    /* 确保用户应用目录存在 */
+    if (g_mkdir_with_parents(userapp_dir.c_str(), 0755) < 0)
+    {
+        LOG_ERROR("Error occured while trying to create user app directory '%s', error %d",
+                  userapp_dir.c_str(),
+                  errno);
+        return "";
+    }
+
+    /* 拷贝desktop文件 */
+    try {
+        dest_file = Gio::File::create_for_path(dest_path);
+        if (source_file->copy(dest_file))
+            return new_id;
+    } catch (Glib::Error &e) {
+        LOG_ERROR("Failed to copy file '%s': %s", source_file->get_path().c_str(), e.what().c_str());
+    }
+
+    return "";
+}
+
+bool AppManager::remove_app_from_disk(const std::string &desktop_id) 
+{
+    auto app = lookup_app(desktop_id);
+    if (!app || app->get_kind() != AppKind::USER_TASKBAR)
+        return false;
+    
+    return g_unlink(app->get_file_name().c_str()) != -1;
+}
+
 void AppManager::load_desktop_apps()
 {
     bool new_app_change = false;
 
     std::vector<std::shared_ptr<App>> new_installed_apps;
     std::vector<std::shared_ptr<App>> new_uninstalled_apps;
+    std::vector<Glib::RefPtr<Gio::AppInfo>> user_apps;
 
     // copy the keys of the->apps to old_apps.
     auto old_apps = this->apps_;
@@ -655,32 +748,37 @@ void AppManager::load_desktop_apps()
     this->clear_desktop_apps();
     this->wmclass_apps_.clear();
 
+    // load user apps
+    auto app_dir_path = get_userapp_dir_path();
+    auto userapp_dir = g_file_new_for_path(app_dir_path.c_str());
+    if (userapp_dir && g_file_query_file_type(userapp_dir, G_FILE_QUERY_INFO_NONE, NULL) == G_FILE_TYPE_DIRECTORY) {
+        GFileEnumerator *enumerator = g_file_enumerate_children(userapp_dir, "*", G_FILE_QUERY_INFO_NONE, NULL, NULL);
+        do {
+            const char *child_name = nullptr;
+            GFileInfo *info = g_file_enumerator_next_file(enumerator, NULL, NULL);
+            if (!info)
+                break;
+            
+            child_name = g_file_info_get_name(info);
+            if (g_str_has_prefix(child_name, "userapp-") && g_str_has_suffix(child_name, ".desktop")) {
+                auto file = g_file_enumerator_get_child(enumerator, info);
+                LOG_DEBUG("Found user desktop file '%s'", child_name);
+                register_app(old_apps, g_file_get_path(file), AppKind::USER_TASKBAR);
+                g_object_unref(file);
+            }
+            g_object_unref(info);
+        } while (true);
+
+        g_object_unref(enumerator);
+        g_object_unref(userapp_dir);
+    }
+
     // update system apps
     auto registered_apps = Gio::AppInfo::get_all();
     for (auto iter = registered_apps.begin(); iter != registered_apps.end(); ++iter)
     {
-        auto desktop_id = (*iter)->get_id();
-        std::shared_ptr<App> app;
-        auto old_iter = old_apps.find(desktop_id);
-        if (old_iter != old_apps.end())
-        {
-            app = old_iter->second;
-            app->update_from_desktop_file();
-        }
-        else
-        {
-            app = std::make_shared<App>(desktop_id);
-            app->signal_launched().connect(sigc::mem_fun(this, &AppManager::app_launched));
-            app->signal_close_all_windows().connect(sigc::mem_fun(this, &AppManager::app_close_all_windows));
-        }
-
-        this->apps_[desktop_id] = app;
-
-        auto wm_class = app->get_startup_wm_class();
-        if (wm_class.length() > 0)
-        {
-            this->wmclass_apps_[app->get_startup_wm_class()] = app;
-        }
+        auto app = *iter;
+        register_app(old_apps, app, AppKind::NORMAL);
     }
 
     // new installed apps
@@ -731,7 +829,8 @@ void AppManager::clear_desktop_apps()
 {
     for (auto iter = this->apps_.begin(); iter != this->apps_.end();)
     {
-        if (iter->second->get_kind() == AppKind::DESKTOP)
+        AppKind kind = iter->second->get_kind();
+        if (kind == AppKind::NORMAL || kind == AppKind::USER_TASKBAR)
         {
             this->apps_.erase(iter++);
             continue;
@@ -740,11 +839,65 @@ void AppManager::clear_desktop_apps()
     }
 }
 
-void AppManager::desktop_app_changed(GAppInfoMonitor *gappinfomonitor, gpointer user_data)
+void AppManager::register_app(std::map<std::string, std::shared_ptr<App>> &old_apps,
+                              Glib::RefPtr<Gio::AppInfo> &app_,
+                              AppKind kind)
+{
+    auto desktop_id = app_->get_id();
+    std::shared_ptr<App> app;
+    auto old_iter = old_apps.find(desktop_id);
+    if (old_iter != old_apps.end())
+    {
+        app = old_iter->second;
+        app->update_from_desktop_file(true);
+    }
+    else
+    {
+        app = App::create_from_desktop_id(desktop_id, kind);
+        app->signal_launched().connect(sigc::mem_fun(this, &AppManager::app_launched));
+        app->signal_close_all_windows().connect(sigc::mem_fun(this, &AppManager::app_close_all_windows));
+    }
+
+    this->apps_[desktop_id] = app;
+
+    auto wm_class = app->get_startup_wm_class();
+    if (wm_class.length() > 0)
+    {
+        this->wmclass_apps_[app->get_startup_wm_class()] = app;
+    }
+}
+
+void AppManager::register_app(std::map<std::string, std::shared_ptr<App>> &old_apps,
+                      const std::string &desktop_file,
+                      AppKind kind) 
+{
+    std::shared_ptr<App> app = App::create_from_file(desktop_file);
+    auto desktop_id = app->get_desktop_id();
+    auto old_iter = old_apps.find(desktop_id);
+    if (old_iter != old_apps.end())
+    {
+        app = old_iter->second;
+        app->update_from_desktop_file(true);
+    }
+    else
+    {
+        app->signal_launched().connect(sigc::mem_fun(this, &AppManager::app_launched));
+        app->signal_close_all_windows().connect(sigc::mem_fun(this, &AppManager::app_close_all_windows));
+    }
+
+    this->apps_[desktop_id] = app;
+
+    auto wm_class = app->get_startup_wm_class();
+    if (wm_class.length() > 0)
+    {
+        this->wmclass_apps_[app->get_startup_wm_class()] = app;
+    }
+ 
+}
+
+void AppManager::desktop_app_changed(AppManager *app_manager)
 {
     SETTINGS_PROFILE("");
-
-    auto app_manager = (AppManager *)user_data;
 
     g_return_if_fail(app_manager == AppManager::get_instance());
 

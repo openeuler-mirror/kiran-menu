@@ -332,7 +332,7 @@ void MenuAppletWindow::on_search_change()
     apps_list_stack->set_visible_child(SEARCH_RESULTS_PAGE);
 
     //搜索时忽略关键字大小写
-    auto apps_list = Kiran::MenuSkeleton::get_instance()->search_app(search_entry->get_text().data(), true);
+    auto apps_list = Kiran::MenuSkeleton::get_instance()->search_app(search_entry->get_text().data(), true, Kiran::AppKind::NORMAL);
     search_results_container->load_applications(apps_list);
     if (apps_list.size() != 0)
         search_results_container->set_data("first-item", apps_list.front().get());

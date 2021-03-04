@@ -56,7 +56,7 @@ bool TaskBarSkeleton::add_fixed_app(const std::string &desktop_id)
     if (iter == this->fixed_apps_.end())
     {
         auto app = this->app_manager_->lookup_app(desktop_id);
-        if (app && app->get_kind() == AppKind::DESKTOP)
+        if (app && (app->get_kind() == AppKind::USER_TASKBAR || app->get_kind() == AppKind::NORMAL))
         {
             this->fixed_apps_.push_back(quark.id());
 
@@ -83,7 +83,7 @@ bool TaskBarSkeleton::del_fixed_app(const std::string &desktop_id)
     if (iter != this->fixed_apps_.end())
     {
         auto app = this->app_manager_->lookup_app(desktop_id);
-        if (app && app->get_kind() == AppKind::DESKTOP)
+        if (app && (app->get_kind() == AppKind::NORMAL || app->get_kind() == AppKind::USER_TASKBAR))
         {
             this->fixed_apps_.erase(iter);
 
@@ -140,8 +140,7 @@ TaskBarSkeleton::AppShowPolicy TaskBarSkeleton::get_app_show_policy()
 void TaskBarSkeleton::desktop_app_changed()
 {
     SETTINGS_PROFILE("");
-
-    auto apps = this->app_manager_->get_apps_by_kind(AppKind::DESKTOP);
+    auto apps = this->app_manager_->get_apps_by_kind((AppKind)(AppKind::USER_TASKBAR | AppKind::NORMAL));
 
     std::set<int32_t> app_set;
 

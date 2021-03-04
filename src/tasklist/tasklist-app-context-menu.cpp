@@ -86,8 +86,16 @@ void TasklistAppContextMenu::refresh()
     } else {
         item = Gtk::make_managed<Gtk::MenuItem>(_("Unpin to taskbar"));
         item->signal_activate().connect(
-            sigc::hide_return(
-                sigc::bind(sigc::ptr_fun(KiranHelper::remove_app_from_fixed_list), app.lock())));
+            [this]() -> void {
+                auto app_ = app.lock();
+                if (app_) {
+                    KiranHelper::remove_app_from_fixed_list(app_);
+                    if (app_->get_kind() == Kiran::AppKind::USER_TASKBAR) {
+                        /* 从磁盘上删除该应用 */
+                        Kiran::AppManager::get_instance()->remove_app_from_disk(app_->get_desktop_id());
+                    }
+                }
+            });
     }
 
     if (app_->get_kind() == Kiran::AppKind::FAKE_DESKTOP) {

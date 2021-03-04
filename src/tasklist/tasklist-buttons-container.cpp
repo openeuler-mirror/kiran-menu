@@ -791,8 +791,18 @@ void TasklistButtonsContainer::on_drag_data_received(const Glib::RefPtr<Gdk::Dra
                 auto app = app_manager->lookup_app(source_app->get_id());
                 if (app)
                     KiranHelper::add_app_to_fixed_list(app);
-                else
-                    LOG_WARNING("Failed to add fixed apps: app with id '%s' not found", source_app->get_id().c_str());
+                else {
+                    std::string new_id;
+
+                    new_id = app_manager->create_userapp_from_uri(uri);
+                    LOG_WARNING("NEW user app created, id '%s'", new_id.c_str());
+                    if (!new_id.empty()) {
+                        Glib::signal_idle().connect_once(
+                            [new_id]() -> void {
+                                Kiran::TaskBarSkeleton::get_instance()->add_fixed_app(new_id);
+                            });
+                    }
+                }
             }
             else
                 LOG_WARNING("Failed to add fixed apps: can not create app for desktop file '%s'", uri.c_str());

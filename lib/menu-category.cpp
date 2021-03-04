@@ -68,6 +68,10 @@ void MenuCategory::flush(const AppVec &apps)
 
         bool match_result = false;
 
+        /* 仅在开始菜单中显示系统应用 */
+        if (app->get_kind() != AppKind::NORMAL)
+            continue;
+
         for (int j = 0; j < this->categories_.size(); ++j)
         {
             auto &category = this->categories_[j];

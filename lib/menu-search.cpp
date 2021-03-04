@@ -10,6 +10,7 @@
 
 #include "lib/app.h"
 #include "lib/helper.h"
+#include "lib/log.h"
 
 namespace Kiran
 {
@@ -31,6 +32,7 @@ void MenuSearch::flush(const AppVec &apps)
 
 AppVec MenuSearch::search_by_keyword(const std::string &keyword,
                                      bool ignore_case,
+                                     AppKind kind,
                                      const AppVec &apps)
 {
     AppVec match_apps;
@@ -38,6 +40,9 @@ AppVec MenuSearch::search_by_keyword(const std::string &keyword,
     for (int i = 0; i < apps.size(); ++i)
     {
         const auto &app = apps[i];
+
+        if (((int)kind & (int)app->get_kind()) == 0)
+            continue;
 
         auto &comment = app->get_comment();
         auto &locale_comment = app->get_locale_comment();

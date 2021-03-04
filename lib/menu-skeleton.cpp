@@ -60,10 +60,10 @@ void MenuSkeleton::init()
     this->favorite_->signal_app_deleted().connect(sigc::mem_fun(this, &MenuSkeleton::favorite_app_deleted));
 }
 
-AppVec MenuSkeleton::search_app(const std::string &keyword, bool ignore_case)
+AppVec MenuSkeleton::search_app(const std::string &keyword, bool ignore_case, AppKind kind_)
 {
     auto apps = AppManager::get_instance()->get_should_show_apps();
-    auto match_apps = this->search_->search_by_keyword(keyword, ignore_case, apps);
+    auto match_apps = this->search_->search_by_keyword(keyword, ignore_case, kind_, apps);
     return match_apps;
 }
 

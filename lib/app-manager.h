@@ -26,6 +26,11 @@ public:
 
     static void global_deinit() { delete instance_; };
 
+    // 从对应的uri创建用户自定义应用的desktop文件，并返回用户自定义应用的desktop_id
+    std::string create_userapp_from_uri(const std::string &uri);
+
+    bool remove_app_from_disk(const std::string &desktop_id);
+
     // 获取所有App列表(每个App对应一个desktop文件)
     AppVec get_apps();
 
@@ -77,11 +82,22 @@ private:
     std::shared_ptr<App> get_app_by_enumeration_windows(std::shared_ptr<Window> window);
     std::shared_ptr<App> get_app_from_window_group(std::shared_ptr<Window> window);
 
+    std::string gen_userapp_id(const std::string &desktop_id);
+    std::string get_userapp_dir_path();
+
+
     void load_desktop_apps();
     void clear_desktop_apps();
+    void register_app(std::map<std::string, std::shared_ptr<App>> &old_apps,
+                      Glib::RefPtr<Gio::AppInfo> &app,
+                      AppKind kind);
+
+    void register_app(std::map<std::string, std::shared_ptr<App>> &old_apps,
+                      const std::string &desktop_file,
+                      AppKind kind);
 
     // desktop应用变化的信号处理
-    static void desktop_app_changed(GAppInfoMonitor *gappinfomonitor, gpointer user_data);
+    static void desktop_app_changed(AppManager *manager);
 
     // 启动一个应用时的信号处理
     static void app_opened(WnckScreen *screen, WnckApplication *wnck_application, gpointer user_data);
@@ -114,6 +130,9 @@ private:
     std::map<std::string, std::weak_ptr<App>> wmclass_apps_;
 
     std::map<uint64_t, std::weak_ptr<App>> wnck_apps_;
+
+    GAppInfoMonitor *system_app_monitor;        /* 系统应用监控器 */
+    GFileMonitor *user_app_monitor;             /* 用户应用目录监控器 */
 };
 
 }  // namespace Kiran

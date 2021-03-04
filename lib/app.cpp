@@ -18,10 +18,9 @@
 
 namespace Kiran
 {
-App::App(const std::string &desktop_id) : kind_(AppKind::DESKTOP),
+App::App(const std::string &desktop_id, AppKind kind) : kind_(kind),
                                           desktop_id_(desktop_id)
 {
-    this->update_from_desktop_file();
 }
 
 App::~App()
@@ -41,17 +40,40 @@ std::shared_ptr<App> App::create_fake()
     return app;
 }
 
-void App::update_from_desktop_file()
+std::shared_ptr<App> App::create_from_file(const std::string &path, AppKind kind) 
+{
+    auto desktop_app = Gio::DesktopAppInfo::create_from_filename(path);
+    if (!desktop_app)
+        return nullptr;
+    auto app = std::make_shared<App>(desktop_app->get_id(), kind);
+
+    app->desktop_app_ = desktop_app;
+    app->update_from_desktop_file();
+    return app;
+}
+
+std::shared_ptr<App> App::create_from_desktop_id(const std::string &id, AppKind kind) 
+{
+    auto app = std::make_shared<App>(id, kind);
+    app->desktop_app_ = Gio::DesktopAppInfo::create(id);
+    app->update_from_desktop_file();
+    return app;
+}
+
+void App::update_from_desktop_file(bool force)
 {
     SETTINGS_PROFILE("id: %s.", this->desktop_id_.c_str());
 
-    g_return_if_fail(this->kind_ == AppKind::DESKTOP);
 
-    this->desktop_app_ = Gio::DesktopAppInfo::create(this->desktop_id_);
-
+    if (this->desktop_id_.find("firefox") != -1) {
+        LOG_WARNING("%s: found id '%s', desktop app %p", __func__, desktop_id_.c_str(), desktop_app_?desktop_app_.get():0x0);
+    }
     g_return_if_fail(this->desktop_app_);
 
     this->file_name_ = this->desktop_app_->get_filename();
+
+    if (force)
+        this->desktop_app_ = Gio::DesktopAppInfo::create_from_filename(this->file_name_);
 
 #define GET_STRING(key) this->desktop_app_->get_string(key).raw()
 #define GET_LOCALE_STRING(key) this->desktop_app_->get_locale_string(key).raw()

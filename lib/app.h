@@ -25,14 +25,16 @@ class Window;
 
 using AppVec = std::vector<std::shared_ptr<Kiran::App>>;
 
-enum class AppKind
+enum AppKind
 {
     // 未知类型，正常情况不应该出现
-    UNKNOWN,
-    // 可以对应到desktop文件
-    DESKTOP,
+    UNKNOWN = 0x0,
+    // desktop文件在XDG_DATA_DIRS环境变量下
+    NORMAL = 0x1,
+    // 用户固定到任务栏上的自定义应用, desktop文件在用户目录下
+    USER_TASKBAR = 0x2,
     // 无法对应到desktop文件，这里会伪造一个不存在的desktop_id，格式为"fake_${fake_id_count_}"
-    FAKE_DESKTOP,
+    FAKE_DESKTOP = 0x4,
 };
 
 enum class AppStatus
@@ -62,12 +64,14 @@ public:
     App(){};
     App(const App &) = delete;
     // 通过desktop_id创建App
-    App(const std::string &desktop_id);
+    App(const std::string &desktop_id, AppKind kind_ = AppKind::NORMAL);
     virtual ~App();
 
     static std::shared_ptr<App> create_fake();
+    static std::shared_ptr<App> create_from_file(const std::string &path, AppKind kind_ = AppKind::USER_TASKBAR);
+    static std::shared_ptr<App> create_from_desktop_id(const std::string &id, AppKind kind_ = AppKind::NORMAL);
 
-    void update_from_desktop_file();
+    void update_from_desktop_file(bool force = false);
 
     // 获取desktop文件中的Name字段值
     const std::string &get_name() { return this->name_; }

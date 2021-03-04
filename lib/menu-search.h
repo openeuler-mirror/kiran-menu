@@ -24,6 +24,7 @@ public:
 
     AppVec search_by_keyword(const std::string &keyword,
                              bool ignore_case,
+                             AppKind kind,
                              const AppVec &apps);
 
 private:
