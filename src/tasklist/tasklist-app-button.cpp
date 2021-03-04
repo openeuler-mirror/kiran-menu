@@ -356,8 +356,6 @@ void TasklistAppButton::on_drag_data_received(const Glib::RefPtr< Gdk::DragConte
     auto app = get_app();
     if (app)
         app->launch_uris(selection_data.get_uris());
-
-    context->drag_finish(true, false, time);
 }
 
 void TasklistAppButton::on_window_opened(const std::shared_ptr<Kiran::Window> &window)
