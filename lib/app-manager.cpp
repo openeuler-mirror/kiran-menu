@@ -126,6 +126,9 @@ std::shared_ptr<App> AppManager::lookup_app_with_window(std::shared_ptr<Window> 
     app = lookup_app_with_xid(window->get_window_group());
     RETURN_VAL_IF_TRUE(app, app);
 
+    app = get_app_from_env(window);
+    RETURN_VAL_IF_TRUE(app, app);
+
     app = get_app_from_sandboxed_app(window);
     RETURN_VAL_IF_TRUE(app, app);
 
@@ -136,9 +139,6 @@ std::shared_ptr<App> AppManager::lookup_app_with_window(std::shared_ptr<Window> 
     RETURN_VAL_IF_TRUE(app, app);
 
     app = get_app_from_window_wmclass(window);
-    RETURN_VAL_IF_TRUE(app, app);
-
-    app = get_app_from_env(window);
     RETURN_VAL_IF_TRUE(app, app);
 
     // 遍历所有app，检查是否有应用的属性跟窗口的wm_class属性匹配
@@ -626,13 +626,13 @@ std::shared_ptr<App> AppManager::get_app_from_window_group(std::shared_ptr<Windo
             continue;
         }
 
+        app = get_app_from_env(*iter);
+        RETURN_VAL_IF_TRUE(app, app);
+
         app = get_app_from_gapplication_id(window);
         RETURN_VAL_IF_TRUE(app, app);
 
         app = get_app_from_window_wmclass(*iter);
-        RETURN_VAL_IF_TRUE(app, app);
-
-        app = get_app_from_env(*iter);
         RETURN_VAL_IF_TRUE(app, app);
 
         app = get_app_by_enumeration_apps(window);
