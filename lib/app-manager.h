@@ -82,7 +82,7 @@ private:
     std::shared_ptr<App> get_app_by_enumeration_windows(std::shared_ptr<Window> window);
     std::shared_ptr<App> get_app_from_window_group(std::shared_ptr<Window> window);
 
-    std::string gen_userapp_id(const std::string &desktop_id);
+    std::string gen_userapp_id(const std::string &userapp_dir, const std::string &desktop_id);
     std::string get_userapp_dir_path();
 
 
