@@ -85,7 +85,6 @@ private:
     std::string gen_userapp_id(const std::string &desktop_id);
     std::string get_userapp_dir_path();
 
-
     void load_desktop_apps();
     void clear_desktop_apps();
     void register_app(std::map<std::string, std::shared_ptr<App>> &old_apps,
@@ -109,6 +108,19 @@ private:
     // 处理窗口关闭信号
     void window_closed(std::shared_ptr<Window> window);
 
+    // 更新WnckApplication和App之间的绑定关系
+    void update_wnckapps_binding();
+    // 绑定WnckApplication到App，返回绑定成功的App和App是否为新创建的
+    std::pair<std::shared_ptr<App>, bool> bind_wnck2app(WnckApplication *wnck_application);
+    // 绑定WnckApplication到FakeApp，返回绑定成功的FakeApp
+    std::shared_ptr<App> bind_wnck2fake(WnckApplication *wnck_application);
+    // 取消WnckApplication和App的绑定关系，返回取消绑定的App和App是否被删除
+    std::pair<std::shared_ptr<App>, bool> unbind_wnck2app(WnckApplication *wnck_application);
+    // 清理所有WnckApplication和App之间的绑定关系
+    void clear_wnckapps_binding();
+    // 清理未使用的fake app，返回清理的数量
+    int32_t clear_nouse_fake_app();
+
     std::string get_exec_name(const std::string &exec_str);
 
     void app_launched(std::shared_ptr<App> app);
@@ -129,10 +141,11 @@ private:
     std::map<std::string, std::shared_ptr<App>> apps_;
     std::map<std::string, std::weak_ptr<App>> wmclass_apps_;
 
+    // <WnckApplication xid, App>
     std::map<uint64_t, std::weak_ptr<App>> wnck_apps_;
 
-    GAppInfoMonitor *system_app_monitor;        /* 系统应用监控器 */
-    GFileMonitor *user_app_monitor;             /* 用户应用目录监控器 */
+    GAppInfoMonitor *system_app_monitor; /* 系统应用监控器 */
+    GFileMonitor *user_app_monitor;      /* 用户应用目录监控器 */
 };
 
 }  // namespace Kiran

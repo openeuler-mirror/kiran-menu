@@ -222,12 +222,34 @@ void MenuSkeleton::desktop_app_changed()
 
 void MenuSkeleton::app_installed(AppVec apps)
 {
-    this->app_installed_.emit(apps);
+    AppVec show_apps;
+    for (auto &app : apps)
+    {
+        if (app->should_show())
+        {
+            show_apps.push_back(app);
+        }
+    }
+    if (show_apps.size() > 0)
+    {
+        this->app_installed_.emit(show_apps);
+    }
 }
 
 void MenuSkeleton::app_uninstalled(AppVec apps)
 {
-    this->app_uninstalled_.emit(apps);
+    AppVec show_apps;
+    for (auto &app : apps)
+    {
+        if (app->should_show())
+        {
+            show_apps.push_back(app);
+        }
+    }
+    if (show_apps.size() > 0)
+    {
+        this->app_uninstalled_.emit(show_apps);
+    }
 }
 
 void MenuSkeleton::new_app_changed()

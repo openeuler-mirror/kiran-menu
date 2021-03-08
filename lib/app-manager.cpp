@@ -6,14 +6,15 @@
  * @Description  :
  * @FilePath     : /kiran-menu-2.0/lib/app-manager.cpp
  */
+
 #include "lib/app-manager.h"
 
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
+#include <glib/gstdio.h>
 
 #include <cinttypes>
 #include <sstream>
-#include <glib/gstdio.h>
 
 #include "lib/common.h"
 #include "lib/log.h"
@@ -21,12 +22,11 @@
 namespace Kiran
 {
 #define SNAP_SECURITY_LABEL_PREFIX "snap."
-#define USER_APP_DIR  ".config/kiran-applets/applications/"
+#define USER_APP_DIR ".config/kiran-applets/applications/"
 
-AppManager::AppManager(WindowManager *window_manager) :
-    window_manager_(window_manager),
-    system_app_monitor(nullptr),
-    user_app_monitor(nullptr)
+AppManager::AppManager(WindowManager *window_manager) : window_manager_(window_manager),
+                                                        system_app_monitor(nullptr),
+                                                        user_app_monitor(nullptr)
 {
 }
 
@@ -34,7 +34,7 @@ AppManager::~AppManager()
 {
     if (system_app_monitor)
         g_object_unref(system_app_monitor);
-    
+
     if (user_app_monitor)
         g_object_unref(user_app_monitor);
 }
@@ -213,7 +213,7 @@ void AppManager::init()
     load_desktop_apps();
 
     /* 监控用户应用目录 */
-    GFile* user_app_dir = g_file_new_for_path("");
+    GFile *user_app_dir = g_file_new_for_path("");
     user_app_monitor = g_file_monitor_directory(user_app_dir, G_FILE_MONITOR_NONE, NULL, NULL);
     g_return_if_fail(user_app_monitor != NULL);
     g_signal_connect_swapped(user_app_monitor, "changed", G_CALLBACK(AppManager::desktop_app_changed), this);
@@ -659,7 +659,7 @@ std::shared_ptr<App> AppManager::get_app_from_window_group(std::shared_ptr<Windo
     return nullptr;
 }
 
-std::string AppManager::gen_userapp_id(const std::string &desktop_id) 
+std::string AppManager::gen_userapp_id(const std::string &desktop_id)
 {
     /* 移除.desktop后缀 */
     std::string desktop_name;
@@ -668,7 +668,8 @@ std::string AppManager::gen_userapp_id(const std::string &desktop_id)
     if (index != std::string::npos)
     {
         desktop_name = desktop_id.substr(0, index);
-    } else
+    }
+    else
         desktop_name = desktop_id;
 
     auto pattern = Glib::ustring::compose("userapp-%1-XXXXXX.desktop", desktop_name.c_str());
@@ -676,24 +677,24 @@ std::string AppManager::gen_userapp_id(const std::string &desktop_id)
     int fd = mkstemps(pattern_str, 8);
     if (fd != -1)
         close(fd);
-    
+
     return pattern_str;
 }
 
-std::string AppManager::get_userapp_dir_path() 
+std::string AppManager::get_userapp_dir_path()
 {
     return Glib::ustring::compose("%1/" USER_APP_DIR, g_get_home_dir()).raw();
 }
 
-std::string AppManager::create_userapp_from_uri(const std::string &uri) 
+std::string AppManager::create_userapp_from_uri(const std::string &uri)
 {
     Glib::RefPtr<Gio::File> source_file, dest_file;
     std::string new_id, dest_path, userapp_dir;
 
-    source_file = Gio::File::create_for_uri(uri); 
+    source_file = Gio::File::create_for_uri(uri);
     if (!source_file)
         return "";
-    
+
     auto source_app = Gio::DesktopAppInfo::create_from_filename(source_file->get_path());
     if (!source_app)
         return "";
@@ -713,54 +714,56 @@ std::string AppManager::create_userapp_from_uri(const std::string &uri)
     }
 
     /* 拷贝desktop文件 */
-    try {
+    try
+    {
         dest_file = Gio::File::create_for_path(dest_path);
         if (source_file->copy(dest_file))
             return new_id;
-    } catch (Glib::Error &e) {
+    }
+    catch (Glib::Error &e)
+    {
         LOG_ERROR("Failed to copy file '%s': %s", source_file->get_path().c_str(), e.what().c_str());
     }
 
     return "";
 }
 
-bool AppManager::remove_app_from_disk(const std::string &desktop_id) 
+bool AppManager::remove_app_from_disk(const std::string &desktop_id)
 {
     auto app = lookup_app(desktop_id);
     if (!app || app->get_kind() != AppKind::USER_TASKBAR)
         return false;
-    
+
     return g_unlink(app->get_file_name().c_str()) != -1;
 }
 
 void AppManager::load_desktop_apps()
 {
-    bool new_app_change = false;
+    std::vector<std::shared_ptr<App>> installed_apps;
+    std::vector<std::shared_ptr<App>> uninstalled_apps;
 
-    std::vector<std::shared_ptr<App>> new_installed_apps;
-    std::vector<std::shared_ptr<App>> new_uninstalled_apps;
-    std::vector<Glib::RefPtr<Gio::AppInfo>> user_apps;
-
-    // copy the keys of the->apps to old_apps.
+    // 缓存旧的app
     auto old_apps = this->apps_;
 
-    // clear the apps which type is AppKind::DESKTOP
     this->clear_desktop_apps();
     this->wmclass_apps_.clear();
 
-    // load user apps
+    // 加载用户自定义应用
     auto app_dir_path = get_userapp_dir_path();
     auto userapp_dir = g_file_new_for_path(app_dir_path.c_str());
-    if (userapp_dir && g_file_query_file_type(userapp_dir, G_FILE_QUERY_INFO_NONE, NULL) == G_FILE_TYPE_DIRECTORY) {
+    if (userapp_dir && g_file_query_file_type(userapp_dir, G_FILE_QUERY_INFO_NONE, NULL) == G_FILE_TYPE_DIRECTORY)
+    {
         GFileEnumerator *enumerator = g_file_enumerate_children(userapp_dir, "*", G_FILE_QUERY_INFO_NONE, NULL, NULL);
-        do {
+        do
+        {
             const char *child_name = nullptr;
             GFileInfo *info = g_file_enumerator_next_file(enumerator, NULL, NULL);
             if (!info)
                 break;
-            
+
             child_name = g_file_info_get_name(info);
-            if (g_str_has_prefix(child_name, "userapp-") && g_str_has_suffix(child_name, ".desktop")) {
+            if (g_str_has_prefix(child_name, "userapp-") && g_str_has_suffix(child_name, ".desktop"))
+            {
                 auto file = g_file_enumerator_get_child(enumerator, info);
                 LOG_DEBUG("Found user desktop file '%s'", child_name);
                 register_app(old_apps, g_file_get_path(file), AppKind::USER_TASKBAR);
@@ -773,7 +776,7 @@ void AppManager::load_desktop_apps()
         g_object_unref(userapp_dir);
     }
 
-    // update system apps
+    // 加载系统应用
     auto registered_apps = Gio::AppInfo::get_all();
     for (auto iter = registered_apps.begin(); iter != registered_apps.end(); ++iter)
     {
@@ -781,20 +784,20 @@ void AppManager::load_desktop_apps()
         register_app(old_apps, app, AppKind::NORMAL);
     }
 
-    // new installed apps
+    // 更新WnckApplicatin和应用绑定
+    this->update_wnckapps_binding();
+    // 清理不再使用的fake app
+    this->clear_nouse_fake_app();
+
+    // 获取新安装的应用
     static bool first_flush = true;
     if (!first_flush)
     {
-        for (auto iter = registered_apps.begin(); iter != registered_apps.end(); ++iter)
+        for (auto &iter : this->apps_)
         {
-            auto desktop_id = (*iter)->get_id();
-            auto app = lookup_app(desktop_id);
-
-            if (app &&
-                app->should_show() &&
-                old_apps.find(desktop_id) == old_apps.end())
+            if (old_apps.find(iter.first) == old_apps.end())
             {
-                new_installed_apps.push_back(app);
+                installed_apps.push_back(iter.second);
             }
         }
     }
@@ -803,25 +806,23 @@ void AppManager::load_desktop_apps()
         first_flush = false;
     }
 
-    // new uninstalled apps
+    // 获取卸载的应用
+    for (auto iter = old_apps.begin(); iter != old_apps.end(); ++iter)
     {
-        for (auto iter = old_apps.begin(); iter != old_apps.end(); ++iter)
+        if (this->apps_.find(iter->first) == this->apps_.end())
         {
-            if (this->apps_.find(iter->first) == this->apps_.end() && iter->second->should_show())
-            {
-                new_uninstalled_apps.push_back(iter->second);
-            }
+            uninstalled_apps.push_back(iter->second);
         }
     }
 
-    if (new_installed_apps.size() > 0)
+    if (installed_apps.size() > 0)
     {
-        this->app_installed_.emit(new_installed_apps);
+        this->app_installed_.emit(installed_apps);
     }
 
-    if (new_uninstalled_apps.size() > 0)
+    if (uninstalled_apps.size() > 0)
     {
-        this->app_uninstalled_.emit(new_uninstalled_apps);
+        this->app_uninstalled_.emit(uninstalled_apps);
     }
 }
 
@@ -868,8 +869,8 @@ void AppManager::register_app(std::map<std::string, std::shared_ptr<App>> &old_a
 }
 
 void AppManager::register_app(std::map<std::string, std::shared_ptr<App>> &old_apps,
-                      const std::string &desktop_file,
-                      AppKind kind) 
+                              const std::string &desktop_file,
+                              AppKind kind)
 {
     std::shared_ptr<App> app = App::create_from_file(desktop_file);
     auto desktop_id = app->get_desktop_id();
@@ -892,7 +893,6 @@ void AppManager::register_app(std::map<std::string, std::shared_ptr<App>> &old_a
     {
         this->wmclass_apps_[app->get_startup_wm_class()] = app;
     }
- 
 }
 
 void AppManager::desktop_app_changed(AppManager *app_manager)
@@ -918,47 +918,21 @@ void AppManager::app_opened(WnckScreen *screen, WnckApplication *wnck_applicatio
 
     LOG_DEBUG("wnck app is opened, xid: %" PRIu64 ", name: %s.", xwindow, name);
 
-    auto iter = app_manager->wnck_apps_.find(xwindow);
-    if (iter != app_manager->wnck_apps_.end())
-    {
-        LOG_WARNING("the wnck app already exist. name: %s xid: %" PRIu64 "\n", name, xwindow);
-        return;
-    }
+    auto binding_result = app_manager->bind_wnck2app(wnck_application);
 
-    auto wnck_windows = wnck_application_get_windows(wnck_application);
-    bool add_result = false;
-    std::shared_ptr<App> app;
-    for (auto l = wnck_windows; l != NULL; l = l->next)
+    if (binding_result.first)
     {
-        auto wnck_window = (WnckWindow *)(l->data);
-        auto window = app_manager->window_manager_->create_temp_window(wnck_window);
-        app = app_manager->lookup_app_with_window(window);
-        if (app)
+        // 如果绑定时创建了新的app，需要发送app安装信号
+        if (binding_result.second)
         {
-            app_manager->wnck_apps_.emplace(xwindow, app);
-            app->add_wnck_app_by_xid(xwindow);
-            add_result = true;
-            break;
+            app_manager->app_installed_.emit(AppVec{binding_result.first});
         }
+        app_manager->signal_app_action_changed_.emit(binding_result.first, AppAction::APP_OPENED);
     }
-
-    if (!add_result)
+    else
     {
-        LOG_DEBUG("create a fake app for wnck app, name: %s xid: %" PRIu64 "\n", name, xwindow);
-
-        app = App::create_fake();
-        app->add_wnck_app_by_xid(xwindow);
-        app_manager->wnck_apps_[xwindow] = app;
-        auto &desktop_id = app->get_desktop_id();
-
-        if (app_manager->apps_.find(desktop_id) != app_manager->apps_.end())
-        {
-            LOG_WARNING("exist a app that have same desktop id. id: %s name: %s xid: %" PRIu64 "\n", desktop_id.c_str(), name, xwindow);
-        }
-        app_manager->apps_[desktop_id] = app;
+        LOG_WARNING("Cannot bind wnck application to any app. name: %s xid: %" PRIu64 "\n", name, xwindow);
     }
-
-    app_manager->signal_app_action_changed_.emit(app, AppAction::APP_OPENED);
 }
 
 void AppManager::app_closed(WnckScreen *screen, WnckApplication *wnck_application, gpointer user_data)
@@ -973,36 +947,20 @@ void AppManager::app_closed(WnckScreen *screen, WnckApplication *wnck_applicatio
 
     LOG_DEBUG("wnck app is closed, xid: %" PRIu64 ", name: %s.", xwindow, name);
 
-    std::shared_ptr<App> app;
-    auto iter = app_manager->wnck_apps_.find(xwindow);
-    if (iter == app_manager->wnck_apps_.end())
+    auto unbinding_result = app_manager->unbind_wnck2app(wnck_application);
+
+    if (unbinding_result.first)
     {
-        LOG_WARNING("cannot find the App for the wnck_application. name: %s xid: %" PRIu64 "\n", name, xwindow);
+        // 如果取消绑定时删除了fakeapp，需要发送app卸载信号
+        if (unbinding_result.second)
+        {
+            app_manager->app_uninstalled_.emit(AppVec{unbinding_result.first});
+        }
+        app_manager->signal_app_action_changed_.emit(unbinding_result.first, AppAction::APP_CLOSED);
     }
     else
     {
-        if (iter->second.expired() == false)
-        {
-            app = iter->second.lock();
-            app->del_wnck_app_by_xid(xwindow);
-            app_manager->signal_app_action_changed_.emit(app, AppAction::APP_CLOSED);
-        }
-        app_manager->wnck_apps_.erase(iter);
-    }
-
-    if (app &&
-        app->get_kind() == AppKind::FAKE_DESKTOP &&
-        app->get_wnck_app_count() == 0)
-    {
-        auto iter = app_manager->apps_.find(app->get_desktop_id());
-        if (iter != app_manager->apps_.end())
-        {
-            app_manager->apps_.erase(iter);
-        }
-        else
-        {
-            LOG_WARNING("cannot find the fake App for the wnck_application. name: %s xid: %" PRIu64 "\n", name, xwindow);
-        }
+        LOG_WARNING("Failed to unbind for wnck application. name: %s xid: %" PRIu64 "\n", name, xwindow);
     }
 }
 
@@ -1033,6 +991,158 @@ void AppManager::window_closed(std::shared_ptr<Window> window)
     {
         LOG_WARNING("cannot find app for window: %" PRIu64 ".", window->get_xid());
     }
+}
+
+void AppManager::update_wnckapps_binding()
+{
+    /* 当出现应用安装时，与之相关的窗口之前是绑定的fake app，此时需要重新绑定；
+       当出现应用卸载时，与之相关的窗口失去了绑定，此时需要创建一个fake app来与窗口绑定
+    */
+
+    // 先缓存所有的wnckapplication
+    std::vector<uint64_t> wnck_apps_xids;
+    for (auto &iter : this->wnck_apps_)
+    {
+        wnck_apps_xids.push_back(iter.first);
+    }
+
+    // 清理所有的绑定关系
+    this->clear_wnckapps_binding();
+
+    // 重新绑定
+    for (auto &wnck_app_xid : wnck_apps_xids)
+    {
+        auto wnck_application = wnck_application_get(wnck_app_xid);
+        // 绑定时如果有新的app创建则交给上一层函数去处理信号发送
+        this->bind_wnck2app(wnck_application);
+    }
+}
+
+std::pair<std::shared_ptr<App>, bool> AppManager::bind_wnck2app(WnckApplication *wnck_application)
+{
+    RETURN_VAL_IF_TRUE(wnck_application == NULL, std::make_pair(nullptr, false));
+
+    auto xwindow = wnck_application_get_xid(wnck_application);
+    auto name = wnck_application_get_name(wnck_application);
+
+    auto iter = this->wnck_apps_.find(xwindow);
+    if (iter != this->wnck_apps_.end())
+    {
+        LOG_WARNING("The wnck app already exist. name: %s xid: %" PRIu64 "\n", name, xwindow);
+        return std::make_pair(nullptr, false);
+    }
+
+    auto wnck_windows = wnck_application_get_windows(wnck_application);
+    std::shared_ptr<App> app;
+    for (auto l = wnck_windows; l != NULL; l = l->next)
+    {
+        auto wnck_window = (WnckWindow *)(l->data);
+        auto window = this->window_manager_->create_temp_window(wnck_window);
+        app = this->lookup_app_with_window(window);
+        if (app)
+        {
+            this->wnck_apps_.emplace(xwindow, app);
+            app->add_wnck_app_by_xid(xwindow);
+            break;
+        }
+    }
+
+    // 如果现有的app中未找到绑定关系，则创建一个fake app与之绑定
+    if (!app)
+    {
+        app = this->bind_wnck2fake(wnck_application);
+        return std::make_pair(app, true);
+    }
+    return std::make_pair(app, false);
+}
+
+std::shared_ptr<App> AppManager::bind_wnck2fake(WnckApplication *wnck_application)
+{
+    auto xwindow = wnck_application_get_xid(wnck_application);
+    auto name = wnck_application_get_name(wnck_application);
+
+    LOG_DEBUG("create a fake app for wnck app, name: %s xid: %" PRIu64 "\n", name, xwindow);
+
+    auto app = App::create_fake();
+    app->add_wnck_app_by_xid(xwindow);
+
+    this->wnck_apps_[xwindow] = app;
+    auto &desktop_id = app->get_desktop_id();
+
+    auto iter = this->apps_.emplace(desktop_id, app);
+    if (!iter.second)
+    {
+        LOG_WARNING("Exist a app that have same desktop id: %s\n", desktop_id.c_str());
+        return nullptr;
+    }
+
+    return app;
+}
+
+std::pair<std::shared_ptr<App>, bool> AppManager::unbind_wnck2app(WnckApplication *wnck_application)
+{
+    RETURN_VAL_IF_TRUE(wnck_application == NULL, std::make_pair(nullptr, false));
+
+    auto xwindow = wnck_application_get_xid(wnck_application);
+    auto name = wnck_application_get_name(wnck_application);
+
+    std::shared_ptr<App> app;
+    auto iter = this->wnck_apps_.find(xwindow);
+    if (iter == this->wnck_apps_.end())
+    {
+        LOG_WARNING("cannot find the App for the wnck_application. name: %s xid: %" PRIu64 "\n", name, xwindow);
+        return std::make_pair(nullptr, false);
+    }
+    else
+    {
+        app = iter->second.lock();
+        if (app)
+        {
+            app->del_wnck_app_by_xid(xwindow);
+            // this->signal_app_action_changed_.emit(app, AppAction::APP_CLOSED);
+        }
+        this->wnck_apps_.erase(iter);
+    }
+
+    if (app &&
+        app->get_kind() == AppKind::FAKE_DESKTOP &&
+        app->get_wnck_app_count() == 0)
+    {
+        this->apps_.erase(app->get_desktop_id());
+        return std::make_pair(app, true);
+    }
+    return std::make_pair(app, false);
+}
+
+void AppManager::clear_wnckapps_binding()
+{
+    for (auto &iter : this->wnck_apps_)
+    {
+        auto app = iter.second.lock();
+        if (app)
+        {
+            app->del_wnck_app_by_xid(iter.first);
+        }
+    }
+    this->wnck_apps_.clear();
+}
+
+int32_t AppManager::clear_nouse_fake_app()
+{
+    int32_t clear_number = 0;
+    // 如果fake app不再绑定任何WnckApplication，则进行清理
+    for (auto iter = this->apps_.begin(); iter != this->apps_.end();)
+    {
+        if (iter->second->get_kind() == AppKind::FAKE_DESKTOP &&
+            iter->second->get_wnck_app_count() == 0)
+        {
+            this->apps_.erase(iter++);
+            ++clear_number;
+            continue;
+        }
+        ++iter;
+    }
+    return clear_number;
 }
 
 std::string AppManager::get_exec_name(const std::string &exec_str)

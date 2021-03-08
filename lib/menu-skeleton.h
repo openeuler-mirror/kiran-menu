@@ -87,13 +87,13 @@ public:
     std::shared_ptr<MenuUnit> get_unit(MenuUnitType unit_type);
 
     //signal accessor:
-    // desktop应用列表发生变化信号，与AppManager::signal_desktop_app_changed相同，建议使用AppManager::signal_desktop_app_changed，这里只是为了兼容以前的接口
+    // desktop应用列表发生变化信号，与AppManager::signal_desktop_app_changed相同
     sigc::signal<void> &signal_app_changed() { return this->app_changed_; }
 
-    // App安装时的信号，与AppManager::signal_app_installed相同，建议使用AppManager::signal_app_installed，这里只是为了兼容以前的接口
+    // App安装时的信号，这里会过滤掉should_show返回false的应用
     sigc::signal<void, AppVec> &signal_app_installed() { return this->app_installed_; }
 
-    // App卸载时的信号，与AppManager::signal_app_uninstalled相同，建议使用AppManager::signal_app_uninstalled，这里只是为了兼容以前的接口
+    // App卸载时的信号，这里会过滤掉should_show返回false的应用
     sigc::signal<void, AppVec> &signal_app_uninstalled() { return this->app_uninstalled_; }
 
     // 新安装应用列表发生变化的信号
