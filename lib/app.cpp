@@ -19,7 +19,7 @@
 namespace Kiran
 {
 App::App(const std::string &desktop_id, AppKind kind) : kind_(kind),
-                                          desktop_id_(desktop_id)
+                                                        desktop_id_(desktop_id)
 {
 }
 
@@ -40,7 +40,7 @@ std::shared_ptr<App> App::create_fake()
     return app;
 }
 
-std::shared_ptr<App> App::create_from_file(const std::string &path, AppKind kind) 
+std::shared_ptr<App> App::create_from_file(const std::string &path, AppKind kind)
 {
     auto desktop_app = Gio::DesktopAppInfo::create_from_filename(path);
     if (!desktop_app)
@@ -52,7 +52,7 @@ std::shared_ptr<App> App::create_from_file(const std::string &path, AppKind kind
     return app;
 }
 
-std::shared_ptr<App> App::create_from_desktop_id(const std::string &id, AppKind kind) 
+std::shared_ptr<App> App::create_from_desktop_id(const std::string &id, AppKind kind)
 {
     auto app = std::make_shared<App>(id, kind);
     app->desktop_app_ = Gio::DesktopAppInfo::create(id);
@@ -64,10 +64,6 @@ void App::update_from_desktop_file(bool force)
 {
     SETTINGS_PROFILE("id: %s.", this->desktop_id_.c_str());
 
-
-    if (this->desktop_id_.find("firefox") != -1) {
-        LOG_WARNING("%s: found id '%s', desktop app %p", __func__, desktop_id_.c_str(), desktop_app_?desktop_app_.get():0x0);
-    }
     g_return_if_fail(this->desktop_app_);
 
     this->file_name_ = this->desktop_app_->get_filename();
@@ -141,12 +137,13 @@ bool App::should_show()
     return (this->desktop_app_->should_show() && !this->x_kiran_no_display_);
 }
 
-bool App::is_active() 
+bool App::is_active()
 {
     auto window_manager = Kiran::WindowManager::get_instance();
     auto active_window = window_manager->get_active_window();
 
-    if (active_window) {
+    if (active_window)
+    {
         if (!active_window->should_skip_taskbar())
             return active_window->get_app().get() == this;
     }
@@ -268,7 +265,7 @@ bool App::launch()
     return res;
 }
 
-bool App::launch_uris(const Glib::ListHandle< std::string >& uris)
+bool App::launch_uris(const Glib::ListHandle<std::string> &uris)
 {
     SETTINGS_PROFILE("id: %s.", this->desktop_id_.c_str());
 
