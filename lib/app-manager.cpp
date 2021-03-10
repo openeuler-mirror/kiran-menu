@@ -213,7 +213,7 @@ void AppManager::init()
     load_desktop_apps();
 
     /* 监控用户应用目录 */
-    GFile *user_app_dir = g_file_new_for_path("");
+    GFile *user_app_dir = g_file_new_for_path(get_userapp_dir_path().c_str());
     user_app_monitor = g_file_monitor_directory(user_app_dir, G_FILE_MONITOR_NONE, NULL, NULL);
     g_return_if_fail(user_app_monitor != NULL);
     g_signal_connect_swapped(user_app_monitor, "changed", G_CALLBACK(AppManager::desktop_app_changed), this);
@@ -659,9 +659,11 @@ std::shared_ptr<App> AppManager::get_app_from_window_group(std::shared_ptr<Windo
     return nullptr;
 }
 
-std::string AppManager::gen_userapp_id(const std::string &desktop_id)
+std::string AppManager::gen_userapp_id(const std::string &userapp_dir,
+                                       const std::string &desktop_id)
 {
     /* 移除.desktop后缀 */
+    int num = 1;
     std::string desktop_name;
 
     auto index = desktop_id.rfind(".desktop");
@@ -672,13 +674,26 @@ std::string AppManager::gen_userapp_id(const std::string &desktop_id)
     else
         desktop_name = desktop_id;
 
-    auto pattern = Glib::ustring::compose("userapp-%1-XXXXXX.desktop", desktop_name.c_str());
-    auto pattern_str = g_strdup(pattern.c_str());
-    int fd = mkstemps(pattern_str, 8);
-    if (fd != -1)
-        close(fd);
+    while (true)
+    {
+        char *new_id = nullptr, *desktop_path = nullptr;
 
-    return pattern_str;
+        new_id = g_strdup_printf("userapp-%s-%d.desktop", desktop_name.c_str(), num);
+        desktop_path = g_build_filename(userapp_dir.c_str(), new_id, NULL);
+        if (!g_file_test(desktop_path, G_FILE_TEST_EXISTS))
+        {
+            desktop_name.assign(new_id);
+            g_free(desktop_path);
+            g_free(new_id);
+            break;
+        }
+
+        g_free(desktop_path);
+        g_free(new_id);
+        num++;
+    }
+
+    return desktop_name;
 }
 
 std::string AppManager::get_userapp_dir_path()
@@ -690,18 +705,28 @@ std::string AppManager::create_userapp_from_uri(const std::string &uri)
 {
     Glib::RefPtr<Gio::File> source_file, dest_file;
     std::string new_id, dest_path, userapp_dir;
+    Glib::RefPtr<Gio::DesktopAppInfo> source_app;
 
-    source_file = Gio::File::create_for_uri(uri);
-    if (!source_file)
-        return "";
+    try
+    {
+        source_file = Gio::File::create_for_uri(uri);
+        if (!source_file)
+            return "";
 
-    auto source_app = Gio::DesktopAppInfo::create_from_filename(source_file->get_path());
-    if (!source_app)
+        /* 确保其为正常的desktop文件 */
+        source_app = Gio::DesktopAppInfo::create_from_filename(source_file->get_path());
+        if (!source_app)
+            return "";
+    }
+    catch (const Gio::Error &e)
+    {
+        LOG_ERROR("Failed to create user app for '%s': %s", uri.c_str(), e.what().c_str());
         return "";
+    }
 
     /* 生成新Desktop文件名称 */
-    new_id = gen_userapp_id(source_app->get_id());
     userapp_dir = get_userapp_dir_path();
+    new_id = gen_userapp_id(userapp_dir, source_app->get_id());
     dest_path = Glib::ustring::compose("%1/%2", userapp_dir, new_id);
 
     /* 确保用户应用目录存在 */

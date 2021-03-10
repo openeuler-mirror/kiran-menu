@@ -63,7 +63,6 @@ std::shared_ptr<App> App::create_from_desktop_id(const std::string &id, AppKind 
 void App::update_from_desktop_file(bool force)
 {
     SETTINGS_PROFILE("id: %s.", this->desktop_id_.c_str());
-
     g_return_if_fail(this->desktop_app_);
 
     this->file_name_ = this->desktop_app_->get_filename();
@@ -134,6 +133,8 @@ std::string App::get_startup_wm_class()
 bool App::should_show()
 {
     RETURN_VAL_IF_FALSE(this->desktop_app_, false);
+    RETURN_VAL_IF_FALSE(get_kind() != AppKind::USER_TASKBAR, false);
+
     return (this->desktop_app_->should_show() && !this->x_kiran_no_display_);
 }
 
