@@ -41,6 +41,13 @@ public:
      */
     void set_size(int size);
 
+
+    /**
+     * @brief set_app 设置当前按钮关联的应用为app，关联后应用按钮缓存的数据会自动刷新
+     * @param app 要关联的应用
+     */
+    void set_app(const std::shared_ptr<Kiran::App> &app);
+
     /**
      * @brief get_app 获取按钮关联的应用
      * @return  返回关联的应用
@@ -123,7 +130,7 @@ private:
 
     int applet_size;                                    //所属插件的尺寸
     int icon_size;                                      //绘制应用图标的尺寸
-    std::weak_ptr<Kiran::App> app;                      //关联的app对象
+    std::shared_ptr<Kiran::App> app;                      //关联的app对象
 
     AppButtonState state;                               //按钮显示状态
     bool dragging;                                      //当前是否处于被拖动状态
@@ -131,7 +138,7 @@ private:
     GdkPoint drag_point;
     sigc::connection    draw_attention_flicker;         //需要用户注意时的闪烁绘制定时器
     sigc::connection    draw_attention_normal;          //需要用户注意时的最终绘制定时器
-
+    std::vector<sigc::connection> windows_state_handlers;   //窗口状态变化信号监控
 
     Glib::RefPtr<Gtk::GestureDrag> gesture;                     //拖动的事件
     sigc::signal<void, bool> m_signal_context_menu_toggled;
