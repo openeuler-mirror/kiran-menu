@@ -3,6 +3,7 @@
 #include <glib/gi18n.h>
 #include <gtk/gtkx.h>
 #include "global.h"
+#include "log.h"
 #include "workspace-manager.h"
 
 
@@ -11,6 +12,11 @@ TasklistWindowContextMenu::TasklistWindowContextMenu(const std::shared_ptr<Kiran
 {
     refresh();
     get_style_context()->add_class("previewer-context-menu");
+}
+
+sigc::signal<void> TasklistWindowContextMenu::signal_window_move_required() 
+{
+    return m_signal_window_move_required;
 }
 
 void TasklistWindowContextMenu::refresh()
@@ -66,6 +72,17 @@ void TasklistWindowContextMenu::refresh()
                             window->unmaximize();
                     }
 
+                });
+    append(*item);
+
+    /* 移动 */
+    item = Gtk::make_managed<Gtk::MenuItem>(_("Move"));
+    item->signal_activate().connect(
+                [this]() -> void {
+                    auto window = win.lock();
+                    if (window) {
+                        window->keyboard_move();
+                    }
                 });
     append(*item);
 
@@ -127,6 +144,7 @@ void TasklistWindowContextMenu::refresh()
     append(*item);
 
     show_all();
+
 }
 
 /**

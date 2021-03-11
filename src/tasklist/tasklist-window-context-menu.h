@@ -9,6 +9,8 @@ class TasklistWindowContextMenu : public KiranOpacityMenu
 public:
     TasklistWindowContextMenu(const std::shared_ptr<Kiran::Window> &win_);
 
+    sigc::signal<void> signal_window_move_required();
+
     /**
      * @brief refresh 根据关联的窗口状态刷新菜单内容
      */
@@ -28,6 +30,7 @@ protected:
 
 private:
     std::weak_ptr<Kiran::Window> win;   /* 该菜单关联的窗口 */
+    sigc::signal<void> m_signal_window_move_required;
 };
 
 #endif // TASKLIST_WINDOW_CONTEXT_MENU_H
