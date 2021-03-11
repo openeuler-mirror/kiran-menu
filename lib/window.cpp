@@ -380,6 +380,16 @@ WindowGeometry Window::get_client_window_geometry()
     return std::make_tuple(x, y, w, h);
 }
 
+void Window::set_geometry(WnckWindowGravity gravity,
+                          WnckWindowMoveResizeMask geometry_mask,
+                          int x,
+                          int y,
+                          int width,
+                          int height)
+{
+    wnck_window_set_geometry(this->wnck_window_, gravity, geometry_mask, x, y, width, height);
+}
+
 std::shared_ptr<Workspace> Window::get_workspace()
 {
     auto wnck_workspace = wnck_window_get_workspace(this->wnck_window_);
@@ -529,7 +539,7 @@ void Window::state_changed(WnckWindow *wnck_window, gpointer user_data)
     window->signal_state_changed().emit();
 }
 
-void Window::process_events(GdkXEvent* xevent, GdkEvent* event)
+void Window::process_events(GdkXEvent *xevent, GdkEvent *event)
 {
     auto x_event = (XEvent *)xevent;
 

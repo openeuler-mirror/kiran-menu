@@ -44,7 +44,7 @@ public:
 
     // 获取窗口预览图的pixmap
     Pixmap get_pixmap() { return this->pixmap_; };
-    cairo_surface_t *get_thumbnail(int &thumbnail_width, int &thumbnail_height);
+    cairo_surface_t* get_thumbnail(int& thumbnail_width, int& thumbnail_height);
 
     // 获取与该窗口关联的App对象
     std::shared_ptr<App> get_app();
@@ -126,6 +126,14 @@ public:
     WindowGeometry get_geometry();
     WindowGeometry get_client_window_geometry();
 
+    // 设置窗口的位置和大小，位置和大小包含了窗口管理器添加的边框大小
+    void set_geometry(WnckWindowGravity gravity,
+                      WnckWindowMoveResizeMask geometry_mask,
+                      int x,
+                      int y,
+                      int width,
+                      int height);
+
     // 获取当前所在的工作区。如果窗口为pin状态或者不在任何工作区，则返回空
     std::shared_ptr<Workspace> get_workspace();
     void set_on_visible_workspace(bool on);
@@ -138,7 +146,7 @@ public:
 
     // 窗口标题发生变化信号
     sigc::signal<void> signal_name_changed() { return this->name_changed_; }
-    sigc::signal<void> signal_state_changed() { return this->m_signal_state_changed;}
+    sigc::signal<void> signal_state_changed() { return this->m_signal_state_changed; }
     // 工作区变化信号。两个参数分别代表之前的工作区和当前的工作区，如果指针为nullptr，说明窗口不属于任意工作区或者窗口是pin状态
     sigc::signal<void, std::shared_ptr<Workspace>, std::shared_ptr<Workspace>> signal_workspace_changed() { return this->workspace_changed_; }
 
@@ -148,7 +156,7 @@ private:
     static void name_changed(WnckWindow* wnck_window, gpointer user_data);
     static void workspace_changed(WnckWindow* wnck_window, gpointer user_data);
     static void geometry_changed(WnckWindow* wnck_window, gpointer user_data);
-    static void state_changed(WnckWindow *wnck_window, gpointer user_data);
+    static void state_changed(WnckWindow* wnck_window, gpointer user_data);
 
     void process_events(GdkXEvent* xevent, GdkEvent* event);
     bool update_window_pixmap();
