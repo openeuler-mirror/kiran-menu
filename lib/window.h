@@ -82,6 +82,9 @@ public:
     // 激活窗口
     void activate(uint32_t timestamp);
 
+    // 通过键盘和鼠标移动窗口
+    void keyboard_move();
+
     // 使窗口最小化
     void minimize();
     void unminimize(uint32_t timestamp);

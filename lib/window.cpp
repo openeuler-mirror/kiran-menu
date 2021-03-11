@@ -173,6 +173,12 @@ std::string Window::get_class_group_name()
     RET_WRAP_NULL(wnck_window_get_class_group_name(this->wnck_window_));
 }
 
+void Window::keyboard_move() 
+{
+    g_return_if_fail(this->wnck_window_ != nullptr);
+    wnck_window_keyboard_move(this->wnck_window_);
+}
+
 bool Window::needs_attention()
 {
     return wnck_window_needs_attention(this->wnck_window_);

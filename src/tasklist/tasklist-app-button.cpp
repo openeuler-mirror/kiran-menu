@@ -11,7 +11,7 @@
 TasklistAppButton::TasklistAppButton(const std::shared_ptr<Kiran::App> &app_, int size_):
     Glib::ObjectBase("KiranTasklistAppButton"),
     indicator_size_property(*this, "indicator-size", G_MAXINT32),
-    app(app_),
+    app(nullptr),
     context_menu(nullptr),
     applet_size(size_),
     state(APP_BUTTON_STATE_NORMAL)
@@ -20,14 +20,7 @@ TasklistAppButton::TasklistAppButton(const std::shared_ptr<Kiran::App> &app_, in
 
     get_style_context()->add_class("kiran-tasklist-button");
 
-    auto windows_list = KiranHelper::get_taskbar_windows(app_);
-    if (windows_list.size() == 0)
-        set_tooltip_text(app_->get_locale_name());
-
-    for (auto window: windows_list) {
-        window->signal_state_changed().connect(
-            sigc::mem_fun(*this, &TasklistAppButton::on_windows_state_changed));
-    }
+    set_app(app_);
 
     auto window_manager = Kiran::WindowManager::get_instance();
     window_manager->signal_window_opened().connect(
@@ -50,6 +43,39 @@ TasklistAppButton::~TasklistAppButton()
 {
     if (context_menu)
         delete context_menu;
+
+    /* 断开原有的窗口状态监控信号 */
+    for (auto connection: windows_state_handlers)
+        connection.disconnect();
+    windows_state_handlers.clear();
+}
+
+void TasklistAppButton::set_app(const std::shared_ptr<Kiran::App> &app_)
+{
+    if (app)
+        LOG_DEBUG("update app for button '%s'", app->get_desktop_id().c_str());
+
+    app = app_;
+
+    auto windows_list = KiranHelper::get_taskbar_windows(app);
+    if (windows_list.size() == 0)
+        set_tooltip_text(app->get_locale_name());
+
+    /* 断开原有的窗口状态监控信号 */
+    for (auto connection: windows_state_handlers)
+        connection.disconnect();
+    windows_state_handlers.clear();
+
+    for (auto window: windows_list) {
+        auto connection = window->signal_state_changed().connect(
+            sigc::mem_fun(*this, &TasklistAppButton::on_windows_state_changed));
+
+        windows_state_handlers.push_back(connection);
+    }
+
+    /* 重新绘制按钮 */
+    if (get_realized())
+        queue_draw();
 }
 
 sigc::signal<void, int, int> TasklistAppButton::signal_drag_update()
@@ -367,9 +393,7 @@ void TasklistAppButton::on_window_opened(const std::shared_ptr<Kiran::Window> &w
 
 const std::shared_ptr<Kiran::App> TasklistAppButton::get_app()
 {
-    if (app.expired())
-        return nullptr;
-    return app.lock();
+    return app;
 }
 
 bool TasklistAppButton::get_context_menu_opened()
@@ -421,14 +445,13 @@ Glib::RefPtr<Gdk::Pixbuf> TasklistAppButton::get_app_icon_pixbuf()
 {
     Glib::RefPtr<Gdk::Pixbuf> pixbuf;
     int scale;
-    auto app_ = app.lock();
 
-    if (!app_)
+    if (!app)
         return pixbuf;
 
     scale = get_scale_factor();
     try {
-        auto gicon = app_->get_icon();
+        auto gicon = app->get_icon();
 
         if (gicon)
         {
@@ -450,7 +473,7 @@ Glib::RefPtr<Gdk::Pixbuf> TasklistAppButton::get_app_icon_pixbuf()
             /*
              * 无法获取到应用图标的情况下，使用应用第一个已打开窗口的图标作为应用图标
              */
-            auto windows = KiranHelper::get_taskbar_windows(app_);
+            auto windows = KiranHelper::get_taskbar_windows(app);
 
             if (windows.size() > 0) {
                 pixbuf = Glib::wrap(windows.front()->get_icon(), true);

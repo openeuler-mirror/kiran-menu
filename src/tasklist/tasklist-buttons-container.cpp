@@ -147,8 +147,7 @@ void TasklistButtonsContainer::add_app_button(const KiranAppPointer &app)
 
     //建立app和应用按钮之间的映射
     app_buttons.insert(std::make_pair(app, button));
-    LOG_DEBUG("Add app button '%s'(%p)\n", app->get_name().data(), app.get());
-
+    LOG_DEBUG("add button for app '%s'", app->get_desktop_id().c_str());
 }
 
 void TasklistButtonsContainer::schedule_pointer_check()
@@ -983,15 +982,46 @@ void TasklistButtonsContainer::load_applications()
 
     previewer->hide();
 
-    /*
-     * 删除旧的应用数据和应用按钮
-     */
     for (auto child: get_children()) {
-        remove(*child);
-        delete child;
-    }
-    app_buttons.clear();
+        auto button = dynamic_cast<TasklistAppButton*>(child);
+        auto old_app = button->get_app();
 
+        if (G_UNLIKELY(!old_app))
+            continue;
+
+        app_buttons.erase(old_app);
+        if (old_app->get_kind() != Kiran::AppKind::FAKE_DESKTOP)
+        {
+            auto new_app = app_manager->lookup_app(old_app->get_desktop_id());
+            if (new_app)
+            {
+                /* 对于未卸载应用，找到对应的应用，重新刷新窗口 */
+                if (new_app->get_taskbar_windows().size() != 0 || KiranHelper::app_is_in_fixed_list(new_app))
+                {
+                    LOG_DEBUG("update button for app '%s'", old_app->get_desktop_id().c_str());
+                    button->set_app(new_app);
+                    app_buttons.insert(std::make_pair(new_app, button));
+                    continue;
+                } else {
+                    /* 应用未卸载，但窗口已归属到其它的应用 */
+                    LOG_DEBUG("remove button for app '%s', since no windows opened", old_app->get_desktop_id().c_str());
+                }
+            } else {
+                /* 已卸载应用 */
+                LOG_DEBUG("remove button for uninstalled app '%s'", old_app->get_desktop_id().c_str());
+            }
+        } else {
+            /* Fake desktop 应用 */
+            LOG_DEBUG("remove button for fake app '%s'", old_app->get_desktop_id().c_str());
+        }
+
+        /**
+         * 对于已卸载应用和Fake Desktop应用，删除对应的应用按钮，
+         * 原应用上的窗口随后会重新分配
+         */
+        remove(*button);
+        delete button;
+    }
 
     //加载常驻任务栏应用
     LOG_DEBUG("%s: loading fixed apps ...\n", __FUNCTION__);
@@ -1002,18 +1032,11 @@ void TasklistButtonsContainer::load_applications()
 
     //加载当前运行应用
     LOG_DEBUG("%s: loading running apps ...\n", __FUNCTION__);
-
     if (backend->get_app_show_policy() == Kiran::TaskBarSkeleton::POLICY_SHOW_ALL)
     {
         apps = app_manager->get_running_apps();
-        for (auto app : apps)
+        for (auto app: apps)
         {
-            if (find_app_button(app))
-            {
-                LOG_DEBUG("button for app '%s' already exists, skip ...\n");
-                continue;
-            }
-
             //如果应用的窗口都不需要在任务栏显示，就不在任务栏上显示应用按钮
             if (KiranHelper::get_taskbar_windows(app).size() == 0)
                 continue;
@@ -1028,8 +1051,6 @@ void TasklistButtonsContainer::load_applications()
             on_window_opened(window);
         }
     }
-
-    previewer->hide();
 }
 
 /**
