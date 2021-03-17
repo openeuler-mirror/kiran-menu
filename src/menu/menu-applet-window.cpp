@@ -155,6 +155,8 @@ void MenuAppletWindow::init_ui()
     builder->get_widget<Gtk::ScrolledWindow>("all-apps-scroll", all_apps_scrolled);
     builder->get_widget<Gtk::ScrolledWindow>("category-list-scroll", category_list_scrolled);
 
+    category_list_viewport = Gtk::make_managed<Gtk::Viewport>(Glib::RefPtr<Gtk::Adjustment>(),Glib::RefPtr<Gtk::Adjustment>());
+    category_list_scrolled->add(*category_list_viewport);
     category_list_scrolled->get_style_context()->add_class("category-list-box");
 
     /* 最近访问文档列表 */
@@ -369,11 +371,17 @@ void MenuAppletWindow::on_search_stop()
 void MenuAppletWindow::switch_to_category_overview(const std::string &selected_category)
 {
     MenuCategoryItem *selected_item = nullptr;
+    auto category_list_box = dynamic_cast<Gtk::Container*>(category_list_viewport->get_child());
 
-    KiranHelper::remove_all_for_container(*category_list_scrolled, false);
+    if (category_list_box != nullptr) {
+        LOG_DEBUG("category list container already exists");
+        KiranHelper::remove_all_for_container(*category_list_box, true);
+    } else {
+        LOG_DEBUG("create new category list container");
+        category_list_box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
+        category_list_viewport->add(*category_list_box);
+    }
 
-    auto category_list_box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
-    category_list_scrolled->add(*category_list_box);
     /*
      * 从app列表控件中读取应用分类，以确保遍历的顺序与app列表中显示的
      * 顺序保持一致，因为从category_items读取无法保证一致性。
@@ -385,6 +393,7 @@ void MenuAppletWindow::switch_to_category_overview(const std::string &selected_c
             continue;
         }
 
+        LOG_DEBUG("add category '%s'", container->get_category_name().c_str());
         auto item = Gtk::make_managed<MenuCategoryItem>(container->get_category_name(), true);
         item->set_hexpand(true);
         item->show_all();
