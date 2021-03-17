@@ -26,6 +26,9 @@ MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type):
     compact_avatar_widget(nullptr),
     expand_avatar_widget(nullptr)
 {
+    geometry.width = 0;
+    geometry.height = 0;
+
     set_name("menu-applet-window");
     set_skip_taskbar_hint(true);
     set_skip_pager_hint(true);
@@ -48,9 +51,11 @@ MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type):
     profile.signal_changed().connect(sigc::mem_fun(*this, &MenuAppletWindow::on_profile_changed));
     property_is_active().signal_changed().connect(sigc::mem_fun(*this, &MenuAppletWindow::on_active_change));
 
+    /* 监控工作区域大小变化 */
     auto screen = get_screen();
     monitor = new WorkareaMonitor(screen);
-    monitor->signal_size_changed().connect(sigc::mem_fun(*this, &MenuAppletWindow::ensure_display_mode));
+    monitor->signal_size_changed().connect(
+        sigc::mem_fun(*this, &MenuAppletWindow::on_workarea_size_changed));
 
     //加载当前用户信息
     set_display_mode(profile.get_display_mode());
@@ -59,6 +64,11 @@ MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type):
 MenuAppletWindow::~MenuAppletWindow()
 {
     delete monitor;
+}
+
+sigc::signal<void> MenuAppletWindow::signal_size_changed()
+{
+    return m_signal_size_changed;
 }
 
 void MenuAppletWindow::reload_apps_data()
@@ -128,6 +138,22 @@ bool MenuAppletWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
     child = get_child();
     propagate_draw(*child, cr);
     return true;
+}
+
+bool MenuAppletWindow::on_configure_event(GdkEventConfigure *configure_event)
+{
+    Gtk::Window::on_configure_event(configure_event);
+
+    if (geometry.width != configure_event->width || geometry.height != configure_event->height) {
+        /* FIXME: Use gtk_window_get_size() ??? */
+        geometry.width = configure_event->width;
+        geometry.height= configure_event->height;
+        geometry.x = configure_event->x;
+        geometry.y = configure_event->y;
+        signal_size_changed().emit();
+    }
+
+    return false;
 }
 
 void MenuAppletWindow::init_ui()
@@ -252,6 +278,11 @@ void MenuAppletWindow::init_avatar_widget()
         avatar_box->add(*expand_avatar_widget);
         avatar_box->show_all();
     }
+}
+
+void MenuAppletWindow::on_workarea_size_changed()
+{
+    ensure_display_mode();
 }
 
 void MenuAppletWindow::on_active_window_changed(std::shared_ptr<Kiran::Window> active_window)

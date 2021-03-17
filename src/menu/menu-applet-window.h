@@ -20,6 +20,11 @@ public:
     ~MenuAppletWindow() override;
 
     /**
+     * @brief 窗口大小变化信号
+     */
+    sigc::signal<void> signal_size_changed();
+
+    /**
      * @brief 重新加载所有的应用信息，包括收藏夹、常用应用和新安装应用
      */
     void reload_apps_data();
@@ -80,9 +85,16 @@ protected:
     virtual bool on_button_press_event(GdkEventButton *button_event) override;
     virtual void get_preferred_height_vfunc(int &min_width, int &natural_width) const override;
     virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
+    virtual bool on_configure_event(GdkEventConfigure *configure_event) override;
 
     virtual void init_ui();
     virtual void init_avatar_widget();
+
+
+    /**
+     * @brief 回调汗素：当前屏幕的工作区域大小发生变化时调用
+     */
+    void on_workarea_size_changed();
 
     /**
      * @brief on_active_window_changed 回调函数：系统当前活动窗口发生变化时调用
@@ -179,6 +191,9 @@ private:
     MenuProfile profile;                 /*首选项*/
     MenuDisplayMode display_mode;       /*当前显示模式*/
     WorkareaMonitor *monitor;           /*屏幕变化监视器*/
+
+    GdkRectangle geometry;                      /* 当前窗口大小 */
+    sigc::signal<void> m_signal_size_changed;   /* 窗口大小变化信号 */
 
     /**
      * @brief 为侧边栏添加视图切换按钮和快捷启动按钮

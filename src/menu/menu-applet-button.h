@@ -11,6 +11,11 @@ class MenuAppletButton : public KiranAppletButton
 public:
     MenuAppletButton(MatePanelApplet *panel_applet);
 
+    /**
+     * @brief 根据当前插件窗口大小和面板按钮位置，重新定位插件窗口
+     */
+    void reposition_applet_window();
+
 protected:
     virtual void on_toggled() override;
 
