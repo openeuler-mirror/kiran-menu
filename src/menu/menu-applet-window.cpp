@@ -642,6 +642,12 @@ void MenuAppletWindow::load_all_apps()
     auto backend = Kiran::MenuSkeleton::get_instance();
 
     //清空原有的应用和分类信息
+    for (auto data: category_items) {
+        auto container = data.second;
+        container->get_parent()->remove(*container);
+        delete container;
+    }
+
     category_items.clear();
 
     //遍历分类列表，建立应用列表
