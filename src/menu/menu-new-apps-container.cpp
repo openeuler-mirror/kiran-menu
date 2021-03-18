@@ -10,6 +10,7 @@ bool MenuNewAppsContainer::load_applications(const Kiran::AppVec &apps)
 
     KiranHelper::remove_all_for_container(apps_box);
     hidden_items.clear();
+    expand_button = nullptr;
 
     apps_box.set_min_children_per_line(1);
     apps_box.set_max_children_per_line(1);
@@ -58,6 +59,7 @@ bool MenuNewAppsContainer::load_applications(const Kiran::AppVec &apps)
     }
 
     apps_box.show();
+    show();
 
     return true;
 }

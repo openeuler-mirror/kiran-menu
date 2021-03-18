@@ -684,6 +684,7 @@ void MenuAppletWindow::load_new_apps()
     //加载新安装应用列表
     auto new_apps_list = Kiran::MenuSkeleton::get_instance()->get_nnew_apps(-1);
 
+    LOG_DEBUG("load new apps, size %lu", new_apps_list.size());
     new_apps_container->load_applications(new_apps_list);
 }
 
