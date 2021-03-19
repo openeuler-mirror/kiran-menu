@@ -144,7 +144,7 @@ void TaskBarSkeleton::desktop_app_changed()
 
     std::set<int32_t> app_set;
 
-    for (int i = 0; i < apps.size(); ++i)
+    for (int i = 0; i < (int)apps.size(); ++i)
     {
         auto &app = apps[i];
         auto &desktop_id = app->get_desktop_id();

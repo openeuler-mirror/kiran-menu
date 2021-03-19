@@ -68,12 +68,12 @@ WorkspaceVec WorkspaceManager::get_workspaces()
 
     for (auto iter = this->workspaces_.begin(); iter != this->workspaces_.end(); ++iter)
     {
-        if (iter->second->get_number() != workspaces.size())
+        if (iter->second->get_number() != (int)workspaces.size())
         {
             LOG_WARNING("the number of the workspace is invalid. number: %d name: %s need_number: %d\n",
                         iter->second->get_number(),
                         iter->second->get_name().c_str(),
-                        workspaces.size());
+                        (int)workspaces.size());
         }
 
         workspaces.push_back(iter->second);
@@ -122,18 +122,20 @@ void WorkspaceManager::destroy_workspace(std::shared_ptr<Workspace> workspace)
     g_return_if_fail(workspace != nullptr);
 
     workspace_no = workspace->get_number();
-    for (int i = workspace_no - 1; ; i++) {
+    for (int i = workspace_no - 1;; i++)
+    {
         if (i < 0)
             continue;
 
         prev_workspace = get_workspace(i);
         current_workspace = get_workspace(i + 1);
-        if (prev_workspace == nullptr || current_workspace == nullptr) {
+        if (prev_workspace == nullptr || current_workspace == nullptr)
+        {
             break;
         }
 
-        for (auto window: current_workspace->get_windows()) {
-
+        for (auto window : current_workspace->get_windows())
+        {
             /* 过滤掉Dock窗口、Desktop窗口和在所有工作区中显示的窗口 */
             if (window->get_window_type() == WNCK_WINDOW_DOCK || window->get_window_type() == WNCK_WINDOW_DESKTOP)
                 continue;

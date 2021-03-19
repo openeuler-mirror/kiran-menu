@@ -511,7 +511,7 @@ std::shared_ptr<App> AppManager::lookup_app_with_heuristic_name(const std::strin
 static gchar **split_environ_str(gchar *str, int32_t len)
 {
     GSList *string_list = NULL, *slist;
-    gchar **str_array, *s;
+    gchar **str_array;
     guint n = 0;
 
     g_return_val_if_fail(str != NULL, NULL);

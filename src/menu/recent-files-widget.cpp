@@ -1,5 +1,5 @@
 /**
- * @file recent-files-widget.cpp
+ * @file          /kiran-menu/src/menu/recent-files-widget.cpp
  * @brief 最近访问文档列表页面
  * @author songchuanfei <songchuanfei@kylinos.com.cn>
  * @copyright (c) 2021 KylinSec. All rights reserved.
@@ -46,7 +46,6 @@ void RecentFilesWidget::on_recent_list_changed()
     if (manager->get_items().size() != 0) {
         if (list.get_parent() == nullptr) {
             if (scrolled.get_child() != nullptr) {
-                auto child = scrolled.get_child();
                 scrolled.remove();
             }
             scrolled.add(list);
@@ -54,7 +53,6 @@ void RecentFilesWidget::on_recent_list_changed()
     } else {
         if (empty_label.get_parent() == nullptr) {
             if (scrolled.get_child() != nullptr) {
-                auto child = scrolled.get_child();
                 scrolled.remove();
             }
             scrolled.add(empty_label);

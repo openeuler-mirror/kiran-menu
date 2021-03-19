@@ -10,6 +10,9 @@ find_package(PkgConfig)
 
 configure_file(config.h.in config.h)
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED on)
+
 add_subdirectory(lib)
 add_subdirectory(src)
 add_subdirectory(data)

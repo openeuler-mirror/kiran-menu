@@ -23,7 +23,7 @@ std::vector<std::vector<int16_t>> window_arrangement(std::vector<int> windows, i
 {
     std::vector<std::vector<int16_t>> result(v, std::vector<int16_t>());
     if (v == 1) {
-        for (int i = 0; i < windows.size(); i++)
+        for (int i = 0; i < (int)windows.size(); i++)
             result[0].push_back(i);
 
         return result;

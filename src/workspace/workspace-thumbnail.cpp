@@ -12,9 +12,9 @@
 
 WorkspaceThumbnail::WorkspaceThumbnail(KiranWorkspacePointer &workspace_) : workspace(workspace_),
                                                                             bg_surface(nullptr),
+                                                                            border_width(4),
                                                                             drop_check(false),
-                                                                            draw_windows(false),
-                                                                            border_width(4)
+                                                                            draw_windows(false)
 {
     /*背景图片设置变化时重绘背景*/
     bg_settings = Gio::Settings::create(BACKGROUND_SETTINGS_PATH);
@@ -366,7 +366,7 @@ void WorkspaceThumbnail::on_drag_data_received(const Glib::RefPtr<Gdk::DragConte
     auto window = Kiran::WindowManager::get_instance()->get_window(*wid);
     if (!window)
     {
-        LOG_WARNING("Window with ID 0x%x not found\n", *wid);
+        LOG_WARNING("Window with ID 0x%x not found\n", (int)(*wid));
         if (drop_check)
         {
             context->drag_refuse(time);

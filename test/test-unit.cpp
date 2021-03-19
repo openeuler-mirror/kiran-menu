@@ -20,30 +20,29 @@ void test_favorite_apps(gconstpointer data)
     // delte all favorite apps
     auto favorite_apps = menu_skeleton->get_favorite_apps();
 
-    for (int i = 0; i < favorite_apps.size(); ++i)
+    for (auto app : favorite_apps)
     {
-        auto &app = favorite_apps[i];
         menu_skeleton->del_favorite_app(app->get_desktop_id());
     }
 
     // insert all apps to favorite app
     auto all_apps = menu_skeleton->get_all_sorted_apps();
 
-    gboolean call_success;
-    for (int i = 0; i < all_apps.size(); ++i)
+    gboolean call_success = false;
+
+    for (auto app : all_apps)
     {
-        auto &app = all_apps[i];
-        menu_skeleton->add_favorite_app(app->get_desktop_id());
+        call_success = menu_skeleton->add_favorite_app(app->get_desktop_id());
         g_assert_true(call_success);
     }
 
     // delete all favorite apps except last one.
     std::string last_desktop_id;
 
-    for (int i = 0; i < all_apps.size(); ++i)
+    for (int i = 0; i < (int)all_apps.size(); ++i)
     {
-        auto &app = all_apps[i];
-        if (i + 1 == all_apps.size())
+        auto app = all_apps[i];
+        if (i + 1 == (int)all_apps.size())
         {
             last_desktop_id = app->get_desktop_id();
         }
@@ -63,9 +62,9 @@ void test_favorite_apps(gconstpointer data)
     {
         favorite_apps = menu_skeleton->get_favorite_apps();
         gsize apps_len = 0;
-        for (int i = 0; i < favorite_apps.size(); ++i)
+
+        for (auto app : favorite_apps)
         {
-            auto &app = favorite_apps[i];
             ++apps_len;
             if (apps_len == 1)
             {
@@ -79,8 +78,6 @@ void test_favorite_apps(gconstpointer data)
 void test_category_apps(gconstpointer data)
 {
     auto menu_skeleton = Kiran::MenuSkeleton::get_instance();
-
-    gboolean call_success;
 
     auto all_category_apps = menu_skeleton->get_all_category_apps();
 
@@ -98,7 +95,7 @@ void test_category_apps(gconstpointer data)
         g_print("category_name: %s\n", iter->first.c_str());
         g_print("category_apps: ");
 
-        for (int i = 0; i < iter->second.size(); ++i)
+        for (int i = 0; i < (int)iter->second.size(); ++i)
         {
             auto &app = iter->second[i];
             g_print("%s ", app->get_desktop_id().c_str());
@@ -143,9 +140,9 @@ void test_frequent_apps(gconstpointer data)
     auto apps = menu_skeleton->get_nfrequent_apps(5);
 
     g_print("frequent_apps: ");
-    for (int i = 0; i < apps.size(); ++i)
+
+    for (auto app : apps)
     {
-        auto &app = apps[i];
         g_print("%s ", app->get_desktop_id().c_str());
     }
     g_print("\n");
@@ -154,7 +151,7 @@ void test_frequent_apps(gconstpointer data)
 #define CHECK_SEARCH_RESULT(keyword)                                                    \
     {                                                                                   \
         auto search_apps = menu_skeleton->search_app(keyword);                          \
-        g_assert_true(search_apps.size() == 1);                                         \
+        g_assert_true((int)search_apps.size() == 1);                                    \
         auto &s_app = search_apps[0];                                                   \
         g_assert_cmpstr(first_desktop_id.c_str(), ==, s_app->get_desktop_id().c_str()); \
     }
@@ -168,7 +165,7 @@ void test_search_apps(gconstpointer data)
 
     auto all_apps = app_manager->get_should_show_apps();
 
-    if (all_apps.size() > 0)
+    if ((int)all_apps.size() > 0)
     {
         auto &first_app = all_apps[0];
         auto first_desktop_id = first_app->get_desktop_id();
@@ -196,19 +193,18 @@ void test_fixed_apps(gconstpointer data)
     // delte all fixed apps
     auto fixed_apps = taskbar_skeleton->get_fixed_apps();
 
-    for (int i = 0; i < fixed_apps.size(); ++i)
+    for (auto app : fixed_apps)
     {
-        auto &app = fixed_apps[i];
         taskbar_skeleton->del_fixed_app(app->get_desktop_id());
     }
 
     // insert all apps to fixed app
     auto all_apps = app_manager->get_apps();
 
-    gboolean call_success;
-    for (int i = 0; i < all_apps.size(); ++i)
+    gboolean call_success = true;
+
+    for (auto app : all_apps)
     {
-        auto &app = all_apps[i];
         taskbar_skeleton->add_fixed_app(app->get_desktop_id());
         g_assert_true(call_success);
     }
@@ -216,10 +212,10 @@ void test_fixed_apps(gconstpointer data)
     // delete all fixed apps except last one.
     std::string last_desktop_id;
 
-    for (int i = 0; i < all_apps.size(); ++i)
+    for (int i = 0; i < (int)all_apps.size(); ++i)
     {
-        auto &app = all_apps[i];
-        if (i + 1 == all_apps.size())
+        auto app = all_apps[i];
+        if (i + 1 == (int)all_apps.size())
         {
             last_desktop_id = app->get_desktop_id();
         }
@@ -240,9 +236,8 @@ void test_fixed_apps(gconstpointer data)
     {
         fixed_apps = taskbar_skeleton->get_fixed_apps();
         gsize apps_len = 0;
-        for (int i = 0; i < fixed_apps.size(); ++i)
+        for (auto app : fixed_apps)
         {
-            auto &app = fixed_apps[i];
             ++apps_len;
             if (apps_len == 1)
             {

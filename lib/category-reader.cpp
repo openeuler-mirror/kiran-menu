@@ -1,10 +1,8 @@
-/*
- * @Author       : tangjie02
- * @Date         : 2020-04-30 17:28:47
- * @LastEditors  : tangjie02
- * @LastEditTime : 2020-09-08 15:57:04
- * @Description  : 
- * @FilePath     : /kiran-menu-2.0/lib/category-reader.cpp
+/**
+ * @file          /kiran-menu/lib/category-reader.cpp
+ * @brief         
+ * @author        tangjie02 <tangjie02@kylinos.com.cn>
+ * @copyright (c) 2020 KylinSec. All rights reserved. 
  */
 
 #include "lib/category-reader.h"
@@ -154,6 +152,8 @@ void CategoryReader::on_text(ParseContext &context, const Glib::ustring &text)
                         "No text is allowed inside element <%s>",
                         context.get_element().c_str());
         }
+        break;
+    default:
         break;
     }
 }

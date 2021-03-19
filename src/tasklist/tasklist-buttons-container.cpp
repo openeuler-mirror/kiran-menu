@@ -20,9 +20,9 @@ TasklistButtonsContainer::TasklistButtonsContainer(MatePanelApplet *applet_, int
     Glib::ObjectBase("KiranTasklistButtonsContainer"),
     applet(applet_),
     child_spacing(spacing_),
+    m_property_orient(*this, "orientation", Gtk::ORIENTATION_HORIZONTAL),
     dragging_source(nullptr),
-    dragging_icon(nullptr),
-    m_property_orient(*this, "orientation", Gtk::ORIENTATION_HORIZONTAL)
+    dragging_icon(nullptr)
 {
     init_ui();
 
@@ -406,8 +406,6 @@ void TasklistButtonsContainer::on_window_closed(KiranWindowPointer window)
  */
 void TasklistButtonsContainer::move_previewer(TasklistAppButton *target_button)
 {
-    Gtk::PositionType pos = Gtk::POS_BOTTOM;
-
     auto target_app = target_button->get_app();
     auto previewer_app = previewer->get_app();
 
@@ -635,7 +633,6 @@ void TasklistButtonsContainer::on_size_allocate(Gtk::Allocation &allocation)
 
     for (auto child: children) {
         Gtk::Allocation child_allocation;
-        auto button = dynamic_cast<TasklistAppButton*>(child);
 
         if (child_index % n_child_page == 0) {
             /* 新的页面，child需要排在开头 */
@@ -1077,7 +1074,7 @@ void TasklistButtonsContainer::on_fixed_apps_removed(const Kiran::AppVec &apps)
     for (auto app: apps) {
         LOG_DEBUG("remove fixed app '%s', %d windows found\n",
                 app->get_name().data(),
-                app->get_taskbar_windows().size());
+                (int)app->get_taskbar_windows().size());
         TasklistAppButton *button = find_app_button(app);
 
         if (button && KiranHelper::get_taskbar_windows(app).size() == 0) {
@@ -1255,7 +1252,6 @@ void TasklistButtonsContainer::reorder_child(Gtk::Widget *widget, PointerMotionD
 {
     bool found = false;
     Gtk::Orientation orient = get_orientation();
-    int len;
 
     if (motion_dir != MOTION_DIR_UNKNOWN)
     {

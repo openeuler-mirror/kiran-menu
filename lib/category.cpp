@@ -43,6 +43,8 @@ Category::Category(std::shared_ptr<CategoryNode> node) : repeat_(true),
             }
         }
         break;
+        default:
+            break;
         }
     }
 }
@@ -217,7 +219,7 @@ bool Category::match_desktop_category(std::shared_ptr<CategoryNode> node, std::s
     }
 
     auto strv = str_split(categories, ";");
-    for (gint i = 0; i < strv.size(); ++i)
+    for (gint i = 0; i < (int)strv.size(); ++i)
     {
         //g_print("%s:---%s---%s\n", kiran_app_get_desktop_id(app), strv[i], desktop_category);
         if (g_ascii_strncasecmp(strv[i].c_str(), node->get_content().c_str(), node->get_content().length() + 1) == 0)
@@ -289,6 +291,8 @@ bool Category::match_rule(std::shared_ptr<CategoryNode> node, std::shared_ptr<Ap
             case CategoryNodeType::CATEGORY_NODE_TYPE_NOT:
                 match_result = (!sub_result);
                 match_finish = true;
+                break;
+            default:
                 break;
             }
         }

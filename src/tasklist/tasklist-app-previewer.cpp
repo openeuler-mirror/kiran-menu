@@ -7,8 +7,8 @@ const int TasklistAppPreviewer::border_spacing = 5;
 
 TasklistAppPreviewer::TasklistAppPreviewer():
     Gtk::Window(Gtk::WINDOW_POPUP),
-    position(Gtk::POS_TOP),
-    relative_to(nullptr)
+    relative_to(nullptr),
+    position(Gtk::POS_TOP)
 {
     set_rgba_visual();
 
@@ -53,7 +53,7 @@ void TasklistAppPreviewer::set_relative_to(TasklistAppButton *widget, Gtk::Posit
 
 void TasklistAppPreviewer::reposition()
 {
-    int parent_x, parent_y, new_x, new_y;
+    int parent_x, parent_y, new_x = 0, new_y = 0;
     Gtk::Requisition mini, natural;
     Gtk::Allocation parent_allocation;
     Gdk::Rectangle workarea;

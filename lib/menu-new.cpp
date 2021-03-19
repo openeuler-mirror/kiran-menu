@@ -82,7 +82,7 @@ std::vector<std::string> MenuNew::get_nnew_apps(gint top_n)
         new_apps.push_back(desktop_id);
     }
 
-    if (top_n > 0 && top_n < new_apps.size())
+    if (top_n > 0 && top_n < (int)new_apps.size())
     {
         new_apps.resize(top_n);
     }

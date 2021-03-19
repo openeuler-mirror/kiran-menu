@@ -13,8 +13,8 @@
 #define SNAPSHOT_EXTRA_HEIGHT   44          //窗口截图控件除缩略图部分外的额外高度
 
 WorkspaceWindowsOverview::WorkspaceWindowsOverview():
-    layout(Gtk::ORIENTATION_VERTICAL),
     old_allocation(-1, -1, 0, 0),
+    layout(Gtk::ORIENTATION_VERTICAL),
     row_spacing(15),
     column_spacing(15),
     max_rows(4)

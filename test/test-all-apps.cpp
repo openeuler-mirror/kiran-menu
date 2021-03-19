@@ -1,10 +1,8 @@
-/*
- * @Author       : tangjie02
- * @Date         : 2020-05-07 17:36:28
- * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-09 14:42:15
- * @Description  : 
- * @FilePath     : /kiran-menu-2.0/test/test-all-apps.cpp
+/**
+ * @file          /kiran-menu/test/test-all-apps.cpp
+ * @brief         
+ * @author        tangjie02 <tangjie02@kylinos.com.cn>
+ * @copyright (c) 2020 KylinSec. All rights reserved. 
  */
 
 #include <gtkmm.h>
@@ -19,10 +17,8 @@ void print_apps(const Kiran::AppVec &apps, const std::string &type)
 {
     g_print("\n--------------------- %s ------------------------\n", type.c_str());
 
-    for (int i = 0; i < apps.size(); ++i)
+    for (auto app : apps)
     {
-        auto &app = apps[i];
-
         g_print("desktop_id: %s\n", app->get_desktop_id().c_str());
     }
     g_print("\n");
@@ -37,13 +33,12 @@ void timing_print(gconstpointer data)
     {
         g_print("\n-------------------------- all apps-----------------------\n");
         auto all_apps = app_manager->get_apps();
-        for (int i = 0; i < all_apps.size(); ++i)
+        for (auto app : all_apps)
         {
-            auto &app = all_apps[i];
             g_print("desktop_id: %s\n", app->get_desktop_id().c_str());
 
             auto actions = app->get_actions();
-            for (int j = 0; j < actions.size(); ++j)
+            for (int j = 0; j < (int)actions.size(); ++j)
             {
                 g_print("   action/name: %s/%s\n", actions[j].c_str(), app->get_action_name(actions[j]).c_str());
             }
@@ -66,7 +61,7 @@ void timing_print(gconstpointer data)
     auto all_apps = menu_skeleton->get_all_sorted_apps();
 
     g_print("run %d cases cost %f seconds. sort length: %d \n", CASES,
-            (end_clock - start_clock) * 1.0 / G_TIME_SPAN_SECOND, all_apps.size());
+            (end_clock - start_clock) * 1.0 / G_TIME_SPAN_SECOND, (int)all_apps.size());
 }
 
 void sig_hander(int signo)

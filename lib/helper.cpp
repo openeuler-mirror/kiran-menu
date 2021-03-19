@@ -38,13 +38,13 @@ std::vector<std::string> str_split(const std::string &s, const std::string &sepe
 
     int i = 0;
 
-    while (i != s.size())
+    while (i != (int)s.size())
     {
         int flag = 0;
-        while (i != s.size() && flag == 0)
+        while (i != (int)s.size() && flag == 0)
         {
             flag = 1;
-            for (int x = 0; x < seperator.size(); ++x)
+            for (int x = 0; x < (int)seperator.size(); ++x)
             {
                 if (s[i] == seperator[x])
                 {
@@ -57,9 +57,9 @@ std::vector<std::string> str_split(const std::string &s, const std::string &sepe
 
         flag = 0;
         int j = i;
-        while (j != s.size() && flag == 0)
+        while (j != (int)s.size() && flag == 0)
         {
-            for (int x = 0; x < seperator.size(); ++x)
+            for (int x = 0; x < (int)seperator.size(); ++x)
             {
                 if (s[j] == seperator[x])
                 {
@@ -81,7 +81,7 @@ std::vector<std::string> str_split(const std::string &s, const std::string &sepe
     return result;
 }
 
-size_t find_chars(const std::string& s, const char* chs, size_t char_cnt, size_t off)
+size_t find_chars(const std::string &s, const char *chs, size_t char_cnt, size_t off)
 {
     for (size_t p = off; p < s.length(); p++)
     {

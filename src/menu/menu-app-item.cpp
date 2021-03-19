@@ -136,7 +136,6 @@ bool MenuAppItem::on_key_press_event(GdkEventKey *key_event)
 void MenuAppItem::create_context_menu()
 {
     Gtk::MenuItem *item;
-    auto backend = Kiran::MenuSkeleton::get_instance();
 
     KiranHelper::remove_all_for_container(context_menu);
 

@@ -4,8 +4,8 @@
 #include "log.h"
 #include <iostream>
 
-MenuAvatarWidget::MenuAvatarWidget(int size) : user_info(getuid()),
-                                               icon_size(size)
+MenuAvatarWidget::MenuAvatarWidget(int size) : icon_size(size),
+                                               user_info(getuid())
 {
     set_size_request(size, size);
     add_events(Gdk::BUTTON_PRESS_MASK);

@@ -7,9 +7,9 @@
 WorkspaceWindowThumbnail::WorkspaceWindowThumbnail(KiranWindowPointer &win_, double scale_):
     Glib::ObjectBase("WorkspaceWindowSnapshot"),
     WindowThumbnailWidget (win_),
+    scale(scale_),
     border_width(4),
     thumbnail_surface(nullptr),
-    scale(scale_),
     show_thumbnail(true)
 {
     set_valign(Gtk::ALIGN_START);
@@ -166,10 +166,9 @@ void WorkspaceWindowThumbnail::on_thumbnail_clicked()
 
 bool WorkspaceWindowThumbnail::generate_thumbnail()
 {
-    GdkDisplay *display;
     cairo_t *cr = nullptr;
     cairo_surface_t *surface = nullptr;
-    int width, height, scale_factor;
+    int width, height;
     auto window = get_window_();
 
 
@@ -178,9 +177,6 @@ bool WorkspaceWindowThumbnail::generate_thumbnail()
 
     if (thumbnail_surface != nullptr)
         cairo_surface_destroy(thumbnail_surface);
-
-    display = get_display()->gobj();
-    scale_factor = get_scale_factor();
 
     surface = window->get_thumbnail(width, height);
     if (surface == nullptr) {

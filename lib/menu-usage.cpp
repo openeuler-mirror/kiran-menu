@@ -90,7 +90,7 @@ std::vector<std::string> MenuUsage::get_nfrequent_apps(gint top_n)
         return a_score > b_score;
     });
 
-    if (top_n > 0 && top_n < apps.size())
+    if (top_n > 0 && top_n < (int)apps.size())
     {
         apps.resize(top_n);
     }

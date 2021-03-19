@@ -21,10 +21,10 @@
 MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type):
     Glib::ObjectBase("KiranMenuWindow"),
     Gtk::Window(window_type),
-    compact_min_height_property(*this, "compact-min-height", 0),
-    expand_min_height_property(*this, "expand-min-height", 0),
     compact_avatar_widget(nullptr),
-    expand_avatar_widget(nullptr)
+    expand_avatar_widget(nullptr),
+    compact_min_height_property(*this, "compact-min-height", 0),
+    expand_min_height_property(*this, "expand-min-height", 0)
 {
     geometry.width = 0;
     geometry.height = 0;

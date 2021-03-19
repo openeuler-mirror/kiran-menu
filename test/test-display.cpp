@@ -32,10 +32,10 @@ gboolean timing_print(gpointer user_data)
 
         auto windows = window_manager->get_windows();
 
-        g_print("total window number: %d\n", windows.size());
-        for (int i = 0; i < windows.size(); ++i)
+        g_print("total window number: %d\n", (int)windows.size());
+
+        for (auto window : windows)
         {
-            auto window = windows[i];
             auto app = window->get_app();
 
             g_print("window_name: %s xid: %" PRIu64 "\n",
@@ -56,7 +56,7 @@ gboolean timing_print(gpointer user_data)
             g_print("\n\n");
         }
 
-        if (windows.size() > 0)
+        if ((int)windows.size() > 0)
         {
             auto window = windows.back();
             // window->activate();
@@ -76,32 +76,31 @@ gboolean timing_print(gpointer user_data)
 
         auto apps = app_manager->get_running_apps();
 
-        g_print("total running app number: %d\n", apps.size());
+        g_print("total running app number: %d\n", (int)apps.size());
 
-        for (int i = 0; i < apps.size(); ++i)
+        for (auto app : apps)
         {
-            auto app = apps[i];
             g_print("running app_id: %s\n", app->get_desktop_id().c_str());
 
             g_print("   type: %d\n", app->get_kind());
 
             auto windows = app->get_windows();
-            for (int j = 0; j < windows.size(); ++j)
+
+            for (auto window : windows)
             {
-                auto window = windows[j];
                 g_print("   related window name: %s\n", window->get_name().c_str());
             }
 
             auto taskbar_windows = app->get_taskbar_windows();
-            for (int j = 0; j < taskbar_windows.size(); ++j)
+
+            for (auto window : taskbar_windows)
             {
-                auto window = windows[j];
                 g_print("   related tarskbar window name: %s\n", window->get_name().c_str());
             }
             g_print("\n\n");
         }
 
-        if (apps.size() > 0)
+        if ((int)apps.size() > 0)
         {
             auto app = apps.back();
             // app->close_all_windows();
@@ -118,17 +117,16 @@ gboolean timing_print(gpointer user_data)
         // workspace_manager->change_workspace_count(2);
         auto workspaces = workspace_manager->get_workspaces();
 
-        g_print("total workspace number: %d\n", workspaces.size());
+        g_print("total workspace number: %d\n", (int)workspaces.size());
 
-        for (int i = 0; i < workspaces.size(); ++i)
+        for (auto workspace : workspaces)
         {
-            auto workspace = workspaces[i];
             g_print("workspace_name: %s index: %d\n", workspace->get_name().c_str(), workspace->get_number());
 
             auto windows = workspace->get_windows();
-            for (int j = 0; j < windows.size(); ++j)
+
+            for (auto window : windows)
             {
-                auto window = windows[j];
                 g_print("   window_name: %s xid: %" PRIu64 " is_pinned: %d\n",
                         window->get_name().c_str(),
                         window->get_xid(),
@@ -151,9 +149,9 @@ gboolean timing_print(gpointer user_data)
         auto window_manager = Kiran::WindowManager::get_instance();
         auto windows = window_manager->get_windows();
         auto display = gdk_x11_get_default_xdisplay();
-        for (int i = 0; i < windows.size(); ++i)
+
+        for (auto window : windows)
         {
-            auto window = windows[i];
             auto pixmap = window->get_pixmap();
             auto geometry = window->get_geometry();
             auto client_geometry = window->get_client_window_geometry();

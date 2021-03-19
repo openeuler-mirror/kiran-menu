@@ -1,11 +1,10 @@
-/*
- * @Author       : tangjie02
- * @Date         : 2020-04-08 14:01:52
- * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 11:46:14
- * @Description  : 用于菜单搜索功能
- * @FilePath     : /kiran-menu-2.0/lib/menu-search.cpp
+/**
+ * @file          /kiran-menu/lib/menu-search.cpp
+ * @brief         
+ * @author        tangjie02 <tangjie02@kylinos.com.cn>
+ * @copyright (c) 2020 KylinSec. All rights reserved. 
  */
+
 #include "lib/menu-search.h"
 
 #include "lib/app.h"
@@ -37,7 +36,7 @@ AppVec MenuSearch::search_by_keyword(const std::string &keyword,
 {
     AppVec match_apps;
 
-    for (int i = 0; i < apps.size(); ++i)
+    for (int i = 0; i < (int)apps.size(); ++i)
     {
         const auto &app = apps[i];
 

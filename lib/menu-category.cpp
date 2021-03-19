@@ -8,11 +8,11 @@
  */
 #include "lib/menu-category.h"
 
+#include "config.h"
 #include "lib/category-reader.h"
 #include "lib/category-writer.h"
 #include "lib/category.h"
 #include "lib/log.h"
-#include "config.h"
 
 namespace Kiran
 {
@@ -36,7 +36,7 @@ void MenuCategory::init()
         {
             if (iter->get_type() != CategoryNodeType::CATEGORY_NODE_TYPE_CATEGORY)
             {
-                LOG_WARNING("exist invalid node type: %u\n", iter->get_type());
+                LOG_WARNING("exist invalid node type: %d\n", (int)iter->get_type());
                 continue;
             }
             std::shared_ptr<Category> category(new Category(iter));
@@ -56,19 +56,19 @@ void MenuCategory::init()
 
 void MenuCategory::flush(const AppVec &apps)
 {
-    for (int i = 0; i < this->categories_.size(); ++i)
+    for (int i = 0; i < (int)this->categories_.size(); ++i)
     {
         auto &category = this->categories_[i];
         category->clear_apps();
     }
 
-    for (int i = 0; i < apps.size(); ++i)
+    for (int i = 0; i < (int)apps.size(); ++i)
     {
         auto &app = apps[i];
 
         bool match_result = false;
 
-        for (int j = 0; j < this->categories_.size(); ++j)
+        for (int j = 0; j < (int)this->categories_.size(); ++j)
         {
             auto &category = this->categories_[j];
 
@@ -87,7 +87,7 @@ void MenuCategory::flush(const AppVec &apps)
 
 void MenuCategory::flush_app(std::shared_ptr<App> app)
 {
-    for (int i = 0; i < this->categories_.size(); ++i)
+    for (int i = 0; i < (int)this->categories_.size(); ++i)
     {
         auto &category = this->categories_[i];
         category->del_app(app);
@@ -95,7 +95,7 @@ void MenuCategory::flush_app(std::shared_ptr<App> app)
 
     bool match_result = false;
 
-    for (int i = 0; i < this->categories_.size(); ++i)
+    for (int i = 0; i < (int)this->categories_.size(); ++i)
     {
         auto &category = this->categories_[i];
 
@@ -158,7 +158,7 @@ std::vector<std::string> MenuCategory::get_names()
 {
     std::vector<std::string> category_names;
 
-    for (int i = 0; i < this->categories_.size(); ++i)
+    for (int i = 0; i < (int)this->categories_.size(); ++i)
     {
         auto &category = this->categories_[i];
         auto &name = category->get_name();
@@ -171,9 +171,7 @@ std::map<std::string, std::vector<std::string>> MenuCategory::get_all()
 {
     std::map<std::string, std::vector<std::string>> categories;
 
-    gchar *category_name;
-
-    for (int i = 0; i < this->categories_.size(); ++i)
+    for (int i = 0; i < (int)this->categories_.size(); ++i)
     {
         auto &category = this->categories_[i];
 
@@ -193,7 +191,7 @@ void MenuCategory::store_categories()
 
 std::shared_ptr<Category> MenuCategory::find_category(const std::string &category_name)
 {
-    for (int i = 0; i < this->categories_.size(); ++i)
+    for (int i = 0; i < (int)this->categories_.size(); ++i)
     {
         auto &category = this->categories_[i];
         auto &name = category->get_name();

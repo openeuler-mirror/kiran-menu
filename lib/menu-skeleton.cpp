@@ -17,8 +17,8 @@ namespace Kiran
 {
 MenuSkeleton::MenuSkeleton(AppManager *app_manager) : app_manager_(app_manager),
                                                       usage_(new MenuUsage()),
-                                                      favorite_(new MenuFavorite()),
                                                       search_(new MenuSearch()),
+                                                      favorite_(new MenuFavorite()),
                                                       category_(new MenuCategory()),
                                                       new_(new MenuNew())
 {
@@ -147,7 +147,7 @@ std::map<std::string, AppVec> MenuSkeleton::get_all_category_apps()
     std::map<std::string, AppVec> categories;
     auto category_names = this->category_->get_names();
 
-    for (int i = 0; i < category_names.size(); ++i)
+    for (int i = 0; i < (int)category_names.size(); ++i)
     {
         categories[category_names[i]] = get_category_apps(category_names[i]);
     }
@@ -200,7 +200,7 @@ AppVec MenuSkeleton::trans_ids_to_apps(const std::vector<std::string> &desktop_i
 {
     std::vector<std::shared_ptr<App>> apps;
 
-    for (int i = 0; i < desktop_ids.size(); ++i)
+    for (int i = 0; i < (int)desktop_ids.size(); ++i)
     {
         auto app = AppManager::get_instance()->lookup_app(desktop_ids[i]);
         if (app && app->should_show())

@@ -38,10 +38,10 @@ void on_applet_size_allocate(MatePanelApplet *applet UNUSED,
 }
 
 TasklistAppletWidget::TasklistAppletWidget(MatePanelApplet *applet_):
-    container(applet_),
     button_box(Gtk::ORIENTATION_VERTICAL),
     prev_btn(nullptr),
     next_btn(nullptr),
+    container(applet_),
     applet(applet_)
 {
     init_ui();

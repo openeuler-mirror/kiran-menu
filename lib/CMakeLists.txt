@@ -24,8 +24,6 @@ set(DEP_LIBDIR ${GLIBMM_LIBDIR})
 
 include_directories(${CMAKE_BINARY_DIR})
 
-target_compile_features(${TARGET_NAME} PUBLIC cxx_std_11)
-
 target_include_directories(${TARGET_NAME} PUBLIC 
     ${PROJECT_SOURCE_DIR}
     ${GTHREAD_INCLUDE_DIRS}
@@ -37,7 +35,8 @@ target_include_directories(${TARGET_NAME} PUBLIC
 
 
 target_compile_options(${TARGET_NAME} PUBLIC
-    -DWNCK_I_KNOW_THIS_IS_UNSTABLE)
+    -DWNCK_I_KNOW_THIS_IS_UNSTABLE
+    -Wno-parentheses)
 
 target_compile_options(${TARGET_NAME} PRIVATE
     -L${DEP_LIBDIR}

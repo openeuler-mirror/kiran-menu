@@ -10,10 +10,10 @@
 
 TasklistAppButton::TasklistAppButton(const std::shared_ptr<Kiran::App> &app_, int size_):
     Glib::ObjectBase("KiranTasklistAppButton"),
-    indicator_size_property(*this, "indicator-size", G_MAXINT32),
-    app(nullptr),
     context_menu(nullptr),
+    indicator_size_property(*this, "indicator-size", G_MAXINT32),
     applet_size(size_),
+    app(nullptr),
     state(APP_BUTTON_STATE_NORMAL)
 {
     add_events(Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::BUTTON_PRESS_MASK);
@@ -171,7 +171,6 @@ bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
     int windows_count;
     int scale = get_scale_factor();
     auto context = get_style_context();
-    static bool hilight = false;
 
     auto app_ = get_app();
     if (!app_) {

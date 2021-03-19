@@ -48,7 +48,6 @@ add_executable(${TARGET_NAME}
         applet.cpp
 )
 
-target_compile_features(${TARGET_NAME} PUBLIC cxx_std_11)
 
 if(BUILD_WITH_KIRANACCOUNTS)
 target_sources(${TARGET_NAME} PUBLIC menu/kiran-accounts-user.cpp menu/kiran-accounts-manager.cpp)

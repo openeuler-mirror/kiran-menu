@@ -105,9 +105,9 @@ Gtk::ToggleButton *MenuNewAppsContainer::create_expand_button()
 }
 
 MenuNewAppsContainer::MenuNewAppsContainer(int max_apps_) : MenuAppsContainer(MenuAppsContainer::ICON_MODE_SMALL, _("New Installed"), false, false),
+                                                            max_apps(max_apps_),
                                                             more_apps_box(nullptr),
-                                                            expand_button(nullptr),
-                                                            max_apps(max_apps_)
+                                                            expand_button(nullptr)
 {
     set_auto_hide(true);
     set_draw_frame(false);

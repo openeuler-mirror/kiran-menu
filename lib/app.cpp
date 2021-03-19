@@ -18,8 +18,8 @@
 
 namespace Kiran
 {
-App::App(const std::string &desktop_id, AppKind kind) : kind_(kind),
-                                                        desktop_id_(desktop_id)
+App::App(const std::string &desktop_id, AppKind kind) : desktop_id_(desktop_id),
+                                                        kind_(kind)
 {
 }
 

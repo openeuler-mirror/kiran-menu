@@ -173,7 +173,7 @@ std::string Window::get_class_group_name()
     RET_WRAP_NULL(wnck_window_get_class_group_name(this->wnck_window_));
 }
 
-void Window::keyboard_move() 
+void Window::keyboard_move()
 {
     g_return_if_fail(this->wnck_window_ != nullptr);
     wnck_window_keyboard_move(this->wnck_window_);
@@ -423,7 +423,7 @@ void Window::flush_workspace()
             else if (this->last_is_pinned_)
             {
                 auto workspaces = WorkspaceManager::get_instance()->get_workspaces();
-                for (auto i = 0; i < workspaces.size(); ++i)
+                for (auto i = 0; i < (int)workspaces.size(); ++i)
                 {
                     workspaces[i]->remove_window(this->shared_from_this());
                 }
@@ -444,7 +444,7 @@ void Window::flush_workspace()
         if (current_is_pinned)
         {
             auto workspaces = WorkspaceManager::get_instance()->get_workspaces();
-            for (auto i = 0; i < workspaces.size(); ++i)
+            for (auto i = 0; i < (int)workspaces.size(); ++i)
             {
                 workspaces[i]->add_window(this->shared_from_this());
             }
@@ -517,8 +517,6 @@ void Window::geometry_changed(WnckWindow *wnck_window,
     auto geometry = window->get_geometry();
     if (gdk_screen_is_composited(gdk_screen))
     {
-        auto xid = window->get_xid();
-
         if (std::get<2>(geometry) != std::get<2>(window->last_geometry_) ||
             std::get<3>(geometry) != std::get<3>(window->last_geometry_))
         {

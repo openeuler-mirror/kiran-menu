@@ -1,11 +1,10 @@
-/*
- * @Author       : tangjie02
- * @Date         : 2020-05-20 20:12:59
- * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-10 17:27:28
- * @Description  : 
- * @FilePath     : /kiran-menu-2.0/test/test-menu-signal.cpp
+/**
+ * @file          /kiran-menu/test/test-menu-signal.cpp
+ * @brief         
+ * @author        tangjie02 <tangjie02@kylinos.com.cn>
+ * @copyright (c) 2020 KylinSec. All rights reserved. 
  */
+
 #include <gtkmm.h>
 
 #include "lib/app.h"
@@ -22,18 +21,16 @@ static void installed_changed()
 
 static void app_installed(Kiran::AppVec apps)
 {
-    for (int i = 0; i < apps.size(); ++i)
+    for (auto app : apps)
     {
-        auto &app = apps[i];
         g_print("recv app %s installed signal.\n", app->get_desktop_id().c_str());
     }
 }
 
 static void app_uninstalled(Kiran::AppVec apps)
 {
-    for (int i = 0; i < apps.size(); ++i)
+    for (auto app : apps)
     {
-        auto &app = apps[i];
         g_print("recv app %s uninstalled signal.\n", app->get_desktop_id().c_str());
     }
 }
@@ -45,18 +42,16 @@ static void new_app_changed()
 
 static void favorite_app_added(Kiran::AppVec apps)
 {
-    for (int i = 0; i < apps.size(); ++i)
+    for (auto app : apps)
     {
-        auto &app = apps[i];
         g_print("recv favorite app %s added signal.\n", app->get_desktop_id().c_str());
     }
 }
 
 static void favorite_app_deleted(Kiran::AppVec apps)
 {
-    for (int i = 0; i < apps.size(); ++i)
+    for (auto app : apps)
     {
-        auto &app = apps[i];
         g_print("recv favorite app %s deleted signal.\n", app->get_desktop_id().c_str());
     }
 }

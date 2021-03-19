@@ -1,11 +1,10 @@
-/*
- * @Author       : tangjie02
- * @Date         : 2020-05-20 20:12:59
- * @LastEditors  : tangjie02
- * @LastEditTime : 2020-08-11 17:27:49
- * @Description  : 
- * @FilePath     : /kiran-menu-2.0/test/test-taskbar-signal.cpp
+/**
+ * @file          /kiran-menu/test/test-taskbar-signal.cpp
+ * @brief         
+ * @author        tangjie02 <tangjie02@kylinos.com.cn>
+ * @copyright (c) 2020 KylinSec. All rights reserved. 
  */
+
 #include <gtkmm.h>
 
 #include "lib/app.h"
@@ -17,18 +16,16 @@ void sig_hander(int signo)
 
 static void fixed_app_added(Kiran::AppVec apps)
 {
-    for (int i = 0; i < apps.size(); ++i)
+    for (auto app : apps)
     {
-        auto &app = apps[i];
         g_print("recv fixed app %s added signal.\n", app->get_desktop_id().c_str());
     }
 }
 
 static void fixed_app_deleted(Kiran::AppVec apps)
 {
-    for (int i = 0; i < apps.size(); ++i)
+    for (auto app : apps)
     {
-        auto &app = apps[i];
         g_print("recv fixed app %s deleted signal.\n", app->get_desktop_id().c_str());
     }
 }

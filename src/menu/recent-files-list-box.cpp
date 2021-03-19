@@ -81,7 +81,7 @@ void RecentFilesListBox::open_file_location(const Glib::RefPtr<Gtk::RecentInfo>&
    if (dir)
       Gio::AppInfo::launch_default_for_uri_async(dir->get_uri());
    else
-      g_warning("%s: no parent found for file '%s'", __func__, item->get_uri());
+      g_warning("%s: no parent found for file '%s'", __func__, item->get_uri().c_str());
 }
 
 void RecentFilesListBox::remove_file_from_list(const Glib::RefPtr<Gtk::RecentInfo>& item) 
