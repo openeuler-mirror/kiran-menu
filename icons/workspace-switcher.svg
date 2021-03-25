@@ -34,15 +34,19 @@
       }
 
       .cls-2 {
-        fill: #ffdfb5;
-        fill-rule: evenodd;
+        fill: #9be2e6;
+      }
+
+      .cls-3 {
+        fill: #fff;
       }
     </style>
     <linearGradient id="linear-gradient" x1="12" y1="24" x2="12" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#ff771d"/>
-      <stop offset="1" stop-color="#ff904d"/>
+      <stop offset="0" stop-color="#24a7a3"/>
+      <stop offset="1" stop-color="#63d5b1"/>
     </linearGradient>
   </defs>
   <rect id="矩形_1" data-name="矩形 1" class="cls-1" width="24" height="24" rx="6" ry="6"/>
-  <path id="矩形_2_拷贝_5" data-name="矩形 2 拷贝 5" class="cls-2" d="M4,4H8V8H4V4Zm6,0h4V8H10V4Zm6,0h4V8H16V4ZM4,10H8v4H4V10Zm6,0h4v4H10V10Zm6,0h4v4H16V10ZM4,16H8v4H4V16Zm6,0h4v4H10V16Zm6,0h4v4H16V16Z"/>
+  <rect id="矩形_2_拷贝_2" data-name="矩形 2 拷贝 2" class="cls-2" x="8" y="6" width="12" height="8"/>
+  <rect id="矩形_2_拷贝_3" data-name="矩形 2 拷贝 3" class="cls-3" x="4" y="10" width="12" height="8"/>
 </svg>
