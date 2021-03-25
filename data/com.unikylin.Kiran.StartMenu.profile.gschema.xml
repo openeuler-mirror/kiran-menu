@@ -13,7 +13,7 @@
       <summary>Background Opacity of start menu</summary>
     </key>
     <key name="display-mode" enum="com.unikylin.Kiran.StartMenu.DisplayMode">
-      <default>'compact'</default>
+      <default>'expand'</default>
       <summary>Display mode for menu. 'compact' or 'expand'</summary>
     </key>
     <key name="default-page" enum="com.unikylin.Kiran.StartMenu.DefaultPage">
