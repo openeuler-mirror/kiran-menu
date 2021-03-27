@@ -1,0 +1,17 @@
+src/common/kiran-search-entry.cpp
+src/menu/menu-app-item.cpp
+src/menu/menu-applet-button.cpp
+src/menu/menu-applet-window.cpp
+src/menu/menu-applet.cpp
+src/menu/menu-new-apps-container.cpp
+src/menu/menu-power-button.cpp
+src/menu/menu-power-menu.cpp
+src/menu/recent-files-list-box.cpp
+src/menu/recent-files-widget.cpp
+src/tasklist/tasklist-app-context-menu.cpp
+src/tasklist/tasklist-applet-widget.cpp
+src/tasklist/tasklist-applet.cpp
+src/tasklist/tasklist-window-context-menu.cpp
+src/workspace/workspace-applet.cpp
+[type: gettext/glade]data/menu.ui.xml
+[type: gettext/xml]data/com.unikylin.Kiran.MenuCategory.xml
