@@ -87,6 +87,17 @@ protected:
     virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
     virtual bool on_configure_event(GdkEventConfigure *configure_event) override;
 
+    /**
+     * @brief 回调函数，开始菜单窗口失去键盘焦点时调用
+     * @param grab_broken_event 见grab-broken-event signal
+     */
+    virtual bool on_grab_broken_event(GdkEventGrabBroken *grab_broken_event);
+
+    /**
+     * @brief 回调函数，电源菜单关闭时调用
+     */
+    virtual void on_power_menu_deactivated();
+
     virtual void init_ui();
     virtual void init_avatar_widget();
 
@@ -95,12 +106,6 @@ protected:
      * @brief 回调汗素：当前屏幕的工作区域大小发生变化时调用
      */
     void on_workarea_size_changed();
-
-    /**
-     * @brief on_active_window_changed 回调函数：系统当前活动窗口发生变化时调用
-     * @param active_window   新的活动窗口
-     */
-    virtual void on_active_window_changed(std::shared_ptr<Kiran::Window> active_window);
 
     /**
      * @brief create_app_search_entry  创建并初始化应用搜索输入框
@@ -123,11 +128,6 @@ protected:
      * @brief init_window_visual  设置开始菜单窗口使用的Visual
      */
     virtual void init_window_visual();
-
-    /**
-     * @brief 回调函数: 开始菜单窗口的激活状态发生变化时调用
-     */
-    void on_active_change();
 
     /**
      * @brief 回调函数: 当搜索框内容变化时调用
@@ -195,6 +195,8 @@ private:
     GdkRectangle geometry;                      /* 当前窗口大小 */
     sigc::signal<void> m_signal_size_changed;   /* 窗口大小变化信号 */
 
+
+private:
     /**
      * @brief 为侧边栏添加视图切换按钮和快捷启动按钮
      */

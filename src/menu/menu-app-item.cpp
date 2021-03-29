@@ -31,6 +31,9 @@ MenuAppItem::MenuAppItem(const std::shared_ptr<Kiran::App> &app_, int _icon_size
     set_can_focus(true);
     set_tooltip_text(app_->get_locale_comment());
 
+    context_menu.signal_deactivate().connect(
+        sigc::mem_fun(*this, &MenuAppItem::on_context_menu_deactivated));
+
     init_drag_and_drop();
 }
 
@@ -107,6 +110,13 @@ void MenuAppItem::on_drag_end(const Glib::RefPtr<Gdk::DragContext> &context)
     KiranHelper::grab_input(*toplevel);
 }
 
+void MenuAppItem::on_context_menu_deactivated()
+{
+    /* 让开始菜单窗口重新获取输入焦点 */
+    auto toplevel = get_toplevel();
+    KiranHelper::grab_input(*toplevel);
+}
+
 bool MenuAppItem::on_key_press_event(GdkEventKey *key_event)
 {
 
@@ -116,7 +126,6 @@ bool MenuAppItem::on_key_press_event(GdkEventKey *key_event)
 
         allocation = get_allocation();
         if (get_has_window()) {
-            //重新创建右键菜单，以确保收藏夹相关的选项能及时更新
              allocation.set_x(0);
              allocation.set_y(0);
         }

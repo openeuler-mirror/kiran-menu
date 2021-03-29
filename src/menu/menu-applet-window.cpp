@@ -38,9 +38,6 @@ MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type):
 
     init_ui();
 
-    Kiran::WindowManager::get_instance()->signal_active_window_changed().connect(
-                sigc::hide<0>(sigc::mem_fun(*this, &MenuAppletWindow::on_active_window_changed)));
-
     auto backend = Kiran::MenuSkeleton::get_instance();
     backend->signal_app_changed().connect(sigc::mem_fun(*this, &MenuAppletWindow::reload_apps_data));
     backend->signal_favorite_app_added().connect(sigc::hide(sigc::mem_fun(*this, &MenuAppletWindow::load_favorite_apps)));
@@ -49,7 +46,6 @@ MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type):
     backend->signal_new_app_changed().connect(sigc::mem_fun(*this, &MenuAppletWindow::load_new_apps));
 
     profile.signal_changed().connect(sigc::mem_fun(*this, &MenuAppletWindow::on_profile_changed));
-    property_is_active().signal_changed().connect(sigc::mem_fun(*this, &MenuAppletWindow::on_active_change));
 
     /* 监控工作区域大小变化 */
     auto screen = get_screen();
@@ -59,6 +55,9 @@ MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type):
 
     //加载当前用户信息
     set_display_mode(profile.get_display_mode());
+
+    signal_grab_broken_event().connect(
+        sigc::mem_fun(*this, &MenuAppletWindow::on_grab_broken_event));
 }
 
 MenuAppletWindow::~MenuAppletWindow()
@@ -107,12 +106,6 @@ void MenuAppletWindow::get_preferred_height_vfunc(int &min_height, int &natural_
     natural_height = std::max(min_height, natural_height);
 }
 
-void MenuAppletWindow::on_active_change()
-{
-    if (is_active())
-        KiranHelper::grab_input(*this);
-}
-
 bool MenuAppletWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
 {
     double opacity;
@@ -154,6 +147,20 @@ bool MenuAppletWindow::on_configure_event(GdkEventConfigure *configure_event)
     }
 
     return false;
+}
+
+bool MenuAppletWindow::on_grab_broken_event(GdkEventGrabBroken *grab_broken_event) 
+{
+    if (grab_broken_event->keyboard && grab_broken_event->grab_window == nullptr) {
+        /* 开始菜单窗口失去了键盘焦点 */
+        hide();
+    }
+    return false;
+}
+
+void MenuAppletWindow::on_power_menu_deactivated()
+{
+    KiranHelper::grab_input(*this);
 }
 
 void MenuAppletWindow::init_ui()
@@ -284,16 +291,6 @@ void MenuAppletWindow::on_workarea_size_changed()
 {
     ensure_display_mode();
 }
-
-void MenuAppletWindow::on_active_window_changed(std::shared_ptr<Kiran::Window> active_window)
-{
-    if (!get_realized())
-        return;
-
-    if (!active_window || active_window->get_xid() != GDK_WINDOW_XID(get_window()->gobj()))
-        hide();
-}
-
 
 Gtk::SearchEntry *MenuAppletWindow::create_app_search_entry()
 {
@@ -494,16 +491,15 @@ bool MenuAppletWindow::on_map_event(GdkEventAny *any_event)
 {
     Gtk::Window::on_map_event(any_event);
 
-    /*
-     * 获取当前系统的鼠标事件，这样才能在鼠标点击窗口外部时及时隐藏窗口
-     */
-    KiranHelper::grab_input(*this);
-
     //应用列表滚动到开始位置
     switch_to_apps_overview(0, false);
 
     on_search_stop();
 
+    /*
+     * 获取当前系统的鼠标事件，这样才能在鼠标点击窗口外部时及时隐藏窗口
+     */
+    KiranHelper::grab_input(*this);
     if (display_mode == DISPLAY_MODE_EXPAND || profile.get_default_page() == PAGE_ALL_APPS)
         search_entry->grab_focus();
     return true;
@@ -592,7 +588,7 @@ Gtk::Button *MenuAppletWindow::create_launcher_button(const char *icon_resource,
 void MenuAppletWindow::add_sidebar_buttons()
 {
     Gtk::Separator *separator;
-    Gtk::Button *power_btn, *launcher_btn;
+    Gtk::Button *launcher_btn;
     Gtk::Grid *side_box = nullptr;
 
     separator= Gtk::make_managed<Gtk::Separator>(Gtk::ORIENTATION_HORIZONTAL);
@@ -631,7 +627,9 @@ void MenuAppletWindow::add_sidebar_buttons()
                                   "mate-system-monitor");
     side_box->add(*launcher_btn);
 
-    power_btn = Gtk::make_managed<MenuPowerButton>();
+    auto power_btn = Gtk::make_managed<MenuPowerButton>();
+    power_btn->signal_power_menu_deactivated().connect(
+        sigc::mem_fun(*this, &MenuAppletWindow::on_power_menu_deactivated));
     side_box->add(*power_btn);
 
     side_box->show_all();

@@ -568,12 +568,9 @@ void TasklistButtonsContainer::on_size_allocate(Gtk::Allocation &allocation)
 
     n_child = children.size();
     if (n_child == 0) {
-        guint real_width, real_height;
 
-        /* 调整bin_window的大小 */
-        get_size(real_width, real_height);
-        get_bin_window()->resize(std::max((int)real_width, allocation.get_width()),
-                                 std::max((int)real_height, allocation.get_height()));
+        /* gtk_layout_set_size()会自动调整bin_window大小 */
+        set_size(allocation.get_width(), allocation.get_height());
         return;
     }
 

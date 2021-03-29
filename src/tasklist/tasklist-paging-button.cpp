@@ -1,9 +1,12 @@
 #include "tasklist-paging-button.h"
 #include "global.h"
+#include "log.h"
 
 TasklistPagingButton::TasklistPagingButton(MatePanelApplet *applet_):
     applet(applet_),
-    drag_triggered(false)
+    drag_triggered(false),
+    icon_resource(""),
+    icon_size(16)
 {
 
     /*
@@ -16,13 +19,65 @@ TasklistPagingButton::TasklistPagingButton(MatePanelApplet *applet_):
     get_style_context()->add_class("tasklist-arrow-button");
 }
 
-void TasklistPagingButton::set_icon_image(const Glib::ustring icon_resource, int icon_size)
+void TasklistPagingButton::set_icon_image(const Glib::ustring icon_resource_, int icon_size_)
 {
-    auto image = Gtk::make_managed<Gtk::Image>();
-    image->set_pixel_size(icon_size);
-    image->set_from_resource(icon_resource);
+    if (icon_resource == icon_resource_ && icon_size == icon_size_)
+        return;
 
-    add(*image);
+    icon_resource = icon_resource_;
+    icon_size = icon_size_;
+    queue_draw();
+}
+
+bool TasklistPagingButton::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
+{
+    Glib::RefPtr<Gdk::Pixbuf> icon_pixbuf;
+    cairo_surface_t *surface = NULL;
+    Gtk::Allocation allocation = get_allocation();
+    int scale_factor = get_scale_factor();
+    auto context = get_style_context();
+
+    context->render_background(cr,
+                               0,
+                               0,
+                               allocation.get_width(),
+                               allocation.get_height());
+
+    try {
+        icon_pixbuf = Gdk::Pixbuf::create_from_resource(icon_resource,
+                                                        icon_size * scale_factor,
+                                                        icon_size * scale_factor);
+
+        surface = gdk_cairo_surface_create_from_pixbuf(icon_pixbuf->gobj(),
+                                                       scale_factor,
+                                                       NULL);
+
+        if (!get_sensitive()) {
+            /* 禁用情况下绘制暗色 */
+            cairo_t *cr = cairo_create(surface);
+            cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+            cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+            cairo_paint_with_alpha(cr, 0.5);
+            cairo_destroy(cr);
+        }
+
+        gtk_render_icon_surface(context->gobj(),
+                                cr->cobj(),
+                                surface,
+                                (allocation.get_width() - icon_size)/2,
+                                (allocation.get_height() - icon_size)/2);
+        cairo_surface_destroy(surface);
+    } catch (const Gio::ResourceError &e) {
+        LOG_WARNING("Error occurred while trying to load resource '%s': %s",
+                  icon_resource.c_str(),
+                  e.what().c_str());
+    } catch (const Gdk::PixbufError &e) {
+        LOG_WARNING("Error occurred while creating pixbuf for resource '%s': %s",
+                  icon_resource.c_str(),
+                  e.what().c_str());
+    }
+
+    return false;
 }
 
 void TasklistPagingButton::on_clicked()
