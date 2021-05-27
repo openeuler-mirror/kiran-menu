@@ -337,6 +337,15 @@ msgstr "图像"
 msgid "Multimedia"
 msgstr "多媒体"
 
+msgid "Tray"
+msgstr "系统托盘"
+
+msgid "About Tray"
+msgstr "关于系统托盘"
+
+msgid "The Tray displays the system notify icon"
+msgstr "系统托盘显示系统应用通知图标"
+
 msgid "Utilities"
 msgstr "工具"
 

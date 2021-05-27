@@ -519,3 +519,65 @@ scrolledwindow, scrolledwindow viewport {
     background: none;
     border: none;
 }
+
+/* Tray */
+#iconButton
+{
+  border-color: rgba(255, 255, 255, 0.1);
+  border-width: 0px;
+  background-color: rgb(34, 34, 34);
+}
+
+#iconButton:hover
+{
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+#iconButtonPanel
+{
+  border-radius: 0px;
+  border-color: rgba(255, 255, 256, 0.1);
+  border-width: 0px;
+  background-color: @taskbar_bg_color;
+}
+
+#iconButtonPanel:hover
+{
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+#iconWinButton
+{
+  border-width: 0px;
+  background-color: @taskbar_bg_color;
+  background-image: url("/kiran-tray/icon/arrow-up");
+  background-repeat: no-repeat;
+  background-position: center;
+  min-width: 24px;
+  margin: 0px;
+  padding: 0px;
+}
+
+#iconWinButton:hover
+{
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+#trayWindowBox
+{
+  border-color: rgba(255, 255, 255, 0.2);
+  background-color: rgb(34, 34, 34);
+  border-width: 1px;
+  margin: 0px;
+  padding: 0px;
+}
+
+#trayGrid
+{
+  margin: 0px;
+}
+
+#trayBox
+{
+  margin: 0px 5px 0px 0px;
+}
