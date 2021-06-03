@@ -2,7 +2,7 @@
 <schemalist>
   <schema id="com.unikylin.kiran.taskbar" path="/com/unikylin/kiran/taskbar/">
     <key name="fixed-apps" type="as">
-      <default>[]</default>
+      <default>['org.gnome.Software.desktop', 'firefox.desktop', 'caja.desktop', 'mate-terminal.desktop']</default>
     </key>
     <key name="show-active-workspace-apps" type="b">
       <default>false</default>
