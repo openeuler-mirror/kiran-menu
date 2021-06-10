@@ -18,33 +18,33 @@ install(FILES ${PROJECT_BINARY_DIR}/data/org.mate.panel.KiranApplet.mate-panel-a
 install(FILES ${PROJECT_BINARY_DIR}/data/org.mate.panel.applet.KiranAppletFactory.service
         DESTINATION "${CMAKE_INSTALL_PREFIX}/share/dbus-1/services")
 
-install(FILES "com.unikylin.Kiran.StartMenu.gschema.xml.in" 
+install(FILES "com.kylinsec.kiran.startmenu.gschema.xml.in" 
     DESTINATION  ${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas/
-    RENAME "com.unikylin.Kiran.StartMenu.gschema.xml" 
+    RENAME "com.kylinsec.kiran.startmenu.gschema.xml" 
 )
 
-install(FILES "com.unikylin.Kiran.StartMenu.profile.gschema.xml" 
+install(FILES "com.kylinsec.kiran.startmenu.profile.gschema.xml" 
     DESTINATION  ${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas/
 )
 
-install(FILES "com.unikylin.Kiran.MenuCategory.xml" 
+install(FILES "com.kylinsec.Kiran.MenuCategory.xml" 
     DESTINATION  ${CMAKE_INSTALL_PREFIX}/share/${CMAKE_PROJECT_NAME}/
 )
 
 
-install(FILES "com.unikylin.Kiran.TaskBar.gschema.xml.in" 
+install(FILES "com.kylinsec.kiran.taskbar.gschema.xml.in" 
     DESTINATION  ${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas/
-    RENAME "com.unikylin.Kiran.TaskBar.gschema.xml" 
+    RENAME "com.kylinsec.kiran.taskbar.gschema.xml" 
 )
 
-install(FILES "com.unikylin.Kiran.WorkspaceSwitcher.gschema.xml.in"
+install(FILES "com.kylinsec.kiran.workspace-switcher.gschema.xml.in"
     DESTINATION  ${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas/
-    RENAME "com.unikylin.Kiran.WorkspaceSwitcher.gschema.xml"
+    RENAME "com.kylinsec.kiran.workspace-switcher.gschema.xml"
 )
 
-install(FILES "com.unikylin.Kiran.Tray.gschema.xml.in"
+install(FILES "com.kylinsec.kiran.tray.gschema.xml.in"
     DESTINATION  ${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas/
-    RENAME "com.unikylin.Kiran.Tray.gschema.xml"
+    RENAME "com.kylinsec.kiran.tray.gschema.xml"
 )
 
 install(FILES "menu-menu.ui.xml" "tasklist-menu.ui.xml" "workspace-switcher-menu.ui.xml"

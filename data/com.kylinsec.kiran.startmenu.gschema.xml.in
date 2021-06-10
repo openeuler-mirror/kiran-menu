@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
-  <schema id="com.unikylin.kiran.startmenu" path="/com/unikylin/kiran/startmenu/">
+  <schema id="com.kylinsec.kiran.startmenu" path="/com/kylinsec/kiran/startmenu/">
     <key name="frequent-apps" type="a{sv}">
       <default>[]</default>
     </key>
