@@ -1,16 +1,23 @@
+/**
+ * @file          /kiran-menu/src/menu/menu-profile.cpp
+ * @brief         
+ * @author        tangjie02 <tangjie02@kylinos.com.cn>
+ * @copyright (c) 2020 KylinSec. All rights reserved. 
+ */
+
 #include "menu-profile.h"
 #include <log.h>
 
 const Glib::ustring default_page_key = "default-page";
 const Glib::ustring display_mode_key = "display-mode";
 const Glib::ustring window_opacity_key = "background-opacity";
-const Glib::ustring profile_settings_path = "com.unikylin.Kiran.StartMenu.profile";
+const Glib::ustring profile_settings_path = "com.kylinsec.kiran.startmenu.profile";
 
 MenuProfile::MenuProfile()
 {
     settings = Gio::Settings::create(profile_settings_path);
     settings->signal_changed().connect(
-               sigc::mem_fun(*this, &MenuProfile::on_settings_changed));
+        sigc::mem_fun(*this, &MenuProfile::on_settings_changed));
 }
 
 sigc::signal<void, const Glib::ustring &> MenuProfile::signal_changed()
@@ -57,4 +64,3 @@ void MenuProfile::on_settings_changed(const Glib::ustring &key)
     LOG_DEBUG("settings key '%s' changed\n", key.data());
     m_signal_changed.emit(key);
 }
-

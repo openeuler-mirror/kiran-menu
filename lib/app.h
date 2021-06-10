@@ -123,7 +123,7 @@ public:
     bool launch();
 
     // 启动应用打开给定的uri，成功返回true,失败返回false
-    bool launch_uris (const Glib::ListHandle< std::string >& uris);
+    bool launch_uris(const Glib::ListHandle<std::string> &uris);
 
     // 通过action_name启动应用，例如"new-window"，"new-private-window"
     void launch_action(const std::string &action_name);

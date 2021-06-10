@@ -14,4 +14,4 @@ src/tasklist/tasklist-applet.cpp
 src/tasklist/tasklist-window-context-menu.cpp
 src/workspace/workspace-applet.cpp
 [type: gettext/glade]data/menu.ui.xml
-[type: gettext/xml]data/com.unikylin.Kiran.MenuCategory.xml
+[type: gettext/xml]data/com.kylinsec.Kiran.MenuCategory.xml

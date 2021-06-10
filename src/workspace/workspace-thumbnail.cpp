@@ -6,9 +6,9 @@
 #include <gtk/gtkx.h>
 #include <cairomm/xlib_surface.h>
 
-#define BACKGROUND_SETTINGS_PATH    "org.mate.background"
-#define WORKSPACE_SETTINGS_PATH     "com.unikylin.kiran.workspace-switcher"
-#define DRAW_WINDOWS_KEY            "draw-windows-in-thumbnails"
+#define BACKGROUND_SETTINGS_PATH "org.mate.background"
+#define WORKSPACE_SETTINGS_PATH "com.kylinsec.kiran.workspace-switcher"
+#define DRAW_WINDOWS_KEY "draw-windows-in-thumbnails"
 
 WorkspaceThumbnail::WorkspaceThumbnail(KiranWorkspacePointer &workspace_) : workspace(workspace_),
                                                                             bg_surface(nullptr),
@@ -262,7 +262,8 @@ bool WorkspaceThumbnail::draw_thumbnail_image(Gtk::Widget *thumbnail_area_, cons
                           allocation.get_width() - border_width,
                           allocation.get_height() - border_width);
             cr->stroke();
-        } else
+        }
+        else
             LOG_WARNING("color 'thumbnail-hover-color' not found");
     }
     else
@@ -293,9 +294,11 @@ void WorkspaceThumbnail::on_thumbnail_clicked()
 
 void WorkspaceThumbnail::on_settings_changed(const Glib::ustring &key)
 {
-    if (key == DRAW_WINDOWS_KEY) {
+    if (key == DRAW_WINDOWS_KEY)
+    {
         bool new_value = applet_settings->get_boolean(DRAW_WINDOWS_KEY);
-        if (new_value != draw_windows) {
+        if (new_value != draw_windows)
+        {
             LOG_DEBUG("key '%s' changed to %d", DRAW_WINDOWS_KEY, new_value);
             queue_draw();
         }

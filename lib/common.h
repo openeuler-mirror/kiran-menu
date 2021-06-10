@@ -1,10 +1,8 @@
-/*
- * @Author       : tangjie02
- * @Date         : 2020-04-08 16:04:39
- * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-13 08:32:49
- * @Description  :
- * @FilePath     : /kiran-menu-2.0/lib/common.h
+/**
+ * @file          /kiran-cc-daemon/home/tangjie02/git/kiran-menu/lib/common.h
+ * @brief         
+ * @author        tangjie02 <tangjie02@kylinos.com.cn>
+ * @copyright (c) 2020 KylinSec. All rights reserved. 
  */
 
 #pragma once
@@ -13,7 +11,7 @@
 
 namespace Kiran
 {
-#define KIRAN_MENU_SCHEMA "com.unikylin.kiran.startmenu"
+#define KIRAN_MENU_SCHEMA "com.kylinsec.kiran.startmenu"
 
 #define MENU_KEY_FAVORITE_APPS "favorite-apps"
 
@@ -21,7 +19,7 @@ namespace Kiran
 
 #define MENU_KEY_NEW_APPS "new-apps"
 
-#define KIRAN_TASKBAR_SCHEMA "com.unikylin.kiran.taskbar"
+#define KIRAN_TASKBAR_SCHEMA "com.kylinsec.kiran.taskbar"
 
 #define TASKBAR_KEY_FIXED_APPS "fixed-apps"
 #define TASKBAR_KEY_SHOW_ACTIVE_WORKSPACE "show-active-workspace-apps"

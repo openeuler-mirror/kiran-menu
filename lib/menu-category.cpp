@@ -18,7 +18,7 @@ namespace Kiran
 {
 MenuCategory::MenuCategory()
 {
-    this->file_path_ = PACKAGE_DATA_DIR "/com.unikylin.Kiran.MenuCategory.xml";
+    this->file_path_ = PACKAGE_DATA_DIR "/com.kylinsec.Kiran.MenuCategory.xml";
     std::unique_ptr<CategoryReader> reader(new CategoryReader());
     this->root_ = reader->create_from_xml(this->file_path_);
 }
