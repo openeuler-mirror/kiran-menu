@@ -477,6 +477,7 @@ void MenuAppletWindow::switch_to_apps_overview(double position, bool animation)
 
     //切换到应用程序列表
     category_list_scrolled->set_visible(false);
+
     menu_view_stack->set_visible_child(ALL_APPS_VIEW);
     apps_list_stack->set_visible_child(APPS_LIST_PAGE);
     if (position >= 0) {
@@ -491,8 +492,7 @@ bool MenuAppletWindow::on_map_event(GdkEventAny *any_event)
 {
     Gtk::Window::on_map_event(any_event);
 
-    //应用列表滚动到开始位置
-    switch_to_apps_overview(0, false);
+    category_list_scrolled->set_visible(false);
 
     on_search_stop();
 
