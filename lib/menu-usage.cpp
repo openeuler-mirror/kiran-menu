@@ -11,8 +11,8 @@
 #include <libwnck/libwnck.h>
 
 #include "lib/app-manager.h"
+#include "lib/base.h"
 #include "lib/common.h"
-#include "lib/log.h"
 #include "lib/math-helper.h"
 
 namespace Kiran
@@ -194,7 +194,7 @@ bool MenuUsage::read_usages_from_settings()
 
             if (child_base.get_type().get_string() != "{sv}")
             {
-                LOG_WARNING("the element format for frequen-apps in gsettings must be {sv}. but now it's %s\n", child_base.get_type().get_string().c_str());
+                KLOG_WARNING("the element format for frequen-apps in gsettings must be {sv}. but now it's %s\n", child_base.get_type().get_string().c_str());
                 return false;
             }
 
@@ -219,7 +219,7 @@ bool MenuUsage::read_usages_from_settings()
     }
     catch (std::bad_cast &bc)
     {
-        LOG_WARNING("failed to read frequent-apps: %s\n", bc.what());
+        KLOG_WARNING("failed to read frequent-apps: %s\n", bc.what());
         return false;
     }
 

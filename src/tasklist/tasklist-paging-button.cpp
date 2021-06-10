@@ -1,14 +1,12 @@
 #include "tasklist-paging-button.h"
 #include "global.h"
-#include "log.h"
+#include "lib/base.h"
 
-TasklistPagingButton::TasklistPagingButton(MatePanelApplet *applet_):
-    applet(applet_),
-    drag_triggered(false),
-    icon_resource(""),
-    icon_size(16)
+TasklistPagingButton::TasklistPagingButton(MatePanelApplet *applet_) : applet(applet_),
+                                                                       drag_triggered(false),
+                                                                       icon_resource(""),
+                                                                       icon_size(16)
 {
-
     /*
      * 当拖动的应用按钮经过分页按钮上方时，触发页面跳转
      */
@@ -43,7 +41,8 @@ bool TasklistPagingButton::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
                                allocation.get_width(),
                                allocation.get_height());
 
-    try {
+    try
+    {
         icon_pixbuf = Gdk::Pixbuf::create_from_resource(icon_resource,
                                                         icon_size * scale_factor,
                                                         icon_size * scale_factor);
@@ -52,10 +51,11 @@ bool TasklistPagingButton::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
                                                        scale_factor,
                                                        NULL);
 
-        if (!get_sensitive()) {
+        if (!get_sensitive())
+        {
             /* 禁用情况下绘制暗色 */
             cairo_t *cr = cairo_create(surface);
-            cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+            cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
             cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
             cairo_paint_with_alpha(cr, 0.5);
             cairo_destroy(cr);
@@ -64,17 +64,21 @@ bool TasklistPagingButton::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
         gtk_render_icon_surface(context->gobj(),
                                 cr->cobj(),
                                 surface,
-                                (allocation.get_width() - icon_size)/2,
-                                (allocation.get_height() - icon_size)/2);
+                                (allocation.get_width() - icon_size) / 2,
+                                (allocation.get_height() - icon_size) / 2);
         cairo_surface_destroy(surface);
-    } catch (const Gio::ResourceError &e) {
-        LOG_WARNING("Error occurred while trying to load resource '%s': %s",
-                  icon_resource.c_str(),
-                  e.what().c_str());
-    } catch (const Gdk::PixbufError &e) {
-        LOG_WARNING("Error occurred while creating pixbuf for resource '%s': %s",
-                  icon_resource.c_str(),
-                  e.what().c_str());
+    }
+    catch (const Gio::ResourceError &e)
+    {
+        KLOG_WARNING("Error occurred while trying to load resource '%s': %s",
+                     icon_resource.c_str(),
+                     e.what().c_str());
+    }
+    catch (const Gdk::PixbufError &e)
+    {
+        KLOG_WARNING("Error occurred while creating pixbuf for resource '%s': %s",
+                     icon_resource.c_str(),
+                     e.what().c_str());
     }
 
     return false;
@@ -93,7 +97,8 @@ void TasklistPagingButton::on_clicked()
 
 bool TasklistPagingButton::on_drag_motion(const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, guint time)
 {
-    if (!drag_triggered) {
+    if (!drag_triggered)
+    {
         clicked();
         drag_triggered = true;
     }

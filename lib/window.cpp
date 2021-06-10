@@ -19,7 +19,7 @@
 
 #include "lib/app-manager.h"
 #include "lib/app.h"
-#include "lib/log.h"
+#include "lib/base.h"
 #include "lib/workspace-manager.h"
 
 namespace Kiran
@@ -80,8 +80,10 @@ Window::Window(gulong xid) : wnck_window_(nullptr),
         this->workspace_changed_handler_ = g_signal_connect(this->wnck_window_, "workspace-changed", G_CALLBACK(Window::workspace_changed), NULL);
         this->geometry_changed_handler_ = g_signal_connect(this->wnck_window_, "geometry-changed", G_CALLBACK(Window::geometry_changed), NULL);
         this->state_changed_handler = g_signal_connect(this->wnck_window_, "state-changed", G_CALLBACK(Window::state_changed), NULL);
-    } else {
-        LOG_WARNING("No WnckWindow found for Window with ID 0x%x", xid);
+    }
+    else
+    {
+        KLOG_WARNING("No WnckWindow found for Window with ID 0x%x", xid);
     }
     this->update_window_pixmap();
 }
@@ -311,7 +313,7 @@ bool Window::is_skip_taskbar()
 
 void Window::activate(uint32_t timestamp)
 {
-    SETTINGS_PROFILE("xid: %" PRIu64 ", timestamp: %d.", this->get_xid(), timestamp);
+    KLOG_PROFILE("xid: %" PRIu64 ", timestamp: %d.", this->get_xid(), timestamp);
 
     g_return_if_fail(this->wnck_window_ != nullptr);
 
@@ -341,7 +343,7 @@ void Window::activate(uint32_t timestamp)
 
 void Window::unminimize(uint32_t timestamp)
 {
-    SETTINGS_PROFILE("xid: %" PRIu64 ", timestamp: %d.", this->get_xid(), timestamp);
+    KLOG_PROFILE("xid: %" PRIu64 ", timestamp: %d.", this->get_xid(), timestamp);
     if (this->wnck_window_ != nullptr)
         wnck_window_unminimize(this->wnck_window_, timestamp);
     else
@@ -352,16 +354,17 @@ bool Window::is_minimized()
 {
     if (this->wnck_window_ != nullptr)
         return wnck_window_is_minimized(this->wnck_window_);
-    else {
+    else
+    {
         GdkWindowState state = gdk_window_get_state(gdk_window_);
 
-        return  (state & GDK_WINDOW_STATE_ICONIFIED) != 0;
+        return (state & GDK_WINDOW_STATE_ICONIFIED) != 0;
     }
 }
 
 void Window::minimize()
 {
-    SETTINGS_PROFILE("xid: %" PRIu64 ".", this->get_xid());
+    KLOG_PROFILE("xid: %" PRIu64 ".", this->get_xid());
     if (this->wnck_window_ != nullptr)
         wnck_window_minimize(this->wnck_window_);
     else
@@ -372,16 +375,17 @@ bool Window::is_maximized()
 {
     if (this->wnck_window_ != nullptr)
         return wnck_window_is_maximized(this->wnck_window_);
-    else {
+    else
+    {
         GdkWindowState state = gdk_window_get_state(gdk_window_);
 
-        return  (state & GDK_WINDOW_STATE_MAXIMIZED) != 0;
+        return (state & GDK_WINDOW_STATE_MAXIMIZED) != 0;
     }
 }
 
 void Window::maximize()
 {
-    SETTINGS_PROFILE("xid: %" PRIu64 ".", this->get_xid());
+    KLOG_PROFILE("xid: %" PRIu64 ".", this->get_xid());
     if (this->wnck_window_ != nullptr)
         wnck_window_maximize(this->wnck_window_);
     else
@@ -390,7 +394,7 @@ void Window::maximize()
 
 void Window::unmaximize()
 {
-    SETTINGS_PROFILE("xid: %" PRIu64 ".", this->get_xid());
+    KLOG_PROFILE("xid: %" PRIu64 ".", this->get_xid());
     if (this->wnck_window_ != nullptr)
         wnck_window_unmaximize(this->wnck_window_);
     else
@@ -405,7 +409,7 @@ bool Window::is_shaded()
 
 void Window::pin()
 {
-    SETTINGS_PROFILE("xid: %" PRIu64 ".", this->get_xid());
+    KLOG_PROFILE("xid: %" PRIu64 ".", this->get_xid());
     if (this->wnck_window_ != nullptr)
         return wnck_window_pin(this->wnck_window_);
     else
@@ -414,7 +418,7 @@ void Window::pin()
 
 void Window::unpin()
 {
-    SETTINGS_PROFILE("xid: %" PRIu64 ".", this->get_xid());
+    KLOG_PROFILE("xid: %" PRIu64 ".", this->get_xid());
     if (this->wnck_window_ != nullptr)
         return wnck_window_unpin(this->wnck_window_);
     else
@@ -423,7 +427,7 @@ void Window::unpin()
 
 void Window::make_above()
 {
-    SETTINGS_PROFILE("xid: %" PRIu64 ".", this->get_xid());
+    KLOG_PROFILE("xid: %" PRIu64 ".", this->get_xid());
     if (this->wnck_window_ != nullptr)
         wnck_window_make_above(this->wnck_window_);
     else
@@ -432,7 +436,7 @@ void Window::make_above()
 
 void Window::make_unabove()
 {
-    SETTINGS_PROFILE("xid: %" PRIu64 ".", this->get_xid());
+    KLOG_PROFILE("xid: %" PRIu64 ".", this->get_xid());
     if (this->wnck_window_ != nullptr)
         wnck_window_unmake_above(this->wnck_window_);
     else
@@ -443,20 +447,22 @@ bool Window::is_active()
 {
     if (this->wnck_window_ != nullptr)
         return wnck_window_is_active(this->wnck_window_);
-    else {
+    else
+    {
         return gdk_screen_get_active_window(gdk_window_get_screen(gdk_window_)) == gdk_window_;
     }
 }
 
 void Window::move_to_workspace(std::shared_ptr<Workspace> workspace)
 {
-    SETTINGS_PROFILE("xid: %" PRIu64 ", number: %d.",
-                     this->get_xid(),
-                     workspace ? workspace->get_number() : -1);
+    KLOG_PROFILE("xid: %" PRIu64 ", number: %d.",
+                 this->get_xid(),
+                 workspace ? workspace->get_number() : -1);
 
     if (this->wnck_window_ != nullptr)
         wnck_window_move_to_workspace(this->wnck_window_, workspace->workspace_);
-    else {
+    else
+    {
         gdk_x11_window_move_to_desktop(gdk_window_, workspace->get_number());
     }
 }
@@ -469,7 +475,7 @@ uint64_t Window::get_window_group()
 
 void Window::close()
 {
-    SETTINGS_PROFILE("xid: %" PRIu64 ", name: %s.", this->get_xid(), this->get_name().c_str());
+    KLOG_PROFILE("xid: %" PRIu64 ", name: %s.", this->get_xid(), this->get_name().c_str());
 
     g_return_if_fail(this->wnck_window_ != nullptr);
     uint64_t now = Glib::DateTime::create_now_local().to_unix();
@@ -524,7 +530,7 @@ std::shared_ptr<Workspace> Window::get_workspace()
 
 void Window::flush_workspace()
 {
-    SETTINGS_PROFILE("");
+    KLOG_PROFILE("");
 
     auto workspace = get_workspace();
 
@@ -589,7 +595,7 @@ void Window::name_changed(WnckWindow *wnck_window, gpointer user_data)
     auto window = WindowManager::get_instance()->lookup_window(wnck_window);
     g_return_if_fail(window);
 
-    LOG_DEBUG("the name of the window %" PRIu64 " is changed. new_name: %s.", window->get_xid(), window->get_name().c_str());
+    KLOG_DEBUG("the name of the window %" PRIu64 " is changed. new_name: %s.", window->get_xid(), window->get_name().c_str());
 
     window->name_changed_.emit();
 }
@@ -601,7 +607,7 @@ void Window::workspace_changed(WnckWindow *wnck_window, gpointer user_data)
     auto xid = wnck_window_get_xid(wnck_window);
     auto name = wnck_window_get_name(wnck_window);
 
-    LOG_DEBUG("the workspace of the window is changed. xid: %" PRIu64 ", name: %s.", xid, name);
+    KLOG_DEBUG("the workspace of the window is changed. xid: %" PRIu64 ", name: %s.", xid, name);
 
     auto window = WindowManager::get_instance()->lookup_window(wnck_window);
     if (window)
@@ -613,7 +619,7 @@ void Window::workspace_changed(WnckWindow *wnck_window, gpointer user_data)
     }
     else
     {
-        LOG_WARNING("cannot find the window for wnck window: %" PRIu64 ".", xid);
+        KLOG_WARNING("cannot find the window for wnck window: %" PRIu64 ".", xid);
     }
 }
 
@@ -623,9 +629,9 @@ void Window::geometry_changed(WnckWindow *wnck_window,
     auto window = WindowManager::get_instance()->lookup_window(wnck_window);
     g_return_if_fail(window);
 
-    LOG_DEBUG("the geometry of the window is changed. xid: %" PRIu64 ", window name: %s.",
-              window->get_xid(),
-              window->get_name().c_str());
+    KLOG_DEBUG("the geometry of the window is changed. xid: %" PRIu64 ", window name: %s.",
+               window->get_xid(),
+               window->get_name().c_str());
 
     auto display = gdk_x11_get_default_xdisplay();
     auto gdk_screen = gdk_screen_get_default();
@@ -648,7 +654,7 @@ void Window::geometry_changed(WnckWindow *wnck_window,
     }
     else
     {
-        LOG_WARNING("the extension composite is unsupported.\n");
+        KLOG_WARNING("the extension composite is unsupported.\n");
     }
 
     window->last_geometry_ = geometry;

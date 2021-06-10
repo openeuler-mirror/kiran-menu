@@ -1,10 +1,8 @@
-/*
- * @Author       : tangjie02
- * @Date         : 2020-04-09 21:42:15
- * @LastEditors  : tangjie02
- * @LastEditTime : 2020-09-08 16:35:44
- * @Description  :
- * @FilePath     : /kiran-menu-2.0/lib/app-manager.cpp
+/**
+ * @file          /kiran-menu/lib/app-manager.cpp
+ * @brief         
+ * @author        tangjie02 <tangjie02@kylinos.com.cn>
+ * @copyright (c) 2020 KylinSec. All rights reserved. 
  */
 
 #include "lib/app-manager.h"
@@ -16,8 +14,8 @@
 #include <cinttypes>
 #include <sstream>
 
+#include "lib/base.h"
 #include "lib/common.h"
-#include "lib/log.h"
 
 namespace Kiran
 {
@@ -162,9 +160,9 @@ std::shared_ptr<App> AppManager::lookup_app_with_window(std::shared_ptr<Window> 
     app = get_app_from_window_group(window);
     RETURN_VAL_IF_TRUE(app, app);
 
-    LOG_WARNING("not found matching App for the window. name: %s xid: %" PRIu64 "\n",
-                window->get_name().c_str(),
-                window->get_xid());
+    KLOG_WARNING("not found matching App for the window. name: %s xid: %" PRIu64 "\n",
+                 window->get_name().c_str(),
+                 window->get_xid());
 
     return nullptr;
 }
@@ -208,7 +206,7 @@ std::vector<std::string> AppManager::get_all_sorted_apps()
 
 void AppManager::init()
 {
-    SETTINGS_PROFILE("");
+    KLOG_PROFILE("");
 
     load_desktop_apps();
 
@@ -720,7 +718,7 @@ std::string AppManager::create_userapp_from_uri(const std::string &uri)
     }
     catch (const Gio::Error &e)
     {
-        LOG_ERROR("Failed to create user app for '%s': %s", uri.c_str(), e.what().c_str());
+        KLOG_ERROR("Failed to create user app for '%s': %s", uri.c_str(), e.what().c_str());
         return "";
     }
 
@@ -732,9 +730,9 @@ std::string AppManager::create_userapp_from_uri(const std::string &uri)
     /* 确保用户应用目录存在 */
     if (g_mkdir_with_parents(userapp_dir.c_str(), 0755) < 0)
     {
-        LOG_ERROR("Error occured while trying to create user app directory '%s', error %d",
-                  userapp_dir.c_str(),
-                  errno);
+        KLOG_ERROR("Error occured while trying to create user app directory '%s', error %d",
+                   userapp_dir.c_str(),
+                   errno);
         return "";
     }
 
@@ -747,7 +745,7 @@ std::string AppManager::create_userapp_from_uri(const std::string &uri)
     }
     catch (Glib::Error &e)
     {
-        LOG_ERROR("Failed to copy file '%s': %s", source_file->get_path().c_str(), e.what().c_str());
+        KLOG_ERROR("Failed to copy file '%s': %s", source_file->get_path().c_str(), e.what().c_str());
     }
 
     return "";
@@ -790,7 +788,7 @@ void AppManager::load_desktop_apps()
             if (g_str_has_prefix(child_name, "userapp-") && g_str_has_suffix(child_name, ".desktop"))
             {
                 auto file = g_file_enumerator_get_child(enumerator, info);
-                LOG_DEBUG("Found user desktop file '%s'", child_name);
+                KLOG_DEBUG("Found user desktop file '%s'", child_name);
                 register_app(old_apps, g_file_get_path(file), AppKind::USER_TASKBAR);
                 g_object_unref(file);
             }
@@ -922,7 +920,7 @@ void AppManager::register_app(std::map<std::string, std::shared_ptr<App>> &old_a
 
 void AppManager::desktop_app_changed(AppManager *app_manager)
 {
-    SETTINGS_PROFILE("");
+    KLOG_PROFILE("");
 
     g_return_if_fail(app_manager == AppManager::get_instance());
 
@@ -941,7 +939,7 @@ void AppManager::app_opened(WnckScreen *screen, WnckApplication *wnck_applicatio
     auto xwindow = wnck_application_get_xid(wnck_application);
     auto name = wnck_application_get_name(wnck_application);
 
-    LOG_DEBUG("wnck app is opened, xid: %" PRIu64 ", name: %s.", xwindow, name);
+    KLOG_DEBUG("wnck app is opened, xid: %" PRIu64 ", name: %s.", xwindow, name);
 
     auto binding_result = app_manager->bind_wnck2app(wnck_application);
 
@@ -956,7 +954,7 @@ void AppManager::app_opened(WnckScreen *screen, WnckApplication *wnck_applicatio
     }
     else
     {
-        LOG_WARNING("Cannot bind wnck application to any app. name: %s xid: %" PRIu64 "\n", name, xwindow);
+        KLOG_WARNING("Cannot bind wnck application to any app. name: %s xid: %" PRIu64 "\n", name, xwindow);
     }
 }
 
@@ -970,7 +968,7 @@ void AppManager::app_closed(WnckScreen *screen, WnckApplication *wnck_applicatio
     auto xwindow = wnck_application_get_xid(wnck_application);
     auto name = wnck_application_get_name(wnck_application);
 
-    LOG_DEBUG("wnck app is closed, xid: %" PRIu64 ", name: %s.", xwindow, name);
+    KLOG_DEBUG("wnck app is closed, xid: %" PRIu64 ", name: %s.", xwindow, name);
 
     auto unbinding_result = app_manager->unbind_wnck2app(wnck_application);
 
@@ -985,13 +983,13 @@ void AppManager::app_closed(WnckScreen *screen, WnckApplication *wnck_applicatio
     }
     else
     {
-        LOG_WARNING("Failed to unbind for wnck application. name: %s xid: %" PRIu64 "\n", name, xwindow);
+        KLOG_WARNING("Failed to unbind for wnck application. name: %s xid: %" PRIu64 "\n", name, xwindow);
     }
 }
 
 void AppManager::window_opened(std::shared_ptr<Window> window)
 {
-    SETTINGS_PROFILE("xid: %" PRIu64 ".", window ? window->get_xid() : 0);
+    KLOG_PROFILE("xid: %" PRIu64 ".", window ? window->get_xid() : 0);
 
     auto app = lookup_app_with_window(window);
     if (app)
@@ -1000,12 +998,12 @@ void AppManager::window_opened(std::shared_ptr<Window> window)
     }
     else
     {
-        LOG_WARNING("cannot find app for window: %" PRIu64 ".", window->get_xid());
+        KLOG_WARNING("cannot find app for window: %" PRIu64 ".", window->get_xid());
     }
 }
 void AppManager::window_closed(std::shared_ptr<Window> window)
 {
-    SETTINGS_PROFILE("xid: %" PRIu64 ".", window ? window->get_xid() : 0);
+    KLOG_PROFILE("xid: %" PRIu64 ".", window ? window->get_xid() : 0);
 
     auto app = lookup_app_with_window(window);
     if (app)
@@ -1014,7 +1012,7 @@ void AppManager::window_closed(std::shared_ptr<Window> window)
     }
     else
     {
-        LOG_WARNING("cannot find app for window: %" PRIu64 ".", window->get_xid());
+        KLOG_WARNING("cannot find app for window: %" PRIu64 ".", window->get_xid());
     }
 }
 
@@ -1053,7 +1051,7 @@ std::pair<std::shared_ptr<App>, bool> AppManager::bind_wnck2app(WnckApplication 
     auto iter = this->wnck_apps_.find(xwindow);
     if (iter != this->wnck_apps_.end())
     {
-        LOG_WARNING("The wnck app already exist. name: %s xid: %" PRIu64 "\n", name, xwindow);
+        KLOG_WARNING("The wnck app already exist. name: %s xid: %" PRIu64 "\n", name, xwindow);
         return std::make_pair(nullptr, false);
     }
 
@@ -1086,7 +1084,7 @@ std::shared_ptr<App> AppManager::bind_wnck2fake(WnckApplication *wnck_applicatio
     auto xwindow = wnck_application_get_xid(wnck_application);
     auto name = wnck_application_get_name(wnck_application);
 
-    LOG_DEBUG("create a fake app for wnck app, name: %s xid: %" PRIu64 "\n", name, xwindow);
+    KLOG_DEBUG("create a fake app for wnck app, name: %s xid: %" PRIu64 "\n", name, xwindow);
 
     auto app = App::create_fake();
     app->add_wnck_app_by_xid(xwindow);
@@ -1097,7 +1095,7 @@ std::shared_ptr<App> AppManager::bind_wnck2fake(WnckApplication *wnck_applicatio
     auto iter = this->apps_.emplace(desktop_id, app);
     if (!iter.second)
     {
-        LOG_WARNING("Exist a app that have same desktop id: %s\n", desktop_id.c_str());
+        KLOG_WARNING("Exist a app that have same desktop id: %s\n", desktop_id.c_str());
         return nullptr;
     }
 
@@ -1115,7 +1113,7 @@ std::pair<std::shared_ptr<App>, bool> AppManager::unbind_wnck2app(WnckApplicatio
     auto iter = this->wnck_apps_.find(xwindow);
     if (iter == this->wnck_apps_.end())
     {
-        LOG_WARNING("cannot find the App for the wnck_application. name: %s xid: %" PRIu64 "\n", name, xwindow);
+        KLOG_WARNING("cannot find the App for the wnck_application. name: %s xid: %" PRIu64 "\n", name, xwindow);
         return std::make_pair(nullptr, false);
     }
     else
@@ -1184,14 +1182,14 @@ std::string AppManager::get_exec_name(const std::string &exec_str)
 
 void AppManager::app_launched(std::shared_ptr<App> app)
 {
-    SETTINGS_PROFILE("app id: %s.", app ? app->get_desktop_id().c_str() : "null");
+    KLOG_PROFILE("app id: %s.", app ? app->get_desktop_id().c_str() : "null");
 
     this->signal_app_action_changed_.emit(app, AppAction::APP_LAUNCHED);
 }
 
 void AppManager::app_close_all_windows(std::shared_ptr<App> app)
 {
-    SETTINGS_PROFILE("app id: %s.", app ? app->get_desktop_id().c_str() : "null");
+    KLOG_PROFILE("app id: %s.", app ? app->get_desktop_id().c_str() : "null");
 
     this->signal_app_action_changed_.emit(app, AppAction::APP_ALL_WINDOWS_CLOSED);
 }

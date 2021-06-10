@@ -1,12 +1,11 @@
 #include "menu-applet-button.h"
 #include <glibmm/i18n.h>
 #include "kiran-helper.h"
-#include "log.h"
+#include "lib/base.h"
 
 #define BUTTON_MARGIN 6
 
-MenuAppletButton::MenuAppletButton(MatePanelApplet *panel_applet):
-    KiranAppletButton(panel_applet)
+MenuAppletButton::MenuAppletButton(MatePanelApplet *panel_applet) : KiranAppletButton(panel_applet)
 {
     set_tooltip_text(_("Kiran Start Menu"));
     set_icon_from_resource("/kiran-menu/icon/logo");
@@ -38,7 +37,7 @@ void MenuAppletButton::reposition_applet_window()
         return;
 
     window.get_size(window_width, window_height);
-    LOG_WARNING("window size %d x %d, reposition now", window_width, window_height);
+    KLOG_WARNING("window size %d x %d, reposition now", window_width, window_height);
 
     //获取按钮的位置坐标
     button_allocation = get_allocation();

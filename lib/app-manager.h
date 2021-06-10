@@ -1,11 +1,10 @@
-/*
- * @Author       : tangjie02
- * @Date         : 2020-04-08 17:21:54
- * @LastEditors  : tangjie02
- * @LastEditTime : 2020-08-17 20:21:34
- * @Description  :
- * @FilePath     : /kiran-menu-2.0/lib/app-manager.h
+/**
+ * @file          /kiran-menu/lib/app-manager.h
+ * @brief         
+ * @author        tangjie02 <tangjie02@kylinos.com.cn>
+ * @copyright (c) 2020 KylinSec. All rights reserved. 
  */
+
 #pragma once
 
 #include "lib/app.h"

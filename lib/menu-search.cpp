@@ -8,8 +8,8 @@
 #include "lib/menu-search.h"
 
 #include "lib/app.h"
+#include "lib/base.h"
 #include "lib/helper.h"
-#include "lib/log.h"
 
 namespace Kiran
 {

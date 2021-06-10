@@ -9,8 +9,8 @@
 
 #include <sstream>
 
+#include "lib/base.h"
 #include "lib/category-node.h"
-#include "lib/log.h"
 
 namespace Kiran
 {
@@ -167,19 +167,19 @@ std::shared_ptr<CategoryNode> CategoryReader::create_from_xml(const std::string 
     text = NULL;
     length = 0;
 
-    LOG_DEBUG("Loading \"%s\" from disk\n", file_path.c_str());
+    KLOG_DEBUG("Loading \"%s\" from disk\n", file_path.c_str());
 
     auto file = Gio::File::create_for_path(file_path);
 
     if (!file)
     {
-        LOG_WARNING("failed to create file: %s\n", file_path.c_str());
+        KLOG_WARNING("failed to create file: %s\n", file_path.c_str());
         return nullptr;
     }
 
     if (!file->load_contents(text, length))
     {
-        LOG_WARNING("Failed to load \"%s\"\n", file_path.c_str());
+        KLOG_WARNING("Failed to load \"%s\"\n", file_path.c_str());
         return nullptr;
     }
 
@@ -205,7 +205,7 @@ std::shared_ptr<CategoryNode> CategoryReader::create_from_xml(const std::string 
 
     if (error.length() > 0)
     {
-        LOG_WARNING("Error \"%s\" loading \"%s\"\n", error.c_str(), file_path.c_str());
+        KLOG_WARNING("Error \"%s\" loading \"%s\"\n", error.c_str(), file_path.c_str());
     }
 
     return this->root_;

@@ -1,20 +1,19 @@
 #include "workspace-applet-window.h"
+#include <X11/Xlib.h>
+#include "global.h"
+#include "kiran-helper.h"
+#include "lib/base.h"
 #include "window-manager.h"
 #include "workspace-manager.h"
 #include "workspace-thumbnail.h"
 #include "workspace-window-thumbnail.h"
 #include "workspace-windows-overview.h"
-#include "kiran-helper.h"
-#include "global.h"
-#include "log.h"
-#include <X11/Xlib.h>
 
 #define MATE_DESKTOP_USE_UNSTABLE_API
-#include <libmate-desktop/mate-bg.h>
 #include <gdk/gdkkeysyms.h>
+#include <libmate-desktop/mate-bg.h>
 
-WorkspaceAppletWindow::WorkspaceAppletWindow():
-    selected_workspace(-1)
+WorkspaceAppletWindow::WorkspaceAppletWindow() : selected_workspace(-1)
 {
     init_ui();
 
@@ -50,7 +49,7 @@ void WorkspaceAppletWindow::on_realize()
 
     /*设置窗口的Visual为RGBA visual，确保窗口背景透明度可以正常绘制 */
     rgba_visual = screen->get_rgba_visual();
-    gtk_widget_set_visual(reinterpret_cast<GtkWidget*>(gobj()), rgba_visual->gobj());
+    gtk_widget_set_visual(reinterpret_cast<GtkWidget *>(gobj()), rgba_visual->gobj());
 
     Gtk::Window::on_realize();
 }
@@ -81,17 +80,19 @@ bool WorkspaceAppletWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
 
 bool WorkspaceAppletWindow::on_key_press_event(GdkEventKey *event)
 {
-    if (event->keyval == GDK_KEY_Escape) {
+    if (event->keyval == GDK_KEY_Escape)
+    {
         /*
          * 按下ESC键时隐藏窗口
          */
-        if (selected_workspace >= 0) {
+        if (selected_workspace >= 0)
+        {
             auto workspace = Kiran::WorkspaceManager::get_instance()->get_workspace(selected_workspace);
 
             if (workspace)
                 workspace->activate(0);
             else
-                LOG_WARNING("workspace with number %d not found", selected_workspace);
+                KLOG_WARNING("workspace with number %d not found", selected_workspace);
         }
         hide();
         return true;
@@ -115,7 +116,7 @@ void WorkspaceAppletWindow::on_unmap()
 
 void WorkspaceAppletWindow::init_ui()
 {
-    Gtk::Button *add_button;                                /* 创建工作区按钮 */
+    Gtk::Button *add_button; /* 创建工作区按钮 */
 
     builder = Gtk::Builder::create_from_resource("/kiran-applet/ui/workspace-applet-window");
 
@@ -158,7 +159,7 @@ void WorkspaceAppletWindow::load_workspaces()
     workspaces_table.clear();
     KiranHelper::remove_all_for_container(*left_layout);
 
-    for (auto workspace: workspace_manager->get_workspaces())
+    for (auto workspace : workspace_manager->get_workspaces())
     {
         int workspace_no = workspace->get_number();
         auto thumbnail_area = Gtk::make_managed<WorkspaceThumbnail>(workspace);
@@ -171,12 +172,14 @@ void WorkspaceAppletWindow::load_workspaces()
 
         //点击工作区时切换右侧的窗口预览
         thumbnail_area->signal_clicked().connect([this, workspace_no]() -> void {
-            for (auto data: workspaces_table){
+            for (auto data : workspaces_table)
+            {
                 auto num = data.first;
                 auto area = data.second;
                 if (num != workspace_no)
                     area->set_selected(false);
-                else {
+                else
+                {
                     area->set_selected(true);
 
                     //通知窗口列表预览控件重绘
@@ -193,7 +196,7 @@ void WorkspaceAppletWindow::load_workspaces()
 
         workspace->signal_windows_changes().clear();
         workspace->signal_windows_changes().connect(
-                    sigc::bind<int>(sigc::mem_fun(*this, &WorkspaceAppletWindow::update_workspace), workspace->get_number()));
+            sigc::bind<int>(sigc::mem_fun(*this, &WorkspaceAppletWindow::update_workspace), workspace->get_number()));
     }
 }
 
@@ -208,8 +211,9 @@ void WorkspaceAppletWindow::update_workspace(int workspace_num)
 {
     WorkspaceThumbnail *thumbnail = nullptr;
     auto iter = workspaces_table.find(workspace_num);
-    if (G_UNLIKELY(iter == workspaces_table.end())) {
-        LOG_WARNING("workspace with num %d not found in cached thumbnails\n", workspace_num);
+    if (G_UNLIKELY(iter == workspaces_table.end()))
+    {
+        KLOG_WARNING("workspace with num %d not found in cached thumbnails\n", workspace_num);
         return;
     }
 
@@ -217,7 +221,8 @@ void WorkspaceAppletWindow::update_workspace(int workspace_num)
     thumbnail->queue_draw();
 
     /*如果窗口所属的工作区是当前显示的工作区，那么重绘右侧的窗口预览图*/
-    if (thumbnail->is_selected()) {
+    if (thumbnail->is_selected())
+    {
         //通知窗口列表预览控件重绘
         auto workspace = thumbnail->get_workspace();
         overview_area.set_workspace(workspace);
@@ -243,6 +248,6 @@ void WorkspaceAppletWindow::resize_and_reposition()
     overview_area.clear();
 
     move(rect.get_x(), rect.get_y());
-    g_debug("screen size changed to %d x %d, resize and reposition applet window now", rect.get_width(), rect.get_height());
+    KLOG_DEBUG("screen size changed to %d x %d, resize and reposition applet window now", rect.get_width(), rect.get_height());
     resize(rect.get_width(), rect.get_height());
 }

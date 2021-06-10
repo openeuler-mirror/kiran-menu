@@ -1,10 +1,8 @@
-/*
- * @Author       : tangjie02
- * @Date         : 2020-04-08 14:10:33
- * @LastEditors  : tangjie02
- * @LastEditTime : 2020-09-08 14:47:04
- * @Description  : 维护APP的一些基本信息
- * @FilePath     : /kiran-menu-2.0/lib/app.h
+/**
+ * @file          /kiran-menu/lib/app.h
+ * @brief         维护APP的一些基本信息
+ * @author        tangjie02 <tangjie02@kylinos.com.cn>
+ * @copyright (c) 2020 KylinSec. All rights reserved. 
  */
 
 #pragma once

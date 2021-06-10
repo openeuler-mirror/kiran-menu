@@ -9,7 +9,7 @@
 
 #include "lib/category-writer.h"
 
-#include "lib/log.h"
+#include "lib/base.h"
 
 namespace Kiran
 {
@@ -30,7 +30,7 @@ bool CategoryWriter::write_to_xml(std::shared_ptr<CategoryNode> node, const std:
 
     if (!config_file)
     {
-        LOG_WARNING("file %s create fail.\n", file_path.c_str());
+        KLOG_WARNING("file %s create fail.\n", file_path.c_str());
         return false;
     }
 
@@ -40,7 +40,7 @@ bool CategoryWriter::write_to_xml(std::shared_ptr<CategoryNode> node, const std:
     }
     catch (const Gio::Error &e)
     {
-        LOG_WARNING("Could not save menu category data: %s", e.what().c_str());
+        KLOG_WARNING("Could not save menu category data: %s", e.what().c_str());
         return false;
     }
 
@@ -53,7 +53,7 @@ bool CategoryWriter::write_to_xml(std::shared_ptr<CategoryNode> node, const std:
     }
     catch (const Glib::Error &e)
     {
-        LOG_WARNING("failed to save menu category data: %s", e.what().c_str());
+        KLOG_WARNING("failed to save menu category data: %s", e.what().c_str());
         return false;
     }
     return true;

@@ -1,13 +1,22 @@
-#include <glibmm/i18n.h>
-#include "menu-applet.h"
-#include "menu-applet-button.h"
-#include "kiran-helper.h"
-#include <log.h>
-#include <gtk/gtkx.h>
-#include "config.h"
+/**
+ * @file          /kiran-menu/src/menu/menu-applet.cpp
+ * @brief         
+ * @author        tangjie02 <tangjie02@kylinos.com.cn>
+ * @copyright (c) 2020 KylinSec. All rights reserved. 
+ */
 
-static Atom atom_mate_panel_action_kiran_menu  = None;
-static Atom atom_mate_panel_action  = None;
+#include "menu-applet.h"
+#include <glibmm/i18n.h>
+#include "config.h"
+#include "kiran-helper.h"
+#include "lib/base.h"
+#include "menu-applet-button.h"
+
+//
+#include <gtk/gtkx.h>
+
+static Atom atom_mate_panel_action_kiran_menu = None;
+static Atom atom_mate_panel_action = None;
 
 static GdkFilterReturn key_event_filter(GdkXEvent *xevent, GdkEvent *event, gpointer data)
 {
@@ -16,12 +25,12 @@ static GdkFilterReturn key_event_filter(GdkXEvent *xevent, GdkEvent *event, gpoi
 
     if (x_event->type == ClientMessage)
     {
-        LOG_DEBUG("got client message\n");
+        KLOG_DEBUG("got client message\n");
 
         if (x_event->xclient.message_type == atom_mate_panel_action &&
             x_event->xclient.data.l[0] == (long int)atom_mate_panel_action_kiran_menu)
         {
-            LOG_DEBUG("it is kiran menu event\n");
+            KLOG_DEBUG("it is kiran menu event\n");
             button->set_active(!button->get_active());
         }
     }
@@ -47,7 +56,6 @@ static GtkActionGroup *create_action_group()
     gtk_action_group_add_action(action_group, action);
     g_signal_connect(action, "activate", G_CALLBACK(open_about_dialog), NULL);
     G_GNUC_END_IGNORE_DEPRECATIONS
-
 
     return action_group;
 }

@@ -1,15 +1,15 @@
 #include "kiran-applet-button.h"
 #include "kiran-helper.h"
-#include "log.h"
+#include "lib/base.h"
 
 #define BUTTON_MARGIN 6
 
 static void on_applet_size_change(MatePanelApplet *applet UNUSED,
-                           gint size UNUSED,
-                           gpointer userdata)
+                                  gint size UNUSED,
+                                  gpointer userdata)
 {
-    LOG_DEBUG("applet size changed");
-    auto widget = reinterpret_cast<Gtk::Widget*>(userdata);
+    KLOG_DEBUG("applet size changed");
+    auto widget = reinterpret_cast<Gtk::Widget *>(userdata);
     widget->queue_resize();
 }
 
@@ -31,7 +31,6 @@ MatePanelApplet *KiranAppletButton::get_applet()
 {
     return applet;
 }
-
 
 void KiranAppletButton::get_preferred_width_vfunc(int &minimum_width, int &natural_width) const
 {
@@ -68,18 +67,19 @@ void KiranAppletButton::on_size_allocate(Gtk::Allocation &allocation)
     else
         icon_size = allocation.get_width() - 2 * BUTTON_MARGIN;
 
-    g_debug("icon size changed to %d", icon_size);
+    KLOG_DEBUG("icon size changed to %d", icon_size);
     Gtk::ToggleButton::on_size_allocate(allocation);
 }
 
-bool KiranAppletButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
+bool KiranAppletButton::on_draw(const ::Cairo::RefPtr<Cairo::Context> &cr)
 {
     Gtk::Allocation allocation;
     auto context = get_style_context();
     int scale = get_scale_factor();
 
     allocation = get_allocation();
-    if (icon_pixbuf && icon_pixbuf->get_width() != icon_size * scale) {
+    if (icon_pixbuf && icon_pixbuf->get_width() != icon_size * scale)
+    {
         /* 图标大小发生变化，需要重新生成pixbuf */
         icon_pixbuf.reset();
     }
@@ -93,12 +93,12 @@ bool KiranAppletButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
     context->set_state(get_state_flags());
     context->render_background(cr, 0, 0, allocation.get_width(), allocation.get_height());
 
-    cr->scale(1.0/scale, 1.0/scale);
+    cr->scale(1.0 / scale, 1.0 / scale);
     //将图标绘制在按钮的正中心位置
     Gdk::Cairo::set_source_pixbuf(cr,
                                   icon_pixbuf,
-                                  (allocation.get_width() * scale - icon_pixbuf->get_width())/2.0,
-                                  (allocation.get_height() * scale - icon_pixbuf->get_height())/2.0);
+                                  (allocation.get_width() * scale - icon_pixbuf->get_width()) / 2.0,
+                                  (allocation.get_height() * scale - icon_pixbuf->get_height()) / 2.0);
     cr->paint();
     return false;
 }
@@ -107,7 +107,7 @@ void KiranAppletButton::generate_pixbuf()
 {
     int scale = get_scale_factor();
 
-    LOG_MESSAGE("generate pixbuf for button, resource %s\n",
+    KLOG_INFO("generate pixbuf for button, resource %s\n",
               icon_resource.c_str());
     icon_pixbuf = Gdk::Pixbuf::create_from_resource(icon_resource,
                                                     icon_size * scale,
@@ -119,8 +119,8 @@ void KiranAppletButton::set_icon_from_resource(const std::string &resource)
     icon_resource = resource;
 
     icon_pixbuf.clear();
-    if (get_realized()) {
+    if (get_realized())
+    {
         queue_resize();
     }
 }
-

@@ -1,7 +1,14 @@
-#include <glibmm/i18n.h>
+/**
+ * @file          /kiran-menu/src/workspace/workspace-applet.cpp
+ * @brief         
+ * @author        tangjie02 <tangjie02@kylinos.com.cn>
+ * @copyright (c) 2020 KylinSec. All rights reserved. 
+ */
+
 #include "workspace-applet.h"
-#include "workspace/workspace-applet-button.h"
+#include <glibmm/i18n.h>
 #include "config.h"
+#include "src/workspace/workspace-applet-button.h"
 
 static void open_workspace_switcher_about(GtkAction *action, gpointer userdata)
 {
@@ -35,6 +42,6 @@ gboolean workspace_applet_fill(MatePanelApplet *applet)
     mate_panel_applet_setup_menu_from_file(applet,
                                            PACKAGE_DATA_DIR "/workspace-switcher-menu.ui.xml",
                                            create_action_group_for_workspace_switcher());
-    
+
     return TRUE;
 }

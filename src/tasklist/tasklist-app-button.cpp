@@ -1,20 +1,19 @@
 ﻿#include "tasklist-app-button.h"
+#include <gtk/gtkx.h>
+#include <algorithm>
+#include <iostream>
+#include "kiran-helper.h"
+#include "lib/base.h"
+#include "tasklist-buttons-container.h"
 #include "window-manager.h"
 #include "workspace-manager.h"
-#include <iostream>
-#include <algorithm>
-#include <gtk/gtkx.h>
-#include "tasklist-buttons-container.h"
-#include "kiran-helper.h"
-#include "log.h"
 
-TasklistAppButton::TasklistAppButton(const std::shared_ptr<Kiran::App> &app_, int size_):
-    Glib::ObjectBase("KiranTasklistAppButton"),
-    context_menu(nullptr),
-    indicator_size_property(*this, "indicator-size", G_MAXINT32),
-    applet_size(size_),
-    app(nullptr),
-    state(APP_BUTTON_STATE_NORMAL)
+TasklistAppButton::TasklistAppButton(const std::shared_ptr<Kiran::App> &app_, int size_) : Glib::ObjectBase("KiranTasklistAppButton"),
+                                                                                           context_menu(nullptr),
+                                                                                           indicator_size_property(*this, "indicator-size", G_MAXINT32),
+                                                                                           applet_size(size_),
+                                                                                           app(nullptr),
+                                                                                           state(APP_BUTTON_STATE_NORMAL)
 {
     add_events(Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::BUTTON_PRESS_MASK);
 
@@ -45,7 +44,7 @@ TasklistAppButton::~TasklistAppButton()
         delete context_menu;
 
     /* 断开原有的窗口状态监控信号 */
-    for (auto connection: windows_state_handlers)
+    for (auto connection : windows_state_handlers)
         connection.disconnect();
     windows_state_handlers.clear();
 }
@@ -53,7 +52,7 @@ TasklistAppButton::~TasklistAppButton()
 void TasklistAppButton::set_app(const std::shared_ptr<Kiran::App> &app_)
 {
     if (app)
-        LOG_DEBUG("update app for button '%s'", app->get_desktop_id().c_str());
+        KLOG_DEBUG("update app for button '%s'", app->get_desktop_id().c_str());
 
     app = app_;
 
@@ -62,11 +61,12 @@ void TasklistAppButton::set_app(const std::shared_ptr<Kiran::App> &app_)
         set_tooltip_text(app->get_locale_name());
 
     /* 断开原有的窗口状态监控信号 */
-    for (auto connection: windows_state_handlers)
+    for (auto connection : windows_state_handlers)
         connection.disconnect();
     windows_state_handlers.clear();
 
-    for (auto window: windows_list) {
+    for (auto window : windows_list)
+    {
         auto connection = window->signal_state_changed().connect(
             sigc::mem_fun(*this, &TasklistAppButton::on_windows_state_changed));
 
@@ -104,12 +104,15 @@ Gtk::SizeRequestMode TasklistAppButton::get_request_mode_vfunc() const
 
 void TasklistAppButton::get_preferred_width_vfunc(int &minimum_width, int &natural_width) const
 {
-    if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
+    if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL)
+    {
         int minimum_height, natural_height;
 
         get_preferred_height(minimum_height, natural_height);
         get_preferred_width_for_height(natural_height, minimum_width, natural_width);
-    } else {
+    }
+    else
+    {
         //使用父控件的高度设置
         minimum_width = natural_width = applet_size;
     }
@@ -117,10 +120,13 @@ void TasklistAppButton::get_preferred_width_vfunc(int &minimum_width, int &natur
 
 void TasklistAppButton::get_preferred_height_vfunc(int &minimum_height, int &natural_height) const
 {
-    if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
+    if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL)
+    {
         //使用父控件的高度设置
         minimum_height = natural_height = applet_size;
-    } else {
+    }
+    else
+    {
         int minimum_width, natural_width;
 
         get_preferred_width(minimum_width, natural_width);
@@ -130,20 +136,26 @@ void TasklistAppButton::get_preferred_height_vfunc(int &minimum_height, int &nat
 
 void TasklistAppButton::get_preferred_width_for_height_vfunc(int height, int &minimum_width, int &natural_width) const
 {
-    if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
+    if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL)
+    {
         natural_width = height + 8;
         minimum_width = height;
-    } else {
+    }
+    else
+    {
         minimum_width = natural_width = height - 8;
     }
 }
 
 void TasklistAppButton::get_preferred_height_for_width_vfunc(int width, int &minimum_height, int &natural_height) const
 {
-    if (get_orientation() == Gtk::ORIENTATION_VERTICAL) {
+    if (get_orientation() == Gtk::ORIENTATION_VERTICAL)
+    {
         natural_height = width + 8;
         minimum_height = width;
-    } else {
+    }
+    else
+    {
         minimum_height = natural_height = width - 8;
     }
 }
@@ -152,17 +164,19 @@ void TasklistAppButton::on_size_allocate(Gtk::Allocation &allocation)
 {
     Gtk::Button::on_size_allocate(allocation);
 
-    if (get_orientation() == Gtk::ORIENTATION_VERTICAL) {
+    if (get_orientation() == Gtk::ORIENTATION_VERTICAL)
+    {
         icon_size = allocation.get_width() - 8;
-
-    } else {
+    }
+    else
+    {
         icon_size = allocation.get_height() - 8;
     }
 
     update_windows_icon_geometry();
 }
 
-bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
+bool TasklistAppButton::on_draw(const ::Cairo::RefPtr<Cairo::Context> &cr)
 {
     Gtk::Allocation allocation;
     Glib::RefPtr<Gdk::Pixbuf> pixbuf;
@@ -173,35 +187,36 @@ bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
     auto context = get_style_context();
 
     auto app_ = get_app();
-    if (!app_) {
-        LOG_WARNING("%s: app already expired!!\n", __FUNCTION__);
+    if (!app_)
+    {
+        KLOG_WARNING("%s: app already expired!!\n", __FUNCTION__);
         return false;
     }
 
-    LOG_DEBUG("indicator size %d\n", indicator_size);
+    KLOG_DEBUG("indicator size %d\n", indicator_size);
 
     allocation = get_allocation();
     context->set_state(get_state_flags());
 
-
-
     /*
      * 从样式中加载活动窗口背景色和指示器颜色
      */
-    if (!context->lookup_color("tasklist_app_active_color", active_color)) {
-        LOG_WARNING("failed to load color 'tasklist_app_active_color'");
+    if (!context->lookup_color("tasklist_app_active_color", active_color))
+    {
+        KLOG_WARNING("failed to load color 'tasklist_app_active_color'");
     }
 
-    if (!context->lookup_color("tasklist_app_indicator_color", indicator_color)) {
-        LOG_WARNING("failed to load color 'tasklist_app_indicator_color'");
+    if (!context->lookup_color("tasklist_app_indicator_color", indicator_color))
+    {
+        KLOG_WARNING("failed to load color 'tasklist_app_indicator_color'");
     }
-
 
     windows_count = KiranHelper::get_taskbar_windows(app_).size();
-    LOG_DEBUG("app '%s', %d windows, workspace %d", app_->get_name().c_str(), windows_count,
-        Kiran::WorkspaceManager::get_instance()->get_active_workspace()->get_number());
+    KLOG_DEBUG("app '%s', %d windows, workspace %d", app_->get_name().c_str(), windows_count,
+               Kiran::WorkspaceManager::get_instance()->get_active_workspace()->get_number());
 
-    if (app_->is_active()) {
+    if (app_->is_active())
+    {
         Gdk::Cairo::set_source_rgba(cr, active_color);
         cr->paint();
 
@@ -215,7 +230,8 @@ bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
                       indicator_size);
         cr->fill();
 
-        if (windows_count > 1) {
+        if (windows_count > 1)
+        {
             /**
              * 绘制分割符，来表明有多个窗口
              */
@@ -225,24 +241,27 @@ bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
             cr->line_to(allocation.get_width() - 3, allocation.get_height());
             cr->stroke();
         }
-    } else {
+    }
+    else
+    {
         context->render_background(cr, 0, 0, allocation.get_width(), allocation.get_height());
 
         draw_attentions(cr);
 
         //绘制已打开窗口指示器
-        if (windows_count > 0) {
+        if (windows_count > 0)
+        {
             int x_offset = 0;
 
             /*最多绘制4个指示器*/
             if (windows_count > 4)
                 windows_count = 4;
-            x_offset = (allocation.get_width() - (indicator_size * windows_count + 3 * (windows_count - 1)))/2;
-            x_offset += indicator_size/2;
+            x_offset = (allocation.get_width() - (indicator_size * windows_count + 3 * (windows_count - 1))) / 2;
+            x_offset += indicator_size / 2;
 
             Gdk::Cairo::set_source_rgba(cr, indicator_color);
-            for (int i = 0; i < windows_count; i++) {
-
+            for (int i = 0; i < windows_count; i++)
+            {
                 cr->arc(x_offset + i * (indicator_size + 3),
                         allocation.get_height() - indicator_size / 2.0 - 1,
                         indicator_size / 2.0,
@@ -266,7 +285,6 @@ bool TasklistAppButton::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
     cr->paint();
     cr->restore();
 
-
     return false;
 }
 
@@ -275,23 +293,28 @@ bool TasklistAppButton::on_button_press_event(GdkEventButton *button_event)
     GdkEvent *event = gtk_get_current_event();
     auto app_ = get_app();
 
-    LOG_WARNING("button pressed");
+    KLOG_WARNING("button pressed");
     pressed = true;
 
-    if (!app_) {
-        LOG_WARNING("%s: app already expired", __FUNCTION__);
+    if (!app_)
+    {
+        KLOG_WARNING("%s: app already expired", __FUNCTION__);
         return false;
     }
 
-    if (gdk_event_triggers_context_menu(event)) {
-        if (context_menu == nullptr) {
+    if (gdk_event_triggers_context_menu(event))
+    {
+        if (context_menu == nullptr)
+        {
             context_menu = new TasklistAppContextMenu(app_);
             context_menu->attach_to_widget(*this);
             context_menu->signal_deactivate().connect(
-                        [this]() -> void {
-                            m_signal_context_menu_toggled.emit(false);
-                        });
-        } else {
+                [this]() -> void {
+                    m_signal_context_menu_toggled.emit(false);
+                });
+        }
+        else
+        {
             //刷新右键菜单内容，因为收藏夹等选项可能需要更新
             context_menu->refresh();
         }
@@ -313,13 +336,15 @@ void TasklistAppButton::on_clicked()
     if (!pressed)
         return;
 
-    if (!app_) {
-        LOG_WARNING("%s: app already expired", __FUNCTION__);
+    if (!app_)
+    {
+        KLOG_WARNING("%s: app already expired", __FUNCTION__);
         return;
     }
 
     auto windows_list = KiranHelper::get_taskbar_windows(app_);
-    if (windows_list.size() == 0) {
+    if (windows_list.size() == 0)
+    {
         //无已打开窗口，打开新的应用窗口(仅针对常驻任务栏应用)
         app_->launch();
         return;
@@ -370,11 +395,12 @@ void TasklistAppButton::on_gesture_drag_end(double x, double y)
     signal_drag_end().emit();
 }
 
-void TasklistAppButton::on_drag_data_received(const Glib::RefPtr< Gdk::DragContext >& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time)
+void TasklistAppButton::on_drag_data_received(const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, const Gtk::SelectionData &selection_data, guint info, guint time)
 {
 #ifdef DEBUG
-    for (auto uri: selection_data.get_uris()) {
-        LOG_WARNING("got uri '%s'", uri.c_str());
+    for (auto uri : selection_data.get_uris())
+    {
+        KLOG_WARNING("got uri '%s'", uri.c_str());
     }
 #endif
 
@@ -405,10 +431,9 @@ sigc::signal<void, bool> TasklistAppButton::signal_context_menu_toggled()
     return m_signal_context_menu_toggled;
 }
 
-
 Gtk::Orientation TasklistAppButton::get_orientation() const
 {
-    const TasklistButtonsContainer *parent = static_cast<const TasklistButtonsContainer*>(get_parent());
+    const TasklistButtonsContainer *parent = static_cast<const TasklistButtonsContainer *>(get_parent());
 
     //使用父控件容器的排列方向
     return parent->get_orientation();
@@ -427,12 +452,14 @@ void TasklistAppButton::update_windows_icon_geometry()
     allocation = get_allocation();
     get_window()->get_origin(origin_x, origin_y);
 
-    if (!get_has_window()) {
+    if (!get_has_window())
+    {
         origin_x += allocation.get_x();
         origin_y += allocation.get_y();
     }
 
-    for (auto window: KiranHelper::get_taskbar_windows(get_app())) {
+    for (auto window : KiranHelper::get_taskbar_windows(get_app()))
+    {
         window->set_icon_geometry(origin_x * scale_factor,
                                   origin_y * scale_factor,
                                   allocation.get_width() * scale_factor,
@@ -449,7 +476,8 @@ Glib::RefPtr<Gdk::Pixbuf> TasklistAppButton::get_app_icon_pixbuf()
         return pixbuf;
 
     scale = get_scale_factor();
-    try {
+    try
+    {
         auto gicon = app->get_icon();
 
         if (gicon)
@@ -457,7 +485,8 @@ Glib::RefPtr<Gdk::Pixbuf> TasklistAppButton::get_app_icon_pixbuf()
             //将应用图标转换为pixbuf
             std::string icon_desc = gicon->to_string();
 
-            if (icon_desc[0] == '/') {
+            if (icon_desc[0] == '/')
+            {
                 pixbuf = Gdk::Pixbuf::create_from_file(icon_desc, icon_size * scale, icon_size * scale);
             }
             else
@@ -468,19 +497,24 @@ Glib::RefPtr<Gdk::Pixbuf> TasklistAppButton::get_app_icon_pixbuf()
                                                scale,
                                                Gtk::ICON_LOOKUP_FORCE_SIZE);
             }
-        } else {
+        }
+        else
+        {
             /*
              * 无法获取到应用图标的情况下，使用应用第一个已打开窗口的图标作为应用图标
              */
             auto windows = KiranHelper::get_taskbar_windows(app);
 
-            if (windows.size() > 0) {
+            if (windows.size() > 0)
+            {
                 pixbuf = Glib::wrap(windows.front()->get_icon(), true);
                 pixbuf = pixbuf->scale_simple(icon_size * scale, icon_size * scale, Gdk::INTERP_BILINEAR);
             }
         }
-    } catch (const Glib::Error &e) {
-        LOG_WARNING("Error occured while trying to load app icon: %s", e.what().c_str());
+    }
+    catch (const Glib::Error &e)
+    {
+        KLOG_WARNING("Error occured while trying to load app icon: %s", e.what().c_str());
         pixbuf.clear();
     }
 
@@ -497,7 +531,8 @@ Glib::RefPtr<Gdk::Pixbuf> TasklistAppButton::get_app_icon_pixbuf()
 
 void TasklistAppButton::on_windows_state_changed()
 {
-    if (needs_attention()) {
+    if (needs_attention())
+    {
         if (!draw_attention_flicker.connected())
         {
             state = APP_BUTTON_STATE_FLICKER;
@@ -521,9 +556,12 @@ void TasklistAppButton::on_windows_state_changed()
 
                     queue_draw();
                     return false;
-                }, 2800);
+                },
+                2800);
         }
-    } else {
+    }
+    else
+    {
         state = APP_BUTTON_STATE_NORMAL;
         if (draw_attention_flicker.connected())
             draw_attention_flicker.disconnect();
@@ -544,7 +582,7 @@ void TasklistAppButton::draw_attentions(const Cairo::RefPtr<Cairo::Context> &cr)
      */
     if (!get_style_context()->lookup_color("tasklist_attention_color", attention_color))
     {
-        LOG_WARNING("Failed to load attention-color from style");
+        KLOG_WARNING("Failed to load attention-color from style");
     }
 
     attention_color.set_alpha(1.0);
@@ -575,13 +613,14 @@ void TasklistAppButton::init_dnd()
     drag_dest_set(targets, Gtk::DEST_DEFAULT_ALL, Gdk::ACTION_COPY);
 }
 
-bool TasklistAppButton::needs_attention() 
+bool TasklistAppButton::needs_attention()
 {
     auto app_ = get_app();
     if (!app_)
         return false;
 
-    for (auto window: KiranHelper::get_taskbar_windows(app_)) {
+    for (auto window : KiranHelper::get_taskbar_windows(app_))
+    {
         if (window->needs_attention())
             return true;
     }

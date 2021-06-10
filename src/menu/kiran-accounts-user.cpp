@@ -1,8 +1,9 @@
 #include "kiran-accounts-user.h"
-#include "log.h"
 #include <gio/gio.h>
+#include "lib/base.h"
 
-struct _KiranAccountsUserPrivate{
+struct _KiranAccountsUserPrivate
+{
     char *object_path;
     GDBusProxy *dbus_proxy;
     gboolean is_loaded;
@@ -13,7 +14,8 @@ struct _KiranAccountsUserPrivate{
 
 G_DEFINE_TYPE_WITH_PRIVATE(KiranAccountsUser, kiran_accounts_user, G_TYPE_OBJECT)
 
-enum {
+enum
+{
     SIGNAL_LOADED = 0,
     SIGNAL_CHANGED,
     SIGNAL_INVALID
@@ -25,7 +27,7 @@ void kiran_accounts_user_init(KiranAccountsUser *self)
 {
     KiranAccountsUserPrivate *priv;
 
-    priv = (KiranAccountsUserPrivate*)kiran_accounts_user_get_instance_private(self);
+    priv = (KiranAccountsUserPrivate *)kiran_accounts_user_get_instance_private(self);
     memset(priv, 0, sizeof(KiranAccountsUserPrivate));
 }
 
@@ -34,7 +36,7 @@ void kiran_accounts_user_finalize(GObject *kobj)
     KiranAccountsUser *self = KIRAN_ACCOUNTS_USER(kobj);
     KiranAccountsUserPrivate *priv;
 
-    priv = (KiranAccountsUserPrivate*)kiran_accounts_user_get_instance_private(self);
+    priv = (KiranAccountsUserPrivate *)kiran_accounts_user_get_instance_private(self);
 
     g_free(priv->object_path);
 
@@ -57,29 +59,28 @@ void kiran_accounts_user_class_init(KiranAccountsUserClass *klass)
                                           0);
 
     signals[SIGNAL_CHANGED] = g_signal_new("changed",
-                                          G_TYPE_FROM_CLASS(klass),
-                                          G_SIGNAL_RUN_FIRST,
-                                          0,
-                                          NULL,
-                                          NULL,
-                                          NULL,
-                                          G_TYPE_NONE,
-                                          0);
-
+                                           G_TYPE_FROM_CLASS(klass),
+                                           G_SIGNAL_RUN_FIRST,
+                                           0,
+                                           NULL,
+                                           NULL,
+                                           NULL,
+                                           G_TYPE_NONE,
+                                           0);
 
     G_OBJECT_CLASS(klass)->finalize = kiran_accounts_user_finalize;
 }
 
 static void on_dbus_properties_changed(KiranAccountsUser *user, GVariant *changed_properties, GStrv invalidated_properties)
 {
-    for (int i = 0; i < g_variant_n_children(changed_properties); i++) {
+    for (int i = 0; i < g_variant_n_children(changed_properties); i++)
+    {
         GVariant *child = g_variant_get_child_value(changed_properties, i);
-        
 
         GVariant *value;
         const char *name;
         g_variant_get(child, "{sv}", &name, &value);
-        LOG_MESSAGE("key '%s' changed", name);
+        KLOG_INFO("key '%s' changed", name);
         g_variant_unref(value);
         g_variant_unref(child);
     }
@@ -89,16 +90,17 @@ static void on_dbus_properties_changed(KiranAccountsUser *user, GVariant *change
 
 static void on_dbus_proxy_ready(GObject *source_obj, GAsyncResult *result, gpointer userdata)
 {
-    KiranAccountsUser *self = (KiranAccountsUser*)userdata;
+    KiranAccountsUser *self = (KiranAccountsUser *)userdata;
     KiranAccountsUserPrivate *priv;
     GError *error = NULL;
-    
-    priv = (KiranAccountsUserPrivate*)kiran_accounts_user_get_instance_private(self);
-    
+
+    priv = (KiranAccountsUserPrivate *)kiran_accounts_user_get_instance_private(self);
+
     priv->dbus_proxy = g_dbus_proxy_new_for_bus_finish(result, &error);
-    if (error) {
+    if (error)
+    {
         priv->dbus_proxy = NULL;
-        LOG_WARNING("Failed to connect to dbus: %s", error->message);
+        KLOG_WARNING("Failed to connect to dbus: %s", error->message);
         g_error_free(error);
         return;
     }
@@ -114,7 +116,7 @@ KiranAccountsUser *kiran_accounts_user_new(const char *object_path)
     KiranAccountsUserPrivate *priv;
 
     user = KIRAN_ACCOUNTS_USER(g_object_new(KIRAN_ACCOUNTS_TYPE_USER, NULL));
-    priv = (KiranAccountsUserPrivate*)kiran_accounts_user_get_instance_private(user);
+    priv = (KiranAccountsUserPrivate *)kiran_accounts_user_get_instance_private(user);
     priv->object_path = g_strdup(object_path);
 
     g_dbus_proxy_new_for_bus(G_BUS_TYPE_SYSTEM,
@@ -130,43 +132,41 @@ KiranAccountsUser *kiran_accounts_user_new(const char *object_path)
     return user;
 }
 
-static 
-GVariant *kiran_accounts_user_get_property(KiranAccountsUser *user, const char *property_name)
+static GVariant *kiran_accounts_user_get_property(KiranAccountsUser *user, const char *property_name)
 {
     KiranAccountsUserPrivate *priv;
 
     if (!KIRAN_ACCOUNTS_IS_USER(user))
         return NULL;
 
-    priv = (KiranAccountsUserPrivate*)kiran_accounts_user_get_instance_private(user);
+    priv = (KiranAccountsUserPrivate *)kiran_accounts_user_get_instance_private(user);
     if (!priv->dbus_proxy)
         return NULL;
-    
+
     return g_dbus_proxy_get_cached_property(priv->dbus_proxy, property_name);
 }
-static 
-const char *kiran_accounts_user_get_string_property(KiranAccountsUser *user, const char *property_name)
+static const char *kiran_accounts_user_get_string_property(KiranAccountsUser *user, const char *property_name)
 {
     const char *value = NULL;
     GVariant *variant = kiran_accounts_user_get_property(user, property_name);
     if (variant && g_variant_is_of_type(variant, G_VARIANT_TYPE_STRING))
         value = g_variant_get_string(variant, NULL);
-    
+
     if (variant)
         g_variant_unref(variant);
     return value;
 }
 
-static 
-gboolean kiran_accounts_user_get_boolean_property(KiranAccountsUser *user, const char *property_name)
+static gboolean kiran_accounts_user_get_boolean_property(KiranAccountsUser *user, const char *property_name)
 {
     gboolean value = FALSE;
     GVariant *variant = kiran_accounts_user_get_property(user, property_name);
 
-    if (variant && g_variant_is_of_type(variant, G_VARIANT_TYPE_BOOLEAN)) {
+    if (variant && g_variant_is_of_type(variant, G_VARIANT_TYPE_BOOLEAN))
+    {
         value = g_variant_get_boolean(variant);
     }
-    
+
     if (variant)
         g_variant_unref(variant);
     return value;
@@ -188,16 +188,15 @@ gboolean kiran_accounts_user_get_is_loaded(KiranAccountsUser *user)
     if (!KIRAN_ACCOUNTS_IS_USER(user))
         return FALSE;
 
-    priv = (KiranAccountsUserPrivate*)kiran_accounts_user_get_instance_private(user);
+    priv = (KiranAccountsUserPrivate *)kiran_accounts_user_get_instance_private(user);
     return priv->is_loaded;
 }
-
 
 guint64 kiran_accounts_user_get_uid(KiranAccountsUser *user)
 {
     guint64 uid = -1;
     GVariant *variant = kiran_accounts_user_get_property(user, "uid");
-    
+
     if (variant && g_variant_is_of_type(variant, G_VARIANT_TYPE_UINT64))
         uid = g_variant_get_uint64(variant);
 
@@ -249,7 +248,8 @@ KiranAccountsPasswordMode kiran_accounts_user_get_password_mode(KiranAccountsUse
 
     if (!variant || !g_variant_is_of_type(variant, G_VARIANT_TYPE_UINT32))
         mode = ACCOUNTS_PASSWORD_MODE_LAST;
-    else {
+    else
+    {
         mode = g_variant_get_uint32(variant);
     }
 
@@ -264,7 +264,8 @@ KiranAccountsAccountType kiran_accounts_user_get_account_type(KiranAccountsUser 
 
     if (!variant || !g_variant_is_of_type(variant, G_VARIANT_TYPE_UINT32))
         account_type = ACCOUNTS_ACCOUNT_TYPE_LAST;
-    else {
+    else
+    {
         account_type = g_variant_get_uint32(variant);
     }
 

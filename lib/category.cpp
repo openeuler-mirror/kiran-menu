@@ -9,7 +9,7 @@
 
 #include "lib/category.h"
 
-#include "lib/log.h"
+#include "lib/base.h"
 
 namespace Kiran
 {
@@ -18,7 +18,7 @@ Category::Category(std::shared_ptr<CategoryNode> node) : repeat_(true),
 {
     if (node->get_type() != CategoryNodeType::CATEGORY_NODE_TYPE_CATEGORY)
     {
-        LOG_WARNING("KiranCategory init need the node which type must be CATEGORY_NODE_TYPE_CATEGORY.");
+        KLOG_WARNING("KiranCategory init need the node which type must be CATEGORY_NODE_TYPE_CATEGORY.");
     }
 
     for (auto iter = this->node_->get_children(); iter; iter = iter->get_next())

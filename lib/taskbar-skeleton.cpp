@@ -9,8 +9,8 @@
 
 #include "lib/taskbar-skeleton.h"
 
+#include "lib/base.h"
 #include "lib/common.h"
-#include "lib/log.h"
 
 namespace Kiran
 {
@@ -48,7 +48,7 @@ void TaskBarSkeleton::init()
 
 bool TaskBarSkeleton::add_fixed_app(const std::string &desktop_id)
 {
-    SETTINGS_PROFILE("id: %s.", desktop_id.c_str());
+    KLOG_PROFILE("id: %s.", desktop_id.c_str());
 
     Glib::Quark quark(desktop_id);
 
@@ -66,7 +66,7 @@ bool TaskBarSkeleton::add_fixed_app(const std::string &desktop_id)
         }
         else
         {
-            LOG_DEBUG("desktop id '%s' not found or invalid.", desktop_id.c_str());
+            KLOG_DEBUG("desktop id '%s' not found or invalid.", desktop_id.c_str());
         }
     }
     return false;
@@ -74,7 +74,7 @@ bool TaskBarSkeleton::add_fixed_app(const std::string &desktop_id)
 
 bool TaskBarSkeleton::del_fixed_app(const std::string &desktop_id)
 {
-    SETTINGS_PROFILE("id: %s.", desktop_id.c_str());
+    KLOG_PROFILE("id: %s.", desktop_id.c_str());
 
     Glib::Quark quark(desktop_id);
 
@@ -93,7 +93,7 @@ bool TaskBarSkeleton::del_fixed_app(const std::string &desktop_id)
         }
         else
         {
-            LOG_DEBUG("desktop id '%s' not found or invalid.", desktop_id.c_str());
+            KLOG_DEBUG("desktop id '%s' not found or invalid.", desktop_id.c_str());
         }
     }
     return false;
@@ -139,7 +139,7 @@ TaskBarSkeleton::AppShowPolicy TaskBarSkeleton::get_app_show_policy()
 
 void TaskBarSkeleton::desktop_app_changed()
 {
-    SETTINGS_PROFILE("");
+    KLOG_PROFILE("");
     auto apps = this->app_manager_->get_apps_by_kind((AppKind)(AppKind::USER_TASKBAR | AppKind::NORMAL));
 
     std::set<int32_t> app_set;
@@ -179,7 +179,7 @@ void TaskBarSkeleton::desktop_app_changed()
 
 void TaskBarSkeleton::app_changed(const Glib::ustring &key)
 {
-    SETTINGS_PROFILE("key: %s.", key.c_str());
+    KLOG_PROFILE("key: %s.", key.c_str());
 
     auto new_fixed_apps = read_as_to_list_quark(this->settings_, TASKBAR_KEY_FIXED_APPS);
 

@@ -1,6 +1,6 @@
 #include "kiran-power.h"
-#include "log.h"
 #include <iostream>
+#include "lib/base.h"
 
 #define SESSION_MANAGER_DBUS "org.gnome.SessionManager"
 #define SESSION_MANAGER_PATH "/org/gnome/SessionManager"
@@ -14,78 +14,90 @@
 #define DISPLAY_MANAGER_SEAT_PATH "/org/freedesktop/DisplayManager/Seat0"
 #define DISPLAY_MANAGER_INTERFACE "org.freedesktop.DisplayManager.Seat"
 
-
 static bool read_boolean_key_from_gsettings(const Glib::ustring &key, bool default_value)
 {
-    try {
+    try
+    {
         auto settings = Gio::Settings::create("org.mate.lockdown");
         std::vector<Glib::ustring> keys = settings->list_keys();
 
-        if (std::find(keys.begin(), keys.end(), key.c_str()) == keys.end()) {
-            LOG_WARNING("key '%s' not found in schema\n", key.c_str());
+        if (std::find(keys.begin(), keys.end(), key.c_str()) == keys.end())
+        {
+            KLOG_WARNING("key '%s' not found in schema\n", key.c_str());
             return default_value;
         }
         return settings->get_boolean(key);
-    } catch (const Glib::Error &e) {
-        LOG_WARNING("Failed to read settings from schema: %s", e.what().c_str());
+    }
+    catch (const Glib::Error &e)
+    {
+        KLOG_WARNING("Failed to read settings from schema: %s", e.what().c_str());
         return default_value;
     }
 }
 
-
 bool KiranPower::suspend()
 {
-    try {
+    try
+    {
         Glib::Variant<bool> variant = Glib::Variant<bool>::create(false);
         Glib::VariantContainerBase container = Glib::VariantContainerBase::create_tuple(variant);
         Glib::RefPtr<Gio::DBus::Proxy> proxy = Gio::DBus::Proxy::create_for_bus_sync(Gio::DBus::BUS_TYPE_SYSTEM,
-                                                  LOGIN_MANAGER_DBUS,
-                                                  LOGIN_MANAGER_PATH,
-                                                  LOGIN_MANAGER_INTERFACE);
+                                                                                     LOGIN_MANAGER_DBUS,
+                                                                                     LOGIN_MANAGER_PATH,
+                                                                                     LOGIN_MANAGER_INTERFACE);
 
         proxy->call_sync("Suspend", container, 300);
         return true;
-    } catch (const Gio::DBus::Error &e) {
-        LOG_WARNING("Failed to request suspend method: %s", e.what().c_str());
+    }
+    catch (const Gio::DBus::Error &e)
+    {
+        KLOG_WARNING("Failed to request suspend method: %s", e.what().c_str());
         return false;
     }
 }
 
 bool KiranPower::hibernate()
 {
-    try {
+    try
+    {
         Glib::Variant<bool> variant = Glib::Variant<bool>::create(false);
         Glib::VariantContainerBase container = Glib::VariantContainerBase::create_tuple(variant);
         Glib::RefPtr<Gio::DBus::Proxy> proxy = Gio::DBus::Proxy::create_for_bus_sync(Gio::DBus::BUS_TYPE_SYSTEM,
-                                                  LOGIN_MANAGER_DBUS,
-                                                  LOGIN_MANAGER_PATH,
-                                                  LOGIN_MANAGER_INTERFACE);
+                                                                                     LOGIN_MANAGER_DBUS,
+                                                                                     LOGIN_MANAGER_PATH,
+                                                                                     LOGIN_MANAGER_INTERFACE);
 
         proxy->call_sync("Hibernate", container, 300);
         return true;
-    } catch (const Gio::DBus::Error &e) {
-        LOG_WARNING("Failed to request hibernate method: %s", e.what().c_str());
+    }
+    catch (const Gio::DBus::Error &e)
+    {
+        KLOG_WARNING("Failed to request hibernate method: %s", e.what().c_str());
         return false;
     }
 }
 bool KiranPower::shutdown()
 {
-    try {
+    try
+    {
         Glib::RefPtr<Gio::DBus::Proxy> proxy = Gio::DBus::Proxy::create_for_bus_sync(Gio::DBus::BUS_TYPE_SESSION,
-                                                  SESSION_MANAGER_DBUS,
-                                                  SESSION_MANAGER_PATH,
-                                                  SESSION_MANAGER_INTERFACE);
+                                                                                     SESSION_MANAGER_DBUS,
+                                                                                     SESSION_MANAGER_PATH,
+                                                                                     SESSION_MANAGER_INTERFACE);
 
         proxy->call_sync("RequestShutdown");
         return true;
-    } catch (const Gio::DBus::Error &e) {
-        LOG_WARNING("Failed to request shutdown method: %s", e.what().c_str());
+    }
+    catch (const Gio::DBus::Error &e)
+    {
+        KLOG_WARNING("Failed to request shutdown method: %s", e.what().c_str());
         return false;
     }
 }
 bool KiranPower::reboot()
 {
-    try {
+    try
+    {
         Glib::RefPtr<Gio::DBus::Proxy> proxy = Gio::DBus::Proxy::create_for_bus_sync(Gio::DBus::BUS_TYPE_SESSION,
                                                                                      SESSION_MANAGER_DBUS,
                                                                                      SESSION_MANAGER_PATH,
@@ -93,26 +105,31 @@ bool KiranPower::reboot()
 
         proxy->call_sync("RequestReboot");
         return true;
-    } catch (const Gio::DBus::Error &e) {
-        LOG_WARNING("Failed to request reboot method: %s", e.what().c_str());
+    }
+    catch (const Gio::DBus::Error &e)
+    {
+        KLOG_WARNING("Failed to request reboot method: %s", e.what().c_str());
         return false;
     }
 }
 
 bool KiranPower::logout(int mode)
 {
-    try {
+    try
+    {
         Glib::Variant<uint> variant = Glib::Variant<uint>::create(mode);
         Glib::VariantContainerBase container = Glib::VariantContainerBase::create_tuple(variant);
         Glib::RefPtr<Gio::DBus::Proxy> proxy = Gio::DBus::Proxy::create_for_bus_sync(Gio::DBus::BUS_TYPE_SESSION,
-                                                  SESSION_MANAGER_DBUS,
-                                                  SESSION_MANAGER_PATH,
-                                                  SESSION_MANAGER_INTERFACE);
+                                                                                     SESSION_MANAGER_DBUS,
+                                                                                     SESSION_MANAGER_PATH,
+                                                                                     SESSION_MANAGER_INTERFACE);
 
         proxy->call_sync("Logout", container);
         return true;
-    } catch (const Gio::DBus::Error &e) {
-        LOG_WARNING("Failed to request logout method: %s", e.what().c_str());
+    }
+    catch (const Gio::DBus::Error &e)
+    {
+        KLOG_WARNING("Failed to request logout method: %s", e.what().c_str());
         return false;
     }
 }
@@ -122,21 +139,24 @@ bool KiranPower::can_suspend()
     if (read_boolean_key_from_gsettings("disable-suspend", false))
         return false;
 
-    try {
+    try
+    {
         Glib::VariantBase result;
         Glib::ustring data;
         Glib::RefPtr<Gio::DBus::Proxy> proxy = Gio::DBus::Proxy::create_for_bus_sync(Gio::DBus::BUS_TYPE_SYSTEM,
-                                                  LOGIN_MANAGER_DBUS,
-                                                  LOGIN_MANAGER_PATH,
-                                                  LOGIN_MANAGER_INTERFACE);
+                                                                                     LOGIN_MANAGER_DBUS,
+                                                                                     LOGIN_MANAGER_PATH,
+                                                                                     LOGIN_MANAGER_INTERFACE);
 
         result = proxy->call_sync("CanSuspend").get_child();
         data = Glib::VariantBase::cast_dynamic<Glib::Variant<Glib::ustring>>(result).get();
 
         return (data == "yes");
-    } catch (const Gio::DBus::Error &e) {
+    }
+    catch (const Gio::DBus::Error &e)
+    {
         //如果获取失败，就假设其可以挂起，由挂起操作调用时做检查
-        LOG_WARNING("Failed to query CanSuspend: %s", e.what().c_str());
+        KLOG_WARNING("Failed to query CanSuspend: %s", e.what().c_str());
         return true;
     }
 }
@@ -146,37 +166,43 @@ bool KiranPower::can_hibernate()
     if (read_boolean_key_from_gsettings("disable-suspend", false))
         return false;
 
-    try {
+    try
+    {
         Glib::VariantBase result;
         Glib::ustring data;
         Glib::RefPtr<Gio::DBus::Proxy> proxy = Gio::DBus::Proxy::create_for_bus_sync(Gio::DBus::BUS_TYPE_SYSTEM,
-                                                  LOGIN_MANAGER_DBUS,
-                                                  LOGIN_MANAGER_PATH,
-                                                  LOGIN_MANAGER_INTERFACE);
+                                                                                     LOGIN_MANAGER_DBUS,
+                                                                                     LOGIN_MANAGER_PATH,
+                                                                                     LOGIN_MANAGER_INTERFACE);
 
         result = proxy->call_sync("CanHibernate").get_child();
         data = Glib::VariantBase::cast_dynamic<Glib::Variant<Glib::ustring>>(result).get();
 
         return (data == "yes");
-    } catch (const Gio::DBus::Error &e) {
+    }
+    catch (const Gio::DBus::Error &e)
+    {
         //如果获取失败，就假设其可以挂起，由挂起操作调用时做检查
-        LOG_WARNING("Failed to query CanHibernate: %s", e.what().c_str());
+        KLOG_WARNING("Failed to query CanHibernate: %s", e.what().c_str());
         return true;
     }
 }
 
 bool KiranPower::switch_user()
 {
-    try {
+    try
+    {
         Glib::RefPtr<Gio::DBus::Proxy> proxy = Gio::DBus::Proxy::create_for_bus_sync(Gio::DBus::BUS_TYPE_SYSTEM,
-                                                  DISPLAY_MANAGER_DBUS,
-                                                  DISPLAY_MANAGER_SEAT_PATH,
-                                                  DISPLAY_MANAGER_INTERFACE);
+                                                                                     DISPLAY_MANAGER_DBUS,
+                                                                                     DISPLAY_MANAGER_SEAT_PATH,
+                                                                                     DISPLAY_MANAGER_INTERFACE);
 
         proxy->call_sync("SwitchToGreeter", Glib::VariantContainerBase(), 300);
         return true;
-    } catch (const Gio::DBus::Error &e) {
-        LOG_WARNING("Failed to request SwitchToGreeter method: %s", e.what().c_str());
+    }
+    catch (const Gio::DBus::Error &e)
+    {
+        KLOG_WARNING("Failed to request SwitchToGreeter method: %s", e.what().c_str());
         return false;
     }
 }
@@ -185,11 +211,13 @@ bool KiranPower::can_switchuser()
 {
     bool result = false;
 
-    try {
+    try
+    {
         auto settings = Gio::Settings::create("org.mate.session");
 
         result = settings->get_boolean("logout-prompt");
-    } catch (const Glib::Exception &e)
+    }
+    catch (const Glib::Exception &e)
     {
         result = false;
     }
@@ -208,10 +236,13 @@ bool KiranPower::lock_screen()
     argv.push_back("mate-screensaver-command");
     argv.push_back("-l");
 
-    try {
+    try
+    {
         Glib::spawn_async("", argv, Glib::SPAWN_SEARCH_PATH | Glib::SPAWN_STDOUT_TO_DEV_NULL);
         return true;
-    } catch (const Glib::SpawnError &e) {
+    }
+    catch (const Glib::SpawnError &e)
+    {
         return false;
     }
 }

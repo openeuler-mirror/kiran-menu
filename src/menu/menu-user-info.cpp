@@ -1,37 +1,37 @@
 #include "menu-user-info.h"
-#include "log.h"
 #include <iostream>
+#include "lib/base.h"
 
-enum {
+enum
+{
     INFO_STATE_NOT_LOAD,
     INFO_STATE_LOADING,
     INFO_STATE_LOADED
 };
 
-MenuUserInfo::MenuUserInfo(uid_t id) :
-    uid(id),
-    user(nullptr),
-    load_state(INFO_STATE_NOT_LOAD)
+MenuUserInfo::MenuUserInfo(uid_t id) : uid(id),
+                                       user(nullptr),
+                                       load_state(INFO_STATE_NOT_LOAD)
 {
 }
 
-MenuUserInfo::~MenuUserInfo() 
+MenuUserInfo::~MenuUserInfo()
 {
-    
 }
 
 bool MenuUserInfo::load()
 {
     if (load_state != INFO_STATE_NOT_LOAD)
-	return true;
+        return true;
 
 #ifdef BUILD_WITH_KIRANACCOUNTS
     auto manager = kiran_accounts_manager_get_default();
 
     user = kiran_accounts_manager_get_user_by_id(manager, uid);
     g_signal_connect_swapped(user, "changed", G_CALLBACK(&MenuUserInfo::on_changed), this);
-    if (!kiran_accounts_user_get_is_loaded(user)) {
-	load_state = INFO_STATE_LOADING;
+    if (!kiran_accounts_user_get_is_loaded(user))
+    {
+        load_state = INFO_STATE_LOADING;
         handler_id = g_signal_connect_swapped(user, "loaded", G_CALLBACK(MenuUserInfo::on_loaded), this);
     }
 #else
@@ -39,8 +39,9 @@ bool MenuUserInfo::load()
 
     user = act_user_manager_get_user_by_id(manager, uid);
     g_signal_connect_swapped(user, "changed", G_CALLBACK(&MenuUserInfo::on_changed), this);
-    if (!act_user_is_loaded(user)) {
-	load_state = INFO_STATE_LOADING;
+    if (!act_user_is_loaded(user))
+    {
+        load_state = INFO_STATE_LOADING;
         handler_id = g_signal_connect_swapped(user, "notify::is-loaded", G_CALLBACK(MenuUserInfo::on_loaded), this);
     }
 #endif
@@ -85,14 +86,13 @@ sigc::signal<void> MenuUserInfo::signal_ready()
     return m_signal_ready;
 }
 
-sigc::signal<void> MenuUserInfo::signal_changed() 
+sigc::signal<void> MenuUserInfo::signal_changed()
 {
     return m_signal_changed;
 }
 
 void MenuUserInfo::on_changed(MenuUserInfo *info)
 {
-
-    LOG_MESSAGE("got changed signal for user information");
+    KLOG_INFO("got changed signal for user information");
     info->signal_changed().emit();
 }

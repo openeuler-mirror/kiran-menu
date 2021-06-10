@@ -8,7 +8,7 @@
  */
 
 #include "lib/app-manager.h"
-#include "lib/log.h"
+#include "lib/base.h"
 #include "lib/menu-skeleton.h"
 #include "lib/screen-manager.h"
 #include "lib/taskbar-skeleton.h"

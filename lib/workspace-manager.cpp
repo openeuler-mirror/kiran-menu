@@ -9,7 +9,7 @@
 
 #include "lib/workspace-manager.h"
 
-#include "lib/log.h"
+#include "lib/base.h"
 
 namespace Kiran
 {
@@ -70,10 +70,10 @@ WorkspaceVec WorkspaceManager::get_workspaces()
     {
         if (iter->second->get_number() != (int)workspaces.size())
         {
-            LOG_WARNING("the number of the workspace is invalid. number: %d name: %s need_number: %d\n",
-                        iter->second->get_number(),
-                        iter->second->get_name().c_str(),
-                        (int)workspaces.size());
+            KLOG_WARNING("the number of the workspace is invalid. number: %d name: %s need_number: %d\n",
+                         iter->second->get_number(),
+                         iter->second->get_name().c_str(),
+                         (int)workspaces.size());
         }
 
         workspaces.push_back(iter->second);
@@ -93,7 +93,7 @@ std::shared_ptr<Workspace> WorkspaceManager::get_active_workspace()
 
 void WorkspaceManager::change_workspace_count(int32_t count)
 {
-    SETTINGS_PROFILE("count: %d.", count);
+    KLOG_PROFILE("count: %d.", count);
 
     auto screen = wnck_screen_get_default();
     g_return_if_fail(screen != NULL);
@@ -159,9 +159,9 @@ std::shared_ptr<Workspace> WorkspaceManager::lookup_workspace(WnckWorkspace *wnc
     auto iter = this->workspaces_.find(number);
     if (iter == this->workspaces_.end())
     {
-        LOG_WARNING("not found the workspace. number: %d name: %s\n",
-                    number,
-                    wnck_workspace_get_name(wnck_workspace));
+        KLOG_WARNING("not found the workspace. number: %d name: %s\n",
+                     number,
+                     wnck_workspace_get_name(wnck_workspace));
         return nullptr;
     }
     else
@@ -172,7 +172,7 @@ std::shared_ptr<Workspace> WorkspaceManager::lookup_workspace(WnckWorkspace *wnc
 
 void WorkspaceManager::load_workspaces()
 {
-    SETTINGS_PROFILE("");
+    KLOG_PROFILE("");
 
     this->workspaces_.clear();
 
@@ -193,7 +193,7 @@ void WorkspaceManager::load_workspaces()
 void WorkspaceManager::window_opened(std::shared_ptr<Window> window)
 {
     g_return_if_fail(window);
-    LOG_DEBUG("xid: %" PRIu64 ", name: %s.", window->get_xid(), window->get_name().c_str());
+    KLOG_DEBUG("xid: %" PRIu64 ", name: %s.", window->get_xid(), window->get_name().c_str());
 
     if (window->is_pinned())
     {
@@ -215,7 +215,7 @@ void WorkspaceManager::window_opened(std::shared_ptr<Window> window)
 void WorkspaceManager::window_closed(std::shared_ptr<Window> window)
 {
     g_return_if_fail(window);
-    LOG_DEBUG("xid: %" PRIu64 ", name: %s.", window->get_xid(), window->get_name().c_str());
+    KLOG_DEBUG("xid: %" PRIu64 ", name: %s.", window->get_xid(), window->get_name().c_str());
 
     if (window->is_pinned())
     {
@@ -245,7 +245,7 @@ void WorkspaceManager::workspace_created(WnckScreen *screen, WnckWorkspace *wnck
     auto name = wnck_workspace_get_name(wnck_workspace);
     auto workspace = std::make_shared<Workspace>(wnck_workspace);
 
-    LOG_DEBUG("workspace is created. number: %d, name: %s.", number, name);
+    KLOG_DEBUG("workspace is created. number: %d, name: %s.", number, name);
 
     auto iter = workspace_manager->workspaces_.find(number);
     if (iter == workspace_manager->workspaces_.end())
@@ -254,10 +254,10 @@ void WorkspaceManager::workspace_created(WnckScreen *screen, WnckWorkspace *wnck
     }
     else
     {
-        LOG_WARNING("the workspace is already exist. number: %d old_name: %s new_name: %s\n",
-                    number,
-                    iter->second->get_name().c_str(),
-                    name);
+        KLOG_WARNING("the workspace is already exist. number: %d old_name: %s new_name: %s\n",
+                     number,
+                     iter->second->get_name().c_str(),
+                     name);
         iter->second = workspace;
     }
 
@@ -282,12 +282,12 @@ void WorkspaceManager::workspace_destroyed(WnckScreen *screen, WnckWorkspace *wn
     auto number = wnck_workspace_get_number(wnck_workspace);
     auto name = wnck_workspace_get_name(wnck_workspace);
 
-    LOG_DEBUG("workspace is destroyed. number: %d, name: %s.", number, name);
+    KLOG_DEBUG("workspace is destroyed. number: %d, name: %s.", number, name);
 
     auto iter = workspace_manager->workspaces_.find(number);
     if (iter == workspace_manager->workspaces_.end())
     {
-        LOG_WARNING("not found the workspace. number: %d name: %s\n", number, name);
+        KLOG_WARNING("not found the workspace. number: %d name: %s\n", number, name);
     }
     else
     {
@@ -304,11 +304,11 @@ void WorkspaceManager::active_workspace_changed(WnckScreen *screen, WnckWorkspac
     auto prev_workspace = workspace_manager->lookup_workspace(prev_wnck_workspace);
     auto cur_workspace = workspace_manager->get_active_workspace();
 
-    LOG_DEBUG("prev workspace: number %d, name %s; cur workspace: number %d, name %s.",
-              prev_workspace ? prev_workspace->get_number() : 0,
-              prev_workspace ? prev_workspace->get_name().c_str() : "null",
-              cur_workspace ? cur_workspace->get_number() : 0,
-              cur_workspace ? cur_workspace->get_name().c_str() : "null");
+    KLOG_DEBUG("prev workspace: number %d, name %s; cur workspace: number %d, name %s.",
+               prev_workspace ? prev_workspace->get_number() : 0,
+               prev_workspace ? prev_workspace->get_name().c_str() : "null",
+               cur_workspace ? cur_workspace->get_number() : 0,
+               cur_workspace ? cur_workspace->get_name().c_str() : "null");
 
     workspace_manager->active_workspace_changed_.emit(prev_workspace, cur_workspace);
 }

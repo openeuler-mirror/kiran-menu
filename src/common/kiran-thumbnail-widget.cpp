@@ -1,9 +1,8 @@
 #include "kiran-thumbnail-widget.h"
-#include "log.h"
+#include "lib/base.h"
 
-KiranThumbnailWidget::KiranThumbnailWidget():
-    show_close_button(true),
-    show_icon_image(true)
+KiranThumbnailWidget::KiranThumbnailWidget() : show_close_button(true),
+                                               show_icon_image(true)
 {
     init_ui();
     get_style_context()->add_class("kiran-thumbnail");
@@ -14,24 +13,24 @@ void KiranThumbnailWidget::set_vspacing(int spacing)
     layout->set_row_spacing(spacing);
 }
 
-void KiranThumbnailWidget::set_title(const Glib::ustring &title_text) 
+void KiranThumbnailWidget::set_title(const Glib::ustring &title_text)
 {
     title_label->set_text(title_text);
 }
 
-void KiranThumbnailWidget::set_show_close_button(bool show) 
+void KiranThumbnailWidget::set_show_close_button(bool show)
 {
     show_close_button = show;
     close_button->set_visible(show);
 }
 
-void KiranThumbnailWidget::set_show_icon(bool show) 
+void KiranThumbnailWidget::set_show_icon(bool show)
 {
     show_icon_image = show;
     icon_area->set_visible(show);
 }
 
-bool KiranThumbnailWidget::on_enter_notify_event(GdkEventCrossing* crossing_event)
+bool KiranThumbnailWidget::on_enter_notify_event(GdkEventCrossing *crossing_event)
 {
     if (show_close_button)
     {
@@ -40,10 +39,11 @@ bool KiranThumbnailWidget::on_enter_notify_event(GdkEventCrossing* crossing_even
     return Gtk::Button::on_enter_notify_event(crossing_event);
 }
 
-bool KiranThumbnailWidget::on_leave_notify_event(GdkEventCrossing* crossing_event)
+bool KiranThumbnailWidget::on_leave_notify_event(GdkEventCrossing *crossing_event)
 {
     //隐藏关闭按钮
-    if (crossing_event->detail != GDK_NOTIFY_INFERIOR && show_close_button) {
+    if (crossing_event->detail != GDK_NOTIFY_INFERIOR && show_close_button)
+    {
         close_button->hide();
     }
 
@@ -97,7 +97,7 @@ void KiranThumbnailWidget::init_ui()
     }
     catch (const Glib::Exception &e)
     {
-        LOG_ERROR("Error occured while trying to load ui file: %s\n", e.what().c_str());
+        KLOG_ERROR("Error occured while trying to load ui file: %s\n", e.what().c_str());
         return;
     }
 

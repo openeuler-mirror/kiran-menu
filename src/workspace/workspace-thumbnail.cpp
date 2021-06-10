@@ -1,10 +1,10 @@
 #include "workspace-thumbnail.h"
+#include <cairomm/xlib_surface.h>
+#include <gtk/gtkx.h>
+#include "global.h"
+#include "lib/base.h"
 #include "window-manager.h"
 #include "workspace-manager.h"
-#include "global.h"
-#include "log.h"
-#include <gtk/gtkx.h>
-#include <cairomm/xlib_surface.h>
 
 #define BACKGROUND_SETTINGS_PATH "org.mate.background"
 #define WORKSPACE_SETTINGS_PATH "com.kylinsec.kiran.workspace-switcher"
@@ -264,7 +264,7 @@ bool WorkspaceThumbnail::draw_thumbnail_image(Gtk::Widget *thumbnail_area_, cons
             cr->stroke();
         }
         else
-            LOG_WARNING("color 'thumbnail-hover-color' not found");
+            KLOG_WARNING("color 'thumbnail-hover-color' not found");
     }
     else
     {
@@ -299,7 +299,7 @@ void WorkspaceThumbnail::on_settings_changed(const Glib::ustring &key)
         bool new_value = applet_settings->get_boolean(DRAW_WINDOWS_KEY);
         if (new_value != draw_windows)
         {
-            LOG_DEBUG("key '%s' changed to %d", DRAW_WINDOWS_KEY, new_value);
+            KLOG_DEBUG("key '%s' changed to %d", DRAW_WINDOWS_KEY, new_value);
             queue_draw();
         }
     }
@@ -309,7 +309,7 @@ bool WorkspaceThumbnail::on_button_press_event(GdkEventButton *event)
 {
     if (workspace.expired())
     {
-        LOG_WARNING("workspace already expired");
+        KLOG_WARNING("workspace already expired");
         return false;
     }
 
@@ -325,7 +325,7 @@ bool WorkspaceThumbnail::on_button_press_event(GdkEventButton *event)
 
 bool WorkspaceThumbnail::on_drag_motion(const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, guint time)
 {
-    LOG_DEBUG("drag motion");
+    KLOG_DEBUG("drag motion");
     drop_check = true;
 
     drag_get_data(context, "binary/XID", time);
@@ -334,7 +334,7 @@ bool WorkspaceThumbnail::on_drag_motion(const Glib::RefPtr<Gdk::DragContext> &co
 
 bool WorkspaceThumbnail::on_drag_drop(const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, guint time)
 {
-    LOG_DEBUG("drag-drop finished");
+    KLOG_DEBUG("drag-drop finished");
     drop_check = false;
     drag_get_data(context, "binary/XID", time);
     return true;
@@ -369,7 +369,7 @@ void WorkspaceThumbnail::on_drag_data_received(const Glib::RefPtr<Gdk::DragConte
     auto window = Kiran::WindowManager::get_instance()->get_window(*wid);
     if (!window)
     {
-        LOG_WARNING("Window with ID 0x%x not found\n", (int)(*wid));
+        KLOG_WARNING("Window with ID 0x%x not found\n", (int)(*wid));
         if (drop_check)
         {
             context->drag_refuse(time);
@@ -385,7 +385,7 @@ void WorkspaceThumbnail::on_drag_data_received(const Glib::RefPtr<Gdk::DragConte
         if (drop_check)
         {
             context->drag_refuse(time);
-            LOG_DEBUG("Workspace of window and the target workspace are the same, drag-drop refused!");
+            KLOG_DEBUG("Workspace of window and the target workspace are the same, drag-drop refused!");
         }
         else
             context->drag_finish(false, false, time);

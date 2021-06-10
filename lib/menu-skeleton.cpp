@@ -10,7 +10,7 @@
 #include "lib/menu-skeleton.h"
 
 #include "lib/app-manager.h"
-#include "lib/log.h"
+#include "lib/base.h"
 #include "lib/window-manager.h"
 
 namespace Kiran
@@ -67,19 +67,19 @@ AppVec MenuSkeleton::search_app(const std::string &keyword, bool ignore_case, Ap
     return match_apps;
 }
 
-#define RETURN_VAL_IF_INVALID_DESKTOP_ID(desktop_id, ret)                       \
-    {                                                                           \
-        auto app = app_manager_->lookup_app(desktop_id);                        \
-        if (!app)                                                               \
-        {                                                                       \
-            LOG_WARNING("not found the %s in AppManager.", desktop_id.c_str()); \
-            return ret;                                                         \
-        }                                                                       \
-        if (!(app->should_show()))                                              \
-        {                                                                       \
-            LOG_WARNING("the %s cannot show in menu.", desktop_id.c_str());     \
-            return ret;                                                         \
-        }                                                                       \
+#define RETURN_VAL_IF_INVALID_DESKTOP_ID(desktop_id, ret)                        \
+    {                                                                            \
+        auto app = app_manager_->lookup_app(desktop_id);                         \
+        if (!app)                                                                \
+        {                                                                        \
+            KLOG_WARNING("not found the %s in AppManager.", desktop_id.c_str()); \
+            return ret;                                                          \
+        }                                                                        \
+        if (!(app->should_show()))                                               \
+        {                                                                        \
+            KLOG_WARNING("the %s cannot show in menu.", desktop_id.c_str());     \
+            return ret;                                                          \
+        }                                                                        \
     }
 
 bool MenuSkeleton::add_favorite_app(const std::string &desktop_id)

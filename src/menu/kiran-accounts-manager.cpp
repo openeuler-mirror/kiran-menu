@@ -1,25 +1,27 @@
 #include "kiran-accounts-manager.h"
-#include "log.h"
 #include <gio/gio.h>
+#include "lib/base.h"
 
-struct _KiranAccountsManagerPrivate {
+struct _KiranAccountsManagerPrivate
+{
     GDBusProxy *dbus_proxy;
     gboolean loaded;
 };
 
-#define KIRAN_ACCOUNTS_MANAGER_PRIVATE(o)   (KiranAccountsManagerPrivate*)kiran_accounts_manager_get_instance_private(o)
+#define KIRAN_ACCOUNTS_MANAGER_PRIVATE(o) (KiranAccountsManagerPrivate *)kiran_accounts_manager_get_instance_private(o)
 
 G_DEFINE_TYPE_WITH_PRIVATE(KiranAccountsManager, kiran_accounts_manager, G_TYPE_OBJECT)
 
 static void on_dbus_proxy_ready(GObject *source_object, GAsyncResult *result, gpointer userdata)
 {
     GError *error = NULL;
-    KiranAccountsManager *self = (KiranAccountsManager*)userdata;
+    KiranAccountsManager *self = (KiranAccountsManager *)userdata;
     KiranAccountsManagerPrivate *priv = KIRAN_ACCOUNTS_MANAGER_PRIVATE(self);
 
     priv->dbus_proxy = g_dbus_proxy_new_for_bus_finish(result, &error);
-    if (!priv->dbus_proxy) {
-        LOG_WARNING("Failed to create dbus proxy for accounts manager: %s", error->message);
+    if (!priv->dbus_proxy)
+    {
+        KLOG_WARNING("Failed to create dbus proxy for accounts manager: %s", error->message);
         g_error_free(error);
         priv->loaded = FALSE;
         return;
@@ -41,8 +43,9 @@ void kiran_accounts_manager_init(KiranAccountsManager *self)
                                                      KIRAN_ACCOUNTS_INTERFACE,
                                                      NULL,
                                                      &error);
-    if (error) {
-        LOG_WARNING("Failed to create dbus proxy for accounts manager: %s", error->message);
+    if (error)
+    {
+        KLOG_WARNING("Failed to create dbus proxy for accounts manager: %s", error->message);
         g_error_free(error);
         priv->loaded = FALSE;
         return;
@@ -66,7 +69,6 @@ void kiran_accounts_manager_class_init(KiranAccountsManagerClass *klass)
     G_OBJECT_CLASS(klass)->finalize = kiran_accounts_manager_finalize;
 }
 
-
 KiranAccountsUser *kiran_accounts_manager_get_user_by_id(KiranAccountsManager *self, uid_t uid)
 {
     GError *error = NULL;
@@ -76,16 +78,18 @@ KiranAccountsUser *kiran_accounts_manager_get_user_by_id(KiranAccountsManager *s
 
     id_param = g_variant_new_uint64(uid);
     params = g_variant_new_tuple(&id_param, 1);
-    g_assert (priv->loaded == TRUE);
+    g_assert(priv->loaded == TRUE);
     result = g_dbus_proxy_call_sync(priv->dbus_proxy,
                                     "FindUserById",
                                     params, G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
 
     if (error)
     {
-        LOG_WARNING("Failed to get object path for user %d: %s", uid, error->message);
+        KLOG_WARNING("Failed to get object path for user %d: %s", uid, error->message);
         g_error_free(error);
-    } else {
+    }
+    else
+    {
         const char *object_path;
 
         g_variant_get(result, "(o)", &object_path);
@@ -98,10 +102,10 @@ KiranAccountsUser *kiran_accounts_manager_get_user_by_id(KiranAccountsManager *s
 KiranAccountsManager *kiran_accounts_manager_get_default()
 {
     static KiranAccountsManager *manager = NULL;
-    if (!manager) {
-        manager = (KiranAccountsManager*)g_object_new(KIRAN_ACCOUNTS_TYPE_MANAGER, NULL);
+    if (!manager)
+    {
+        manager = (KiranAccountsManager *)g_object_new(KIRAN_ACCOUNTS_TYPE_MANAGER, NULL);
     }
 
     return manager;
 }
-

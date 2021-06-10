@@ -1,10 +1,8 @@
-/*
- * @Author       : tangjie02
- * @Date         : 2020-04-08 14:10:38
- * @LastEditors  : tangjie02
- * @LastEditTime : 2020-09-08 15:09:58
- * @Description  :
- * @FilePath     : /kiran-menu-2.0/lib/app.cpp
+/**
+ * @file          /kiran-menu/lib/app.cpp
+ * @brief         
+ * @author        tangjie02 <tangjie02@kylinos.com.cn>
+ * @copyright (c) 2020 KylinSec. All rights reserved. 
  */
 
 #include "lib/app.h"
@@ -12,8 +10,8 @@
 #include <cinttypes>
 #include <vector>
 
+#include "lib/base.h"
 #include "lib/helper.h"
-#include "lib/log.h"
 #include "lib/window-manager.h"
 
 namespace Kiran
@@ -36,7 +34,7 @@ std::shared_ptr<App> App::create_fake()
     std::ostringstream oss;
     oss << "fake_" << ++App::fake_id_count_;
     app->desktop_id_ = oss.str();
-    LOG_DEBUG("create fake app: %s.", app->desktop_id_.c_str());
+    KLOG_DEBUG("create fake app: %s.", app->desktop_id_.c_str());
     return app;
 }
 
@@ -62,7 +60,7 @@ std::shared_ptr<App> App::create_from_desktop_id(const std::string &id, AppKind 
 
 void App::update_from_desktop_file(bool force)
 {
-    SETTINGS_PROFILE("id: %s.", this->desktop_id_.c_str());
+    KLOG_PROFILE("id: %s.", this->desktop_id_.c_str());
     g_return_if_fail(this->desktop_app_);
 
     this->file_name_ = this->desktop_app_->get_filename();
@@ -161,7 +159,7 @@ WindowVec App::get_windows()
         auto wnck_app = wnck_application_get(xid);
         if (!wnck_app)
         {
-            LOG_WARNING("cannot find the wnck_application. xid: %" PRIu64 "\n", xid);
+            KLOG_WARNING("cannot find the wnck_application. xid: %" PRIu64 "\n", xid);
             continue;
         }
 
@@ -176,9 +174,9 @@ WindowVec App::get_windows()
             }
             else
             {
-                LOG_WARNING("failed to lookup window, id: %" PRIu64 ", name: %s",
-                            wnck_window_get_xid(wnck_window),
-                            wnck_window_get_name(wnck_window));
+                KLOG_WARNING("failed to lookup window, id: %" PRIu64 ", name: %s",
+                             wnck_window_get_xid(wnck_window),
+                             wnck_window_get_name(wnck_window));
             }
         }
     }
@@ -197,7 +195,7 @@ WindowVec App::get_taskbar_windows()
 
 void App::close_all_windows()
 {
-    SETTINGS_PROFILE("");
+    KLOG_PROFILE("");
 
     for (auto iter = this->wnck_apps_.begin(); iter != wnck_apps_.end(); ++iter)
     {
@@ -205,13 +203,13 @@ void App::close_all_windows()
         auto wnck_app = wnck_application_get(xid);
         if (!wnck_app)
         {
-            LOG_WARNING("cannot find the wnck_application. xid: %" PRIu64 "\n", xid);
+            KLOG_WARNING("cannot find the wnck_application. xid: %" PRIu64 "\n", xid);
             continue;
         }
 
-        LOG_DEBUG("close these windows belong to wnck_app<%" PRIu64 ", %s>.",
-                  wnck_application_get_xid(wnck_app),
-                  wnck_application_get_name(wnck_app));
+        KLOG_DEBUG("close these windows belong to wnck_app<%" PRIu64 ", %s>.",
+                   wnck_application_get_xid(wnck_app),
+                   wnck_application_get_name(wnck_app));
 
         auto wnck_windows = wnck_application_get_windows(wnck_app);
         for (auto l = wnck_windows; l != NULL; l = l->next)
@@ -224,9 +222,9 @@ void App::close_all_windows()
             }
             else
             {
-                LOG_WARNING("failed to lookup window, id: %" PRIu64 ", name: %s",
-                            wnck_window_get_xid(wnck_window),
-                            wnck_window_get_name(wnck_window));
+                KLOG_WARNING("failed to lookup window, id: %" PRIu64 ", name: %s",
+                             wnck_window_get_xid(wnck_window),
+                             wnck_window_get_name(wnck_window));
             }
         }
     }
@@ -235,7 +233,7 @@ void App::close_all_windows()
 
 bool App::launch()
 {
-    SETTINGS_PROFILE("id: %s.", this->desktop_id_.c_str());
+    KLOG_PROFILE("id: %s.", this->desktop_id_.c_str());
 
     g_return_val_if_fail(this->desktop_app_, false);
 
@@ -261,14 +259,14 @@ bool App::launch()
     else
     {
         this->launch_failed_.emit(this->shared_from_this());
-        LOG_WARNING("failed to launch: %s", error.c_str());
+        KLOG_WARNING("failed to launch: %s", error.c_str());
     }
     return res;
 }
 
 bool App::launch_uris(const Glib::ListHandle<std::string> &uris)
 {
-    SETTINGS_PROFILE("id: %s.", this->desktop_id_.c_str());
+    KLOG_PROFILE("id: %s.", this->desktop_id_.c_str());
 
     g_return_val_if_fail(this->desktop_app_, false);
     g_warn_if_fail(uris.size() > 0);
@@ -295,14 +293,14 @@ bool App::launch_uris(const Glib::ListHandle<std::string> &uris)
     else
     {
         this->launch_failed_.emit(this->shared_from_this());
-        LOG_WARNING("failed to launch uris: %s", error.c_str());
+        KLOG_WARNING("failed to launch uris: %s", error.c_str());
     }
     return res;
 }
 
 void App::launch_action(const std::string &action_name)
 {
-    SETTINGS_PROFILE("id: %s.", this->desktop_id_.c_str());
+    KLOG_PROFILE("id: %s.", this->desktop_id_.c_str());
 
     g_return_if_fail(this->desktop_app_);
 

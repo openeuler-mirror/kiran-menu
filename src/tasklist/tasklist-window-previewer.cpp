@@ -1,14 +1,13 @@
 #include "tasklist-window-previewer.h"
-#include "log.h"
-#include <gtk/gtkx.h>
 #include <cairomm/xlib_surface.h>
-#include <iostream>
 #include <glib/gi18n.h>
+#include <gtk/gtkx.h>
+#include <iostream>
+#include "lib/base.h"
 
-TasklistWindowPreviewer::TasklistWindowPreviewer(std::shared_ptr<Kiran::Window> &window_):
-    WindowThumbnailWidget(window_),
-    context_menu(nullptr),
-    attention_color("red")
+TasklistWindowPreviewer::TasklistWindowPreviewer(std::shared_ptr<Kiran::Window> &window_) : WindowThumbnailWidget(window_),
+                                                                                            context_menu(nullptr),
+                                                                                            attention_color("red")
 {
     needs_attention = window_->needs_attention();
 
@@ -19,7 +18,6 @@ TasklistWindowPreviewer::TasklistWindowPreviewer(std::shared_ptr<Kiran::Window> 
     //如果窗口管理器混合模式关闭，我们需要隐藏窗口预览图，因为窗口预览图已经无法获取
     signal_composited_changed().connect(sigc::mem_fun(*this, &TasklistWindowPreviewer::on_composite_changed));
 
-
     window_state_change = window_->signal_state_changed().connect(
         sigc::mem_fun(*this, &TasklistWindowPreviewer::on_window_state_changed));
 
@@ -28,7 +26,7 @@ TasklistWindowPreviewer::TasklistWindowPreviewer(std::shared_ptr<Kiran::Window> 
      */
     if (!get_style_context()->lookup_color("tasklist_attention_color", attention_color))
     {
-        LOG_WARNING("Failed to load attention-color from style");
+        KLOG_WARNING("Failed to load attention-color from style");
     }
 
     on_composite_changed();
@@ -54,23 +52,28 @@ bool TasklistWindowPreviewer::draw_thumbnail_image(Gtk::Widget *snapshot_area, c
         return true;
 
     allocation = snapshot_area->get_allocation();
-    try {
+    try
+    {
         int width, height;
         cairo_surface_t *thumbnail = window->get_thumbnail(width, height);
-        if (thumbnail == nullptr) {
+        if (thumbnail == nullptr)
+        {
             //如果无法获取到窗口截图，同时窗口不可见，那么在预览区域绘制窗口图标
             int pixbuf_width, pixbuf_height;
             Glib::RefPtr<Gdk::Pixbuf> pixbuf;
-            GdkPixbuf* c_pixbuf = window->get_icon();
+            GdkPixbuf *c_pixbuf = window->get_icon();
             int icon_size = 64;
 
-            if (!c_pixbuf) {
+            if (!c_pixbuf)
+            {
                 auto icon_theme = Gtk::IconTheme::get_default();
                 pixbuf = icon_theme->load_icon("application-x-executable",
                                                icon_size * scale_factor,
                                                Gtk::ICON_LOOKUP_FORCE_SIZE);
                 return false;
-            } else {
+            }
+            else
+            {
                 pixbuf = Glib::wrap(c_pixbuf, true);
                 pixbuf = pixbuf->scale_simple(icon_size * scale_factor,
                                               icon_size * scale_factor,
@@ -80,30 +83,33 @@ bool TasklistWindowPreviewer::draw_thumbnail_image(Gtk::Widget *snapshot_area, c
             pixbuf_width = pixbuf->get_width();
             pixbuf_height = pixbuf->get_height();
 
-            cr->scale(1.0/scale_factor, 1.0/scale_factor);
+            cr->scale(1.0 / scale_factor, 1.0 / scale_factor);
 
             Gdk::Cairo::set_source_pixbuf(cr, pixbuf,
-                                          (allocation.get_width() * scale_factor - pixbuf_width)/2,
-                                          (allocation.get_height() * scale_factor - pixbuf_height)/2);
+                                          (allocation.get_width() * scale_factor - pixbuf_width) / 2,
+                                          (allocation.get_height() * scale_factor - pixbuf_height) / 2);
             cr->paint();
             return false;
-        } else {
-            scale_x = allocation.get_width() * scale_factor * 1.0/width;
-            scale_y = allocation.get_height()* scale_factor * 1.0/height;
+        }
+        else
+        {
+            scale_x = allocation.get_width() * scale_factor * 1.0 / width;
+            scale_y = allocation.get_height() * scale_factor * 1.0 / height;
 
             scale = std::min(scale_x, scale_y);
-            cr->scale(1.0/scale_factor, 1.0/scale_factor);
-            cr->translate((allocation.get_width() * scale_factor - width * scale)/2.0,
-                          (allocation.get_height() * scale_factor - height * scale)/2.0);
+            cr->scale(1.0 / scale_factor, 1.0 / scale_factor);
+            cr->translate((allocation.get_width() * scale_factor - width * scale) / 2.0,
+                          (allocation.get_height() * scale_factor - height * scale) / 2.0);
             cr->scale(scale, scale);
-
 
             cairo_set_source_surface(cr->cobj(), thumbnail, 0, 0);
             cr->paint();
             cairo_surface_destroy(thumbnail);
         }
-    } catch (const Glib::Error &e) {
-        LOG_WARNING("Error occured while trying to draw window thumbnail: %s", e.what().c_str());
+    }
+    catch (const Glib::Error &e)
+    {
+        KLOG_WARNING("Error occured while trying to draw window thumbnail: %s", e.what().c_str());
     }
 
     return false;
@@ -113,7 +119,7 @@ void TasklistWindowPreviewer::get_preferred_width_vfunc(int &minimum_width, int 
 {
     GtkStateFlags flags;
     GValue value = G_VALUE_INIT;
-    GtkWidget *widget = reinterpret_cast<GtkWidget*>(const_cast<GtkButton*>(gobj()));
+    GtkWidget *widget = reinterpret_cast<GtkWidget *>(const_cast<GtkButton *>(gobj()));
     auto context = get_style_context()->gobj();
 
     flags = gtk_widget_get_state_flags(widget);
@@ -131,7 +137,8 @@ bool TasklistWindowPreviewer::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
     if (!window)
         return false;
 
-    if (window->needs_attention()) {
+    if (window->needs_attention())
+    {
         /* 绘制需要注意的背景色 */
         auto child = get_child();
 
@@ -151,7 +158,7 @@ void TasklistWindowPreviewer::on_thumbnail_clicked()
     if (window)
         window->activate(0);
     else
-        LOG_WARNING("window already expired!!!");
+        KLOG_WARNING("window already expired!!!");
 }
 
 bool TasklistWindowPreviewer::on_button_press_event(GdkEventButton *button_event)
@@ -162,17 +169,20 @@ bool TasklistWindowPreviewer::on_button_press_event(GdkEventButton *button_event
     if (G_UNLIKELY(!window))
         return false;
 
-    event = reinterpret_cast<GdkEvent*>(button_event);
-    if (gdk_event_triggers_context_menu(event)) {
+    event = reinterpret_cast<GdkEvent *>(button_event);
+    if (gdk_event_triggers_context_menu(event))
+    {
         //show context menu
-        if (!context_menu) {
+        if (!context_menu)
+        {
             context_menu = new TasklistWindowContextMenu(window);
             context_menu->attach_to_widget(*this);
             context_menu->signal_deactivate().connect(
-                        [this]() -> void {
-                            signal_context_menu_toggled().emit(false);
-                        });
-        } else
+                [this]() -> void {
+                    signal_context_menu_toggled().emit(false);
+                });
+        }
+        else
             context_menu->refresh();
 
         context_menu->show_all();
@@ -187,11 +197,14 @@ bool TasklistWindowPreviewer::on_button_press_event(GdkEventButton *button_event
 void TasklistWindowPreviewer::on_composite_changed()
 {
     Gtk::Widget *snapshot_area = get_thumbnail_area();
-    if (is_composited()) {
+    if (is_composited())
+    {
         snapshot_area->show();
         get_style_context()->remove_class("vertical");
         get_style_context()->add_class("horizontal");
-    } else {
+    }
+    else
+    {
         snapshot_area->set_visible(false);
         get_style_context()->remove_class("horizontal");
         get_style_context()->add_class("vertical");
@@ -207,7 +220,8 @@ void TasklistWindowPreviewer::on_window_state_changed()
     if (!window)
         return;
 
-    if (needs_attention != window->needs_attention()) {
+    if (needs_attention != window->needs_attention())
+    {
         needs_attention = window->needs_attention();
         queue_draw();
     }

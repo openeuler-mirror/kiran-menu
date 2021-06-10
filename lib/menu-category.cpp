@@ -9,10 +9,10 @@
 #include "lib/menu-category.h"
 
 #include "config.h"
+#include "lib/base.h"
 #include "lib/category-reader.h"
 #include "lib/category-writer.h"
 #include "lib/category.h"
-#include "lib/log.h"
 
 namespace Kiran
 {
@@ -36,7 +36,7 @@ void MenuCategory::init()
         {
             if (iter->get_type() != CategoryNodeType::CATEGORY_NODE_TYPE_CATEGORY)
             {
-                LOG_WARNING("exist invalid node type: %d\n", (int)iter->get_type());
+                KLOG_WARNING("exist invalid node type: %d\n", (int)iter->get_type());
                 continue;
             }
             std::shared_ptr<Category> category(new Category(iter));
@@ -45,7 +45,7 @@ void MenuCategory::init()
                 auto &name = category->get_name();
                 if (find_category(name))
                 {
-                    LOG_WARNING("Multiple category exist same name: %s\n", name.c_str());
+                    KLOG_WARNING("Multiple category exist same name: %s\n", name.c_str());
                     continue;
                 }
                 this->categories_.push_back(category);

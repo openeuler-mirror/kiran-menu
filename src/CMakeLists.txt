@@ -2,104 +2,33 @@ cmake_minimum_required(VERSION 3.0)
 
 set (TARGET_NAME kiran-applet)
 
+file (GLOB_RECURSE SRC_H_FILES ./*.h)
+file (GLOB_RECURSE SRC_CPP_FILES ./*.cpp)
+file (GLOB_RECURSE SRC_C_FILES ./*.c)
+
 add_executable(${TARGET_NAME}
-        common/kiran-helper.cpp
-        common/kiran-power.cpp
-        common/kiran-search-entry.cpp
-        common/kiran-opacity-menu.cpp
-        common/kiran-applet-button.cpp
-        common/kiran-thumbnail-widget.cpp
-        common/window-thumbnail-widget.cpp
-        common/workarea-monitor.cpp
-        menu/recent-files-list-box.cpp
-        menu/recent-files-widget.cpp
-        menu/menu-user-info.cpp
-        menu/menu-list-item-widget.cpp
-        menu/menu-app-launcher-button.cpp
-        menu/menu-app-item.cpp
-        menu/menu-category-item.cpp
-        menu/menu-applet-button.cpp
-        menu/menu-profile.cpp
-        menu/menu-applet-window.cpp
-        menu/menu-power-button.cpp
-        menu/menu-power-menu.cpp
-        menu/menu-avatar-widget.cpp
-        menu/menu-apps-container.cpp
-        menu/menu-new-apps-container.cpp
-        menu/menu-applet.cpp
-        tasklist/tasklist-app-button.cpp
-        tasklist/tasklist-app-previewer.cpp
-        tasklist/tasklist-window-previewer.cpp
-        tasklist/tasklist-applet-widget.cpp
-        tasklist/tasklist-buttons-container.cpp
-        tasklist/tasklist-app-context-menu.cpp
-        tasklist/tasklist-window-context-menu.cpp
-        tasklist/tasklist-paging-button.cpp
-        tasklist/tasklist-applet.cpp
-        workspace/workspace-thumbnail.cpp
-        workspace/workspace-window-thumbnail.cpp
-        workspace/workspace-applet-window.cpp
-        workspace/workspace-windows-overview.cpp
-        workspace/window_arrange.cpp
-        workspace/workspace-applet-button.cpp
-        workspace/workspace-applet.cpp
-        showdesktop/showdesktop-applet-button.cpp
-        showdesktop/showdesktop-applet.cpp
-        tray/kiran-notify-icon.c
-        tray/kiran-notify-icon.h
-        tray/kiran-notify-icon-window.c
-        tray/kiran-notify-icon-window.h
-        tray/kiran-sn-icon.c
-        tray/kiran-sn-icon.h
-        tray/kiran-sn-icon-menu.c
-        tray/kiran-sn-icon-menu.h
-        tray/kiran-sn-tray-manager.c
-        tray/kiran-sn-tray-manager.h
-        tray/kiran-sn-watcher.c
-        tray/kiran-sn-watcher.h
-        tray/kiran-tray-applet.c
-        tray/kiran-tray.c
-        tray/kiran-tray.h
-        tray/kiran-tray-manager.c
-        tray/kiran-tray-manager.h
-        tray/kiran-x11-tray-icon.cpp
-        tray/kiran-x11-tray-icon.h
-        tray/kiran-x11-tray-manager.c
-        tray/kiran-x11-tray-manager.h
-        tray/kiran-x11-tray-socket.c
-        tray/kiran-x11-tray-socket.h
-        kiran-sn-host-gen.c
-        kiran-sn-item-gen.c
-        kiran-sn-watcher-gen.c
-        applet.cpp
-)
+               ${SRC_H_FILES}
+               ${SRC_CPP_FILES}
+               ${SRC_C_FILES}
+               kiran-sn-host-gen.c
+               kiran-sn-host-gen.h
+               kiran-sn-item-gen.c
+               kiran-sn-item-gen.h
+               kiran-sn-watcher-gen.c
+               kiran-sn-watcher-gen.h)
 
 
 if(BUILD_WITH_KIRANACCOUNTS)
-target_sources(${TARGET_NAME} PUBLIC menu/kiran-accounts-user.cpp menu/kiran-accounts-manager.cpp)
-pkg_search_module(ACCOUNTSSERVICE REQUIRED kiran-cc-daemon)
+    target_sources(${TARGET_NAME} PUBLIC menu/kiran-accounts-user.cpp menu/kiran-accounts-manager.cpp)
+    pkg_search_module(ACCOUNTSSERVICE REQUIRED kiran-cc-daemon)
 else()
-pkg_search_module(ACCOUNTSSERVICE REQUIRED accountsservice)
+    pkg_search_module(ACCOUNTSSERVICE REQUIRED accountsservice)
 endif()
+
 install(TARGETS ${TARGET_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/libexec/mate-panel/")
 
 include(CheckIncludeFiles)
 
-CHECK_INCLUDE_FILES(zlog_ex.h HAVE_ZLOG_HEADERS)
-if (NOT HAVE_ZLOG_HEADERS)
-    message(FATAL_ERROR "zlog_ex.h not found")
-endif (NOT HAVE_ZLOG_HEADERS)
-
-pkg_search_module(MATEPANEL REQUIRED libmatepanelapplet-4.0)
-pkg_search_module(GTKMM REQUIRED gtkmm-3.0)
-pkg_search_module(MATEDESKTOP REQUIRED mate-desktop-2.0)
-pkg_search_module(ZLOG REQUIRED zlog)
-
-pkg_search_module(GLIB2 REQUIRED glib-2.0)
-pkg_search_module(GOBJECT2 REQUIRED gobject-2.0)
-pkg_search_module(GTK3 REQUIRED gtk+-3.0)
-pkg_search_module(DBUSMENU_GLIB REQUIRED dbusmenu-glib-0.4)
-pkg_search_module(LIBXML2 REQUIRED libxml-2.0)
 
 find_library(LIBX11 X11)
 find_library(LIBM m)
@@ -134,7 +63,7 @@ target_include_directories(${TARGET_NAME} PUBLIC "${PROJECT_SOURCE_DIR}/lib"
             "${GTKMM_INCLUDE_DIRS}"
             "${MATEDESKTOP_INCLUDE_DIRS}"
             "${ACCOUNTSSERVICE_INCLUDE_DIRS}"
-            "${ZLOG_INCLUDE_DIRS}"
+            "${KLOG_GTK3_INCLUDE_DIRS}"
             "${GTK3_INCLUDE_DIRS}"
             "${DBUSMENU_GLIB_INCLUDE_DIRS}"
             "${LIBXML2_INCLUDE_DIRS}"
@@ -152,7 +81,7 @@ target_link_libraries(${TARGET_NAME} PUBLIC "${MATEPANEL_LIBRARIES}"
             "${LIBXML2_LIBRARIES}"
             "${GOBJECT2_LIBRARIES}"
             "${GLIB2_LIBRARIES}"
-            "${ZLOG_LIBRARIES}"
+            "${KLOG_GTK3_LIBRARIES}"
             "X11"
             "m")
 
