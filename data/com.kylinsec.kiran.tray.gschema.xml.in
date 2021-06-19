@@ -2,7 +2,7 @@
 <schemalist>
   <schema id="com.kylinsec.kiran.tray" path="/com/kylinsec/kiran/tray/">
     <key name="panel-icon-ids" type="as">
-      <default>['~01-keyboard', '~02-volume', '~04-network', '~05-battery']</default>
+      <default>['~01-keyboard', '~02-volume', '~04-network', '~05-battery', 'kiran-flameshot']</default>
       <summary>The notify icon which show in the panel</summary>
       <description>The notify icon show which in the panel.</description>
     </key>
