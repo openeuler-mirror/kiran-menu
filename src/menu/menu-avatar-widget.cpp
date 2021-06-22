@@ -106,6 +106,7 @@ void MenuAvatarWidget::on_clicked()
     const char *app_names[] = {
 #ifdef BUILD_WITH_KIRANACCOUNTS
         "kiran-account-manager",
+        "kiran-cpanel-account",
 #else
         "mate-about-me",
 #endif
