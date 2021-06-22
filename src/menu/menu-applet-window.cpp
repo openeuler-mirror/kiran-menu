@@ -1,3 +1,10 @@
+/**
+ * @file          /kiran-menu/src/menu/menu-applet-window.cpp
+ * @brief         
+ * @author        songchuangfei <songchuangfei@kylinos.com.cn>
+ * @copyright (c) 2020 KylinSec. All rights reserved. 
+ */
+
 #include "menu-applet-window.h"
 #include <gtk/gtkx.h>
 #include "global.h"

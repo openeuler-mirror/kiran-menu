@@ -1,3 +1,10 @@
+/**
+ * @file          /kiran-menu/src/menu/menu-applet-button.cpp
+ * @brief         
+ * @author        songchuangfei <songchuangfei@kylinos.com.cn>
+ * @copyright (c) 2020 KylinSec. All rights reserved. 
+ */
+
 #include "menu-applet-button.h"
 #include <glibmm/i18n.h>
 #include "kiran-helper.h"

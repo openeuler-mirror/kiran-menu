@@ -122,43 +122,52 @@ std::shared_ptr<App> AppManager::lookup_app_with_window(std::shared_ptr<Window> 
 {
     RETURN_VAL_IF_FALSE(window != nullptr, nullptr);
 
+    KLOG_DEBUG("lookup app for window: %s.", window->get_name().c_str());
+
     auto transient_for = window->get_transient();
     if (transient_for)
     {
         return lookup_app_with_window(transient_for);
     }
 
+#define PRINT_AND_RETURN_MATCH_APP(app)                                                                         \
+    if (app)                                                                                                    \
+    {                                                                                                           \
+        KLOG_DEBUG("match app: %s for window: %s.", app->get_desktop_id().c_str(), window->get_name().c_str()); \
+        return app;                                                                                             \
+    }
+
     std::shared_ptr<App> app;
 
     // 为了提高匹配效率，这里直接从缓存中查找，如果缓存中没有找到，说明是这个窗口是第一次调用该函数
     app = lookup_app_with_xid(window->get_window_group());
-    RETURN_VAL_IF_TRUE(app, app);
+    PRINT_AND_RETURN_MATCH_APP(app);
 
     app = get_app_from_env(window);
-    RETURN_VAL_IF_TRUE(app, app);
+    PRINT_AND_RETURN_MATCH_APP(app);
 
     app = get_app_from_sandboxed_app(window);
-    RETURN_VAL_IF_TRUE(app, app);
+    PRINT_AND_RETURN_MATCH_APP(app);
 
     app = get_app_from_gapplication_id(window);
-    RETURN_VAL_IF_TRUE(app, app);
+    PRINT_AND_RETURN_MATCH_APP(app);
 
     app = get_app_from_cmdline(window);
-    RETURN_VAL_IF_TRUE(app, app);
+    PRINT_AND_RETURN_MATCH_APP(app);
 
     app = get_app_from_window_wmclass(window);
-    RETURN_VAL_IF_TRUE(app, app);
+    PRINT_AND_RETURN_MATCH_APP(app);
 
     // 遍历所有app，检查是否有应用的属性跟窗口的wm_class属性匹配
     app = get_app_by_enumeration_apps(window);
-    RETURN_VAL_IF_TRUE(app, app);
+    PRINT_AND_RETURN_MATCH_APP(app);
 
     // 遍历所有window，检查是否存在相同的wm_class属性的窗口已经匹配到app
     app = get_app_by_enumeration_windows(window);
-    RETURN_VAL_IF_TRUE(app, app);
+    PRINT_AND_RETURN_MATCH_APP(app);
 
     app = get_app_from_window_group(window);
-    RETURN_VAL_IF_TRUE(app, app);
+    PRINT_AND_RETURN_MATCH_APP(app);
 
     KLOG_WARNING("not found matching App for the window. name: %s xid: %" PRIu64 "\n",
                  window->get_name().c_str(),

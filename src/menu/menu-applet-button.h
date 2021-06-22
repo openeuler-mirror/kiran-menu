@@ -1,5 +1,11 @@
-#ifndef MENU_APPLET_BUTTON_H
-#define MENU_APPLET_BUTTON_H
+/**
+ * @file          /kiran-menu/src/menu/menu-applet-button.h
+ * @brief         
+ * @author        songchuangfei <songchuangfei@kylinos.com.cn>
+ * @copyright (c) 2020 KylinSec. All rights reserved. 
+ */
+
+#pragma once
 
 #include <gtkmm.h>
 #include <mate-panel-applet.h>
@@ -20,7 +26,5 @@ protected:
     virtual void on_toggled() override;
 
 private:
-    MenuAppletWindow window;                     //菜单窗口
+    MenuAppletWindow window;  //菜单窗口
 };
-
-#endif // MENU_APPLET_BUTTON_H

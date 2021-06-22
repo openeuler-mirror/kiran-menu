@@ -1,17 +1,23 @@
-#ifndef MENU_APPLET_WINDOW_H
-#define MENU_APPLET_WINDOW_H
+/**
+ * @file          /kiran-menu/src/menu/menu-applet-window.h
+ * @brief         
+ * @author        songchuangfei <songchuangfei@kylinos.com.cn>
+ * @copyright (c) 2020 KylinSec. All rights reserved. 
+ */
+
+#pragma once
 
 #include <gtkmm.h>
-#include "menu-user-info.h"
 #include "menu-app-item.h"
+#include "menu-avatar-widget.h"
 #include "menu-category-item.h"
 #include "menu-profile.h"
-#include "menu-avatar-widget.h"
+#include "menu-user-info.h"
 
-#include "menu-skeleton.h"
-#include "workarea-monitor.h"
 #include "menu-apps-container.h"
 #include "menu-new-apps-container.h"
+#include "menu-skeleton.h"
+#include "workarea-monitor.h"
 
 class MenuAppletWindow : public Gtk::Window
 {
@@ -54,7 +60,6 @@ public:
      * @brief 根据设置重新设置开始菜单的显示模式
      */
     void ensure_display_mode();
-
 
     /**
      * @brief 启动搜索结果中的第一个应用，当前无搜索结果时什么都不做
@@ -100,7 +105,6 @@ protected:
 
     virtual void init_ui();
     virtual void init_avatar_widget();
-
 
     /**
      * @brief 回调汗素：当前屏幕的工作区域大小发生变化时调用
@@ -161,7 +165,6 @@ protected:
      */
     void switch_to_apps_overview(double position, bool animation = true);
 
-
     bool launch_app_from_list(const char **app_names);
 
 private:
@@ -172,8 +175,8 @@ private:
 
     Gtk::SearchEntry *search_entry;
     Gtk::Stack *menu_view_stack, *apps_list_stack;
-    Gtk::Box *all_apps_page;                            /* */
-    Gtk::Box *compact_favorites_view;                   /* 紧凑模式下的收藏夹页面 */
+    Gtk::Box *all_apps_page;          /* */
+    Gtk::Box *compact_favorites_view; /* 紧凑模式下的收藏夹页面 */
 
     Gtk::ScrolledWindow *category_list_scrolled;
     Gtk::Viewport *category_list_viewport;
@@ -182,19 +185,18 @@ private:
     MenuAppsContainer *expand_frequents_container;
     MenuAppsContainer *search_results_container;
     MenuAppsContainer *new_apps_container;
-    MenuAvatarWidget  *compact_avatar_widget, *expand_avatar_widget;
+    MenuAvatarWidget *compact_avatar_widget, *expand_avatar_widget;
 
-    std::map<std::string, MenuAppsContainer*> category_items;       /*分类名称到分类控件的映射表*/
+    std::map<std::string, MenuAppsContainer *> category_items; /*分类名称到分类控件的映射表*/
 
     Gtk::StyleProperty<int> compact_min_height_property, expand_min_height_property;
 
-    MenuProfile profile;                 /*首选项*/
-    MenuDisplayMode display_mode;       /*当前显示模式*/
-    WorkareaMonitor *monitor;           /*屏幕变化监视器*/
+    MenuProfile profile;          /*首选项*/
+    MenuDisplayMode display_mode; /*当前显示模式*/
+    WorkareaMonitor *monitor;     /*屏幕变化监视器*/
 
-    GdkRectangle geometry;                      /* 当前窗口大小 */
-    sigc::signal<void> m_signal_size_changed;   /* 窗口大小变化信号 */
-
+    GdkRectangle geometry;                    /* 当前窗口大小 */
+    sigc::signal<void> m_signal_size_changed; /* 窗口大小变化信号 */
 
 private:
     /**
@@ -212,7 +214,6 @@ private:
      */
     void load_date_info();
 
-
     /**
      * @brief 创建快捷应用按钮
      * @param icon_resource: 按钮图标的资源路径
@@ -221,10 +222,9 @@ private:
      *
      * @return 返回创建的按钮，该按钮添加到容器后会随容器一起销毁，未添加到容器时需要手动销毁
      */
-    Gtk::Button* create_launcher_button(const char *icon_resource,
+    Gtk::Button *create_launcher_button(const char *icon_resource,
                                         const char *tooltip,
                                         const char *cmdline);
-
 
     /**
      * @brief 在侧边栏中添加标签按钮
@@ -234,10 +234,7 @@ private:
      *
      * @return 返回创建的按钮
      */
-    Gtk::Button* create_page_button(const char *icon_resource,
+    Gtk::Button *create_page_button(const char *icon_resource,
                                     const char *tooltip,
                                     int page_index);
-
 };
-
-#endif // MENU_APPLET_WINDOW_H
