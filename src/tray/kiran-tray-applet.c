@@ -70,17 +70,6 @@ button_press (GtkWidget      *widget,
     return FALSE;
 }
 
-static gboolean
-mouse_enter (GtkWidget      *widget,
-             GdkEvent       *event,
-             gpointer       user_data)
-{
-    mate_panel_applet_request_focus (MATE_PANEL_APPLET (widget),
-		   		     gtk_get_current_event_time ()); 
-
-    return FALSE;
-}
-
 static void
 destroy_tray (GtkWidget *widget, 
 	       gpointer   user_data)
@@ -122,7 +111,6 @@ fill_tray_applet (MatePanelApplet *applet)
     kcd->watcher = kiran_sn_watcher_new ();
     g_signal_connect (G_OBJECT (kcd->tray), "button-press-event", G_CALLBACK(button_press), kcd);
     g_signal_connect (G_OBJECT (kcd->tray), "destroy", G_CALLBACK (destroy_tray), kcd);
-    g_signal_connect (G_OBJECT (applet), "enter-notify-event", G_CALLBACK (mouse_enter), kcd);
 
     g_signal_connect (G_OBJECT (applet),
                           "change_orient",
