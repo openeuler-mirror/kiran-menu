@@ -8,7 +8,6 @@
 
 namespace KiranPower
 {
-
 bool suspend();
 bool hibernate();
 bool shutdown();
@@ -20,8 +19,9 @@ bool lock_screen();
 bool can_suspend();
 bool can_hibernate();
 bool can_switchuser();
+bool can_shutdown();
 bool can_reboot();
 
-}
+}  // namespace KiranPower
 
-#endif //KIRAN_POWER_INCLUDE_H
+#endif  //KIRAN_POWER_INCLUDE_H
