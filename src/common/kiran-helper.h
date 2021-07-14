@@ -1,16 +1,35 @@
+/**
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
+ */
+
 #ifndef KIRANHELPER_H
 #define KIRANHELPER_H
 
-#include <gtkmm.h>
 #include <app-manager.h>
+#include <gtkmm.h>
 #include "global.h"
 
 using KiranAppPointer = std::shared_ptr<Kiran::App>;
 using KiranWindowPointer = std::shared_ptr<Kiran::Window>;
 using KiranWorkspacePointer = std::shared_ptr<Kiran::Workspace>;
 
-#define WINDOW_WIDTH(w)     (std::get<2>(w->get_client_window_geometry()))
-#define WINDOW_HEIGHT(w)    (std::get<3>(w->get_client_window_geometry()))
+#define WINDOW_WIDTH(w) (std::get<2>(w->get_client_window_geometry()))
+#define WINDOW_HEIGHT(w) (std::get<3>(w->get_client_window_geometry()))
 
 #define UNUSED __attribute__((unused))
 
@@ -58,4 +77,4 @@ void show_applet_about_dialog(const char *program_name,
                               const char *icon_name,
                               const char *comments);
 
-#endif // KIRANHELPER_H
+#endif  // KIRANHELPER_H

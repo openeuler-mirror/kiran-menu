@@ -1,10 +1,20 @@
-/*
- * @Author       : tangjie02
- * @Date         : 2020-04-08 17:30:32
- * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-22 08:47:02
- * @Description  : 管理菜单中的APP的分类
- * @FilePath     : /kiran-menu-2.0/lib/menu-category.h
+/**
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     tangjie02 <tangjie02@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 #pragma once
 
@@ -13,6 +23,7 @@
 
 namespace Kiran
 {
+// 管理菜单中的APP的分类
 class MenuCategory : public MenuUnit
 {
 public:

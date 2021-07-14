@@ -1,15 +1,33 @@
+/**
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
+ */
+
 #include "kiran-search-entry.h"
 #include <glibmm.h>
-#include <iostream>
 #include <glibmm/i18n.h>
+#include <iostream>
 
 void on_preedit_text_changed(KiranSearchEntry *entry, char *preedit_text)
 {
     entry->has_preedit_text = (strlen(preedit_text) != 0);
 }
 
-KiranSearchEntry::KiranSearchEntry():
-    has_preedit_text(false)
+KiranSearchEntry::KiranSearchEntry() : has_preedit_text(false)
 {
     auto context = get_style_context();
 
@@ -25,7 +43,7 @@ KiranSearchEntry::KiranSearchEntry():
     g_signal_connect_swapped(gobj(), "preedit-changed", G_CALLBACK(on_preedit_text_changed), this);
 }
 
-bool KiranSearchEntry::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
+bool KiranSearchEntry::on_draw(const ::Cairo::RefPtr<Cairo::Context> &cr)
 {
     Gdk::RGBA color;
     auto context = get_style_context();

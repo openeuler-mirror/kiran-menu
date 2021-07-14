@@ -1,8 +1,20 @@
 /**
- * @file window-thumbnail-widget.h
- * @brief 窗口缩略图控件
- * @author songchuanfei <songchuanfei@kylinos.com.cn>
- * @copyright (c) 2020 KylinSec. All rights reserved.
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #ifndef WINDOW_THUMBNAIL_WIDGET_INCLUDE_H
@@ -13,10 +25,10 @@
 #include "kiran-helper.h"
 #include "kiran-thumbnail-widget.h"
 
-class WindowThumbnailWidget: public KiranThumbnailWidget
+// 窗口缩略图控件
+class WindowThumbnailWidget : public KiranThumbnailWidget
 {
 public:
-
     /**
      * @brief 构造函数
      * @param window_ 要关联的窗口对象
@@ -48,15 +60,13 @@ protected:
      */
     virtual bool draw_thumbnail_image(Gtk::Widget *snapshot_area, const Cairo::RefPtr<Cairo::Context> &cr);
 
-
     /**
      * @brief 根据窗口标题，更新标题标签内容
      */
     virtual void update_title();
 
 private:
-    std::weak_ptr<Kiran::Window> window;    /* 关联的窗口 */
+    std::weak_ptr<Kiran::Window> window; /* 关联的窗口 */
 };
-
 
 #endif

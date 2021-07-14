@@ -1,13 +1,32 @@
+/**
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
+ */
+
 #include "tasklist-applet-widget.h"
-#include "tasklist-paging-button.h"
-#include "global.h"
 #include <glibmm/i18n.h>
+#include "global.h"
+#include "tasklist-paging-button.h"
 
 void on_applet_orient_change(MatePanelApplet *applet UNUSED,
                              gint orient UNUSED,
                              gpointer userdata)
 {
-    auto widget = reinterpret_cast<TasklistAppletWidget*>(userdata);
+    auto widget = reinterpret_cast<TasklistAppletWidget *>(userdata);
     widget->on_applet_orient_changed();
 }
 
@@ -17,18 +36,20 @@ void on_applet_size_allocate(MatePanelApplet *applet UNUSED,
 {
     int *hints;
     Gtk::Requisition min, natural;
-    Gtk::Widget *widget = reinterpret_cast<Gtk::Widget*>(userdata);
+    Gtk::Widget *widget = reinterpret_cast<Gtk::Widget *>(userdata);
     MatePanelAppletOrient orient;
 
     orient = mate_panel_applet_get_orient(applet);
     widget->get_preferred_size(min, natural);
 
     hints = new int[2];
-    if (orient == MATE_PANEL_APPLET_ORIENT_UP || orient == MATE_PANEL_APPLET_ORIENT_DOWN){
+    if (orient == MATE_PANEL_APPLET_ORIENT_UP || orient == MATE_PANEL_APPLET_ORIENT_DOWN)
+    {
         hints[0] = std::max(natural.width, 0);
         hints[1] = min.width;
     }
-    else {
+    else
+    {
         hints[0] = std::max(natural.height, 0);
         hints[1] = min.height;
     }
@@ -37,12 +58,11 @@ void on_applet_size_allocate(MatePanelApplet *applet UNUSED,
     delete hints;
 }
 
-TasklistAppletWidget::TasklistAppletWidget(MatePanelApplet *applet_):
-    button_box(Gtk::ORIENTATION_VERTICAL),
-    prev_btn(nullptr),
-    next_btn(nullptr),
-    container(applet_),
-    applet(applet_)
+TasklistAppletWidget::TasklistAppletWidget(MatePanelApplet *applet_) : button_box(Gtk::ORIENTATION_VERTICAL),
+                                                                       prev_btn(nullptr),
+                                                                       next_btn(nullptr),
+                                                                       container(applet_),
+                                                                       applet(applet_)
 {
     init_ui();
     g_signal_connect(applet, "size-allocate", G_CALLBACK(on_applet_size_allocate), this);
@@ -66,9 +86,9 @@ void TasklistAppletWidget::on_app_buttons_page_changed()
         return;
 
     paging_check = Glib::signal_idle().connect(
-                    sigc::bind_return<bool>(
-                        sigc::mem_fun(*this, &TasklistAppletWidget::update_paging_buttons_state),
-                        false));
+        sigc::bind_return<bool>(
+            sigc::mem_fun(*this, &TasklistAppletWidget::update_paging_buttons_state),
+            false));
 }
 
 void TasklistAppletWidget::on_applet_orient_changed()
@@ -106,20 +126,21 @@ void TasklistAppletWidget::init_ui()
     pack_end(button_box, false, false);
 
     property_orientation().signal_changed().connect(
-                [this]() -> void {
-                    if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL) {
-                        button_box.set_orientation(Gtk::ORIENTATION_VERTICAL);
-                        button_box.set_size_request(16, -1);
-                    }
-                    else {
-                        button_box.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
-                        button_box.set_size_request(-1, 16);
-                    }
+        [this]() -> void {
+            if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL)
+            {
+                button_box.set_orientation(Gtk::ORIENTATION_VERTICAL);
+                button_box.set_size_request(16, -1);
+            }
+            else
+            {
+                button_box.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+                button_box.set_size_request(-1, 16);
+            }
 
-                    container.update_orientation();
-                    container.queue_allocate();
-                });
-
+            container.update_orientation();
+            container.queue_allocate();
+        });
 
     on_applet_orient_changed();
 
@@ -131,7 +152,6 @@ void TasklistAppletWidget::init_ui()
 
 Gtk::Button *TasklistAppletWidget::create_paging_button(std::string icon_resource, std::string tooltip_text)
 {
-
     auto button = Gtk::make_managed<TasklistPagingButton>(applet);
 
     button->set_size_request(16, 16);

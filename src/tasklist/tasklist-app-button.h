@@ -1,20 +1,41 @@
+/**
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
+ */
+
 #ifndef TASKLIST_APP_BUTTON_H
 #define TASKLIST_APP_BUTTON_H
 
-#include <gtkmm.h>
 #include <app.h>
+#include <gtkmm.h>
 #include <mate-panel-applet.h>
 #include "kiran-helper.h"
 #include "tasklist-app-context-menu.h"
 
-class TasklistAppButton: public Gtk::Button
+class TasklistAppButton : public Gtk::Button
 {
 public:
-    enum AppButtonState {
-        APP_BUTTON_STATE_NORMAL = 0,        //正常显示
-        APP_BUTTON_STATE_ATTENTION,         //需要注意
-        APP_BUTTON_STATE_FLICKER            //闪烁（需要注意和常态之间反复切换)
+    enum AppButtonState
+    {
+        APP_BUTTON_STATE_NORMAL = 0,  //正常显示
+        APP_BUTTON_STATE_ATTENTION,   //需要注意
+        APP_BUTTON_STATE_FLICKER      //闪烁（需要注意和常态之间反复切换)
     };
+
 public:
     TasklistAppButton(const std::shared_ptr<Kiran::App> &app, int size);
     ~TasklistAppButton() override;
@@ -40,7 +61,6 @@ public:
      * @param size  要设置的尺寸
      */
     void set_size(int size);
-
 
     /**
      * @brief set_app 设置当前按钮关联的应用为app，关联后应用按钮缓存的数据会自动刷新
@@ -74,17 +94,17 @@ public:
 
 protected:
     virtual Gtk::SizeRequestMode get_request_mode_vfunc() const override;
-    virtual void get_preferred_width_vfunc(int &minimum_width, int &natural_width)  const  override;
-    virtual void get_preferred_height_vfunc(int &minimum_height, int &natural_height)  const override;
+    virtual void get_preferred_width_vfunc(int &minimum_width, int &natural_width) const override;
+    virtual void get_preferred_height_vfunc(int &minimum_height, int &natural_height) const override;
     virtual void get_preferred_width_for_height_vfunc(int width,
-                                                      int& minimum_height,
-                                                      int& natural_height) const override;
+                                                      int &minimum_height,
+                                                      int &natural_height) const override;
     virtual void get_preferred_height_for_width_vfunc(int width,
-                                                     int& minimum_height,
-                                                     int& natural_height) const override;
+                                                      int &minimum_height,
+                                                      int &natural_height) const override;
 
     virtual void on_size_allocate(Gtk::Allocation &allocation) override;
-    virtual bool on_draw(const::Cairo::RefPtr<Cairo::Context> &cr) override;
+    virtual bool on_draw(const ::Cairo::RefPtr<Cairo::Context> &cr) override;
     virtual bool on_button_press_event(GdkEventButton *button_event) override;
     virtual void on_clicked() override;
 
@@ -94,7 +114,7 @@ protected:
     virtual void on_gesture_drag_update(double x, double y);
     virtual void on_gesture_drag_end(double x, double y);
 
-    virtual void on_drag_data_received(const Glib::RefPtr< Gdk::DragContext >& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time) override;
+    virtual void on_drag_data_received(const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, const Gtk::SelectionData &selection_data, guint info, guint time) override;
 
     /**
      * @brief 回调函数: 新窗口打开时调用
@@ -124,26 +144,25 @@ private:
     bool needs_attention();
 
 private:
-    TasklistAppContextMenu *context_menu;               //右键菜单
-    Gtk::StyleProperty<int> indicator_size_property;    //绘制指示器的尺寸
+    TasklistAppContextMenu *context_menu;             //右键菜单
+    Gtk::StyleProperty<int> indicator_size_property;  //绘制指示器的尺寸
 
+    int applet_size;                  //所属插件的尺寸
+    int icon_size;                    //绘制应用图标的尺寸
+    std::shared_ptr<Kiran::App> app;  //关联的app对象
 
-    int applet_size;                                    //所属插件的尺寸
-    int icon_size;                                      //绘制应用图标的尺寸
-    std::shared_ptr<Kiran::App> app;                      //关联的app对象
-
-    AppButtonState state;                               //按钮显示状态
-    bool dragging;                                      //当前是否处于被拖动状态
-    bool pressed;                                       //当前是否处于按下的状态
+    AppButtonState state;  //按钮显示状态
+    bool dragging;         //当前是否处于被拖动状态
+    bool pressed;          //当前是否处于按下的状态
     GdkPoint drag_point;
-    sigc::connection    draw_attention_flicker;         //需要用户注意时的闪烁绘制定时器
-    sigc::connection    draw_attention_normal;          //需要用户注意时的最终绘制定时器
-    std::vector<sigc::connection> windows_state_handlers;   //窗口状态变化信号监控
+    sigc::connection draw_attention_flicker;               //需要用户注意时的闪烁绘制定时器
+    sigc::connection draw_attention_normal;                //需要用户注意时的最终绘制定时器
+    std::vector<sigc::connection> windows_state_handlers;  //窗口状态变化信号监控
 
-    Glib::RefPtr<Gtk::GestureDrag> gesture;                     //拖动的事件
+    Glib::RefPtr<Gtk::GestureDrag> gesture;  //拖动的事件
     sigc::signal<void, bool> m_signal_context_menu_toggled;
     sigc::signal<void, int, int> m_signal_drag_update;
     sigc::signal<void> m_signal_drag_end;
 };
 
-#endif // TASKLIST_APP_BUTTON_H
+#endif  // TASKLIST_APP_BUTTON_H

@@ -1,26 +1,45 @@
+/**
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
+ */
+
 #ifndef TASKLIST_BUTTONS_CONTAINER_H
 #define TASKLIST_BUTTONS_CONTAINER_H
 
+#include <mate-panel-applet.h>
+#include <map>
+#include <vector>
+#include "app-manager.h"
+#include "app.h"
+#include "kiran-helper.h"
 #include "tasklist-app-button.h"
 #include "tasklist-app-previewer.h"
-#include <mate-panel-applet.h>
-#include <vector>
-#include <map>
-#include "app.h"
-#include "app-manager.h"
-#include "kiran-helper.h"
 
-typedef enum {
+typedef enum
+{
     MOTION_DIR_UNKNOWN,
-    MOTION_DIR_LEFT,            /* 往左拖动 */
-    MOTION_DIR_RIGHT,           /* 往右拖动 */
-    MOTION_DIR_UP,              /* 往上拖动 */
-    MOTION_DIR_DOWN             /* 往右拖动 */
+    MOTION_DIR_LEFT,  /* 往左拖动 */
+    MOTION_DIR_RIGHT, /* 往右拖动 */
+    MOTION_DIR_UP,    /* 往上拖动 */
+    MOTION_DIR_DOWN   /* 往右拖动 */
 } PointerMotionDirection;
 
 class TasklistButtonsContainer : public Gtk::Layout
 {
-
 public:
     TasklistButtonsContainer(MatePanelApplet *applet_, int child_spacing = 15);
     ~TasklistButtonsContainer() override;
@@ -49,13 +68,11 @@ public:
      */
     void on_applet_size_change();
 
-
     /**
      * @brief get_applet_size       获取所属插件的尺寸
      * @return  返回插件尺寸
      */
     int get_applet_size() const;
-
 
     /**
      * @brief move_to_next_page     移动并显示下一页的应用按钮
@@ -85,8 +102,6 @@ public:
      */
     sigc::signal<void> signal_page_changed();
 
-
-
 protected:
     virtual void get_preferred_width_vfunc(int &min_width, int &natural_width) const override;
     virtual void get_preferred_height_vfunc(int &min_height, int &natural_height) const override;
@@ -99,7 +114,7 @@ protected:
     virtual void on_unrealize() override;
 
     virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr) override;
-    virtual void on_drag_data_received(const Glib::RefPtr< Gdk::DragContext >& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time) override;
+    virtual void on_drag_data_received(const Glib::RefPtr<Gdk::DragContext> &context, int x, int y, const Gtk::SelectionData &selection_data, guint info, guint time) override;
 
     /**
      * @brief 回调函数，当应用按钮child被拖动时调用
@@ -107,7 +122,7 @@ protected:
      * @param x     拖动后按钮child的x坐标(基于当前控件)
      * @param y     拖动后按钮child的y坐标(基于当前控件)
      */
-    virtual void on_button_drag_motion (Gtk::Widget *child, int x, int y);
+    virtual void on_button_drag_motion(Gtk::Widget *child, int x, int y);
 
     /**
      * @brief 回调函数，当应用按钮child拖放结束时调用
@@ -124,7 +139,6 @@ protected:
      * @brief 初始化分页状态变化的监视器
      */
     virtual void init_paging_monitor();
-
 
     /**
      * @brief put_child_before 将子控件source放到子控件dest之前
@@ -155,7 +169,6 @@ protected:
      */
     virtual bool child_is_before(Gtk::Widget *w1, Gtk::Widget *w2);
 
-
     /**
      * @brief 加载系统已打开应用列表
      */
@@ -167,7 +180,6 @@ protected:
      * @param active    当前活动窗口
      */
     void on_active_window_changed(KiranWindowPointer previous, KiranWindowPointer active);
-
 
     /**
      * @brief 回调函数：当前活动工作区发生变化时调用
@@ -190,7 +202,6 @@ protected:
      */
     void on_window_closed(KiranWindowPointer window);
 
-
     /**
      * @brief 回调函数: 将应用固定到任务栏时调用
      * @param apps   新固定到任务栏的应用列表
@@ -202,7 +213,6 @@ protected:
      * @param apps   不再固定到任务栏的应用列表
      */
     virtual void on_fixed_apps_removed(const Kiran::AppVec &apps);
-
 
     /**
      * @brief 回调函数: 当任务栏应用按钮显示策略发生变化时调用
@@ -233,7 +243,6 @@ protected:
      */
     void check_and_toggle_previewer();
 
-
     /**
      * @brief 设置定时器，延时检查鼠标位置
      */
@@ -243,7 +252,6 @@ protected:
      * @brief 清除检查鼠标位置的定时器
      */
     void stop_pointer_check();
-
 
     /**
      * @brief   find_app_button 查找给定的app对应的应用按钮
@@ -263,7 +271,6 @@ protected:
      * @param   app 需要移除的应用
      */
     void remove_app_button(const KiranAppPointer &app);
-
 
     /**
      * @brief move_previewer 移动预览窗口到指定的应用按钮，并显示该应用的窗口预览信息
@@ -295,7 +302,6 @@ protected:
      */
     void get_child_geometry(Gtk::Widget *child, Gdk::Rectangle &rect);
 
-
     /**
      * @brief get_pointer_position  获取当前鼠标的屏幕坐标
      * @param pointer_x     鼠标X坐标
@@ -314,25 +320,25 @@ private:
     void init_dnd();
 
 private:
-    MatePanelApplet *applet;                //所属的面板插件
-    std::map<KiranAppPointer, TasklistAppButton*> app_buttons; //任务栏应用按钮列表
+    MatePanelApplet *applet;                                     //所属的面板插件
+    std::map<KiranAppPointer, TasklistAppButton *> app_buttons;  //任务栏应用按钮列表
 
-    KiranAppPointer active_app;             //当前活动窗口所属app(cached，不一定是最新的)
-    TasklistAppPreviewer *previewer;        //应用预览窗口
+    KiranAppPointer active_app;       //当前活动窗口所属app(cached，不一定是最新的)
+    TasklistAppPreviewer *previewer;  //应用预览窗口
 
     sigc::signal<void> m_signal_page_changed;
-    int child_spacing;                      //应用按钮间隔
-    int n_child_page;                       //可视区域内的应用按钮个数
+    int child_spacing;  //应用按钮间隔
+    int n_child_page;   //可视区域内的应用按钮个数
 
-    Glib::Property<Gtk::Orientation> m_property_orient;     //应用按钮排列方向
+    Glib::Property<Gtk::Orientation> m_property_orient;  //应用按钮排列方向
 
-    sigc::connection pointer_check;         //预览窗口显示状态切换检查定时器
-    sigc::connection paging_notify;          //应用按钮页面发生变化时的回调函数
-    sigc::connection adjustment_changed;    //分页数据发生变化时的回调函数
+    sigc::connection pointer_check;       //预览窗口显示状态切换检查定时器
+    sigc::connection paging_notify;       //应用按钮页面发生变化时的回调函数
+    sigc::connection adjustment_changed;  //分页数据发生变化时的回调函数
 
     Gtk::Widget *dragging_source;
     Glib::RefPtr<Gdk::Pixbuf> dragging_icon;
     Gdk::Point dragging_pos;
 };
 
-#endif // TASKLIST_BUTTONS_CONTAINER_H
+#endif  // TASKLIST_BUTTONS_CONTAINER_H

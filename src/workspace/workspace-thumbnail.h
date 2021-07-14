@@ -1,21 +1,34 @@
 /**
- * @file workspace-thumbnail.h
- * @brief 工作区缩略图控件
- * @author songchuanfei <songchuanfei@kylinos.com.cn>
- * @copyright (c) 2020 KylinSec. All rights reserved.
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
+
 #ifndef WORKSPACE_THUMBNAIL_INCLUDE_H
 #define WORKSPACE_THUMBNAIL_INCLUDE_H
 
 #include <gtkmm.h>
-#include <auto_ptr.h>
-#include "workspace.h"
 #include "kiran-helper.h"
 #include "kiran-thumbnail-widget.h"
+#include "workspace.h"
 
 #define MATE_DESKTOP_USE_UNSTABLE_API
 #include <libmate-desktop/mate-bg.h>
 
+// 工作区缩略图控件
 class WorkspaceThumbnail : public KiranThumbnailWidget
 {
 public:
@@ -80,21 +93,21 @@ protected:
      * @brief 初始化拖放支持，允许将窗口缩略图拖到工作区缩略图上进行窗口的移动
      */
     void init_drag_and_drop();
-    
+
 private:
-    Glib::RefPtr<Gio::Settings> bg_settings;        /* 桌面背景设置，用于监控桌面壁纸变化 */
-    Glib::RefPtr<Gio::Settings> applet_settings;    /* 工作区切换插件设置 */
-    std::weak_ptr<Kiran::Workspace> workspace;      /* 关联的工作区对象 */
+    Glib::RefPtr<Gio::Settings> bg_settings;     /* 桌面背景设置，用于监控桌面壁纸变化 */
+    Glib::RefPtr<Gio::Settings> applet_settings; /* 工作区切换插件设置 */
+    std::weak_ptr<Kiran::Workspace> workspace;   /* 关联的工作区对象 */
 
-    cairo_surface_t *bg_surface;                    /* 桌面背景 */
-    double surface_scale;                           /* 绘制窗口缩略图时的缩放比例 */
-    int surface_width, surface_height;              /* 缓存的bg_surface的宽度和高度 */
-    int border_width;                               /* 选中时绘制的缩略图图片边框宽度 */
+    cairo_surface_t *bg_surface;       /* 桌面背景 */
+    double surface_scale;              /* 绘制窗口缩略图时的缩放比例 */
+    int surface_width, surface_height; /* 缓存的bg_surface的宽度和高度 */
+    int border_width;                  /* 选中时绘制的缩略图图片边框宽度 */
 
-    Gtk::Widget *thumbnail_area;                    /* 缩略图绘制区域 */
+    Gtk::Widget *thumbnail_area; /* 缩略图绘制区域 */
 
-    bool drop_check;                                /* 当前是否处于拖放检测状态，用于区分motion和drop操作 */
-    bool draw_windows;                              /* 是否在工作区缩略图中绘制窗口缩略图 */
+    bool drop_check;   /* 当前是否处于拖放检测状态，用于区分motion和drop操作 */
+    bool draw_windows; /* 是否在工作区缩略图中绘制窗口缩略图 */
 };
 
 #endif

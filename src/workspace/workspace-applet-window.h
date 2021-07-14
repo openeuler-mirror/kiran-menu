@@ -1,22 +1,34 @@
 /**
- * @file workspace-applet-window.h
- * @brief 工作区切换预览窗口
- *        窗口左侧为工作区列表，右侧显示左侧所选工作区内所有窗口的缩略图
- * @author songchuanfei <songchuanfei@kylinos.com.cn>
- * @copyright (c) 2020 KylinSec. All rights reserved.
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
+
 #ifndef WORKSPACE_APPLET_WINDOW_INCLUDE_H
 #define WORKSPACE_APPLET_WINDOW_INCLUDE_H
 
 #include <gtkmm.h>
+#include <mate-panel-applet.h>
 #include "workspace-thumbnail.h"
 #include "workspace-windows-overview.h"
-#include <mate-panel-applet.h>
 
+// 工作区切换预览窗口 窗口左侧为工作区列表，右侧显示左侧所选工作区内所有窗口的缩略图
 class WorkspaceAppletWindow : public Gtk::Window
 {
 public:
-
     /**
      * @brief 构造函数
      */
@@ -72,14 +84,13 @@ protected:
 private:
     Glib::RefPtr<Gtk::Builder> builder;
 
-    Gtk::Box *main_layout;                                  /* 窗口布局 */
+    Gtk::Box *main_layout; /* 窗口布局 */
     Gtk::Box *left_layout, *right_layout;
-    WorkspaceWindowsOverview overview_area;                 /* 窗口缩略图显示区域 */
+    WorkspaceWindowsOverview overview_area; /* 窗口缩略图显示区域 */
 
-
-    MatePanelApplet *applet;                                /* 关联的面板插件 */
-    std::map<int, WorkspaceThumbnail*> workspaces_table;    /* 工作区编号到工作区缩略图控件的映射表 */
-    int selected_workspace;                                 /* 当前选择显示的工作区编号 */
+    MatePanelApplet *applet;                              /* 关联的面板插件 */
+    std::map<int, WorkspaceThumbnail *> workspaces_table; /* 工作区编号到工作区缩略图控件的映射表 */
+    int selected_workspace;                               /* 当前选择显示的工作区编号 */
 };
 
-#endif // WORKSPACE_APPLET_WINDOW_INCLUDE_H
+#endif  // WORKSPACE_APPLET_WINDOW_INCLUDE_H

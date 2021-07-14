@@ -1,3 +1,22 @@
+/**
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
+ */
+
 #ifndef TASKLISTAPPLETWIDGET_H
 #define TASKLISTAPPLETWIDGET_H
 
@@ -30,7 +49,6 @@ protected:
      */
     void update_paging_buttons_state();
 
-
     /**
      * @brief create_paging_button 创建分页按钮
      * @param icon_resource        按钮图标的资源路径
@@ -39,14 +57,13 @@ protected:
      */
     Gtk::Button *create_paging_button(std::string icon_resource, std::string tooltip_text);
 
-
 private:
-    Gtk::Box button_box;                    //分页按钮所在布局
-    Gtk::Button *prev_btn, *next_btn;       //分页按钮
-    TasklistButtonsContainer container;     //按钮容器
+    Gtk::Box button_box;                 //分页按钮所在布局
+    Gtk::Button *prev_btn, *next_btn;    //分页按钮
+    TasklistButtonsContainer container;  //按钮容器
 
-    MatePanelApplet *applet;                //所属插件
-    sigc::connection paging_check;          //分页按钮状态更新
+    MatePanelApplet *applet;        //所属插件
+    sigc::connection paging_check;  //分页按钮状态更新
 };
 
-#endif // TASKLISTAPPLETWIDGET_H
+#endif  // TASKLISTAPPLETWIDGET_H

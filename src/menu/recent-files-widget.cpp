@@ -1,14 +1,26 @@
 /**
- * @file          /kiran-menu/src/menu/recent-files-widget.cpp
- * @brief 最近访问文档列表页面
- * @author songchuanfei <songchuanfei@kylinos.com.cn>
- * @copyright (c) 2021 KylinSec. All rights reserved.
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
+
 #include "recent-files-widget.h"
 #include <glibmm/i18n.h>
 
-RecentFilesWidget::RecentFilesWidget():
-    box(Gtk::ORIENTATION_VERTICAL, 0)
+RecentFilesWidget::RecentFilesWidget() : box(Gtk::ORIENTATION_VERTICAL, 0)
 {
     init_ui();
     auto manager = Gtk::RecentManager::get_default();
@@ -17,7 +29,7 @@ RecentFilesWidget::RecentFilesWidget():
         sigc::mem_fun(*this, &RecentFilesWidget::on_recent_list_changed));
 }
 
-void RecentFilesWidget::init_ui() 
+void RecentFilesWidget::init_ui()
 {
     empty_label.set_text(_("The Recently files list is empty!"));
     empty_label.get_style_context()->add_class("empty-prompt-text");
@@ -32,7 +44,7 @@ void RecentFilesWidget::init_ui()
 
     on_recent_list_changed();
     box.show_all();
-    add(box); 
+    add(box);
 
     search_entry.set_placeholder_text(_("Search files"));
     search_entry.get_style_context()->add_class("menu-search-entry");
@@ -40,19 +52,26 @@ void RecentFilesWidget::init_ui()
         sigc::mem_fun(*this, &RecentFilesWidget::on_search_changed));
 }
 
-void RecentFilesWidget::on_recent_list_changed() 
+void RecentFilesWidget::on_recent_list_changed()
 {
     auto manager = Gtk::RecentManager::get_default();
-    if (manager->get_items().size() != 0) {
-        if (list.get_parent() == nullptr) {
-            if (scrolled.get_child() != nullptr) {
+    if (manager->get_items().size() != 0)
+    {
+        if (list.get_parent() == nullptr)
+        {
+            if (scrolled.get_child() != nullptr)
+            {
                 scrolled.remove();
             }
             scrolled.add(list);
         }
-    } else {
-        if (empty_label.get_parent() == nullptr) {
-            if (scrolled.get_child() != nullptr) {
+    }
+    else
+    {
+        if (empty_label.get_parent() == nullptr)
+        {
+            if (scrolled.get_child() != nullptr)
+            {
                 scrolled.remove();
             }
             scrolled.add(empty_label);
@@ -62,9 +81,9 @@ void RecentFilesWidget::on_recent_list_changed()
     scrolled.show_all();
 }
 
-void RecentFilesWidget::on_search_changed() 
+void RecentFilesWidget::on_search_changed()
 {
-    auto text = search_entry.get_text();    
+    auto text = search_entry.get_text();
 
     list.set_filter_pattern(Glib::ustring::compose("*%1*", text));
 }

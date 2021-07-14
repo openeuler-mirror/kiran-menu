@@ -1,16 +1,30 @@
 /**
- * @file workspace-windows-overview.h
- * @brief 工作区预览窗口中窗口缩略图显示区域控件
- * @author songchuanfei <songchuanfei@kylinos.com.cn>
- * @copyright (c) 2020 KylinSec. All rights reserved.
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
+
 #ifndef WORKSPACEWINDOWSOVERVIEW_H
 #define WORKSPACEWINDOWSOVERVIEW_H
 
 #include <gtkmm.h>
-#include "workspace-manager.h"
 #include "kiran-helper.h"
+#include "workspace-manager.h"
 
+// 工作区预览窗口中窗口缩略图显示区域控件
 class WorkspaceWindowsOverview : public Gtk::EventBox
 {
 public:
@@ -68,14 +82,14 @@ protected:
                        int view_height);
 
 private:
-    std::weak_ptr<Kiran::Workspace> workspace;      /* 当前显示的工作区 */
-    Gtk::Allocation old_allocation;                 /* 缓存的显示区域大小 */
-    sigc::connection reload_handler;                /* 缩略图加载处理器，用来避免重复加载 */
+    std::weak_ptr<Kiran::Workspace> workspace; /* 当前显示的工作区 */
+    Gtk::Allocation old_allocation;            /* 缓存的显示区域大小 */
+    sigc::connection reload_handler;           /* 缩略图加载处理器，用来避免重复加载 */
 
-    Gtk::Box layout;                                /* 窗口布局 */
+    Gtk::Box layout; /* 窗口布局 */
 
-    int row_spacing, column_spacing;                /* 缩略图之间横向间距和纵向间距 */
-    int max_rows;                                   /* 缩略图显示的最大行数 */
+    int row_spacing, column_spacing; /* 缩略图之间横向间距和纵向间距 */
+    int max_rows;                    /* 缩略图显示的最大行数 */
 };
 
-#endif // WORKSPACEWINDOWSOVERVIEW_H
+#endif  // WORKSPACEWINDOWSOVERVIEW_H

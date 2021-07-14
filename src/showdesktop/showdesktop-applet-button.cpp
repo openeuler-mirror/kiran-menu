@@ -1,14 +1,32 @@
-#include <screen-manager.h>
-#include "showdesktop-applet-button.h"
+/**
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
+ */
 
-ShowDesktopAppletButton::ShowDesktopAppletButton(MatePanelApplet *applet_):
-    applet(applet_)
+#include "showdesktop-applet-button.h"
+#include <screen-manager.h>
+
+ShowDesktopAppletButton::ShowDesktopAppletButton(MatePanelApplet *applet_) : applet(applet_)
 {
     Kiran::ScreenManager::get_instance()->signal_show_desktop_changed().connect(
-                sigc::mem_fun(*this, &ShowDesktopAppletButton::on_show_desktop_changed));
+        sigc::mem_fun(*this, &ShowDesktopAppletButton::on_show_desktop_changed));
 
     property_active().signal_changed().connect(
-                sigc::mem_fun(*this, &ShowDesktopAppletButton::on_toggled));
+        sigc::mem_fun(*this, &ShowDesktopAppletButton::on_toggled));
 
     get_style_context()->add_class("kiran-showdesktop-button");
 }

@@ -1,10 +1,20 @@
-/*
- * @Author       : tangjie02
- * @Date         : 2020-07-09 11:03:30
- * @LastEditors  : tangjie02
- * @LastEditTime : 2020-07-09 14:31:25
- * @Description  : 
- * @FilePath     : /kiran-menu-2.0/lib/taskbar-skeleton.h
+/**
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     tangjie02 <tangjie02@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "lib/app-manager.h"
@@ -13,13 +23,14 @@ namespace Kiran
 {
 class TaskBarSkeleton
 {
-
 public:
-    typedef enum {
-        POLICY_SHOW_ALL,                /* 显示所有工作区的应用窗口 */
-        POLICY_SHOW_ACTIVE_WORKSPACE,   /* 仅显示当前工作区的应用窗口 */
+    typedef enum
+    {
+        POLICY_SHOW_ALL,              /* 显示所有工作区的应用窗口 */
+        POLICY_SHOW_ACTIVE_WORKSPACE, /* 仅显示当前工作区的应用窗口 */
         POLICY_INVALID
     } AppShowPolicy;
+
 public:
     TaskBarSkeleton(AppManager *app_manager);
     virtual ~TaskBarSkeleton();
@@ -51,7 +62,7 @@ public:
     sigc::signal<void, AppVec> &signal_fixed_app_deleted() { return this->fixed_app_deleted_; };
 
     /* 应用按钮显示策略变化信号 */
-    sigc::signal<void> &signal_app_show_policy_changed() { return this->app_show_policy_changed_;}
+    sigc::signal<void> &signal_app_show_policy_changed() { return this->app_show_policy_changed_; }
 
 private:
     void init();

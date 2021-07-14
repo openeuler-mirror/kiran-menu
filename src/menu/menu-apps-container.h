@@ -1,27 +1,40 @@
 /**
- * @file
- * @author
- * @brief
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #ifndef __MENU_APPS_CONTAINER_H__
 #define __MENU_APPS_CONTAINER_H__
 
-#include <gtkmm.h>
 #include <app.h>
-#include "menu-profile.h"
+#include <gtkmm.h>
 #include "menu-app-item.h"
 #include "menu-category-item.h"
-
-
+#include "menu-profile.h"
 
 class MenuAppsContainer : public Gtk::Box
 {
 public:
-    enum AppIconMode {
-        ICON_MODE_SMALL,        /* 小图标，应用名称在图标的右侧 */
-        ICON_MODE_LARGE         /* 大图标，应用名称在图标的下方 */
+    enum AppIconMode
+    {
+        ICON_MODE_SMALL, /* 小图标，应用名称在图标的右侧 */
+        ICON_MODE_LARGE  /* 大图标，应用名称在图标的下方 */
     };
+
 public:
     /**
      * @brief 构造函数
@@ -61,13 +74,11 @@ public:
      */
     Glib::ustring get_category_name() const;
 
-    
     /**
      * @brief get_category_clickable 检查分类标签是否可以点击
      * @return 分类标签可以点击返回true,否则返回false
      */
     bool get_category_clickable() const;
-
 
     /**
      * @brief load_applications 加载并显示给定的apps应用列表
@@ -114,10 +125,10 @@ private:
     Gtk::ScrolledWindow scrolled_area;
     Gtk::FlowBox apps_box;
 
-    AppIconMode icon_mode;              /* 应用图标显示方式 */
-    Glib::ustring empty_prompt_text;    /* 应用列表为空时的提示文本 */
-    bool auto_hide;                     /* app列表为空时是否要自动隐藏 */
-    bool auto_scroll;                   /* 是否需要自动滚动 */
+    AppIconMode icon_mode;           /* 应用图标显示方式 */
+    Glib::ustring empty_prompt_text; /* 应用列表为空时的提示文本 */
+    bool auto_hide;                  /* app列表为空时是否要自动隐藏 */
+    bool auto_scroll;                /* 是否需要自动滚动 */
 };
 
-#endif // __MENU_APPS_CONTAINER_H__
+#endif  // __MENU_APPS_CONTAINER_H__

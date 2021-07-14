@@ -1,16 +1,20 @@
 /**
- * @file kiran-thumbnail-widget.h
- * @brief 带标题栏和缩略图区域的缩略图控件
- *        |---------------------------------|
- *        | icon | title              |  X  |
- *        |---------------------------------|
- *        |                                 |
- *        |       thumbnail image           |
- *        |                                 |
- *        |---------------------------------|
- * 
- * @author songchuanfei <songchuanfei@kylinos.com.cn>
- * @copyright (c) 2020 KylinSec. All rights reserved.
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #ifndef KIRAN_THUMBNAIL_WIDGET_INCLUDE_H
@@ -19,7 +23,17 @@
 #include <gtkmm.h>
 #include "kiran-helper.h"
 
-class KiranThumbnailWidget: public Gtk::Button
+/*带标题栏和缩略图区域的缩略图控件
+ *        |---------------------------------|
+ *        | icon | title              |  X  |
+ *        |---------------------------------|
+ *        |                                 |
+ *        |       thumbnail image           |
+ *        |                                 |
+ *        |---------------------------------|
+ */
+
+class KiranThumbnailWidget : public Gtk::Button
 {
 public:
     KiranThumbnailWidget();
@@ -49,8 +63,8 @@ public:
     void set_show_icon(bool show);
 
 protected:
-    virtual bool on_enter_notify_event(GdkEventCrossing* crossing_event) override;
-    virtual bool on_leave_notify_event(GdkEventCrossing* crossing_event) override;
+    virtual bool on_enter_notify_event(GdkEventCrossing *crossing_event) override;
+    virtual bool on_leave_notify_event(GdkEventCrossing *crossing_event) override;
     virtual void on_clicked() override;
 
     /**
@@ -69,7 +83,6 @@ protected:
      */
     virtual bool draw_thumbnail_image(Gtk::Widget *snapshot_area, const Cairo::RefPtr<Cairo::Context> &cr) = 0;
 
-
     /**
      * @brief 回调函数，关闭按钮点击时调用
      */
@@ -79,7 +92,6 @@ protected:
      * @brief 回调函数，缩略图点击时调用
      */
     virtual void on_thumbnail_clicked() = 0;
-
 
     /**
      * @brief 初始化界面
@@ -104,16 +116,14 @@ protected:
 private:
     Glib::RefPtr<Gtk::Builder> builder;
 
-    Gtk::Grid *layout;                  /* 整体布局 */
-    Gtk::Label *title_label;            /* 标题标签 */
-    Gtk::DrawingArea *icon_area;        /* 图标绘制区域 */
-    Gtk::DrawingArea *thumbnail_area;   /* 缩略图绘制区域 */
-    Gtk::Button *close_button;       /* 关闭按钮绘制区域 */
+    Gtk::Grid *layout;                /* 整体布局 */
+    Gtk::Label *title_label;          /* 标题标签 */
+    Gtk::DrawingArea *icon_area;      /* 图标绘制区域 */
+    Gtk::DrawingArea *thumbnail_area; /* 缩略图绘制区域 */
+    Gtk::Button *close_button;        /* 关闭按钮绘制区域 */
 
-
-    bool show_close_button;             /* 是否绘制关闭按钮 */
-    bool show_icon_image;               /* 是否绘制图标 */
+    bool show_close_button; /* 是否绘制关闭按钮 */
+    bool show_icon_image;   /* 是否绘制图标 */
 };
-
 
 #endif

@@ -1,10 +1,31 @@
+/**
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
+ */
+
 #ifndef TASKLIST_APP_PREVIEWER_H
 #define TASKLIST_APP_PREVIEWER_H
 
 #include <gtkmm.h>
-#include <X11/Xlib.h>
 #include "tasklist-window-previewer.h"
+//
 #include "tasklist-app-button.h"
+//
+#include <X11/Xlib.h>
 #include "app.h"
 
 #define DEBUG
@@ -63,7 +84,6 @@ public:
      */
     bool contains_pointer() const;
 
-
     /**
      * @brief get_scrollbar            根据缩略图排列方向获取窗口内的对应滚动条
      * @return  返回获取到的滚动条
@@ -82,7 +102,6 @@ protected:
      * @param active    缩略图右键菜单是否打开
      */
     virtual void on_child_context_menu_toggled(bool active);
-
 
     /**
      * @brief init_ui      初始化界面
@@ -105,16 +124,15 @@ protected:
      */
     void set_position(Gtk::PositionType pos);
 
-
 private:
     Gtk::ScrolledWindow scroll_window;
     Gtk::Box box;
 
-    TasklistAppButton *relative_to;     /* 所属的应用按钮 */
-    Gtk::PositionType position;         /* 相对于所属的应用按钮的显示位置 */
+    TasklistAppButton *relative_to; /* 所属的应用按钮 */
+    Gtk::PositionType position;     /* 相对于所属的应用按钮的显示位置 */
 
-    std::weak_ptr<Kiran::App> app;      /* 所属的应用 */
-    std::map<unsigned long, TasklistWindowPreviewer*> win_previewers; /* 窗口XID和缩略图之间的映射表 */
+    std::weak_ptr<Kiran::App> app;                                     /* 所属的应用 */
+    std::map<unsigned long, TasklistWindowPreviewer *> win_previewers; /* 窗口XID和缩略图之间的映射表 */
 
     /**
      * @brief load_windows_list 加载所属应用的已打开窗口缩略图
@@ -129,4 +147,4 @@ private:
     static const int border_spacing;
 };
 
-#endif // TASKLIST_APP_PREVIEWER_H
+#endif  // TASKLIST_APP_PREVIEWER_H

@@ -1,16 +1,33 @@
+/**
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
+ */
+
 #include "menu-list-item-widget.h"
 #include <iostream>
 
-
 MenuListItemWidget::MenuListItemWidget(const std::string &icon_resource,
-                                     const std::string &text,
-                                     Gtk::Orientation orient,
-                                     int icon_size):
-    Glib::ObjectBase("KiranMenuListItem"),
-    box(orient),
-    space_property(*this, "icon-spacing", 0),
-    max_width_property(*this, "max-width", G_MAXINT32),
-    max_height_property(*this, "max-height", G_MAXINT32)
+                                       const std::string &text,
+                                       Gtk::Orientation orient,
+                                       int icon_size) : Glib::ObjectBase("KiranMenuListItem"),
+                                                        box(orient),
+                                                        space_property(*this, "icon-spacing", 0),
+                                                        max_width_property(*this, "max-width", G_MAXINT32),
+                                                        max_height_property(*this, "max-height", G_MAXINT32)
 {
     init_ui();
     set_text(text);
@@ -19,25 +36,23 @@ MenuListItemWidget::MenuListItemWidget(const std::string &icon_resource,
     on_orient_changed();
 }
 
-MenuListItemWidget::MenuListItemWidget(int icon_size, Gtk::Orientation orient):
-    Glib::ObjectBase("KiranMenuListItem"),
-    box(orient),
-    space_property(*this, "icon-spacing", 0),
-    max_width_property(*this, "max-width", G_MAXINT32),
-    max_height_property(*this, "max-height", G_MAXINT32)
+MenuListItemWidget::MenuListItemWidget(int icon_size, Gtk::Orientation orient) : Glib::ObjectBase("KiranMenuListItem"),
+                                                                                 box(orient),
+                                                                                 space_property(*this, "icon-spacing", 0),
+                                                                                 max_width_property(*this, "max-width", G_MAXINT32),
+                                                                                 max_height_property(*this, "max-height", G_MAXINT32)
 {
     init_ui();
 }
 
 MenuListItemWidget::MenuListItemWidget(const Glib::RefPtr<Gio::Icon> &gicon,
-                                     const std::string &text,
-                                     Gtk::Orientation orient,
-                                     int icon_size):
-    Glib::ObjectBase("KiranMenuListItem"),
-    box(orient),
-    space_property(*this, "icon-spacing", 0),
-    max_width_property(*this, "max-width", G_MAXINT32),
-    max_height_property(*this, "max-height", G_MAXINT32)
+                                       const std::string &text,
+                                       Gtk::Orientation orient,
+                                       int icon_size) : Glib::ObjectBase("KiranMenuListItem"),
+                                                        box(orient),
+                                                        space_property(*this, "icon-spacing", 0),
+                                                        max_width_property(*this, "max-width", G_MAXINT32),
+                                                        max_height_property(*this, "max-height", G_MAXINT32)
 {
     init_ui();
     set_text(text);
@@ -50,8 +65,7 @@ void MenuListItemWidget::on_style_updated()
     Gtk::Button::on_style_updated();
 }
 
-
-bool MenuListItemWidget::on_draw(const::Cairo::RefPtr<Cairo::Context> &cr)
+bool MenuListItemWidget::on_draw(const ::Cairo::RefPtr<Cairo::Context> &cr)
 {
     auto context = get_style_context();
     Gtk::Allocation allocation;
@@ -77,7 +91,7 @@ void MenuListItemWidget::on_orient_changed()
         set_hexpand(false);
 }
 
-void MenuListItemWidget::get_preferred_width_vfunc(int &minimum_width,int &natural_width) const
+void MenuListItemWidget::get_preferred_width_vfunc(int &minimum_width, int &natural_width) const
 {
     Gtk::Border padding, margin;
     int child_minimal_width, child_natural_width;
@@ -86,7 +100,8 @@ void MenuListItemWidget::get_preferred_width_vfunc(int &minimum_width,int &natur
     padding = context->get_padding();
     margin = context->get_margin();
 
-    do {
+    do
+    {
         //使用C接口读取CSS中的min-width和min-height设置
         GValue value = G_VALUE_INIT;
         GtkStyleContext *c_context = context.get()->gobj();
@@ -94,7 +109,7 @@ void MenuListItemWidget::get_preferred_width_vfunc(int &minimum_width,int &natur
         gtk_style_context_get_property(c_context, "min-width", gtk_widget_get_state_flags(GTK_WIDGET(gobj())), &value);
         minimum_width = g_value_get_int(&value);
         g_value_unset(&value);
-    } while(0);
+    } while (0);
 
     box.get_preferred_width(child_minimal_width, child_natural_width);
     if (!minimum_width)
@@ -107,13 +122,13 @@ void MenuListItemWidget::get_preferred_width_vfunc(int &minimum_width,int &natur
     if (minimum_width > max_width_property.get_value())
         minimum_width = max_width_property.get_value();
 
-    if (natural_width < minimum_width)      //默认尺寸不能小于最小尺寸
+    if (natural_width < minimum_width)  //默认尺寸不能小于最小尺寸
         natural_width = minimum_width;
 
     if (natural_width > max_width_property.get_value())
         natural_width = max_width_property.get_value();
 }
-void MenuListItemWidget::get_preferred_height_vfunc(int &minimum_height,int &natural_height) const
+void MenuListItemWidget::get_preferred_height_vfunc(int &minimum_height, int &natural_height) const
 {
     Gtk::Border padding, margin;
     int child_minimal_height, child_natural_height;
@@ -122,14 +137,15 @@ void MenuListItemWidget::get_preferred_height_vfunc(int &minimum_height,int &nat
     padding = context->get_padding();
     margin = context->get_margin();
 
-    do {
+    do
+    {
         GValue value = G_VALUE_INIT;
         GtkStyleContext *c_context = context.get()->gobj();
 
         gtk_style_context_get_property(c_context, "min-height", gtk_widget_get_state_flags(GTK_WIDGET(gobj())), &value);
         minimum_height = g_value_get_int(&value);
         g_value_unset(&value);
-    } while(0);
+    } while (0);
 
     box.get_preferred_height(child_minimal_height, child_natural_height);
 
