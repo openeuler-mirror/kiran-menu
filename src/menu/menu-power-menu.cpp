@@ -1,9 +1,9 @@
 #include "menu-power-menu.h"
-#include "kiran-power.h"
 #include <glibmm/i18n.h>
 #include <iostream>
-#include "kiran-helper.h"
 #include "global.h"
+#include "kiran-helper.h"
+#include "kiran-power.h"
 
 MenuPowerMenu::MenuPowerMenu()
 {
@@ -12,7 +12,8 @@ MenuPowerMenu::MenuPowerMenu()
         sigc::ptr_fun(&KiranPower::lock_screen)));
     append(*lock_item);
 
-    if (KiranPower::can_switchuser()) {
+    if (KiranPower::can_switchuser())
+    {
         switchuser_item = Gtk::make_managed<Gtk::MenuItem>(_("Switch user"));
         switchuser_item->signal_activate().connect(sigc::hide_return(
             sigc::ptr_fun(&KiranPower::switch_user)));
@@ -25,7 +26,8 @@ MenuPowerMenu::MenuPowerMenu()
         sigc::bind<int>(sigc::ptr_fun(&KiranPower::logout), LOGOUT_MODE_NOW)));
     append(*logout_item);
 
-    if (KiranPower::can_suspend()) {
+    if (KiranPower::can_suspend())
+    {
         suspend_item = Gtk::make_managed<Gtk::MenuItem>(_("Suspend"));
         suspend_item->signal_activate().connect(sigc::hide_return(
             sigc::ptr_fun(&KiranPower::suspend)));
@@ -33,7 +35,8 @@ MenuPowerMenu::MenuPowerMenu()
         append(*suspend_item);
     }
 
-    if (KiranPower::can_hibernate()) {
+    if (KiranPower::can_hibernate())
+    {
         hibernate_item = Gtk::make_managed<Gtk::MenuItem>(_("Hibernate"));
         hibernate_item->signal_activate().connect(sigc::hide_return(
             sigc::ptr_fun(&KiranPower::hibernate)));
@@ -41,21 +44,25 @@ MenuPowerMenu::MenuPowerMenu()
         append(*hibernate_item);
     }
 
-
-    if (KiranPower::can_reboot()) {
+    if (KiranPower::can_reboot())
+    {
         reboot_item = Gtk::make_managed<Gtk::MenuItem>(_("Reboot"));
         reboot_item->signal_activate().connect(
             sigc::hide_return(sigc::ptr_fun(&KiranPower::reboot)));
         append(*reboot_item);
     }
 
-    shutdown_item = Gtk::make_managed<Gtk::MenuItem>(_("Shutdown"));
-    shutdown_item->signal_activate().connect(
-        sigc::hide_return(sigc::ptr_fun(&KiranPower::shutdown)));
-    append(*shutdown_item);
+    // if (KiranPower::can_shutdown())
+    {
+        shutdown_item = Gtk::make_managed<Gtk::MenuItem>(_("Shutdown"));
+        shutdown_item->signal_activate().connect(
+            sigc::hide_return(sigc::ptr_fun(&KiranPower::shutdown)));
+        append(*shutdown_item);
+    }
 
-    for (auto child: get_children()) {
-        Gtk::MenuItem *item = dynamic_cast<Gtk::MenuItem*>(child);
+    for (auto child : get_children())
+    {
+        Gtk::MenuItem *item = dynamic_cast<Gtk::MenuItem *>(child);
         //点击电源菜单选项后收起开始菜单窗口
         item->signal_activate().connect(
             sigc::mem_fun(*this, &MenuPowerMenu::hide_menu_window));
