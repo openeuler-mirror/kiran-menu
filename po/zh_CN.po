@@ -366,3 +366,6 @@ msgstr "收藏夹列表为空"
 
 msgid "Preferences"
 msgstr "首选项"
+
+msgid "_About"
+msgstr "关于"
