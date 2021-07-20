@@ -247,18 +247,20 @@ bool KiranPower::can_shutdown()
 {
     try
     {
-        Glib::RefPtr<Gio::DBus::Proxy> proxy = Gio::DBus::Proxy::create_for_bus_sync(Gio::DBus::BUS_TYPE_SESSION,
-                                                                                     SESSION_MANAGER_DBUS,
-                                                                                     SESSION_MANAGER_PATH,
-                                                                                     SESSION_MANAGER_INTERFACE);
+        Glib::RefPtr<Gio::DBus::Proxy> proxy = Gio::DBus::Proxy::create_for_bus_sync(Gio::DBus::BUS_TYPE_SYSTEM,
+                                                                                     LOGIN_MANAGER_DBUS,
+                                                                                     LOGIN_MANAGER_PATH,
+                                                                                     LOGIN_MANAGER_INTERFACE);
 
-        auto result = proxy->call_sync("CanShutdown").get_child();
-        return Glib::VariantBase::cast_dynamic<Glib::Variant<bool>>(result).get();
+        auto result = proxy->call_sync("CanPowerOff").get_child();
+        auto data = Glib::VariantBase::cast_dynamic<Glib::Variant<Glib::ustring>>(result).get();
+
+        return (data == "yes");
     }
     catch (const Gio::DBus::Error &e)
     {
         //如果获取失败，就假设其可以关机，由关机操作调用时做检查
-        KLOG_WARNING("Failed to query CanShutdown: %s", e.what().c_str());
+        KLOG_WARNING("Failed to query CanPowerOff: %s", e.what().c_str());
         return true;
     }
 }

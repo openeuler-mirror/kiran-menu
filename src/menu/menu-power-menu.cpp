@@ -71,7 +71,7 @@ MenuPowerMenu::MenuPowerMenu()
         append(*reboot_item);
     }
 
-    // if (KiranPower::can_shutdown())
+    if (KiranPower::can_shutdown())
     {
         shutdown_item = Gtk::make_managed<Gtk::MenuItem>(_("Shutdown"));
         shutdown_item->signal_activate().connect(
