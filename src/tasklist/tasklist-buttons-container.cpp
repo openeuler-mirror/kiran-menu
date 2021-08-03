@@ -422,7 +422,7 @@ void TasklistButtonsContainer::on_window_closed(KiranWindowPointer window)
                 remove_app_button(app);
             else
             {
-                app_button->set_tooltip_text(app->get_name());
+                app_button->set_tooltip_text(app->get_locale_name());
                 app_button->queue_draw();
             }
         }
