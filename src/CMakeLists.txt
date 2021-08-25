@@ -25,7 +25,7 @@ else()
     pkg_search_module(ACCOUNTSSERVICE REQUIRED accountsservice)
 endif()
 
-install(TARGETS ${TARGET_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/libexec/mate-panel/")
+install(TARGETS ${TARGET_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/libexec/${PANEL_NAME}/")
 
 include(CheckIncludeFiles)
 
@@ -59,7 +59,7 @@ include_directories(${CMAKE_BINARY_DIR})
 
 target_compile_options(${TARGET_NAME} PUBLIC -g "-L${PROJECT_BINARY_DIR}/lib" -DG_LOG_DOMAIN=\"${TARGET_NAME}\")
 target_include_directories(${TARGET_NAME} PUBLIC "${PROJECT_SOURCE_DIR}/lib"
-            "${MATEPANEL_INCLUDE_DIRS}"
+            "${PANEL_INCLUDE_DIRS}"
             "${GTKMM_INCLUDE_DIRS}"
             "${MATEDESKTOP_INCLUDE_DIRS}"
             "${ACCOUNTSSERVICE_INCLUDE_DIRS}"
@@ -73,7 +73,7 @@ target_include_directories(${TARGET_NAME} PUBLIC "${PROJECT_SOURCE_DIR}/lib"
             "${PROJECT_SOURCE_DIR}/src/common"
             "${PROJECT_BINARY_DIR}/src")
 
-target_link_libraries(${TARGET_NAME} PUBLIC "${MATEPANEL_LIBRARIES}"
+target_link_libraries(${TARGET_NAME} PUBLIC "${PANEL_LIBRARIES}"
             "${GTKMM_LIBRARIES}"
             "${MATEDESKTOP_LIBRARIES}"
             "${ACCOUNTSSERVICE_LIBRARIES}"
