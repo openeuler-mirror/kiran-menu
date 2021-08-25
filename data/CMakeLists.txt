@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 configure_file(org.mate.panel.KiranApplet.mate-panel-applet.in org.mate.panel.KiranApplet.mate-panel-applet)
 configure_file(org.mate.panel.applet.KiranAppletFactory.service.in org.mate.panel.applet.KiranAppletFactory.service)
+configure_file(org.kiran.panel.applet.KiranAppletFactory.service.in org.kiran.panel.applet.KiranAppletFactory.service)
 
 message("-- Checking for program 'glib-compile-resources'")
 find_program(COMPILE_RESOURCE NAMES "glib-compile-resources")
@@ -13,10 +14,15 @@ install(FILES ${PROJECT_BINARY_DIR}/data/kiran-applet.gresource
 	DESTINATION "${CMAKE_INSTALL_PREFIX}/share/${CMAKE_PROJECT_NAME}")
 
 install(FILES ${PROJECT_BINARY_DIR}/data/org.mate.panel.KiranApplet.mate-panel-applet
-        DESTINATION "${CMAKE_INSTALL_PREFIX}/share/mate-panel/applets")
-    
-install(FILES ${PROJECT_BINARY_DIR}/data/org.mate.panel.applet.KiranAppletFactory.service
-        DESTINATION "${CMAKE_INSTALL_PREFIX}/share/dbus-1/services")
+        DESTINATION "${CMAKE_INSTALL_PREFIX}/share/${PANEL_NAME}/applets")
+
+if (KIRAN_DESKTOP)
+    install(FILES ${PROJECT_BINARY_DIR}/data/org.kiran.panel.applet.KiranAppletFactory.service
+            DESTINATION "${CMAKE_INSTALL_PREFIX}/share/dbus-1/services")
+else ()
+    install(FILES ${PROJECT_BINARY_DIR}/data/org.mate.panel.applet.KiranAppletFactory.service
+            DESTINATION "${CMAKE_INSTALL_PREFIX}/share/dbus-1/services")
+endif ()
 
 install(FILES "com.kylinsec.kiran.startmenu.gschema.xml.in" 
     DESTINATION  ${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas/
