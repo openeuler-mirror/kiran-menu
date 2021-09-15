@@ -69,6 +69,7 @@ target_include_directories(${TARGET_NAME} PUBLIC "${PROJECT_SOURCE_DIR}/lib"
             "${LIBXML2_INCLUDE_DIRS}"
             "${GOBJECT2_INCLUDE_DIRS}"
             "${GLIB2_INCLUDE_DIRS}"
+	    "${FMT_INCLUDE_DIRS}"
             "${PROJECT_SOURCE_DIR}"
             "${PROJECT_SOURCE_DIR}/src/common"
             "${PROJECT_BINARY_DIR}/src")
@@ -82,6 +83,7 @@ target_link_libraries(${TARGET_NAME} PUBLIC "${MATEPANEL_LIBRARIES}"
             "${GOBJECT2_LIBRARIES}"
             "${GLIB2_LIBRARIES}"
             "${KLOG_GTK3_LIBRARIES}"
+	    "${FMT_LIBRARIES}"
             "X11"
             "m")
 
