@@ -529,7 +529,7 @@ update(KiranSnIcon *icon)
             if (pixbuf && icon_size > 1)
             {
                 /*An icon specified by path and filename may be the wrong size for the tray */
-                pixbuf = gdk_pixbuf_scale_simple(pixbuf, icon_size - 2, icon_size - 2, GDK_INTERP_BILINEAR);
+                pixbuf = gdk_pixbuf_scale_simple(pixbuf, scale * icon_size - 2, scale * icon_size - 2, GDK_INTERP_BILINEAR);
             }
         }
         if (!pixbuf)
@@ -537,8 +537,12 @@ update(KiranSnIcon *icon)
             /*deal with missing icon or failure to load icon*/
             pixbuf = get_icon_by_name("image-missing", icon_size);
         }
-        gtk_image_set_from_pixbuf_with_scale(GTK_IMAGE(priv->image), pixbuf, scale);
-        g_object_unref(pixbuf);
+
+	if (pixbuf)
+	{
+            gtk_image_set_from_pixbuf (GTK_IMAGE(priv->image), pixbuf);
+            g_object_unref(pixbuf);
+	}
 
         g_free(priv->icon);
         priv->icon = g_strdup(priv->icon_name);
