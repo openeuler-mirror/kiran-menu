@@ -56,9 +56,15 @@ void MenuAppsContainer::set_auto_hide(bool auto_hide_)
 void MenuAppsContainer::set_draw_frame(bool draw_frame_)
 {
     if (draw_frame_)
+    {
+        get_style_context()->add_class("container-color-1");
         get_style_context()->add_class("menu-section-box");
+    }
     else
+    {
+        get_style_context()->remove_class("container-color-1");
         get_style_context()->remove_class("menu-section-box");
+    }
 }
 
 void MenuAppsContainer::set_empty_prompt_text(const Glib::ustring &text)

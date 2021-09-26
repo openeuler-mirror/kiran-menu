@@ -44,6 +44,7 @@ struct _KiranTrayPrivate
     KiranTrayLoaction location;
 };
 
+static void kiran_tray_finalize(GObject *object);
 static GObject *kiran_tray_constructor(GType type,
                                        guint n_construct_properties,
                                        GObjectConstructParam *construct_properties);
@@ -240,6 +241,7 @@ kiran_tray_class_init(KiranTrayClass *klass)
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
     GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(klass);
 
+    gobject_class->finalize = kiran_tray_finalize;
     gobject_class->constructor = kiran_tray_constructor;
     widget_class->realize = kiran_tray_realize;
     widget_class->unrealize = kiran_tray_unrealize;
@@ -447,6 +449,32 @@ icons_win_hide_cb(GtkWidget *widget,
     KiranTray *tray = KIRAN_TRAY(user_data);
 
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(tray->priv->icons_win_button), FALSE);
+}
+
+static void
+kiran_tray_finalize(GObject *object)
+{
+    KiranTray *tray = KIRAN_TRAY(object);
+    KiranTrayPrivate *priv = tray->priv;
+
+    g_signal_handlers_disconnect_by_func(priv->settings,
+                                         G_CALLBACK(gsettings_changed_panel_icon_ids),
+                                         tray);
+
+    g_signal_handlers_disconnect_by_func(priv->settings,
+                                         G_CALLBACK(gsettings_changed_panel_icon_size),
+                                         tray);
+
+    g_signal_handlers_disconnect_by_func(priv->settings,
+                                         G_CALLBACK(gsettings_changed_panel_icon_padding),
+                                         tray);
+    g_object_unref(priv->settings);
+    priv->settings = NULL;
+
+    gtk_widget_destroy(priv->icons_win);
+    priv->icons_win = NULL;
+
+    G_OBJECT_CLASS(kiran_tray_parent_class)->finalize(object);
 }
 
 static GObject *
