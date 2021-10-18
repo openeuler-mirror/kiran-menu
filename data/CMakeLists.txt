@@ -29,10 +29,6 @@ install(FILES "com.kylinsec.kiran.startmenu.gschema.xml.in"
     RENAME "com.kylinsec.kiran.startmenu.gschema.xml" 
 )
 
-install(FILES "com.kylinsec.kiran.startmenu.profile.gschema.xml" 
-    DESTINATION  ${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas/
-)
-
 install(FILES "com.kylinsec.Kiran.MenuCategory.xml" 
     DESTINATION  ${CMAKE_INSTALL_PREFIX}/share/${CMAKE_PROJECT_NAME}/
 )

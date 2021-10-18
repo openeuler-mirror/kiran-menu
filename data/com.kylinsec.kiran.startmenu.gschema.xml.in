@@ -1,14 +1,81 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
-  <schema id="com.kylinsec.kiran.startmenu" path="/com/kylinsec/kiran/startmenu/">
-    <key name="frequent-apps" type="a{sv}">
-      <default>[]</default>
-    </key>
-    <key name="favorite-apps" type="as">
-      <default>[]</default>
-    </key>
-    <key name="new-apps" type="as">
-      <default>[]</default>
-    </key>
-  </schema>
+    <enum id="com.kylinsec.kiran.startmenu.display-mode">
+        <value nick="compact" value="0"/>
+        <value nick="expand" value="1"/>
+    </enum>
+    <enum id="com.kylinsec.kiran.startmenu.default-page">
+        <value nick="favorite apps" value="0"/>
+        <value nick="all apps" value="1"/>
+    </enum>
+
+    <schema id="com.kylinsec.kiran.startmenu" path="/com/kylinsec/kiran/startmenu/">
+        <key name="frequent-apps" type="a{sv}">
+            <default>[]</default>
+        </key>
+        <key name="favorite-apps" type="as">
+            <default>[]</default>
+        </key>
+        <key name="new-apps" type="as">
+            <default>[]</default>
+        </key>
+    </schema>
+
+    <schema id="com.kylinsec.kiran.startmenu.profile" path="/com/kylinsec/kiran/startmenu/profile/">
+        <key name="background-opacity" type="d">
+            <default>1.0</default>
+            <summary>Background Opacity of start menu</summary>
+        </key>
+        <key name="display-mode" enum="com.kylinsec.kiran.startmenu.display-mode">
+            <default>'expand'</default>
+            <summary>Display mode for menu. 'compact' or 'expand'</summary>
+        </key>
+        <key name="default-page" enum="com.kylinsec.kiran.startmenu.default-page">
+            <default>'favorite apps'</default>
+            <summary>The default page when display in compact mode</summary>
+        </key>
+    </schema>
+
+    <schema id="com.kylinsec.kiran.startmenu.lockdown" path="/com/kylinsec/kiran/startmenu/lockdown/">
+        <key name="disable-lock-screen" type="b">
+            <default>false</default>
+            <summary>Disable lock screen</summary>
+            <description>Prevent the user from locking the screen.</description>
+        </key>
+
+        <key name="disable-user-switching" type="b">
+            <default>false</default>
+            <summary>Disable user switching</summary>
+            <description>Prevent the user from switching to another account while his session is active.</description>
+        </key>
+
+        <key name="disable-log-out" type="b">
+            <default>false</default>
+            <summary>Disable log out session</summary>
+            <description>Prevent the user from loging out session.</description>
+        </key>
+
+        <key name="disable-suspend" type="b">
+            <default>false</default>
+            <summary>Disable power suspend</summary>
+            <description>Prevent the user from suspend the system.</description>
+        </key>
+
+        <key name="disable-hibernate" type="b">
+            <default>false</default>
+            <summary>Disable power hibernate</summary>
+            <description>Prevent the user from hibernate the system.</description>
+        </key>
+
+        <key name="disable-reboot" type="b">
+            <default>false</default>
+            <summary>Disable reboot system</summary>
+            <description>Prevent the user from reboot the system.</description>
+        </key>
+
+        <key name="disable-shutdown" type="b">
+            <default>false</default>
+            <summary>Disable shutdown system</summary>
+            <description>Prevent the user from shutdown the system.</description>
+        </key>
+    </schema>
 </schemalist>

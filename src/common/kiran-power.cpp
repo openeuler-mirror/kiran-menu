@@ -23,34 +23,42 @@
 #define LOGIN_MANAGER_DBUS "org.freedesktop.login1"
 #define LOGIN_MANAGER_PATH "/org/freedesktop/login1"
 #define LOGIN_MANAGER_INTERFACE "org.freedesktop.login1.Manager"
+#define LOGIN_SESSION_INTERFACE "org.freedesktop.login1.Session"
 
 #define DISPLAY_MANAGER_DBUS "org.freedesktop.DisplayManager"
 #define DISPLAY_MANAGER_SEAT_PATH "/org/freedesktop/DisplayManager/Seat0"
 #define DISPLAY_MANAGER_INTERFACE "org.freedesktop.DisplayManager.Seat"
 
-static bool read_boolean_key_from_gsettings(const Glib::ustring &key, bool default_value)
-{
-    try
-    {
-        auto settings = Gio::Settings::create("org.mate.lockdown");
-        std::vector<Glib::ustring> keys = settings->list_keys();
+#define DBUS_PROXY_TIMEOUT_MSEC 300
 
-        if (std::find(keys.begin(), keys.end(), key.c_str()) == keys.end())
-        {
-            KLOG_WARNING("key '%s' not found in schema\n", key.c_str());
-            return default_value;
-        }
-        return settings->get_boolean(key);
-    }
-    catch (const Glib::Error &e)
+#define STARTMENU_LOCKDOWN_SCHEMA_ID "com.kylinsec.kiran.startmenu.lockdown"
+#define STARTMENU_LOCKDOWN_KEY_DISABLE_LOCK_SCREEN "disable-lock-screen"
+#define STARTMENU_LOCKDOWN_KEY_DISABLE_USER_SWITCHING "disable-user-switching"
+#define STARTMENU_LOCKDOWN_KEY_DISABLE_LOG_OUT "disable-log-out"
+#define STARTMENU_LOCKDOWN_KEY_DISABLE_SUSPEND "disable-suspend"
+#define STARTMENU_LOCKDOWN_KEY_DISABLE_HIBERNATE "disable-hibernate"
+#define STARTMENU_LOCKDOWN_KEY_DISABLE_REBOOT "disable-reboot"
+#define STARTMENU_LOCKDOWN_KEY_DISABLE_SHUTDOWN "disable-shutdown"
+
+std::shared_ptr<KiranPower> KiranPower::instance_ = nullptr;
+std::shared_ptr<KiranPower> KiranPower::get_default()
+{
+    if (!instance_)
     {
-        KLOG_WARNING("Failed to read settings from schema: %s", e.what().c_str());
-        return default_value;
+        instance_ = std::shared_ptr<KiranPower>(new KiranPower());
     }
+    return instance_;
+}
+
+KiranPower::KiranPower()
+{
+    this->settings_ = Gio::Settings::create(STARTMENU_LOCKDOWN_SCHEMA_ID);
 }
 
 bool KiranPower::suspend()
 {
+    RETURN_VAL_IF_FALSE(this->can_suspend(), false);
+
     try
     {
         Glib::Variant<bool> variant = Glib::Variant<bool>::create(false);
@@ -60,7 +68,7 @@ bool KiranPower::suspend()
                                                                                      LOGIN_MANAGER_PATH,
                                                                                      LOGIN_MANAGER_INTERFACE);
 
-        proxy->call_sync("Suspend", container, 300);
+        proxy->call_sync("Suspend", container, DBUS_PROXY_TIMEOUT_MSEC);
         return true;
     }
     catch (const Gio::DBus::Error &e)
@@ -72,6 +80,8 @@ bool KiranPower::suspend()
 
 bool KiranPower::hibernate()
 {
+    RETURN_VAL_IF_FALSE(this->can_hibernate(), false);
+
     try
     {
         Glib::Variant<bool> variant = Glib::Variant<bool>::create(false);
@@ -90,8 +100,11 @@ bool KiranPower::hibernate()
         return false;
     }
 }
+
 bool KiranPower::shutdown()
 {
+    RETURN_VAL_IF_FALSE(this->can_shutdown(), false);
+
     try
     {
         Glib::RefPtr<Gio::DBus::Proxy> proxy = Gio::DBus::Proxy::create_for_bus_sync(Gio::DBus::BUS_TYPE_SESSION,
@@ -108,8 +121,11 @@ bool KiranPower::shutdown()
         return false;
     }
 }
+
 bool KiranPower::reboot()
 {
+    RETURN_VAL_IF_FALSE(this->can_reboot(), false);
+
     try
     {
         Glib::RefPtr<Gio::DBus::Proxy> proxy = Gio::DBus::Proxy::create_for_bus_sync(Gio::DBus::BUS_TYPE_SESSION,
@@ -129,6 +145,8 @@ bool KiranPower::reboot()
 
 bool KiranPower::logout(int mode)
 {
+    RETURN_VAL_IF_FALSE(this->can_logout(), false);
+
     try
     {
         Glib::Variant<uint> variant = Glib::Variant<uint>::create(mode);
@@ -148,10 +166,81 @@ bool KiranPower::logout(int mode)
     }
 }
 
+bool KiranPower::switch_user()
+{
+    RETURN_VAL_IF_FALSE(this->can_switch_user(), false);
+
+    try
+    {
+        Glib::RefPtr<Gio::DBus::Proxy> proxy = Gio::DBus::Proxy::create_for_bus_sync(Gio::DBus::BUS_TYPE_SYSTEM,
+                                                                                     DISPLAY_MANAGER_DBUS,
+                                                                                     DISPLAY_MANAGER_SEAT_PATH,
+                                                                                     DISPLAY_MANAGER_INTERFACE);
+
+        proxy->call_sync("SwitchToGreeter", Glib::VariantContainerBase(), DBUS_PROXY_TIMEOUT_MSEC);
+        return true;
+    }
+    catch (const Gio::DBus::Error &e)
+    {
+        KLOG_WARNING("Failed to request SwitchToGreeter method: %s", e.what().c_str());
+        return false;
+    }
+}
+
+bool KiranPower::lock_screen()
+{
+    RETURN_VAL_IF_FALSE(this->can_lock_screen(), false);
+
+    std::vector<std::string> argv;
+
+    argv.push_back("mate-screensaver-command");
+    argv.push_back("-l");
+
+    try
+    {
+        Glib::spawn_async("", argv, Glib::SPAWN_SEARCH_PATH | Glib::SPAWN_STDOUT_TO_DEV_NULL);
+        return true;
+    }
+    catch (const Glib::SpawnError &e)
+    {
+        return false;
+    }
+
+    // FIXME: 由于kiran-applet是由dbus-daemon拉起，所以无法对应到会话ID，等后续使用自研kiran-side-panel后再使用下面的代码
+    /*try
+    {
+        auto parameters = Glib::Variant<std::tuple<uint32_t>>::create(std::make_tuple<uint32_t>(getpid()));
+        auto login1_proxy = Gio::DBus::Proxy::create_for_bus_sync(Gio::DBus::BUS_TYPE_SYSTEM,
+                                                                  LOGIN_MANAGER_DBUS,
+                                                                  LOGIN_MANAGER_PATH,
+                                                                  LOGIN_MANAGER_INTERFACE);
+
+        auto ret_variant = login1_proxy->call_sync("GetSessionByPID", parameters, DBUS_PROXY_TIMEOUT_MSEC);
+        auto object_path = Glib::VariantBase::cast_dynamic<Glib::Variant<Glib::DBusObjectPathString>>(ret_variant.get_child(0)).get();
+
+        auto login1_session_proxy = Gio::DBus::Proxy::create_for_bus_sync(Gio::DBus::BUS_TYPE_SYSTEM,
+                                                                          LOGIN_MANAGER_DBUS,
+                                                                          object_path,
+                                                                          LOGIN_SESSION_INTERFACE);
+
+        login1_session_proxy->call_sync("Lock", Glib::VariantContainerBase(), DBUS_PROXY_TIMEOUT_MSEC);
+    }
+    catch (const Glib::Error &e)
+    {
+        KLOG_WARNING("Failed to call LockScreen method: %s", e.what().c_str());
+        return false;
+    }
+    catch (const std::exception &e)
+    {
+        KLOG_WARNING("Failed to call LockScreen method: %s", e.what());
+        return false;
+    }
+    return true;*/
+}
+
 bool KiranPower::can_suspend()
 {
-    if (read_boolean_key_from_gsettings("disable-suspend", false))
-        return false;
+    RETURN_VAL_IF_TRUE(this->settings_->get_boolean(STARTMENU_LOCKDOWN_KEY_DISABLE_SUSPEND), false);
 
     try
     {
@@ -177,8 +266,7 @@ bool KiranPower::can_suspend()
 
 bool KiranPower::can_hibernate()
 {
-    if (read_boolean_key_from_gsettings("disable-suspend", false))
-        return false;
+    RETURN_VAL_IF_TRUE(this->settings_->get_boolean(STARTMENU_LOCKDOWN_KEY_DISABLE_HIBERNATE), false);
 
     try
     {
@@ -202,44 +290,10 @@ bool KiranPower::can_hibernate()
     }
 }
 
-bool KiranPower::switch_user()
-{
-    try
-    {
-        Glib::RefPtr<Gio::DBus::Proxy> proxy = Gio::DBus::Proxy::create_for_bus_sync(Gio::DBus::BUS_TYPE_SYSTEM,
-                                                                                     DISPLAY_MANAGER_DBUS,
-                                                                                     DISPLAY_MANAGER_SEAT_PATH,
-                                                                                     DISPLAY_MANAGER_INTERFACE);
-
-        proxy->call_sync("SwitchToGreeter", Glib::VariantContainerBase(), 300);
-        return true;
-    }
-    catch (const Gio::DBus::Error &e)
-    {
-        KLOG_WARNING("Failed to request SwitchToGreeter method: %s", e.what().c_str());
-        return false;
-    }
-}
-
-bool KiranPower::can_switchuser()
-{
-    bool result = false;
-
-    try
-    {
-        auto settings = Gio::Settings::create("org.mate.session");
-
-        result = settings->get_boolean("logout-prompt");
-    }
-    catch (const Glib::Exception &e)
-    {
-        result = false;
-    }
-    return result;
-}
-
 bool KiranPower::can_shutdown()
 {
+    RETURN_VAL_IF_TRUE(this->settings_->get_boolean(STARTMENU_LOCKDOWN_KEY_DISABLE_SHUTDOWN), false);
+
     try
     {
         Glib::RefPtr<Gio::DBus::Proxy> proxy = Gio::DBus::Proxy::create_for_bus_sync(Gio::DBus::BUS_TYPE_SYSTEM,
@@ -262,10 +316,7 @@ bool KiranPower::can_shutdown()
 
 bool KiranPower::can_reboot()
 {
-    if (read_boolean_key_from_gsettings("disable-reboot", false))
-    {
-        return false;
-    }
+    RETURN_VAL_IF_TRUE(this->settings_->get_boolean(STARTMENU_LOCKDOWN_KEY_DISABLE_REBOOT), false);
 
     try
     {
@@ -289,20 +340,22 @@ bool KiranPower::can_reboot()
     }
 }
 
-bool KiranPower::lock_screen()
+bool KiranPower::can_logout()
 {
-    std::vector<std::string> argv;
+    RETURN_VAL_IF_TRUE(this->settings_->get_boolean(STARTMENU_LOCKDOWN_KEY_DISABLE_LOG_OUT), false);
+    return true;
+}
 
-    argv.push_back("mate-screensaver-command");
-    argv.push_back("-l");
+bool KiranPower::can_switch_user()
+{
+    RETURN_VAL_IF_TRUE(this->settings_->get_boolean(STARTMENU_LOCKDOWN_KEY_DISABLE_USER_SWITCHING), false);
+    return true;
+}
 
-    try
-    {
-        Glib::spawn_async("", argv, Glib::SPAWN_SEARCH_PATH | Glib::SPAWN_STDOUT_TO_DEV_NULL);
-        return true;
-    }
-    catch (const Glib::SpawnError &e)
-    {
-        return false;
-    }
+bool KiranPower::can_lock_screen()
+{
+    RETURN_VAL_IF_TRUE(this->settings_->get_boolean(STARTMENU_LOCKDOWN_KEY_DISABLE_LOCK_SCREEN), false);
+    RETURN_VAL_IF_TRUE(access("/usr/bin/mate-screensaver", F_OK) != 0, false);
+
+    return true;
 }

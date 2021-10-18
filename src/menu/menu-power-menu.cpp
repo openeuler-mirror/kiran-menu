@@ -21,56 +21,71 @@
 
 MenuPowerMenu::MenuPowerMenu()
 {
-    auto lock_item = Gtk::make_managed<Gtk::MenuItem>(_("Lock screen"));
-    lock_item->signal_activate().connect(sigc::hide_return(
-        sigc::ptr_fun(&KiranPower::lock_screen)));
-    append(*lock_item);
+    auto power = KiranPower::get_default();
 
-    if (KiranPower::can_switchuser())
+    if (power->can_lock_screen())
+    {
+        auto lock_item = Gtk::make_managed<Gtk::MenuItem>(_("Lock screen"));
+        lock_item->signal_activate().connect([power]() {
+            power->lock_screen();
+        });
+
+        append(*lock_item);
+    }
+
+    if (power->can_switch_user())
     {
         switchuser_item = Gtk::make_managed<Gtk::MenuItem>(_("Switch user"));
-        switchuser_item->signal_activate().connect(sigc::hide_return(
-            sigc::ptr_fun(&KiranPower::switch_user)));
+        switchuser_item->signal_activate().connect([power]() {
+            power->switch_user();
+        });
 
         append(*switchuser_item);
     }
 
-    logout_item = Gtk::make_managed<Gtk::MenuItem>(_("Logout"));
-    logout_item->signal_activate().connect(sigc::hide_return(
-        sigc::bind<int>(sigc::ptr_fun(&KiranPower::logout), LOGOUT_MODE_NOW)));
-    append(*logout_item);
+    if (power->can_logout())
+    {
+        logout_item = Gtk::make_managed<Gtk::MenuItem>(_("Logout"));
+        logout_item->signal_activate().connect([power]() {
+            power->logout(LOGOUT_MODE_NOW);
+        });
+        append(*logout_item);
+    }
 
-    if (KiranPower::can_suspend())
+    if (power->can_suspend())
     {
         suspend_item = Gtk::make_managed<Gtk::MenuItem>(_("Suspend"));
-        suspend_item->signal_activate().connect(sigc::hide_return(
-            sigc::ptr_fun(&KiranPower::suspend)));
-
+        suspend_item->signal_activate().connect([power]() {
+            power->suspend();
+        });
         append(*suspend_item);
     }
 
-    if (KiranPower::can_hibernate())
+    if (power->can_hibernate())
     {
         hibernate_item = Gtk::make_managed<Gtk::MenuItem>(_("Hibernate"));
-        hibernate_item->signal_activate().connect(sigc::hide_return(
-            sigc::ptr_fun(&KiranPower::hibernate)));
+        hibernate_item->signal_activate().connect([power]() {
+            power->hibernate();
+        });
 
         append(*hibernate_item);
     }
 
-    if (KiranPower::can_reboot())
+    if (power->can_reboot())
     {
         reboot_item = Gtk::make_managed<Gtk::MenuItem>(_("Reboot"));
-        reboot_item->signal_activate().connect(
-            sigc::hide_return(sigc::ptr_fun(&KiranPower::reboot)));
+        reboot_item->signal_activate().connect([power]() {
+            power->reboot();
+        });
         append(*reboot_item);
     }
 
-    if (KiranPower::can_shutdown())
+    if (power->can_shutdown())
     {
         shutdown_item = Gtk::make_managed<Gtk::MenuItem>(_("Shutdown"));
-        shutdown_item->signal_activate().connect(
-            sigc::hide_return(sigc::ptr_fun(&KiranPower::shutdown)));
+        shutdown_item->signal_activate().connect([power]() {
+            power->shutdown();
+        });
         append(*shutdown_item);
     }
 
