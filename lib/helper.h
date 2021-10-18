@@ -22,9 +22,13 @@
 
 namespace Kiran
 {
-#define RETURN_VAL_IF_FALSE(cond, val) \
-    {                                  \
-        if (!(cond)) return val;       \
+#define RETURN_VAL_IF_FALSE(cond, val)             \
+    {                                              \
+        if (!(cond))                               \
+        {                                          \
+            KLOG_DEBUG("The condition is false."); \
+            return val;                            \
+        }                                          \
     }
 
 #define RETURN_VAL_IF_TRUE(cond, val) \
@@ -32,9 +36,13 @@ namespace Kiran
         if (cond) return val;         \
     }
 
-#define RETURN_IF_FALSE(cond) \
-    {                         \
-        if (!(cond)) return;  \
+#define RETURN_IF_FALSE(cond)                      \
+    {                                              \
+        if (!(cond))                               \
+        {                                          \
+            KLOG_DEBUG("The condition is false."); \
+            return;                                \
+        }                                          \
     }
 
 #define RETURN_IF_TRUE(cond) \
