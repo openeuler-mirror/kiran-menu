@@ -21,7 +21,6 @@
 #include "menu-app-launcher-button.h"
 #include "menu-power-button.h"
 #include "window-manager.h"
-#include <fmt/format.h>
 
 #include <glibmm/i18n.h>
 #include <unistd.h>
@@ -126,27 +125,13 @@ bool MenuAppletWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
     Gtk::Widget *child;
     Gtk::Allocation allocation;
     auto context = get_style_context();
-    auto provider = Gtk::CssProvider::create();
 
     allocation = get_allocation();
     background_color = context->get_background_color(get_state_flags());
     opacity = profile.get_opacity();
-    background_color.set_alpha(opacity);
-
-    auto str = fmt::format("window#menu-applet-window {{background: rgba({0}, {1}, {2}, {3});}}",
-                           background_color.get_red() * 255,
-                           background_color.get_green() * 255,
-                           background_color.get_blue() * 255,
-                           background_color.get_alpha());
-
-    provider->load_from_data(str);
-    Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(),
-                                               provider,
-                                               GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-
-/*
     cr->save();
 
+    background_color.set_alpha(opacity);
     Gdk::Cairo::set_source_rgba(cr, background_color);
     cr->set_operator(Cairo::OPERATOR_SOURCE);
 
@@ -154,12 +139,6 @@ bool MenuAppletWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
     cr->restore();
 
     context->render_frame(cr, 0, 0, allocation.get_width(), allocation.get_height());
-*/
-
-    context->render_background(cr, 0, 0, allocation.get_width(), allocation.get_height());
-
-    Gtk::StyleContext::remove_provider_for_screen(Gdk::Screen::get_default(),
-                                                  provider);
 
     child = get_child();
     propagate_draw(*child, cr);
@@ -200,7 +179,7 @@ void MenuAppletWindow::on_power_menu_deactivated()
 
 void MenuAppletWindow::init_ui()
 {
-    Gtk::Box *search_box, *main_box, *sider_box;
+    Gtk::Box *search_box, *main_box;
     Gtk::EventBox *date_box;
     Gtk::Box *expand_panel, *search_results_page;
     Gtk::ScrolledWindow *all_apps_scrolled;
@@ -210,7 +189,6 @@ void MenuAppletWindow::init_ui()
 
     builder = Gtk::Builder::create_from_resource("/kiran-menu/ui/menu");
     builder->get_widget<Gtk::Box>("menu-container", main_box);
-    builder->get_widget<Gtk::Box>("menu-sider-container", sider_box);
     builder->get_widget<Gtk::Stack>("menu-view-stack", menu_view_stack);
     builder->get_widget<Gtk::Stack>("apps-list-stack", apps_list_stack);
 
@@ -227,9 +205,6 @@ void MenuAppletWindow::init_ui()
     category_list_viewport = Gtk::make_managed<Gtk::Viewport>(Glib::RefPtr<Gtk::Adjustment>(), Glib::RefPtr<Gtk::Adjustment>());
     category_list_scrolled->add(*category_list_viewport);
     category_list_scrolled->get_style_context()->add_class("category-list-box");
-
-    sider_box->set_name("menu-left-container");
-    menu_view_stack->set_name("menu-mid-container");
 
     /* 最近访问文档列表 */
     auto widget = Gtk::make_managed<RecentFilesWidget>();
