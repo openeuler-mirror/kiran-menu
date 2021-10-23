@@ -19,12 +19,11 @@ button.kiran-applet-button {
 
 /* 开始菜单主窗口 */
 window#menu-applet-window {
-    background: #222222;
+    background: rgba(28, 28, 28, 0.9);
     min-width: 760px;
     min-height: 682px;
     color: #ffffff;
-    border: 1px solid #ff3939;
-    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 
     -gtkmm__CustomObject_KiranMenuWindow-compact-min-height: 682px;
     -gtkmm__CustomObject_KiranMenuWindow-expand-min-height: 682px;
@@ -84,7 +83,7 @@ button.menu-app-item.vertical {
     min-height: 100px;
     min-width: 88px;
     border: none;
-    border-radius: 5px; 
+    border-radius: 5px;
     -gtkmm__CustomObject_KiranMenuAppItem-icon-spacing: 8px;
     -gtkmm__CustomObject_KiranMenuAppItem-max-width: 88px;
     -gtkmm__CustomObject_KiranMenuAppItem-max-height: 100px;
@@ -164,6 +163,9 @@ entry.menu-search-entry selection {
 
 /* 开始菜单区域框 */
 .menu-section-box {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     padding-bottom: 10px;
     padding-left: 5px;
@@ -462,14 +464,14 @@ scrolledwindow.category-list-box, scrolledwindow.category-list-box viewport {
 .stack-switcher button{
     background: none;
     border: none;
-    border-radius: 4px;
+    border-radius: 0px;
     min-height: 30px;
 }
 
 .stack-switcher button:hover{
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
     border: none;
-    border-radius: 4px;
+    border-radius: 0px;
     box-shadow: none;
 }
 
@@ -516,14 +518,6 @@ list.menu-recent-list row:selected {
 scrolledwindow, scrolledwindow viewport {
     background: none;
     border: none;
-}
-
-#menu-left-container {
-    border-radius: 8px;
-}
-
-#menu-mid-container {
-    border-radius: 8px;
 }
 
 /* Tray */
@@ -586,9 +580,4 @@ scrolledwindow, scrolledwindow viewport {
 #trayBox
 {
   margin: 0px 5px 0px 0px;
-}
-
-.container-color-1
-{
-  background: #2d2d2d;
 }

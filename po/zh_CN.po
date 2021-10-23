@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 2.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-27 16:32+0800\n"
+"POT-Creation-Date: 2021-10-21 17:11+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,165 +16,165 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../src/common/kiran-search-entry.cpp:19
+#: ../src/common/kiran-search-entry.cpp:32
 msgid "Search for applications"
 msgstr "搜索应用程序"
 
-#: ../src/menu/menu-app-item.cpp:142
-#: ../src/tasklist/tasklist-app-context-menu.cpp:42
+#: ../src/menu/menu-app-item.cpp:168
+#: ../src/tasklist/tasklist-app-context-menu.cpp:57
 msgid "Launch"
 msgstr "启动"
 
-#: ../src/menu/menu-app-item.cpp:146
+#: ../src/menu/menu-app-item.cpp:172
 msgid "Add to desktop"
 msgstr "添加到桌面"
 
-#: ../src/menu/menu-app-item.cpp:151
-#: ../src/tasklist/tasklist-app-context-menu.cpp:62
+#: ../src/menu/menu-app-item.cpp:178
+#: ../src/tasklist/tasklist-app-context-menu.cpp:79
 msgid "Add to favorites"
 msgstr "添加到收藏夹"
 
-#: ../src/menu/menu-app-item.cpp:158
-#: ../src/tasklist/tasklist-app-context-menu.cpp:67
+#: ../src/menu/menu-app-item.cpp:187
+#: ../src/tasklist/tasklist-app-context-menu.cpp:86
 msgid "Remove from favorites"
 msgstr "从收藏夹中移除"
 
-#: ../src/menu/menu-app-item.cpp:168
-#: ../src/tasklist/tasklist-app-context-menu.cpp:87
+#: ../src/menu/menu-app-item.cpp:198
+#: ../src/tasklist/tasklist-app-context-menu.cpp:110
 msgid "Unpin to taskbar"
 msgstr "取消固定到任务栏"
 
-#: ../src/menu/menu-app-item.cpp:171
-#: ../src/tasklist/tasklist-app-context-menu.cpp:82
+#: ../src/menu/menu-app-item.cpp:203
+#: ../src/tasklist/tasklist-app-context-menu.cpp:103
 msgid "Pin to taskbar"
 msgstr "固定到任务栏"
 
-#: ../src/menu/menu-applet-button.cpp:11
+#: ../src/menu/menu-applet-button.cpp:24
 msgid "Kiran Start Menu"
 msgstr "Kiran开始菜单"
 
 #. 扩展模式下的常用应用布局
-#: ../src/menu/menu-applet-window.cpp:193
+#: ../src/menu/menu-applet-window.cpp:239
 msgid "Frequently used"
 msgstr "常用应用"
 
-#: ../src/menu/menu-applet-window.cpp:196
+#: ../src/menu/menu-applet-window.cpp:242
 msgid "No frequent apps"
 msgstr "暂无常用应用信息"
 
 #. 扩展模式下的收藏夹应用布局
 #. 紧凑模式下的收藏夹应用布局
-#: ../src/menu/menu-applet-window.cpp:200
-#: ../src/menu/menu-applet-window.cpp:207
+#: ../src/menu/menu-applet-window.cpp:246
+#: ../src/menu/menu-applet-window.cpp:253
 msgid "Favorite Apps"
 msgstr "收藏夹"
 
-#: ../src/menu/menu-applet-window.cpp:203
-#: ../src/menu/menu-applet-window.cpp:210
+#: ../src/menu/menu-applet-window.cpp:249
+#: ../src/menu/menu-applet-window.cpp:256
 msgid "No favorite apps found"
 msgstr "收藏夹列表为空"
 
 #. 搜索结果布局
-#: ../src/menu/menu-applet-window.cpp:220
+#: ../src/menu/menu-applet-window.cpp:266
 msgid "Search Results"
 msgstr "搜索结果"
 
-#: ../src/menu/menu-applet-window.cpp:223
+#: ../src/menu/menu-applet-window.cpp:269
 msgid "No matched apps found!"
 msgstr "无符合条件的应用"
 
-#: ../src/menu/menu-applet-window.cpp:275
+#: ../src/menu/menu-applet-window.cpp:321
 msgid "Hello"
 msgstr "你好"
 
-#: ../src/menu/menu-applet-window.cpp:610
+#: ../src/menu/menu-applet-window.cpp:653
 msgid "Run"
 msgstr "运行命令"
 
-#: ../src/menu/menu-applet-window.cpp:615
+#: ../src/menu/menu-applet-window.cpp:658
 msgid "Search Files"
 msgstr "搜索文件"
 
-#: ../src/menu/menu-applet-window.cpp:620
+#: ../src/menu/menu-applet-window.cpp:663
 msgid "Home Directory"
 msgstr "主目录"
 
-#: ../src/menu/menu-applet-window.cpp:625
+#: ../src/menu/menu-applet-window.cpp:668
 msgid "Control center"
 msgstr "控制面板"
 
-#: ../src/menu/menu-applet-window.cpp:630
+#: ../src/menu/menu-applet-window.cpp:673
 msgid "System monitor"
 msgstr "资源管理器"
 
-#: ../src/menu/menu-applet-window.cpp:777
+#: ../src/menu/menu-applet-window.cpp:834
 msgid "%a %b %e %Y"
 msgstr "%Y年%m月%d日 星期%a"
 
-#: ../src/menu/menu-applet.cpp:34
+#: ../src/menu/menu-applet.cpp:50
 msgid "Kiran Menu Applet"
 msgstr "Kiran开始菜单插件"
 
-#: ../src/menu/menu-applet.cpp:36
+#: ../src/menu/menu-applet.cpp:52
 msgid "Startup menu designed for Kiran Desktop"
 msgstr "专为Kiran桌面设计的开始菜单"
 
-#: ../src/menu/menu-applet.cpp:46 ../src/tasklist/tasklist-applet.cpp:22
-#: ../src/workspace/workspace-applet.cpp:21
+#: ../src/menu/menu-applet.cpp:62 ../src/tasklist/tasklist-applet.cpp:36
+#: ../src/workspace/workspace-applet.cpp:35
 msgid "About"
 msgstr "关于"
 
-#: ../src/menu/menu-applet.cpp:46 ../src/tasklist/tasklist-applet.cpp:22
-#: ../src/workspace/workspace-applet.cpp:21
+#: ../src/menu/menu-applet.cpp:62 ../src/tasklist/tasklist-applet.cpp:36
+#: ../src/workspace/workspace-applet.cpp:35
 msgid "About this applet"
 msgstr "关于面板"
 
-#: ../src/menu/menu-new-apps-container.cpp:69
-#: ../src/menu/menu-new-apps-container.cpp:95
+#: ../src/menu/menu-new-apps-container.cpp:83
+#: ../src/menu/menu-new-apps-container.cpp:109
 msgid "Expand"
 msgstr "展开"
 
-#: ../src/menu/menu-new-apps-container.cpp:86
+#: ../src/menu/menu-new-apps-container.cpp:100
 msgid "Shrink"
 msgstr "收起"
 
-#: ../src/menu/menu-new-apps-container.cpp:107
+#: ../src/menu/menu-new-apps-container.cpp:121
 msgid "New Installed"
 msgstr "新安装应用"
 
-#: ../src/menu/menu-power-button.cpp:12
+#: ../src/menu/menu-power-button.cpp:26
 msgid "Power options"
 msgstr "电源选项"
 
-#: ../src/menu/menu-power-menu.cpp:10
+#: ../src/menu/menu-power-menu.cpp:28
 msgid "Lock screen"
 msgstr "锁定屏幕"
 
-#: ../src/menu/menu-power-menu.cpp:16
+#: ../src/menu/menu-power-menu.cpp:38
 msgid "Switch user"
 msgstr "切换用户"
 
-#: ../src/menu/menu-power-menu.cpp:23
+#: ../src/menu/menu-power-menu.cpp:48
 msgid "Logout"
 msgstr "注销"
 
-#: ../src/menu/menu-power-menu.cpp:29
+#: ../src/menu/menu-power-menu.cpp:57
 msgid "Suspend"
 msgstr "待机"
 
-#: ../src/menu/menu-power-menu.cpp:37
+#: ../src/menu/menu-power-menu.cpp:66
 msgid "Hibernate"
 msgstr "休眠"
 
-#: ../src/menu/menu-power-menu.cpp:46
+#: ../src/menu/menu-power-menu.cpp:76
 msgid "Reboot"
 msgstr "重启"
 
-#: ../src/menu/menu-power-menu.cpp:52
+#: ../src/menu/menu-power-menu.cpp:85
 msgid "Shutdown"
 msgstr "关机"
 
-#: ../src/menu/recent-files-list-box.cpp:99
+#: ../src/menu/recent-files-list-box.cpp:116
 msgid ""
 "All recent files information will be lost.\n"
 "Are you sure to clear the whole lists?"
@@ -182,104 +182,104 @@ msgstr ""
 "所有的最近访问的文档信息将会丢失。\n"
 "确定要清空整个列表吗?"
 
-#: ../src/menu/recent-files-list-box.cpp:105
+#: ../src/menu/recent-files-list-box.cpp:122
 msgid "System Warning"
 msgstr "系统提示"
 
-#: ../src/menu/recent-files-list-box.cpp:173
+#: ../src/menu/recent-files-list-box.cpp:194
 msgid "Open File"
 msgstr "打开文件"
 
-#: ../src/menu/recent-files-list-box.cpp:178
+#: ../src/menu/recent-files-list-box.cpp:199
 msgid "Open File Location"
 msgstr "打开文件所在目录"
 
-#: ../src/menu/recent-files-list-box.cpp:183
+#: ../src/menu/recent-files-list-box.cpp:204
 msgid "Remove from list"
 msgstr "从最近访问列表中移除"
 
-#: ../src/menu/recent-files-list-box.cpp:188
+#: ../src/menu/recent-files-list-box.cpp:209
 msgid "Clear the whole list"
 msgstr "清空最近访问列表"
 
-#: ../src/menu/recent-files-widget.cpp:22
+#: ../src/menu/recent-files-widget.cpp:29
 msgid "The Recently files list is empty!"
 msgstr "暂无最近访问的文档信息"
 
-#: ../src/menu/recent-files-widget.cpp:37
+#: ../src/menu/recent-files-widget.cpp:44
 msgid "Search files"
 msgstr "搜索文件"
 
-#: ../src/tasklist/tasklist-app-context-menu.cpp:50
+#: ../src/tasklist/tasklist-app-context-menu.cpp:67
 msgid "Close all windows"
 msgstr "关闭所有窗口"
 
-#: ../src/tasklist/tasklist-applet-widget.cpp:91
+#: ../src/tasklist/tasklist-applet-widget.cpp:106
 msgid "Previous"
 msgstr "上一页"
 
-#: ../src/tasklist/tasklist-applet-widget.cpp:92
+#: ../src/tasklist/tasklist-applet-widget.cpp:107
 msgid "Next"
 msgstr "下一页"
 
-#: ../src/tasklist/tasklist-applet.cpp:9
+#: ../src/tasklist/tasklist-applet.cpp:23
 msgid "Kiran Tasklist Applet"
 msgstr "Kiran任务切换插件"
 
-#: ../src/tasklist/tasklist-applet.cpp:11
+#: ../src/tasklist/tasklist-applet.cpp:25
 msgid "Task switcher designed for Kiran Desktop"
 msgstr "专为Kiran桌面设计的任务切换插件"
 
 #. 最大化
-#: ../src/tasklist/tasklist-window-context-menu.cpp:36
+#: ../src/tasklist/tasklist-window-context-menu.cpp:48
 msgid "Maximize"
 msgstr "最大化"
 
 #. 最小化
-#: ../src/tasklist/tasklist-window-context-menu.cpp:51
+#: ../src/tasklist/tasklist-window-context-menu.cpp:65
 msgid "Minimize"
 msgstr "最小化"
 
 #. 恢复大小
-#: ../src/tasklist/tasklist-window-context-menu.cpp:61
+#: ../src/tasklist/tasklist-window-context-menu.cpp:75
 msgid "Restore"
 msgstr "恢复"
 
 #. 移动
-#: ../src/tasklist/tasklist-window-context-menu.cpp:79
+#: ../src/tasklist/tasklist-window-context-menu.cpp:93
 msgid "Move"
 msgstr "移动"
 
 #. 总是置顶
-#: ../src/tasklist/tasklist-window-context-menu.cpp:90
+#: ../src/tasklist/tasklist-window-context-menu.cpp:105
 msgid "Always on top"
 msgstr "常居顶端"
 
 #. 仅在当前工作区
-#: ../src/tasklist/tasklist-window-context-menu.cpp:106
+#: ../src/tasklist/tasklist-window-context-menu.cpp:121
 msgid "Only on this workspace"
 msgstr "仅在此工作区显示"
 
 #. 总在可见工作区
-#: ../src/tasklist/tasklist-window-context-menu.cpp:117
+#: ../src/tasklist/tasklist-window-context-menu.cpp:132
 msgid "Always on visible workspace"
 msgstr "总在可见工作区"
 
 #. 移动到其它工作区
-#: ../src/tasklist/tasklist-window-context-menu.cpp:128
+#: ../src/tasklist/tasklist-window-context-menu.cpp:143
 msgid "Move to another workspace"
 msgstr "移动到其它工作区"
 
 #. 关闭窗口选项
-#: ../src/tasklist/tasklist-window-context-menu.cpp:135
+#: ../src/tasklist/tasklist-window-context-menu.cpp:150
 msgid "Close Window"
 msgstr "关闭"
 
-#: ../src/workspace/workspace-applet.cpp:8
+#: ../src/workspace/workspace-applet.cpp:22
 msgid "Kiran Workspace switcher Applet"
 msgstr "Kiran工作区切换插件"
 
-#: ../src/workspace/workspace-applet.cpp:10
+#: ../src/workspace/workspace-applet.cpp:24
 msgid "Workspace switcher designed for Kiran Desktop"
 msgstr "专为Kiran桌面设计的工作区切换插件"
 
@@ -315,6 +315,10 @@ msgstr "点击更改日期时间设置"
 #: ../data/menu.ui.xml.h:8
 msgid "------"
 msgstr ""
+
+#: ../data/workspace-applet-window.ui.xml.h:1
+msgid "Create new workspace"
+msgstr "创建新工作区"
 
 msgid "Open help"
 msgstr "帮助中心"
