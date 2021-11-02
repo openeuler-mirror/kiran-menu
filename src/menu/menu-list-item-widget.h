@@ -28,14 +28,13 @@ public:
                        Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL,
                        int icon_size = 24);
 
-    MenuListItemWidget(const std::string &resource,
+    MenuListItemWidget(const std::string &icon_name,
                        const std::string &text,
                        Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL,
-                       int icon_size = 24);
+                       Gtk::IconSize icon_size = Gtk::ICON_SIZE_BUTTON);
 
     void set_text(const std::string &text);
     void set_icon(const Glib::RefPtr<Gio::Icon> &gicon, int icon_size = 24);
-    void set_icon(const std::string &resource, int icon_size = 24);
     void set_icon_size(int icon_size);
     virtual void set_orientation(Gtk::Orientation orient);
 

@@ -83,7 +83,7 @@ Gtk::ToggleButton *MenuNewAppsContainer::create_expand_button()
     auto button = new Gtk::ToggleButton(_("Expand"));
     auto image = Gtk::make_managed<Gtk::Image>();
 
-    image->set_from_resource("/kiran-menu/icon/expand");
+    image->set_from_icon_name("kiran-menu-expand-symbolic", Gtk::ICON_SIZE_BUTTON);
     image->set_margin_left(5);
 
     button->set_image(*image);
@@ -98,7 +98,7 @@ Gtk::ToggleButton *MenuNewAppsContainer::create_expand_button()
             if (expand_button->get_active())
             {
                 expand_button->set_label(_("Shrink"));
-                image->set_from_resource("/kiran-menu/icon/shrink");
+                image->set_from_icon_name("kiran-menu-shrink-symbolic", Gtk::ICON_SIZE_BUTTON);
                 for (auto app_item : hidden_items)
                 {
                     app_item->get_parent()->show_all();
@@ -107,7 +107,7 @@ Gtk::ToggleButton *MenuNewAppsContainer::create_expand_button()
             else
             {
                 expand_button->set_label(_("Expand"));
-                image->set_from_resource("/kiran-menu/icon/expand");
+                image->set_from_icon_name("kiran-menu-expand-symbolic", Gtk::ICON_SIZE_BUTTON);
                 for (auto app_item : hidden_items)
                 {
                     app_item->get_parent()->hide();

@@ -31,6 +31,7 @@ public:
 
 protected:
     virtual void on_toggled() override;
+    void on_window_hide_cb();
 
 private:
     MenuAppletWindow window;  //菜单窗口

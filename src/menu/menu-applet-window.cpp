@@ -13,6 +13,7 @@
  */
 
 #include "menu-applet-window.h"
+#include <fmt/format.h>
 #include <gtk/gtkx.h>
 #include "global.h"
 #include "kiran-helper.h"
@@ -21,7 +22,6 @@
 #include "menu-app-launcher-button.h"
 #include "menu-power-button.h"
 #include "window-manager.h"
-#include <fmt/format.h>
 
 #include <glibmm/i18n.h>
 #include <unistd.h>
@@ -144,7 +144,7 @@ bool MenuAppletWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
                                                provider,
                                                GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
-/*
+    /*
     cr->save();
 
     Gdk::Cairo::set_source_rgba(cr, background_color);
@@ -618,13 +618,13 @@ bool MenuAppletWindow::on_leave_notify_event(GdkEventCrossing *crossing_event)
     return false;
 }
 
-Gtk::Button *MenuAppletWindow::create_launcher_button(const char *icon_resource,
+Gtk::Button *MenuAppletWindow::create_launcher_button(const std::string &icon_name,
                                                       const char *tooltip,
                                                       const char *cmdline)
 {
     MenuAppLauncherButton *button;
 
-    button = Gtk::make_managed<MenuAppLauncherButton>(icon_resource,
+    button = Gtk::make_managed<MenuAppLauncherButton>(icon_name,
                                                       tooltip,
                                                       cmdline);
 
@@ -649,27 +649,27 @@ void MenuAppletWindow::add_sidebar_buttons()
     side_box->set_orientation(Gtk::ORIENTATION_VERTICAL);
     side_box->add(*separator);
 
-    launcher_btn = create_launcher_button("/kiran-menu/sidebar/run",
+    launcher_btn = create_launcher_button("kiran-menu-run-symbolic",
                                           _("Run"),
                                           "mate-panel --run-dialog");
     side_box->add(*launcher_btn);
 
-    launcher_btn = create_launcher_button("/kiran-menu/sidebar/search-files",
+    launcher_btn = create_launcher_button("kiran-menu-search-files-symbolic",
                                           _("Search Files"),
                                           "mate-search-tool");
     side_box->add(*launcher_btn);
 
-    launcher_btn = create_launcher_button("/kiran-menu/sidebar/home-dir",
+    launcher_btn = create_launcher_button("kiran-menu-home-dir-symbolic",
                                           _("Home Directory"),
                                           "caja");
     side_box->add(*launcher_btn);
 
-    launcher_btn = create_launcher_button("/kiran-menu/sidebar/settings",
+    launcher_btn = create_launcher_button("kiran-menu-settings-symbolic",
                                           _("Control center"),
                                           "mate-control-center");
     side_box->add(*launcher_btn);
 
-    launcher_btn = create_launcher_button("/kiran-menu/sidebar/monitor",
+    launcher_btn = create_launcher_button("kiran-menu-task-monitor-symbolic",
                                           _("System monitor"),
                                           "mate-system-monitor");
     side_box->add(*launcher_btn);

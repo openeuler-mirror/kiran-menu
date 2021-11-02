@@ -32,6 +32,7 @@ TasklistAppButton::TasklistAppButton(const std::shared_ptr<Kiran::App> &app_, in
     add_events(Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::BUTTON_PRESS_MASK);
 
     get_style_context()->add_class("kiran-tasklist-button");
+    get_style_context()->add_class("flat");
 
     set_app(app_);
 
@@ -535,9 +536,11 @@ Glib::RefPtr<Gdk::Pixbuf> TasklistAppButton::get_app_icon_pixbuf()
     if (!pixbuf)
     {
         //未能找到对应应用的图标，使用内置的默认图标
-        pixbuf = Gdk::Pixbuf::create_from_resource("/kiran-tasklist/icon/executable",
-                                                   icon_size * scale,
-                                                   icon_size * scale);
+        // pixbuf = Gdk::Pixbuf::create_from_resource("/kiran-tasklist/icon/executable",
+        //                                            icon_size * scale,
+        //                                            icon_size * scale);
+
+        pixbuf = Gtk::IconTheme::get_default()->load_icon("kiran-tasklist-executable", icon_size, scale);
     }
 
     return pixbuf;

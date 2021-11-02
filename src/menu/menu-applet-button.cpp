@@ -28,16 +28,21 @@ MenuAppletButton::MenuAppletButton(MatePanelApplet *panel_applet) : KiranAppletB
     window.signal_size_changed().connect(
         sigc::mem_fun(*this, &MenuAppletButton::reposition_applet_window));
 
-    window.signal_map().connect(
-        sigc::mem_fun(*this, &MenuAppletButton::reposition_applet_window));
+    window.signal_map().connect(sigc::mem_fun(*this, &MenuAppletButton::reposition_applet_window));
+
+    window.signal_unmap().connect(sigc::mem_fun(*this, &MenuAppletButton::on_window_hide_cb));
 }
 
 void MenuAppletButton::on_toggled()
 {
-    if (!window.get_visible())
+    if (this->get_active())
+    {
         window.show();
+    }
     else
+    {
         window.hide();
+    }
 }
 
 void MenuAppletButton::reposition_applet_window()
@@ -73,4 +78,10 @@ void MenuAppletButton::reposition_applet_window()
         break;
     }
     window.move(root_x, root_y);
+}
+
+void MenuAppletButton::on_window_hide_cb()
+{
+    // 当窗口隐藏时，按钮的状态需要改为取消激活
+    this->set_active(false);
 }

@@ -223,13 +223,13 @@ private:
 
     /**
      * @brief 创建快捷应用按钮
-     * @param icon_resource: 按钮图标的资源路径
+     * @param icon_resource: 图标名
      * @param tooltip: 按钮的工具提示文本
      * @param cmdline: 按钮点击时启动应用时调用的命令行参数，如 "/bin/ls /home"
      *
      * @return 返回创建的按钮，该按钮添加到容器后会随容器一起销毁，未添加到容器时需要手动销毁
      */
-    Gtk::Button *create_launcher_button(const char *icon_resource,
+    Gtk::Button *create_launcher_button(const std::string &icon_name,
                                         const char *tooltip,
                                         const char *cmdline);
 

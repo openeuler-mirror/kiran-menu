@@ -76,7 +76,7 @@
               </packing>
             </child>
             <style>
-              <class name="container-color-1"/>
+              <class name="block-section"/>
             </style>
           </object>
           <packing>
@@ -111,7 +111,7 @@
               <packing>
                 <property name="name">compact-favorites-view</property>
                 <property name="title" translatable="yes">Favorite applications</property>
-                <property name="icon_name">menu-favorite-apps</property>
+                <property name="icon_name">kiran-menu-favorite-apps-symbolic</property>
               </packing>
             </child>
             <child>
@@ -215,7 +215,7 @@
               <packing>
                 <property name="name">all-apps-view</property>
                 <property name="title" translatable="yes">All applications</property>
-                <property name="icon_name">menu-apps-list</property>
+                <property name="icon_name">kiran-menu-apps-list-symbolic</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -232,12 +232,12 @@
               <packing>
                 <property name="name">recently-files-view</property>
                 <property name="title" translatable="yes">Recent files</property>
-                <property name="icon_name">menu-recent-files</property>
+                <property name="icon_name">kiran-menu-recent-files-symbolic</property>
                 <property name="position">2</property>
               </packing>
             </child>
             <style>
-              <class name="container-color-1"/>
+              <class name="block-section"/>
             </style>
           </object>
           <packing>
@@ -338,7 +338,7 @@
                     </child>
                     <style>
                       <class name="menu-section-box"/>
-                      <class name="container-color-1"/>
+                      <class name="block-section"/>
                     </style>
                   </object>
                 </child>

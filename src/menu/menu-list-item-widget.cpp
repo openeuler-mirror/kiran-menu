@@ -15,18 +15,18 @@
 #include "menu-list-item-widget.h"
 #include <iostream>
 
-MenuListItemWidget::MenuListItemWidget(const std::string &icon_resource,
+MenuListItemWidget::MenuListItemWidget(const std::string &icon_name,
                                        const std::string &text,
                                        Gtk::Orientation orient,
-                                       int icon_size) : Glib::ObjectBase("KiranMenuListItem"),
-                                                        box(orient),
-                                                        space_property(*this, "icon-spacing", 0),
-                                                        max_width_property(*this, "max-width", G_MAXINT32),
-                                                        max_height_property(*this, "max-height", G_MAXINT32)
+                                       Gtk::IconSize icon_size) : Glib::ObjectBase("KiranMenuListItem"),
+                                                                  box(orient),
+                                                                  space_property(*this, "icon-spacing", 0),
+                                                                  max_width_property(*this, "max-width", G_MAXINT32),
+                                                                  max_height_property(*this, "max-height", G_MAXINT32)
 {
     init_ui();
     set_text(text);
-    set_icon(icon_resource, icon_size);
+    image.set_from_icon_name(icon_name, icon_size);
 
     on_orient_changed();
 }
@@ -176,12 +176,6 @@ void MenuListItemWidget::set_icon(const Glib::RefPtr<Gio::Icon> &gicon, int icon
         image.set(Glib::RefPtr<const Gio::Icon>::cast_dynamic(gicon), Gtk::ICON_SIZE_LARGE_TOOLBAR);
     else
         image.set_from_icon_name("gtk-missing", Gtk::ICON_SIZE_LARGE_TOOLBAR);
-}
-
-void MenuListItemWidget::set_icon(const std::string &resource, int icon_size)
-{
-    image.set_pixel_size(icon_size);
-    image.set_from_resource(resource);
 }
 
 void MenuListItemWidget::set_icon_size(int icon_size)

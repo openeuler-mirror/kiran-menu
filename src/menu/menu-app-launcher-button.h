@@ -20,7 +20,7 @@
 class MenuAppLauncherButton : public Gtk::Button
 {
 public:
-    explicit MenuAppLauncherButton(const char *icon_file, const char *tooltip, const char *cmdline);
+    explicit MenuAppLauncherButton(const std::string &icon_name, const char *tooltip, const char *cmdline);
 
     sigc::signal<void> signal_app_launched();
 

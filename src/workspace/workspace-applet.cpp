@@ -45,7 +45,7 @@ gboolean workspace_applet_fill(MatePanelApplet *applet)
     WorkspaceAppletButton *button = Gtk::make_managed<WorkspaceAppletButton>(applet);
 
     gtk_container_add(GTK_CONTAINER(applet), GTK_WIDGET(button->gobj()));
-    mate_panel_applet_set_flags(applet, MATE_PANEL_APPLET_EXPAND_MINOR);
+    mate_panel_applet_set_flags(applet, MatePanelAppletFlags(MATE_PANEL_APPLET_HAS_HANDLE | MATE_PANEL_APPLET_EXPAND_MINOR));
     mate_panel_applet_setup_menu_from_file(applet,
                                            PACKAGE_DATA_DIR "/workspace-switcher-menu.ui.xml",
                                            create_action_group_for_workspace_switcher());

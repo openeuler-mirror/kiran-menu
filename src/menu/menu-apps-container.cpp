@@ -57,12 +57,12 @@ void MenuAppsContainer::set_draw_frame(bool draw_frame_)
 {
     if (draw_frame_)
     {
-        get_style_context()->add_class("container-color-1");
+        get_style_context()->add_class("block-section");
         get_style_context()->add_class("menu-section-box");
     }
     else
     {
-        get_style_context()->remove_class("container-color-1");
+        get_style_context()->remove_class("block-section");
         get_style_context()->remove_class("menu-section-box");
     }
 }

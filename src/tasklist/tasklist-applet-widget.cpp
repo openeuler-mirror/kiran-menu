@@ -103,8 +103,8 @@ void TasklistAppletWidget::on_applet_orient_changed()
 
 void TasklistAppletWidget::init_ui()
 {
-    prev_btn = create_paging_button("/kiran-tasklist/icon/go-previous", _("Previous"));
-    next_btn = create_paging_button("/kiran-tasklist/icon/go-next", _("Next"));
+    prev_btn = create_paging_button("kiran-tasklist-previous-symbolic", _("Previous"));
+    next_btn = create_paging_button("kiran-tasklist-next-symbolic", _("Next"));
 
     prev_btn->set_valign(Gtk::ALIGN_FILL);
     next_btn->set_valign(Gtk::ALIGN_FILL);
@@ -145,12 +145,13 @@ void TasklistAppletWidget::init_ui()
     next_btn->signal_clicked().connect(sigc::mem_fun(container, &TasklistButtonsContainer::move_to_next_page));
 }
 
-Gtk::Button *TasklistAppletWidget::create_paging_button(std::string icon_resource, std::string tooltip_text)
+Gtk::Button *TasklistAppletWidget::create_paging_button(const std::string &icon_name, const std::string &tooltip_text)
 {
     auto button = Gtk::make_managed<TasklistPagingButton>(applet);
 
     button->set_size_request(16, 16);
-    button->set_icon_image(icon_resource, 16);
+    // button->set_icon_image(icon_resource, 16);
+    button->set_image_from_icon_name(icon_name, Gtk::ICON_SIZE_BUTTON);
     button->set_tooltip_text(tooltip_text);
 
     return button;

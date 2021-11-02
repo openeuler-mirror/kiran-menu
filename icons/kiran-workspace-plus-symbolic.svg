@@ -35,5 +35,5 @@
       }
     </style>
   </defs>
-  <path id="arrow2" class="cls-1" d="M888,805l-7-6.5-7,6.5v-1.511l7-6.5,7,6.5V805Z" transform="translate(-873 -793)"/>
+  <path id="plus" class="cls-1" d="M103,976H96v7H94v-7H87v-2h7v-7h2v7h7v2Z" transform="translate(-87 -967)"/>
 </svg>
