@@ -240,12 +240,33 @@ static gboolean
 kiran_notify_icon_window_draw(GtkWidget *widget,
                               cairo_t *cr)
 {
+    GtkStyleContext *context;
     GtkAllocation alloc;
+    GtkStateFlags state;
     gboolean ret = FALSE;
     gdouble degrees = M_PI / 180.0;
-    gint radius = 6;
+    GdkRGBA bg_color;
+    GValue value = G_VALUE_INIT;
+    gint radius;
+
+    context = gtk_widget_get_style_context (GTK_WIDGET (widget));
+    gtk_style_context_save (context);
 
     gtk_widget_get_allocation(widget, &alloc);
+    state = gtk_widget_get_state_flags (widget);
+
+    gtk_style_context_add_class (context, "background");
+    gtk_style_context_get_background_color (context,
+                                            state,
+                                            &bg_color);
+
+    gtk_style_context_get_property (context,
+                                    "border-radius",
+                                    state,
+                                    &value);
+
+    radius = g_value_get_int (&value);
+    g_value_unset (&value);
 
     cairo_new_sub_path(cr);
     cairo_arc(cr, alloc.x + alloc.width - radius, alloc.y + radius, radius, -90 * degrees, 0 * degrees);
@@ -254,7 +275,11 @@ kiran_notify_icon_window_draw(GtkWidget *widget,
     cairo_arc(cr, alloc.x + radius, alloc.y + radius, radius, 180 * degrees, 270 * degrees);
     cairo_close_path(cr);
 
+    cairo_set_source_rgba (cr, bg_color.red, bg_color.green, bg_color.blue, bg_color.alpha);
+    cairo_fill_preserve (cr);
     cairo_clip(cr);
+
+    gtk_style_context_restore (context);
 
     if (GTK_WIDGET_CLASS(kiran_notify_icon_window_parent_class)->draw)
         ret = GTK_WIDGET_CLASS(kiran_notify_icon_window_parent_class)->draw(widget, cr);
@@ -322,22 +347,29 @@ kiran_notify_icon_window_constructor(GType type,
     GObject *obj;
     KiranNotifyIconWindow *win;
     GtkWidget *box;
+    GtkWidget *frame;
 
     obj = G_OBJECT_CLASS(kiran_notify_icon_window_parent_class)->constructor(type, n_construct_properties, construct_properties);
     win = KIRAN_NOTIFY_ICON_WINDOW(obj);
+    gtk_widget_set_name(GTK_WIDGET(win), "trayWindow");
     tran_setup(GTK_WIDGET(win));
+
+    frame = gtk_frame_new (NULL);
+
     box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_size_request(GTK_WIDGET(win), 1, 1);
-    gtk_widget_set_name(GTK_WIDGET(box), "trayWindowBox");
+
     win->priv->grid = gtk_grid_new();
     gtk_grid_set_row_homogeneous(GTK_GRID(win->priv->grid), TRUE);
     gtk_grid_set_column_homogeneous(GTK_GRID(win->priv->grid), TRUE);
     gtk_widget_set_name(GTK_WIDGET(win->priv->grid), "trayGrid");
 
     gtk_box_pack_start(GTK_BOX(box), win->priv->grid, TRUE, TRUE, 0);
-    gtk_container_add(GTK_CONTAINER(win), box);
+    gtk_container_add(GTK_CONTAINER(frame), box);
+    gtk_container_add(GTK_CONTAINER(win), frame);
     gtk_widget_show(win->priv->grid);
     gtk_widget_show(box);
+    gtk_widget_show(frame);
 
     return obj;
 }

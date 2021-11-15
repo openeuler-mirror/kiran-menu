@@ -386,7 +386,6 @@ position_notify_icon_window(KiranTray *tray, gboolean change_y)
             x -= (x + w) - (monitor.x + monitor.width);
 
         x -= (w - button_w) / 2;
-        y += 5;
         gravity = GDK_GRAVITY_NORTH_WEST;
 
         break;
@@ -396,7 +395,6 @@ position_notify_icon_window(KiranTray *tray, gboolean change_y)
             x -= (x + w) - (monitor.x + monitor.width);
 
         x -= (w - button_w) / 2;
-        y -= 5;
 
         gravity = GDK_GRAVITY_SOUTH_WEST;
 
@@ -767,16 +765,16 @@ kiran_tray_notify_icon_added(KiranTrayManager *manager,
                          NULL);
     }
 
+    gtk_widget_set_name (GTK_WIDGET (icon), "iconWinButton");
+
     if (type == ICON_SHOW_IN_PANEL)
     {
         gtk_box_pack_start(GTK_BOX(tray), GTK_WIDGET(icon), FALSE, TRUE, 0);
-        gtk_widget_set_name(GTK_WIDGET(icon), "iconButtonPanel");
         kiran_tray_icons_refresh(tray);
     }
     else if (type == ICON_SHOW_IN_WINDOW)
     {
         kiran_notify_icon_window_add_icon(KIRAN_NOTIFY_ICON_WINDOW(priv->icons_win), icon);
-        gtk_widget_set_name(GTK_WIDGET(icon), "iconButton");
 
         if (!gtk_widget_is_visible(priv->icons_win_button))
             gtk_widget_show(priv->icons_win_button);
