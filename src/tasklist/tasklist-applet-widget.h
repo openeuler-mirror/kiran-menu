@@ -50,7 +50,7 @@ protected:
      * @param tooltip_text         按钮的提示文本
      * @return  返回创建的按钮，该按钮已经调用Gtk::managed接口，将随父控件一起销毁
      */
-    Gtk::Button *create_paging_button(std::string icon_resource, std::string tooltip_text);
+    Gtk::Button *create_paging_button(const std::string &icon_name, const std::string &tooltip_text);
 
 private:
     Gtk::Box button_box;                 //分页按钮所在布局

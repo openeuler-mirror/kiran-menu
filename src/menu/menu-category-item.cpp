@@ -18,7 +18,7 @@
 
 MenuCategoryItem::MenuCategoryItem(const std::string &name,
                                    bool clickable) : Glib::ObjectBase("KiranMenuCategoryItem"),
-                                                     MenuListItemWidget("/kiran-menu/icon/group", _(name.c_str()))
+                                                     MenuListItemWidget("kiran-menu-group-symbolic", _(name.c_str()))
 {
     auto context = get_style_context();
 

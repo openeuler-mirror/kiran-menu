@@ -26,9 +26,8 @@ KiranSearchEntry::KiranSearchEntry() : has_preedit_text(false)
 {
     auto context = get_style_context();
 
-    auto pixbuf = Gdk::Pixbuf::create_from_resource("/kiran-menu/action/search");
+    this->set_icon_from_icon_name("kiran-menu-search-symbolic");
 
-    set_icon_from_pixbuf(pixbuf);
     set_placeholder_text(_("Search for applications"));
     set_halign(Gtk::ALIGN_FILL);
     set_valign(Gtk::ALIGN_CENTER);

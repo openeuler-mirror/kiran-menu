@@ -34,6 +34,8 @@ KiranAppletButton::KiranAppletButton(MatePanelApplet *applet_)
     g_signal_connect_after(applet, "change-size", G_CALLBACK(on_applet_size_change), this);
 
     get_style_context()->add_class("kiran-applet-button");
+    // 添加flat样式，保证在普通状态下按钮时透明背景
+    get_style_context()->add_class("flat");
 }
 
 KiranAppletButton::~KiranAppletButton()

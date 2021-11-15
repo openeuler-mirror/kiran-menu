@@ -386,7 +386,6 @@ position_notify_icon_window(KiranTray *tray, gboolean change_y)
             x -= (x + w) - (monitor.x + monitor.width);
 
         x -= (w - button_w) / 2;
-        y += 5;
         gravity = GDK_GRAVITY_NORTH_WEST;
 
         break;
@@ -396,7 +395,6 @@ position_notify_icon_window(KiranTray *tray, gboolean change_y)
             x -= (x + w) - (monitor.x + monitor.width);
 
         x -= (w - button_w) / 2;
-        y -= 5;
 
         gravity = GDK_GRAVITY_SOUTH_WEST;
 
@@ -493,6 +491,8 @@ kiran_tray_constructor(GType type,
 
     tray->priv->icons_win = kiran_notify_icon_window_new();
     tray->priv->icons_win_button = gtk_toggle_button_new();
+    GtkWidget *arrow_image = gtk_image_new_from_icon_name("kiran-menu-arrow-up-symbolic", GTK_ICON_SIZE_BUTTON);
+    gtk_button_set_image(GTK_BUTTON(tray->priv->icons_win_button), arrow_image);
     gtk_toggle_button_set_mode(GTK_TOGGLE_BUTTON(tray->priv->icons_win_button), TRUE);
     gtk_widget_set_name(tray->priv->icons_win_button, "iconWinButton");
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(tray->priv->icons_win_button), FALSE);
@@ -765,16 +765,16 @@ kiran_tray_notify_icon_added(KiranTrayManager *manager,
                          NULL);
     }
 
+    gtk_widget_set_name (GTK_WIDGET (icon), "iconWinButton");
+
     if (type == ICON_SHOW_IN_PANEL)
     {
         gtk_box_pack_start(GTK_BOX(tray), GTK_WIDGET(icon), FALSE, TRUE, 0);
-        gtk_widget_set_name(GTK_WIDGET(icon), "iconButtonPanel");
         kiran_tray_icons_refresh(tray);
     }
     else if (type == ICON_SHOW_IN_WINDOW)
     {
         kiran_notify_icon_window_add_icon(KIRAN_NOTIFY_ICON_WINDOW(priv->icons_win), icon);
-        gtk_widget_set_name(GTK_WIDGET(icon), "iconButton");
 
         if (!gtk_widget_is_visible(priv->icons_win_button))
             gtk_widget_show(priv->icons_win_button);

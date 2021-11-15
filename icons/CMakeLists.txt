@@ -8,8 +8,7 @@ install(FILES ${PROJECT_SOURCE_DIR}/icons/workspace-switcher.svg
   DESTINATION "${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/scalable/apps/"
   RENAME "kiran-workspace-switcher.svg")
 
-install(FILES ${PROJECT_SOURCE_DIR}/icons/menu-apps-list.svg
-  ${PROJECT_SOURCE_DIR}/icons/menu-favorite-apps.svg
-  ${PROJECT_SOURCE_DIR}/icons/menu-recent-files.svg
-  DESTINATION "${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/scalable/apps/")
+file(GLOB_RECURSE SYMBOLIC_SVG_FILES ${CMAKE_CURRENT_SOURCE_DIR}/kiran-*.svg)
+install(FILES ${SYMBOLIC_SVG_FILES}
+        DESTINATION "${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/scalable/apps/")
 

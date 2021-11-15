@@ -193,7 +193,14 @@ bool KiranPower::lock_screen()
 
     std::vector<std::string> argv;
 
-    argv.push_back("mate-screensaver-command");
+    if (access("/usr/bin/kiran-screensaver-command", F_OK) == 0)
+    {
+        argv.push_back("kiran-screensaver-command");
+    }
+    else
+    {
+        argv.push_back("mate-screensaver-command");
+    }
     argv.push_back("-l");
 
     try
@@ -355,7 +362,8 @@ bool KiranPower::can_switch_user()
 bool KiranPower::can_lock_screen()
 {
     RETURN_VAL_IF_TRUE(this->settings_->get_boolean(STARTMENU_LOCKDOWN_KEY_DISABLE_LOCK_SCREEN), false);
-    RETURN_VAL_IF_TRUE(access("/usr/bin/mate-screensaver", F_OK) != 0, false);
+
+    RETURN_VAL_IF_TRUE(access("/usr/bin/kiran-screensaver-command", F_OK) != 0 && access("/usr/bin/mate-screensaver-command", F_OK) != 0, false);
 
     return true;
 }

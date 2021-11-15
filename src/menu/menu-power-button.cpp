@@ -20,7 +20,7 @@ MenuPowerButton::MenuPowerButton() : menu(nullptr)
 {
     auto context = get_style_context();
 
-    icon.set_from_resource("/kiran-menu/sidebar/power");
+    icon.set_from_icon_name("kiran-menu-power-symbolic", Gtk::ICON_SIZE_BUTTON);
     add(icon);
 
     set_tooltip_text(_("Power options"));

@@ -66,9 +66,6 @@ void MenuAvatarWidget::set_icon_size(int size_)
 
 bool MenuAvatarWidget::on_draw(const ::Cairo::RefPtr<Cairo::Context> &cr)
 {
-    int scale;
-    double radius;
-    Gtk::Allocation allocation;
     Glib::RefPtr<Gdk::Pixbuf> pixbuf;
 
     if (!user_info.is_ready())
@@ -76,10 +73,10 @@ bool MenuAvatarWidget::on_draw(const ::Cairo::RefPtr<Cairo::Context> &cr)
         return false;
     }
 
-    allocation = get_allocation();
-    scale = get_scale_factor();
-    radius = allocation.get_width() > allocation.get_height() ? allocation.get_height() : allocation.get_width();
-    radius /= 2.0;
+    auto allocation = get_allocation();
+    auto scale = get_scale_factor();
+    auto image_size = allocation.get_width() > allocation.get_height() ? allocation.get_height() : allocation.get_width();
+    auto radius = image_size / 2.0;
     try
     {
         pixbuf = Gdk::Pixbuf::create_from_file(user_info.get_iconfile(),
@@ -105,11 +102,11 @@ bool MenuAvatarWidget::on_draw(const ::Cairo::RefPtr<Cairo::Context> &cr)
     cr->paint();
 
     /* 绘制头像边框 */
-    cr->scale(1.0 * scale, 1.0 * scale);
+    /* cr->scale(1.0 * scale, 1.0 * scale);
     cr->arc(radius, radius, radius, 0, 2 * M_PI);
     cr->set_source_rgba(1.0, 1.0, 1.0, 0.2);
     cr->set_line_width(1);
-    cr->stroke();
+    cr->stroke(); */
 
     cr->restore();
     return false;

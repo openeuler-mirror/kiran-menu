@@ -70,10 +70,7 @@ kiran_x11_tray_socket_init(KiranX11TraySocket *self)
     priv = self->priv = kiran_x11_tray_socket_get_instance_private(self);
     priv->has_alpha = TRUE;
 
-    gtk_widget_set_halign(GTK_WIDGET(self), GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(GTK_WIDGET(self), GTK_ALIGN_CENTER);
     gtk_widget_set_hexpand(GTK_WIDGET(self), FALSE);
-    gtk_widget_set_vexpand(GTK_WIDGET(self), FALSE);
 }
 
 void kiran_x11_tray_socket_draw_on_parent(KiranX11TraySocket *socket,

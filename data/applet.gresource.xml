@@ -6,36 +6,16 @@
     <file alias="ui/workspace-applet-window">data/workspace-applet-window.ui.xml</file>
   </gresource>
   <gresource prefix="/kiran-menu/">
-    <file alias="action/search">images/search.svg</file>
-    <file alias="sidebar/search-files">images/search-files.svg</file>
-    <file alias="sidebar/run">images/run.svg</file>
-    <file alias="sidebar/help">images/help.svg</file>
-    <file alias="sidebar/home-dir">images/home-dir.svg</file>
-    <file alias="sidebar/settings">images/settings.svg</file>
-    <file alias="sidebar/monitor">images/task-monitor.svg</file>
-    <file alias="sidebar/lock">images/lock.svg</file>
-    <file alias="sidebar/power">images/power.svg</file>
     <file alias="ui/menu">data/menu.ui.xml</file>
     <file alias="icon/logo">images/logo.svg</file>
     <file alias="icon/avatar">images/avatar_default.png</file>
-    <file alias="icon/group">images/group.svg</file>
-    <file alias="icon/expand">images/expand.svg</file>
-    <file alias="icon/shrink">images/shrink.svg</file>
-   </gresource>
-   <gresource prefix="/kiran-tasklist/">
-    <file alias="icon/executable">images/executable.svg</file>
+  </gresource>
+  <gresource prefix="/kiran-tasklist/">
     <file alias="icon/close_normal">images/close_normal.png</file>
     <file alias="icon/close_prelight">images/close_prelight.png</file>
     <file alias="icon/close_active">images/close_active.png</file>
-    <file alias="icon/go-next">images/next.svg</file>
-    <file alias="icon/go-previous">images/previous.svg</file>
   </gresource>
   <gresource prefix="/kiran-workspace/">
     <file alias="icon/button">images/workspace-switcher.svg</file>
-    <file alias="icon/add">images/plus.png</file>
-  </gresource>
-  <gresource prefix="/kiran-tray/">
-    <file alias="icon/arrow-up">images/arrow-up.svg</file>
-    <file alias="icon/arrow-down">images/arrow-down.svg</file>
   </gresource>
 </gresources>
