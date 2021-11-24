@@ -72,6 +72,7 @@ static void
 kiran_tray_manager_init(KiranTrayManagerInterface *iface)
 {
     iface->set_icon_size = kiran_sn_tray_manager_set_icon_size;
+    iface->style_updated = NULL;
 }
 
 static void

@@ -33,6 +33,9 @@ struct _KiranTrayManagerInterface
 
     void (*set_icon_size)(KiranTrayManager *manager,
                           gint icon_size);
+
+    void (*style_updated)(KiranTrayManager *manager,
+                          GtkStyleContext  *context);
 };
 
 GType kiran_tray_manager_get_type(void);
@@ -42,6 +45,8 @@ void kiran_tray_manager_emit_icon_removed(KiranTrayManager *manager,
                                           KiranNotifyIcon *icon);
 void kiran_tray_manager_set_icon_size(KiranTrayManager *manager,
                                       gint icon_size);
+void kiran_tray_manager_style_updated(KiranTrayManager *manager,
+                                      GtkStyleContext  *context);
 
 G_END_DECLS
 
