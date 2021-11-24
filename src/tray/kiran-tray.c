@@ -54,6 +54,7 @@ static void kiran_tray_unrealize(GtkWidget *widget);
 static void kiran_tray_add_manager(KiranTray *tray, KiranTrayManager *manager);
 static void kiran_tray_icons_refresh(KiranTray *tray);
 static void position_notify_icon_window(KiranTray *tray, gboolean change_y);
+static void kiran_tray_style_updated(GtkWidget *widget);
 
 G_DEFINE_TYPE_WITH_PRIVATE(KiranTray, kiran_tray, GTK_TYPE_BOX)
 
@@ -245,6 +246,7 @@ kiran_tray_class_init(KiranTrayClass *klass)
     gobject_class->constructor = kiran_tray_constructor;
     widget_class->realize = kiran_tray_realize;
     widget_class->unrealize = kiran_tray_unrealize;
+    widget_class->style_updated = kiran_tray_style_updated;
 }
 
 static void
@@ -537,6 +539,27 @@ kiran_tray_unrealize(GtkWidget *widget)
     g_clear_pointer(&priv->icons, g_slist_free);
 
     GTK_WIDGET_CLASS(kiran_tray_parent_class)->unrealize(widget);
+}
+
+static void
+kiran_tray_style_updated(GtkWidget *widget)
+{
+    KiranTray *tray;
+    KiranTrayPrivate *priv;
+    GSList *iterator = NULL;
+    GtkStyleContext *context;
+
+    if (GTK_WIDGET_CLASS (kiran_tray_parent_class)->style_updated)
+        GTK_WIDGET_CLASS (kiran_tray_parent_class)->style_updated (widget);
+
+    tray = KIRAN_TRAY (widget);
+    priv = tray->priv;
+    context = gtk_widget_get_style_context (widget);
+
+    for (iterator = priv->managers; iterator; iterator = iterator->next)
+    {
+        kiran_tray_manager_style_updated (iterator->data, context);
+    }
 }
 
 static gint
