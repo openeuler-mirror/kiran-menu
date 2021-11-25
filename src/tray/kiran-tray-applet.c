@@ -81,6 +81,18 @@ button_press(GtkWidget *widget,
     return FALSE;
 }
 
+static gboolean
+enter_notify(GtkWidget *widget,
+             GdkEvent  *event,
+             gpointer user_data)
+{
+    KiranTrayData *kcd = user_data;
+
+    mate_panel_applet_request_focus(kcd->applet, gtk_get_current_event_time());
+
+    return FALSE;
+}
+
 static void
 destroy_tray(GtkWidget *widget,
              gpointer user_data)
@@ -108,13 +120,19 @@ fill_tray_applet(MatePanelApplet *applet)
 {
     KiranTrayData *kcd;
     GtkActionGroup *action_group;
+    GtkWidget *box;
 
     kcd = g_new0(KiranTrayData, 1);
 
     kcd->applet = applet;
-    kcd->tray = kiran_tray_new();
 
-    gtk_container_add(GTK_CONTAINER(applet), kcd->tray);
+    box = gtk_event_box_new();
+    gtk_container_add(GTK_CONTAINER(applet), box);
+    gtk_widget_show (box);
+    g_signal_connect(G_OBJECT(box), "enter-notify-event", G_CALLBACK(enter_notify), kcd);
+
+    kcd->tray = kiran_tray_new();
+    gtk_container_add(GTK_CONTAINER(box), kcd->tray);
     gtk_widget_show(kcd->tray);
     gtk_widget_show(GTK_WIDGET(kcd->applet));
     gtk_widget_set_size_request(kcd->tray, 80, mate_panel_applet_get_size(kcd->applet));
