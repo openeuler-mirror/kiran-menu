@@ -21,11 +21,14 @@
 #include <libxml/xmlmemory.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <json-glib/json-glib.h>
 #include "kiran-notify-icon-window.h"
 #include "kiran-notify-icon.h"
 #include "kiran-sn-tray-manager.h"
 #include "kiran-x11-tray-manager.h"
 #include "kiran-x11-tray-socket.h"
+#include "kiran-sn-manager-gen.h"
+#include "tray-i.h"
 
 #define ROOT_NODE_NAME "apps"
 #define APP_NODE_NAME "app"
@@ -42,6 +45,9 @@ struct _KiranTrayPrivate
     GSList *managers;
     GSettings *settings;
     KiranTrayLoaction location;
+
+    guint bus_name_id;
+    KiranSnManagerGenSkeleton *skeleton;
 };
 
 static void kiran_tray_finalize(GObject *object);
@@ -55,6 +61,7 @@ static void kiran_tray_add_manager(KiranTray *tray, KiranTrayManager *manager);
 static void kiran_tray_icons_refresh(KiranTray *tray);
 static void position_notify_icon_window(KiranTray *tray, gboolean change_y);
 static void kiran_tray_style_updated(GtkWidget *widget);
+static gchar *get_widget_geometry(GtkWidget *widget);
 
 G_DEFINE_TYPE_WITH_PRIVATE(KiranTray, kiran_tray, GTK_TYPE_BOX)
 
@@ -72,6 +79,8 @@ kiran_tray_set_icon_size(KiranTray *tray)
     {
         kiran_tray_manager_set_icon_size(iterator->data, icon_size);
     }
+
+    kiran_sn_manager_gen_set_icon_size(KIRAN_SN_MANAGER_GEN(priv->skeleton), icon_size);
 }
 
 static void
@@ -250,11 +259,182 @@ kiran_tray_class_init(KiranTrayClass *klass)
 }
 
 static void
+bus_acquired_cb(GDBusConnection *connection,
+                const gchar *name,
+                gpointer user_data)
+{
+    KiranTray *tray;
+    GDBusInterfaceSkeleton *skeleton;
+    GError *error;
+
+    tray = KIRAN_TRAY(user_data);
+    skeleton = G_DBUS_INTERFACE_SKELETON(tray->priv->skeleton);
+
+    error = NULL;
+    g_dbus_interface_skeleton_export(skeleton, connection,
+                                     "/StatusNotifierManager", &error);
+
+    if (error != NULL)
+    {
+        g_warning("%s", error->message);
+        g_error_free(error);
+    }
+}
+
+static gboolean
+handle_get_geometry(KiranSnManagerGenSkeleton *skeleton,
+		    GDBusMethodInvocation *invocation,
+		    const gchar *arg_id,
+		    gpointer user_data)
+{
+    KiranTray *tray;
+    KiranTrayPrivate *priv;
+    KiranNotifyIcon *icon;
+    gchar *geometry;
+
+    tray = KIRAN_TRAY(user_data);
+    priv = tray->priv;
+
+    icon = kiran_tray_find_icon_by_id(tray,
+                                      arg_id);
+
+    if (icon == NULL)
+    {
+	g_dbus_method_invocation_return_error(invocation, G_DBUS_ERROR,
+                                              G_DBUS_ERROR_INVALID_ARGS,
+                                              "icon id '%s' is not valid",
+                                              arg_id);
+
+        return TRUE;
+    }
+
+    geometry = get_widget_geometry (GTK_WIDGET(icon));
+    kiran_sn_manager_gen_complete_get_geometry (KIRAN_SN_MANAGER_GEN (skeleton),
+		                                invocation,
+					        geometry);
+    g_free (geometry);
+
+    return TRUE;
+}
+
+static JsonObject *
+get_color_json_object(GdkRGBA *color)
+{
+    JsonObject *object;
+
+    object = json_object_new ();
+
+    json_object_set_int_member (object,
+		                "red",
+				color->red);
+
+    json_object_set_int_member (object,
+		                "green",
+				color->green);
+
+    json_object_set_int_member (object,
+		                "blue",
+				color->blue);
+
+    json_object_set_int_member (object,
+		                "alpha",
+				color->alpha);
+
+    return object;
+}
+
+static gchar *
+get_widget_style(GtkWidget *widget)
+{
+    GtkAllocation allocation;
+    JsonGenerator *generator;
+    JsonNode *root;
+    JsonObject *object;
+    GtkStyleContext *context;
+    GdkRGBA fg;
+    GdkRGBA error;
+    GdkRGBA warning;
+    GdkRGBA success;
+    gchar *data;
+
+    context = gtk_widget_get_style_context (widget);
+    gtk_style_context_save (context);
+    gtk_style_context_set_state (context, GTK_STATE_FLAG_NORMAL);
+
+    gtk_style_context_get_color (context, GTK_STATE_FLAG_NORMAL, &fg);
+
+    if (!gtk_style_context_lookup_color (context, "error_color", &error))
+      error = fg;
+    if (!gtk_style_context_lookup_color (context, "warning_color", &warning))
+      warning = fg;
+    if (!gtk_style_context_lookup_color (context, "success_color", &success))
+      success = fg;
+
+    gtk_style_context_restore (context);
+
+    generator = json_generator_new ();
+    root = json_node_new (JSON_NODE_OBJECT);
+    object = json_object_new ();
+
+    json_node_init_object (root, object);
+    json_generator_set_root (generator, root);
+
+    json_object_set_object_member (object,
+		                   "fg_color",
+				   get_color_json_object (&fg));
+
+    json_object_set_object_member (object,
+		                   "error_color",
+				   get_color_json_object (&error));
+
+    json_object_set_object_member (object,
+		                   "warning_color",
+				   get_color_json_object (&warning));
+
+    json_object_set_object_member (object,
+		                   "success_color",
+				   get_color_json_object (&success));
+
+    json_node_init_object (root, object);
+    json_generator_set_root (generator, root);
+
+    data = json_generator_to_data (generator, NULL);
+
+    json_object_unref (object);
+    json_node_free (root);
+    g_object_unref (generator);
+
+    return data;
+}
+
+static gboolean
+handle_get_style(KiranSnManagerGenSkeleton *skeleton,
+		 GDBusMethodInvocation *invocation,
+		 gpointer user_data)
+{
+    KiranTray *tray;
+    gchar *style;
+
+    tray = KIRAN_TRAY (user_data);
+
+    style = get_widget_style (GTK_WIDGET (tray));
+
+    kiran_sn_manager_gen_complete_get_style (KIRAN_SN_MANAGER_GEN (skeleton),
+                                             invocation,
+                                             style);
+
+    g_free (style);
+
+    return TRUE;
+}
+
+static void
 kiran_tray_init(KiranTray *self)
 {
     GdkDisplay *display;
     GtkCssProvider *provider;
     GdkScreen *screen;
+    GBusNameOwnerFlags flags;
     KiranTrayPrivate *priv;
 
     priv = self->priv = kiran_tray_get_instance_private(self);
@@ -275,6 +455,25 @@ kiran_tray_init(KiranTray *self)
     gtk_widget_set_halign(GTK_WIDGET(self), GTK_ALIGN_START);
     gtk_widget_set_hexpand(GTK_WIDGET(self), FALSE);
     g_object_unref(provider);
+
+    priv->skeleton = g_object_new(KIRAN_SN_TYPE_MANAGER_GEN_SKELETON, NULL);
+
+    flags = G_BUS_NAME_OWNER_FLAGS_ALLOW_REPLACEMENT |
+            G_BUS_NAME_OWNER_FLAGS_REPLACE;
+    priv->bus_name_id = g_bus_own_name(G_BUS_TYPE_SESSION,
+                                       "org.kde.StatusNotifierManager",
+                                       flags,
+                                       bus_acquired_cb,
+                                       NULL, NULL, self, NULL);
+    g_signal_connect(priv->skeleton,
+		     "handle-get-geometry",
+		     G_CALLBACK(handle_get_geometry),
+		     self);
+
+    g_signal_connect(priv->skeleton,
+		     "handle-get-style",
+		     G_CALLBACK(handle_get_style),
+		     self);
 }
 
 static void
@@ -468,6 +667,12 @@ kiran_tray_finalize(GObject *object)
     g_signal_handlers_disconnect_by_func(priv->settings,
                                          G_CALLBACK(gsettings_changed_panel_icon_padding),
                                          tray);
+    if (priv->bus_name_id > 0)
+    {
+        g_bus_unown_name(priv->bus_name_id);
+        priv->bus_name_id = 0;
+    }
+
     g_object_unref(priv->settings);
     priv->settings = NULL;
 
@@ -548,6 +753,7 @@ kiran_tray_style_updated(GtkWidget *widget)
     KiranTrayPrivate *priv;
     GSList *iterator = NULL;
     GtkStyleContext *context;
+    gchar *style;
 
     if (GTK_WIDGET_CLASS (kiran_tray_parent_class)->style_updated)
         GTK_WIDGET_CLASS (kiran_tray_parent_class)->style_updated (widget);
@@ -560,6 +766,11 @@ kiran_tray_style_updated(GtkWidget *widget)
     {
         kiran_tray_manager_style_updated (iterator->data, context);
     }
+
+    style = get_widget_style (GTK_WIDGET (tray));
+    kiran_sn_manager_gen_emit_style_changed (KIRAN_SN_MANAGER_GEN (priv->skeleton),
+	                                     style);
+    g_free (style);
 }
 
 static gint
@@ -761,6 +972,149 @@ kiran_tray_notify_icon_map_callback(GtkWidget *widget,
     }
 }
 
+static gchar *
+get_widget_geometry(GtkWidget *widget)
+{
+    GdkWindow *window;
+    GtkWidget *parent;
+    GtkAllocation allocation;
+    JsonGenerator *generator;
+    JsonNode *root;
+    JsonObject *object;
+    gchar *data;
+    int x, y, width, height;
+
+    x = y = width = height = 0;
+
+    parent = gtk_widget_get_parent (widget);
+    /* 获取顶层窗口的位置 */
+    while (parent)
+    {
+	window = gtk_widget_get_window (parent);
+	{
+	    gdk_window_get_position (window, &x, &y);
+	}
+	parent = gtk_widget_get_parent (parent);
+    }
+
+    parent = gtk_widget_get_parent (widget);
+    /* 计算控件的屏幕坐标 */
+    while (parent)
+    {
+        gtk_widget_get_allocation (widget, &allocation);
+	x += allocation.x; 
+	y += allocation.y; 
+	parent = gtk_widget_get_parent (parent);
+    }
+
+    gtk_widget_get_allocation (widget, &allocation);
+    x += allocation.x;
+    y += allocation.y;
+    width = allocation.width;
+    height = allocation.height; 
+
+    generator = json_generator_new ();
+    root = json_node_new (JSON_NODE_OBJECT);
+    object = json_object_new ();
+
+    json_object_set_int_member (object,
+		                "x",
+				x);
+
+    json_object_set_int_member (object,
+		                "y",
+				y);
+
+    json_object_set_int_member (object,
+		                "width",
+				width);
+
+    json_object_set_int_member (object,
+		                "height",
+				height);
+
+    json_node_init_object (root, object);
+    json_generator_set_root (generator, root);
+
+    data = json_generator_to_data (generator, NULL);
+
+    json_object_unref (object);
+    json_node_free (root);
+    g_object_unref (generator);
+
+    return data;
+}
+
+static void
+icon_size_allocate_callback (GtkWidget *widget,
+		             GdkRectangle *allocation,
+		             gpointer user_data)
+{
+    KiranTray *tray;
+    KiranTrayPrivate *priv;
+    gchar *geometry;
+
+    if (!gtk_widget_is_visible (widget))
+	return;
+
+    tray = KIRAN_TRAY (user_data);
+    priv = tray->priv;
+    
+    geometry = get_widget_geometry (widget);
+    kiran_sn_manager_gen_emit_geometry_changed (KIRAN_SN_MANAGER_GEN (priv->skeleton), 
+    		                                kiran_notify_icon_get_id (KIRAN_NOTIFY_ICON(widget)),
+					        geometry);
+
+    g_free (geometry);
+}
+
+static gboolean
+icon_button_press_event_callback (GtkWidget *widget,
+		                  GdkEventButton *event,
+			          gpointer user_data)
+{
+    KiranTray *tray;
+    KiranTrayPrivate *priv;
+    GdkWindow *window;
+    GdkDisplay *display;
+    GdkSeat *seat;
+    GdkDevice *pointer;
+    enum PointerEventType type;
+    gint pointer_x, pointer_y;
+
+    tray = KIRAN_TRAY(user_data);
+    priv = tray->priv;
+
+    window = gtk_widget_get_window (widget);
+    display = gtk_widget_get_display (widget);
+    seat = gdk_display_get_default_seat (display);
+    pointer = gdk_seat_get_pointer (seat);
+    gdk_device_get_position (pointer, NULL, &pointer_x, &pointer_y);
+
+    switch (event->button)
+    {
+	case 1:
+	    type = POINTER_EVENT_TYPE_LEFT_BUTTON_PRESS;
+	    break;
+
+	case 2:
+	    type = POINTER_EVENT_TYPE_MIDDLE_BUTTON_PRESS;
+	    break;
+	
+	default:
+	    type = POINTER_EVENT_TYPE_RIGHT_BUTTON_PRESS;
+	    break;
+    }
+
+    kiran_sn_manager_gen_emit_point_clicked (KIRAN_SN_MANAGER_GEN (priv->skeleton),
+		                             kiran_notify_icon_get_id (KIRAN_NOTIFY_ICON(widget)),
+					     type,
+					     pointer_x, 
+					     pointer_y);
+    
+    return FALSE;
+}
+
 static void
 kiran_tray_notify_icon_added(KiranTrayManager *manager,
                              KiranNotifyIcon *icon,
@@ -804,7 +1158,18 @@ kiran_tray_notify_icon_added(KiranTrayManager *manager,
         position_notify_icon_window(tray, FALSE);
     }
 
+    g_signal_connect (icon, 
+		      "size-allocate", 
+		      G_CALLBACK (icon_size_allocate_callback), 
+		      tray);
+
+    g_signal_connect (icon, 
+		      "button-press-event", 
+		      G_CALLBACK (icon_button_press_event_callback), 
+		      tray);
+
     priv->icons = g_slist_prepend(priv->icons, icon);
+
 }
 
 static void
