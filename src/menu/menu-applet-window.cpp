@@ -258,6 +258,7 @@ void MenuAppletWindow::init_ui()
 
     /* 系统应用列表布局 */
     all_apps_page = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
+    all_apps_page->get_style_context()->add_class("all-apps-page");
     all_apps_scrolled->add(*all_apps_page);
     new_apps_container = Gtk::make_managed<MenuNewAppsContainer>(NEW_APPS_MAX_SIZE);
     all_apps_page->pack_start(*new_apps_container, Gtk::PACK_SHRINK);
