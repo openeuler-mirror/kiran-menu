@@ -113,6 +113,11 @@ button.toggle.menu-expand-button:focus{
     border-image: none;
 }
 
+/* 所有应用列表页 */
+.all-apps-page {
+    margin-right: 10px;
+}
+
 .tasklist-widget {
     background: none;
 }
@@ -194,47 +199,6 @@ scrollbar.horizontal, scrollbar.vertical{
     border-image: none;
 }
 
-scrollbar.horizontal {
-    min-height:5px;
-    margin-top: 3px;
-    margin-bottom: 3px;
-}
-
-scrollbar.vertical, scrollbar.vertical trough {
-    min-width:5px;
-}
-
-
-scrollbar.horizontal trough, scrollbar.vertical trough {
-   background: none;
-   border-image: none;
-   border: none;
-}
-
-scrollbar.horizontal button, scrollbar.horizontal button {
-    min-height: 0px;
-    min-width: 0px;
-    background: transparent;
-    border: none;
-}
-
-scrollbar.horizontal slider {
-    min-width: 40px;
-    min-height: 5px;
-}
-
-scrollbar.vertical slider {
-    min-width: 5px;
-    min-height: 40px;
-}
-
-button.tasklist-arrow-button {
-    padding: 0px;
-    min-width: 16px;
-    min-height: 16px;
-    border: none;
-}
-
 /* workspace */
 
 window.workspace-previewer button.window-thumbnail,
@@ -281,7 +245,7 @@ list.menu-recent-list {
 
 list.menu-recent-list row {
     padding: 2px 10px 2px 10px;
-    margin: 0px;
+    margin-right: 14px;
     min-height: 40px;
     border-width: 0px;
 }
