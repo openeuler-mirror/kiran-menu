@@ -810,9 +810,6 @@ get_all_cb(GObject *source_object,
     gchar *key;
     GVariant *value;
 
-    icon = KIRAN_SN_ICON(user_data);
-    priv = KIRAN_SN_ICON_GET_PRIVATE(icon);
-
     error = NULL;
     properties = g_dbus_connection_call_finish(G_DBUS_CONNECTION(source_object),
                                                res,
@@ -830,6 +827,9 @@ get_all_cb(GObject *source_object,
         g_error_free(error);
         return;
     }
+
+    icon = KIRAN_SN_ICON(user_data);
+    priv = KIRAN_SN_ICON_GET_PRIVATE(icon);
 
     g_variant_get(properties, "(a{sv})", &iter);
     while (g_variant_iter_next(iter, "{sv}", &key, &value))
