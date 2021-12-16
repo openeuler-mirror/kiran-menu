@@ -41,9 +41,7 @@ bool KiranHelper::grab_input(Gtk::Widget &widget)
     Gdk::GrabStatus status;
     auto display = Gdk::Display::get_default();
     auto seat = display->get_default_seat();
-    status = seat->grab(widget.get_window(),
-                        Gdk::SEAT_CAPABILITY_ALL_POINTING | Gdk::SEAT_CAPABILITY_KEYBOARD,
-                        true);
+    status = seat->grab(widget.get_window(), Gdk::SEAT_CAPABILITY_ALL_POINTING, true);
     return status == Gdk::GRAB_SUCCESS;
 }
 
