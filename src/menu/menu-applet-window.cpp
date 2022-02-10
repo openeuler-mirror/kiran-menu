@@ -203,7 +203,6 @@ void MenuAppletWindow::init_ui()
     Gtk::Box *search_box, *main_box, *sider_box;
     Gtk::EventBox *date_box;
     Gtk::Box *expand_panel, *search_results_page;
-    Gtk::ScrolledWindow *all_apps_scrolled;
     Gtk::Box *recent_files_view;
 
     init_window_visual();
@@ -482,6 +481,7 @@ void MenuAppletWindow::switch_to_category_overview(const std::string &selected_c
             true));
         category_list_box->add(*item);
     }
+    all_apps_scrolled->set_visible(false);
     category_list_scrolled->show_all();
 
     if (selected_item)
@@ -498,6 +498,7 @@ void MenuAppletWindow::switch_to_apps_overview(const std::string &selected_categ
     {
         //找到分类标签对应的控件
         auto iter = category_items.find(selected_category);
+
         if (iter != category_items.end())
         {
             std::pair<std::string, MenuAppsContainer *> data = *iter;
@@ -519,18 +520,15 @@ void MenuAppletWindow::switch_to_apps_overview(const std::string &selected_categ
 
 void MenuAppletWindow::switch_to_apps_overview(double position, bool animation)
 {
-    Gtk::ScrolledWindow *all_apps_area;
-
     //切换到应用程序列表
     category_list_scrolled->set_visible(false);
+    all_apps_scrolled->show_all();
 
     menu_view_stack->set_visible_child(ALL_APPS_VIEW);
     apps_list_stack->set_visible_child(APPS_LIST_PAGE);
     if (position >= 0)
     {
-        builder->get_widget<Gtk::ScrolledWindow>("all-apps-scroll", all_apps_area);
-
-        auto adjustment = all_apps_area->get_vadjustment();
+        auto adjustment = all_apps_scrolled->get_vadjustment();
         adjustment->set_value(position);
     }
 }
