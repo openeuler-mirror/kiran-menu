@@ -185,7 +185,7 @@ private:
     Gtk::Box *all_apps_page;          /* */
     Gtk::Box *compact_favorites_view; /* 紧凑模式下的收藏夹页面 */
 
-    Gtk::ScrolledWindow *category_list_scrolled;
+    Gtk::ScrolledWindow *category_list_scrolled, *all_apps_scrolled;
     Gtk::Viewport *category_list_viewport;
 
     MenuAppsContainer *compact_favorites_container, *expand_favorites_container;
