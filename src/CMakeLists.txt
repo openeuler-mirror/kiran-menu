@@ -19,7 +19,9 @@ add_executable(${TARGET_NAME}
 
 
 if(BUILD_WITH_KIRANACCOUNTS)
-    target_sources(${TARGET_NAME} PUBLIC menu/kiran-accounts-user.cpp menu/kiran-accounts-manager.cpp)
+    target_sources(${TARGET_NAME} PUBLIC
+                   ${PROJECT_SOURCE_DIR}/src/menu/kiran-accounts-user.cpp
+                   ${PROJECT_SOURCE_DIR}/src/menu/kiran-accounts-manager.cpp)
     pkg_search_module(ACCOUNTSSERVICE REQUIRED kiran-cc-daemon)
 else()
     pkg_search_module(ACCOUNTSSERVICE REQUIRED accountsservice)

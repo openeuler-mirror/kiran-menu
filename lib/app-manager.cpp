@@ -129,7 +129,10 @@ std::shared_ptr<App> AppManager::lookup_app_with_window(std::shared_ptr<Window> 
 {
     RETURN_VAL_IF_FALSE(window != nullptr, nullptr);
 
-    KLOG_DEBUG("lookup app for window: %s.", window->get_name().c_str());
+    KLOG_DEBUG("Lookup app for window: %s, window id: %" PRIu64 ", leader window id: %" PRIu64 ".",
+               window->get_name().c_str(),
+               window->get_xid(),
+               window->get_window_group());
 
     auto transient_for = window->get_transient();
     if (transient_for)
