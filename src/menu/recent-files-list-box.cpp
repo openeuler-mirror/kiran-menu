@@ -26,8 +26,10 @@ RecentFilesListBox::RecentFilesListBox() : filter_pattern("*")
     get_style_context()->add_class("menu-recent-list");
 
     /* 最近访问文件列表发生变化时重新加载 */
-    Gtk::RecentManager::get_default()->signal_changed().connect(
-        sigc::mem_fun(*this, &RecentFilesListBox::load));
+    Gtk::RecentManager::get_default()->signal_changed().connect([this]() {
+        KLOG_DEBUG("The recent files are changed.");
+        this->load();
+    });
 
     load();
 }
@@ -84,8 +86,18 @@ void RecentFilesListBox::open_file(const Glib::RefPtr<Gtk::RecentInfo> &item)
 {
     g_return_if_fail(item && !item->get_uri().empty());
 
-    /* 使用系统默认方式打开文件 */
-    Gio::AppInfo::launch_default_for_uri_async(item->get_uri());
+    auto file = Gio::File::create_for_uri(item->get_uri());
+    if (!file->query_exists())
+    {
+        Gtk::MessageDialog dialog(_("File does not exist"), true, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
+        dialog.set_title(_("System Warning"));
+        dialog.run();
+    }
+    else
+    {
+        /* 使用系统默认方式打开文件 */
+        Gio::AppInfo::launch_default_for_uri_async(item->get_uri());
+    }
 }
 
 void RecentFilesListBox::open_file_location(const Glib::RefPtr<Gtk::RecentInfo> &item)
@@ -95,10 +107,23 @@ void RecentFilesListBox::open_file_location(const Glib::RefPtr<Gtk::RecentInfo> 
     auto file = Gio::File::create_for_uri(item->get_uri());
     auto dir = file->get_parent();
 
-    if (dir)
-        Gio::AppInfo::launch_default_for_uri_async(dir->get_uri());
+    if (!file->query_exists())
+    {
+        Gtk::MessageDialog dialog(_("File does not exist"), true, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
+        dialog.set_title(_("System Warning"));
+        dialog.run();
+    }
     else
-        KLOG_WARNING("%s: no parent found for file '%s'", __func__, item->get_uri().c_str());
+    {
+        if (dir)
+        {
+            Gio::AppInfo::launch_default_for_uri_async(dir->get_uri());
+        }
+        else
+        {
+            KLOG_WARNING("%s: no parent found for file '%s'", __func__, item->get_uri().c_str());
+        }
+    }
 }
 
 void RecentFilesListBox::remove_file_from_list(const Glib::RefPtr<Gtk::RecentInfo> &item)

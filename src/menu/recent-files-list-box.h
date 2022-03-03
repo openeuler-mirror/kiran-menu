@@ -22,7 +22,6 @@ class RecentFilesListBox : public Gtk::ListBox
 public:
     RecentFilesListBox();
     void set_filter_pattern(const Glib::ustring &filter_pattern);
-    void load();
 
 protected:
     virtual void on_row_activated(Gtk::ListBoxRow *row) override;
@@ -51,6 +50,8 @@ protected:
     static void clear_files_list(void);
 
 private:
+    void load();
+
     bool on_filter(Gtk::ListBoxRow *row);
 
     Gtk::Widget *create_recent_item(const Glib::RefPtr<Gtk::RecentInfo> &info);
