@@ -58,7 +58,9 @@ TasklistAppButton::~TasklistAppButton()
     if (context_menu)
         delete context_menu;
 
-    /* 断开原有的窗口状态监控信号 */
+    /* 断开原有的状态监控信号 */
+    draw_attention_flicker.disconnect();
+    draw_attention_normal.disconnect();
     for (auto connection : windows_state_handlers)
         connection.disconnect();
     windows_state_handlers.clear();
