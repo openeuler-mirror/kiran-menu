@@ -16,6 +16,16 @@
 #include <glibmm/i18n.h>
 #include <iostream>
 
+// TODO: 菜单中的应用分类后端目前没有做翻译，暂时放到前端调用_("xxx")进行翻译，正常应该是后端翻译后返回给前端，后续需要调整这里的翻译逻辑
+#define MENU_CATEGORY_OFFICE N_("Office")
+#define MENU_CATEGORY_DEVELOPMENT N_("Development")
+#define MENU_CATEGORY_NETWORK N_("Network")
+#define MENU_CATEGORY_GRAPHICS N_("Graphics")
+#define MENU_CATEGORY_MULTIMEDIA N_("Multimedia")
+#define MENU_CATEGORY_UTILITIES N_("Utilities")
+#define MENU_CATEGORY_SETTINGS N_("Settings")
+#define MENU_CATEGORY_OTHERS N_("Others")
+
 MenuCategoryItem::MenuCategoryItem(const std::string &name,
                                    bool clickable) : Glib::ObjectBase("KiranMenuCategoryItem"),
                                                      MenuListItemWidget("kiran-menu-group-symbolic", _(name.c_str()))

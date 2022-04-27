@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 2.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-03 19:54+0800\n"
+"POT-Creation-Date: 2022-04-27 14:30+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -128,6 +128,39 @@ msgstr "关于"
 #: ../src/workspace/workspace-applet.cpp:35
 msgid "About this applet"
 msgstr "关于面板"
+
+#. TODO: 菜单中的应用分类后端目前没有做翻译，暂时放到前端调用_("xxx")进行翻译，正常应该是后端翻译后返回给前端，后续需要调整这里的翻译逻辑
+#: ../src/menu/menu-category-item.cpp:20
+msgid "Office"
+msgstr "办公"
+
+#: ../src/menu/menu-category-item.cpp:21
+msgid "Development"
+msgstr "开发"
+
+#: ../src/menu/menu-category-item.cpp:22
+msgid "Network"
+msgstr "互联网"
+
+#: ../src/menu/menu-category-item.cpp:23
+msgid "Graphics"
+msgstr "图像"
+
+#: ../src/menu/menu-category-item.cpp:24
+msgid "Multimedia"
+msgstr "多媒体"
+
+#: ../src/menu/menu-category-item.cpp:25
+msgid "Utilities"
+msgstr "工具"
+
+#: ../src/menu/menu-category-item.cpp:26
+msgid "Settings"
+msgstr "设置"
+
+#: ../src/menu/menu-category-item.cpp:27
+msgid "Others"
+msgstr "其它"
 
 #: ../src/menu/menu-new-apps-container.cpp:83
 #: ../src/menu/menu-new-apps-container.cpp:109
@@ -332,21 +365,6 @@ msgstr "创建新工作区"
 #~ msgid "Edit Profiles"
 #~ msgstr "更改设置"
 
-#~ msgid "Office"
-#~ msgstr "办公"
-
-#~ msgid "Development"
-#~ msgstr "开发"
-
-#~ msgid "Network"
-#~ msgstr "互联网"
-
-#~ msgid "Graphics"
-#~ msgstr "图像"
-
-#~ msgid "Multimedia"
-#~ msgstr "多媒体"
-
 #~ msgid "Tray"
 #~ msgstr "系统托盘"
 
@@ -355,15 +373,6 @@ msgstr "创建新工作区"
 
 #~ msgid "The Tray displays the system notify icon"
 #~ msgstr "系统托盘显示系统应用通知图标"
-
-#~ msgid "Utilities"
-#~ msgstr "工具"
-
-#~ msgid "Settings"
-#~ msgstr "设置"
-
-#~ msgid "Others"
-#~ msgstr "其它"
 
 #~ msgid "Click to edit user information"
 #~ msgstr "点击更改用户信息"
