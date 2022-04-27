@@ -537,7 +537,9 @@ bool MenuAppletWindow::on_map_event(GdkEventAny *any_event)
 {
     Gtk::Window::on_map_event(any_event);
 
+    // Fix #53981
     category_list_scrolled->set_visible(false);
+    all_apps_scrolled->set_visible(true);
 
     on_search_stop();
 

@@ -3,6 +3,7 @@ src/menu/menu-app-item.cpp
 src/menu/menu-applet-button.cpp
 src/menu/menu-applet-window.cpp
 src/menu/menu-applet.cpp
+src/menu/menu-category-item.cpp
 src/menu/menu-new-apps-container.cpp
 src/menu/menu-power-button.cpp
 src/menu/menu-power-menu.cpp
