@@ -199,12 +199,11 @@ bool TasklistAppButton::on_draw(const ::Cairo::RefPtr<Cairo::Context> &cr)
     Glib::RefPtr<Gdk::Pixbuf> pixbuf;
     Gdk::RGBA indicator_color("#3ca8ea"), active_color("rgba(255, 255, 255, 0.3)");
     int indicator_size = indicator_size_property.get_value();
-    int windows_count;
     int scale = get_scale_factor();
     auto context = get_style_context();
 
-    auto app_ = get_app();
-    if (!app_)
+    auto app = get_app();
+    if (!app)
     {
         KLOG_WARNING("%s: app already expired!!\n", __FUNCTION__);
         return false;
@@ -228,11 +227,15 @@ bool TasklistAppButton::on_draw(const ::Cairo::RefPtr<Cairo::Context> &cr)
         KLOG_WARNING("failed to load color 'tasklist_app_indicator_color'");
     }
 
-    windows_count = KiranHelper::get_taskbar_windows(app_).size();
-    KLOG_DEBUG("app '%s', %d windows, workspace %d", app_->get_name().c_str(), windows_count,
-               Kiran::WorkspaceManager::get_instance()->get_active_workspace()->get_number());
+    auto windows_count = KiranHelper::get_taskbar_windows(app).size();
+    auto active_workspace = Kiran::WorkspaceManager::get_instance()->get_active_workspace();
 
-    if (app_->is_active())
+    KLOG_DEBUG("App '%s' has %d windows, in workspace %d",
+               app->get_name().c_str(),
+               windows_count,
+               active_workspace ? active_workspace->get_number() : -1);
+
+    if (app->is_active())
     {
         Gdk::Cairo::set_source_rgba(cr, active_color);
         cr->paint();
