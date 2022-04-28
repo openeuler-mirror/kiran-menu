@@ -14,6 +14,7 @@
 
 #include "menu-power-menu.h"
 #include <glibmm/i18n.h>
+#include <gtk3-log-i.h>
 #include <iostream>
 #include "global.h"
 #include "kiran-helper.h"
@@ -35,58 +36,56 @@ MenuPowerMenu::MenuPowerMenu()
 
     if (power->can_switch_user())
     {
-        switchuser_item = Gtk::make_managed<Gtk::MenuItem>(_("Switch user"));
-        switchuser_item->signal_activate().connect([power]() {
-            power->switch_user();
-        });
+        this->switchuser_item_ = Gtk::make_managed<Gtk::MenuItem>(_("Switch user"));
+        this->switchuser_item_->signal_activate().connect(sigc::mem_fun(this, &MenuPowerMenu::on_switch_user_cb));
 
-        append(*switchuser_item);
+        append(*this->switchuser_item_);
     }
 
     if (power->can_logout())
     {
-        logout_item = Gtk::make_managed<Gtk::MenuItem>(_("Logout"));
-        logout_item->signal_activate().connect([power]() {
+        this->logout_item_ = Gtk::make_managed<Gtk::MenuItem>(_("Logout"));
+        this->logout_item_->signal_activate().connect([power]() {
             power->logout(LOGOUT_MODE_NOW);
         });
-        append(*logout_item);
+        append(*this->logout_item_);
     }
 
     if (power->can_suspend())
     {
-        suspend_item = Gtk::make_managed<Gtk::MenuItem>(_("Suspend"));
-        suspend_item->signal_activate().connect([power]() {
+        this->suspend_item_ = Gtk::make_managed<Gtk::MenuItem>(_("Suspend"));
+        this->suspend_item_->signal_activate().connect([power]() {
             power->suspend();
         });
-        append(*suspend_item);
+        append(*this->suspend_item_);
     }
 
     if (power->can_hibernate())
     {
-        hibernate_item = Gtk::make_managed<Gtk::MenuItem>(_("Hibernate"));
-        hibernate_item->signal_activate().connect([power]() {
+        this->hibernate_item_ = Gtk::make_managed<Gtk::MenuItem>(_("Hibernate"));
+        this->hibernate_item_->signal_activate().connect([power]() {
             power->hibernate();
         });
 
-        append(*hibernate_item);
+        append(*this->hibernate_item_);
     }
 
     if (power->can_reboot())
     {
-        reboot_item = Gtk::make_managed<Gtk::MenuItem>(_("Reboot"));
-        reboot_item->signal_activate().connect([power]() {
+        this->reboot_item = Gtk::make_managed<Gtk::MenuItem>(_("Reboot"));
+        this->reboot_item->signal_activate().connect([power]() {
             power->reboot();
         });
-        append(*reboot_item);
+        append(*this->reboot_item);
     }
 
     if (power->can_shutdown())
     {
-        shutdown_item = Gtk::make_managed<Gtk::MenuItem>(_("Shutdown"));
-        shutdown_item->signal_activate().connect([power]() {
+        this->shutdown_item_ = Gtk::make_managed<Gtk::MenuItem>(_("Shutdown"));
+        this->shutdown_item_->signal_activate().connect([power]() {
             power->shutdown();
         });
-        append(*shutdown_item);
+        append(*this->shutdown_item_);
     }
 
     for (auto child : get_children())
@@ -108,4 +107,24 @@ void MenuPowerMenu::hide_menu_window()
         return;
     menu_window = get_attach_widget()->get_toplevel();
     menu_window->hide();
+}
+
+void MenuPowerMenu::on_switch_user_cb()
+{
+    auto power = KiranPower::get_default();
+
+    if (power->get_graphical_ntvs() >= power->get_ntvs_total())
+    {
+        KLOG_DEBUG("Total ntvs: %d, graphical ntvs: %d.", power->get_ntvs_total(), power->get_graphical_ntvs());
+
+        Gtk::MessageDialog dialog(_("The logined users reach the maximum limit at the same time, "
+                                    "you cannot switch to the greeter interface, Please log off some logined users first."),
+                                  true, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
+        dialog.set_title(_("System Warning"));
+        dialog.run();
+    }
+    else
+    {
+        power->switch_user();
+    }
 }

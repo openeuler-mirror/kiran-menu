@@ -27,12 +27,15 @@ public:
     void hide_menu_window();
 
 private:
-    Gtk::MenuItem *suspend_item;
-    Gtk::MenuItem *hibernate_item;
-    Gtk::MenuItem *shutdown_item;
+    void on_switch_user_cb();
+
+private:
+    Gtk::MenuItem *suspend_item_;
+    Gtk::MenuItem *hibernate_item_;
+    Gtk::MenuItem *shutdown_item_;
     Gtk::MenuItem *reboot_item;
-    Gtk::MenuItem *logout_item;
-    Gtk::MenuItem *switchuser_item;
+    Gtk::MenuItem *logout_item_;
+    Gtk::MenuItem *switchuser_item_;
 };
 
 #endif  // MENU_POWER_MENU_H
