@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 2.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-27 14:30+0800\n"
+"POT-Creation-Date: 2022-04-28 15:05+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -87,27 +87,27 @@ msgstr "无符合条件的应用"
 msgid "Hello"
 msgstr "你好"
 
-#: ../src/menu/menu-applet-window.cpp:652
+#: ../src/menu/menu-applet-window.cpp:654
 msgid "Run"
 msgstr "运行命令"
 
-#: ../src/menu/menu-applet-window.cpp:657
+#: ../src/menu/menu-applet-window.cpp:659
 msgid "Search Files"
 msgstr "搜索文件"
 
-#: ../src/menu/menu-applet-window.cpp:662
+#: ../src/menu/menu-applet-window.cpp:664
 msgid "Home Directory"
 msgstr "主目录"
 
-#: ../src/menu/menu-applet-window.cpp:667
+#: ../src/menu/menu-applet-window.cpp:669
 msgid "Control center"
 msgstr "控制面板"
 
-#: ../src/menu/menu-applet-window.cpp:672
+#: ../src/menu/menu-applet-window.cpp:674
 msgid "System monitor"
 msgstr "资源管理器"
 
-#: ../src/menu/menu-applet-window.cpp:833
+#: ../src/menu/menu-applet-window.cpp:835
 msgid "%a %b %e %Y"
 msgstr "%Y年%m月%d日 星期%a"
 
@@ -179,44 +179,50 @@ msgstr "新安装应用"
 msgid "Power options"
 msgstr "电源选项"
 
-#: ../src/menu/menu-power-menu.cpp:28
+#: ../src/menu/menu-power-menu.cpp:29
 msgid "Lock screen"
 msgstr "锁定屏幕"
 
-#: ../src/menu/menu-power-menu.cpp:38
+#: ../src/menu/menu-power-menu.cpp:39
 msgid "Switch user"
 msgstr "切换用户"
 
-#: ../src/menu/menu-power-menu.cpp:48
+#: ../src/menu/menu-power-menu.cpp:47
 msgid "Logout"
 msgstr "注销"
 
-#: ../src/menu/menu-power-menu.cpp:57
+#: ../src/menu/menu-power-menu.cpp:56
 msgid "Suspend"
 msgstr "待机"
 
-#: ../src/menu/menu-power-menu.cpp:66
+#: ../src/menu/menu-power-menu.cpp:65
 msgid "Hibernate"
 msgstr "休眠"
 
-#: ../src/menu/menu-power-menu.cpp:76
+#: ../src/menu/menu-power-menu.cpp:75
 msgid "Reboot"
 msgstr "重启"
 
-#: ../src/menu/menu-power-menu.cpp:85
+#: ../src/menu/menu-power-menu.cpp:84
 msgid "Shutdown"
 msgstr "关机"
+
+#: ../src/menu/menu-power-menu.cpp:120
+msgid ""
+"The logined users reach the maximum limit at the same time, you cannot "
+"switch to the greeter interface, Please log off some logined users first."
+msgstr "已登录用户达到最大限制，无法切换到登录界面，请先注销部分用户。"
+
+#: ../src/menu/menu-power-menu.cpp:123 ../src/menu/recent-files-list-box.cpp:93
+#: ../src/menu/recent-files-list-box.cpp:113
+#: ../src/menu/recent-files-list-box.cpp:147
+msgid "System Warning"
+msgstr "系统提示"
 
 #: ../src/menu/recent-files-list-box.cpp:92
 #: ../src/menu/recent-files-list-box.cpp:112
 msgid "File does not exist"
 msgstr "文件不存在"
-
-#: ../src/menu/recent-files-list-box.cpp:93
-#: ../src/menu/recent-files-list-box.cpp:113
-#: ../src/menu/recent-files-list-box.cpp:147
-msgid "System Warning"
-msgstr "系统提示"
 
 #: ../src/menu/recent-files-list-box.cpp:141
 msgid ""
@@ -358,6 +364,9 @@ msgstr ""
 #: ../data/workspace-applet-window.ui.xml.h:1
 msgid "Create new workspace"
 msgstr "创建新工作区"
+
+#~ msgid "The logined users reach the maximum limit at the same time."
+#~ msgstr "已登录用户达到上限。"
 
 #~ msgid "Open help"
 #~ msgstr "帮助中心"
