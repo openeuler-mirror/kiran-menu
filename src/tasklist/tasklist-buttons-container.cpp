@@ -1017,12 +1017,13 @@ void TasklistButtonsContainer::init_paging_monitor()
             signal_page_changed().emit();
 
             /* 要重新定位面板上应用按钮对应的所有窗口最小化时的位置 */
-            for (auto child : get_children())
-            {
-                auto button = dynamic_cast<TasklistAppButton *>(child);
-                Glib::signal_idle().connect_once(
-                    sigc::mem_fun(*button, &TasklistAppButton::update_windows_icon_geometry));
-            }
+            Glib::signal_idle().connect_once([this]() -> void {
+                for (auto child : this->get_children())
+                {
+                    auto button = dynamic_cast<TasklistAppButton *>(child);
+                    button->update_windows_icon_geometry();
+                }
+            });
         });
 }
 
