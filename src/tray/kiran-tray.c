@@ -997,16 +997,6 @@ get_widget_geometry(GtkWidget *widget)
 	parent = gtk_widget_get_parent (parent);
     }
 
-    parent = gtk_widget_get_parent (widget);
-    /* 计算控件的屏幕坐标 */
-    while (parent)
-    {
-        gtk_widget_get_allocation (widget, &allocation);
-	x += allocation.x; 
-	y += allocation.y; 
-	parent = gtk_widget_get_parent (parent);
-    }
-
     gtk_widget_get_allocation (widget, &allocation);
     x += allocation.x;
     y += allocation.y;
