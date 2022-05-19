@@ -88,8 +88,6 @@ enter_notify(GtkWidget *widget,
 {
     KiranTrayData *kcd = user_data;
 
-    mate_panel_applet_request_focus(kcd->applet, gtk_get_current_event_time());
-
     return FALSE;
 }
 
