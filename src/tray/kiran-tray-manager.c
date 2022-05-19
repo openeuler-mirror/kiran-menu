@@ -65,9 +65,8 @@ void kiran_tray_manager_set_icon_size(KiranTrayManager *manager,
                          icon_size);
 }
 
-void 
-kiran_tray_manager_style_updated(KiranTrayManager *manager,
-                                 GtkStyleContext  *context)
+void kiran_tray_manager_style_updated(KiranTrayManager *manager,
+                                      GtkStyleContext *context)
 {
     KiranTrayManagerInterface *iface;
 

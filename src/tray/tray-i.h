@@ -19,11 +19,11 @@ extern "C"
     enum PointerEventType
     {
         //鼠标左键按下
-	POINTER_EVENT_TYPE_LEFT_BUTTON_PRESS = 1,
+        POINTER_EVENT_TYPE_LEFT_BUTTON_PRESS = 1,
         //鼠标中键按下
-	POINTER_EVENT_TYPE_MIDDLE_BUTTON_PRESS,
+        POINTER_EVENT_TYPE_MIDDLE_BUTTON_PRESS,
         //鼠标右键按下
-	POINTER_EVENT_TYPE_RIGHT_BUTTON_PRESS,
+        POINTER_EVENT_TYPE_RIGHT_BUTTON_PRESS,
     };
 #ifdef __cplusplus
 }

@@ -83,7 +83,7 @@ button_press(GtkWidget *widget,
 
 static gboolean
 enter_notify(GtkWidget *widget,
-             GdkEvent  *event,
+             GdkEvent *event,
              gpointer user_data)
 {
     KiranTrayData *kcd = user_data;
@@ -126,7 +126,7 @@ fill_tray_applet(MatePanelApplet *applet)
 
     box = gtk_event_box_new();
     gtk_container_add(GTK_CONTAINER(applet), box);
-    gtk_widget_show (box);
+    gtk_widget_show(box);
     g_signal_connect(G_OBJECT(box), "enter-notify-event", G_CALLBACK(enter_notify), kcd);
 
     kcd->tray = kiran_tray_new();
