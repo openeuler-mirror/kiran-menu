@@ -41,6 +41,7 @@ pkg_search_module(GTK3 REQUIRED gtk+-3.0)
 pkg_search_module(DBUSMENU_GLIB REQUIRED dbusmenu-glib-0.4)
 pkg_search_module(LIBXML2 REQUIRED libxml-2.0)
 pkg_search_module(FMT REQUIRED fmt)
+pkg_search_module(GLIB_JSON REQUIRED json-glib-1.0)
 
 add_subdirectory(lib)
 add_subdirectory(src)
