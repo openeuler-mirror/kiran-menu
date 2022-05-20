@@ -32,8 +32,7 @@ endif()
 
 install(TARGETS ${TARGET_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/libexec/${PANEL_NAME}/")
 
-include(GNUInstallDirs)
-install(FILES tray/tray-i.h  DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/")
+install(FILES tray/tray-i.h  DESTINATION ${KMU_INSTALL_INCLUDE})
 
 include(CheckIncludeFiles)
 

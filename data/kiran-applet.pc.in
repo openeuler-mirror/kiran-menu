@@ -1,0 +1,4 @@
+Name: Kiran Applet
+Description: Development files for communicating with kiran applet system tray.
+Version: 2.0
+Cflags: -I@KMU_INSTALL_INCLUDE@
