@@ -31,6 +31,9 @@ else ()
     pkg_search_module(PANEL REQUIRED libmatepanelapplet-4.0)
 endif()
 
+include(GNUInstallDirs)
+set(KMU_INSTALL_INCLUDE ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
+
 pkg_search_module(GTKMM REQUIRED gtkmm-3.0)
 pkg_search_module(MATEDESKTOP REQUIRED mate-desktop-2.0)
 pkg_search_module(KLOG_GTK3 REQUIRED klog-gtk3)
@@ -41,6 +44,7 @@ pkg_search_module(GTK3 REQUIRED gtk+-3.0)
 pkg_search_module(DBUSMENU_GLIB REQUIRED dbusmenu-glib-0.4)
 pkg_search_module(LIBXML2 REQUIRED libxml-2.0)
 pkg_search_module(FMT REQUIRED fmt)
+pkg_search_module(GLIB_JSON REQUIRED json-glib-1.0)
 
 add_subdirectory(lib)
 add_subdirectory(src)

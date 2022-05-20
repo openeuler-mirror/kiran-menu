@@ -533,11 +533,11 @@ update(KiranSnIcon *icon)
             pixbuf = get_icon_by_name("image-missing", icon_size);
         }
 
-	if (pixbuf)
-	{
-            gtk_image_set_from_pixbuf (GTK_IMAGE(priv->image), pixbuf);
+        if (pixbuf)
+        {
+            gtk_image_set_from_pixbuf(GTK_IMAGE(priv->image), pixbuf);
             g_object_unref(pixbuf);
-	}
+        }
 
         g_free(priv->icon);
         priv->icon = g_strdup(priv->icon_name);

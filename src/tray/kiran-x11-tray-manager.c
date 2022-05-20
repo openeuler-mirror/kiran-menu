@@ -77,51 +77,51 @@ kiran_x11_tray_manager_set_icon_size(KiranTrayManager *manager,
 
 static void
 kiran_x11_tray_manager_set_colors(KiranX11TrayManager *manager,
-                                  GdkRGBA             *fg,
-                                  GdkRGBA             *error,
-                                  GdkRGBA             *warning,
-                                  GdkRGBA             *success)
+                                  GdkRGBA *fg,
+                                  GdkRGBA *error,
+                                  GdkRGBA *warning,
+                                  GdkRGBA *success)
 {
-  KiranX11TrayManagerPrivate *priv = manager->priv;
+    KiranX11TrayManagerPrivate *priv = manager->priv;
 
-  if (!gdk_rgba_equal (&priv->fg, fg) ||
-      !gdk_rgba_equal (&priv->error, error) ||
-      !gdk_rgba_equal (&priv->warning, warning) ||
-      !gdk_rgba_equal (&priv->success, success))
+    if (!gdk_rgba_equal(&priv->fg, fg) ||
+        !gdk_rgba_equal(&priv->error, error) ||
+        !gdk_rgba_equal(&priv->warning, warning) ||
+        !gdk_rgba_equal(&priv->success, success))
     {
-      priv->fg = *fg;
-      priv->error = *error;
-      priv->warning = *warning;
-      priv->success = *success;
+        priv->fg = *fg;
+        priv->error = *error;
+        priv->warning = *warning;
+        priv->success = *success;
 
-      kiran_x11_manager_set_colors_property (manager);
+        kiran_x11_manager_set_colors_property(manager);
     }
 }
 
 static void
 kiran_x11_tray_manager_style_updated(KiranTrayManager *manager,
-                                     GtkStyleContext  *context)
+                                     GtkStyleContext *context)
 {
     GdkRGBA fg;
     GdkRGBA error;
     GdkRGBA warning;
     GdkRGBA success;
-  
-    gtk_style_context_save (context);
-    gtk_style_context_set_state (context, GTK_STATE_FLAG_NORMAL);
-  
-    gtk_style_context_get_color (context, GTK_STATE_FLAG_NORMAL, &fg);
-  
-    if (!gtk_style_context_lookup_color (context, "error_color", &error))
-      error = fg;
-    if (!gtk_style_context_lookup_color (context, "warning_color", &warning))
-      warning = fg;
-    if (!gtk_style_context_lookup_color (context, "success_color", &success))
-      success = fg;
-  
-    gtk_style_context_restore (context);
-  
-    kiran_x11_tray_manager_set_colors (KIRAN_X11_TRAY_MANAGER (manager), &fg, &error, &warning, &success);
+
+    gtk_style_context_save(context);
+    gtk_style_context_set_state(context, GTK_STATE_FLAG_NORMAL);
+
+    gtk_style_context_get_color(context, GTK_STATE_FLAG_NORMAL, &fg);
+
+    if (!gtk_style_context_lookup_color(context, "error_color", &error))
+        error = fg;
+    if (!gtk_style_context_lookup_color(context, "warning_color", &warning))
+        warning = fg;
+    if (!gtk_style_context_lookup_color(context, "success_color", &success))
+        success = fg;
+
+    gtk_style_context_restore(context);
+
+    kiran_x11_tray_manager_set_colors(KIRAN_X11_TRAY_MANAGER(manager), &fg, &error, &warning, &success);
 }
 
 static void
