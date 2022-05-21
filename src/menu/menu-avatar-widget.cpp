@@ -45,7 +45,10 @@ void MenuAvatarWidget::load_user_info_()
         return;
     }
 
-    set_tooltip_text(user_info.get_username());
+    if (user_info.get_username() != NULL)
+    {
+        set_tooltip_text(user_info.get_username());
+    }
     queue_draw();
 }
 
