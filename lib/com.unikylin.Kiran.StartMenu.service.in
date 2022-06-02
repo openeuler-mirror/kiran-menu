@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=com.unikylin.Kiran.StartMenu
+Exec=@libexecdir@/kiran-start-menu
