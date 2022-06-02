@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="com.kylinsec.kiran.tray" path="/com/kylinsec/kiran/tray/">
+    <key name="panel-icon-ids" type="as">
+      <default>['~01-keyboard', '~02-volume', '~04-network', '~05-battery', 'kiran-flameshot']</default>
+      <summary>The notify icon which show in the panel</summary>
+      <description>The notify icon show which in the panel.</description>
+    </key>
+    <key name="hide-icon-ids" type="as">
+      <default>[]</default>
+      <summary>The notify icon which not show</summary>
+      <description>The notify icon which not show.</description>
+    </key>
+    <key name="tray-icon-size" type="i">
+      <default>16</default>
+      <summary>The tray icon size</summary>
+      <description>The tray icon size.</description>
+    </key>
+    <key name="panel-icon-padding" type="i">
+      <default>2</default>
+      <summary>The tray icon padding in the panel</summary>
+      <description>The tray icon padding in the panel.</description>
+    </key>
+  </schema>
+</schemalist>

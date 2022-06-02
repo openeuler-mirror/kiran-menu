@@ -1,0 +1,11 @@
+kiran-menu-applet
+.vscode/
+build/
+menu.gresource
+/builddir
+/.vscode
+*~
+po/*.mo
+*.user
+*.pro
+src/config.h

@@ -1,0 +1,21 @@
+@startuml
+CCBookShelf <|.. CCBookShelfProxy
+GDbusProxy <|- CCBookShelfProxy
+CCBookShelfProxy : cc_book_shelf_call_add_book()
+CCBookShelfProxy : cc_book_shelf_call_add_book_finish()
+CCBookShelfProxy : cc_book_shelf_call_add_book_sync()
+CCBookShelfProxy : cc_book_shelf_get_book_shelf()
+CCBookShelfProxy : cc_book_shelf_dup_book_shelf()
+
+note top of CCBookShelfProxy : proxy = cc_book_shelf_proxy_new()
+
+CCBookShelf <|.. CCBookShelfSkeleton
+GDbusInterfaceSkeleton <|.. CCBookShelfSkeleton
+CCBookShelfSkeleton : cc_book_shelf_get_book_shelf()
+CCBookShelfSkeleton : cc_book_shelf_dup_book_shelf()
+CCBookShelfSkeleton : cc_book_shelf_set_book_shelf()
+
+note top of CCBookShelfSkeleton : skeleton = cc_book_shelf_skeleton_new()\ng_signal_connect(self->skeleton, \n"handle-add-book",  callback, NULL);
+
+
+@enduml
