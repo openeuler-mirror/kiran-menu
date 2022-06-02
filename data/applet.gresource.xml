@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<gresources>
+  <gresource prefix="/kiran-applet/">
+    <file alias="css/applet.css">data/applet.css</file>
+    <file alias="ui/window-snapshot">data/window-snapshot.ui.xml</file>
+    <file alias="ui/workspace-applet-window">data/workspace-applet-window.ui.xml</file>
+  </gresource>
+  <gresource prefix="/kiran-menu/">
+    <file alias="ui/menu">data/menu.ui.xml</file>
+    <file alias="icon/logo">images/logo.svg</file>
+    <file alias="icon/avatar">images/avatar_default.png</file>
+  </gresource>
+  <gresource prefix="/kiran-tasklist/">
+    <file alias="icon/close_normal">images/close_normal.png</file>
+    <file alias="icon/close_prelight">images/close_prelight.png</file>
+    <file alias="icon/close_active">images/close_active.png</file>
+  </gresource>
+  <gresource prefix="/kiran-workspace/">
+    <file alias="icon/button">images/workspace-switcher.svg</file>
+  </gresource>
+</gresources>

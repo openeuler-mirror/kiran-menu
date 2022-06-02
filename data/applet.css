@@ -1,0 +1,297 @@
+@define-color placeholder_text_color #c8c8c8;
+@define-color tasklist_app_indicator_color #3ca8ea;
+@define-color thumbnail-hover-color #569CD6;
+@define-color tasklist_attention_color alpha(#fbaf43, 0.6);
+
+button.kiran-applet-button {
+    border-radius: 0px;
+    border: none;
+}
+
+
+/* 开始菜单主窗口 */
+window#menu-applet-window {
+    min-width: 760px;
+    min-height: 682px;
+    border-radius: 8px;
+
+    -gtkmm__CustomObject_KiranMenuWindow-compact-min-height: 682px;
+    -gtkmm__CustomObject_KiranMenuWindow-expand-min-height: 682px;
+}
+
+/* 开始菜单应用按钮和分类标签 */
+button.menu-app-item.horizontal, button.menu-category-item {
+    border-width: 0px;
+    border-radius: 0px;
+    outline: none;
+}
+
+button.menu-app-item.horizontal {
+    min-height: 40px;
+    padding: 0px;
+    padding-left: 24px;
+    -gtkmm__CustomObject_KiranMenuAppItem-icon-spacing: 12px;
+}
+
+button.menu-category-item {
+    min-height: 40px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+
+    padding: 0px;
+    padding-left: 12px;
+
+    -gtkmm__CustomObject_KiranMenuCategoryItem-icon-spacing: 12px;
+}
+
+button.menu-app-item.vertical {
+    min-height: 100px;
+    min-width: 88px;
+    border: none;
+    border-radius: 5px;
+    -gtkmm__CustomObject_KiranMenuAppItem-icon-spacing: 8px;
+    -gtkmm__CustomObject_KiranMenuAppItem-max-width: 88px;
+    -gtkmm__CustomObject_KiranMenuAppItem-max-height: 100px;
+    padding: 10px 8px 10px 8px;
+    border-image: none;
+    outline: none;
+}
+
+
+button.menu-app-item:focus,
+button.menu-category-item:focus
+{
+    outline-offset: -2px;
+    outline-style: dotted;
+    outline-width: 1px;
+}
+
+/* 开始菜单侧边栏按钮 */
+button.menu-app-launcher {
+    border-color: transparent;
+    min-height: 30px;
+}
+
+/* 开始菜单应用搜索框 */
+entry.menu-search-entry {
+    margin: 10px 10px 10px 10px;
+    padding: 3px 10px 3px 10px;
+    box-shadow: none;
+    min-height: 24px;
+}
+
+/* 开始菜单区域框 */
+.menu-section-box {
+    border-radius: 8px;
+    padding-bottom: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+
+label.empty-prompt-text {
+    font-size: 18px;
+    color: #8b8b8b;
+}
+
+/* 开始菜单：应用列表展开按钮 */
+button.toggle.menu-expand-button {
+    box-shadow: none;
+    border: none;
+    border-image: none;
+    padding-left: 24px;
+    min-height: 32px;
+}
+
+
+button.toggle.menu-expand-button:focus{
+    outline-offset: -2px;
+    outline-style: dotted;
+    outline-width: 1px;
+    border-color: transparent;
+    box-shadow: none;
+    border-image: none;
+}
+
+/* 所有应用列表页 */
+.all-apps-page {
+    margin-right: 10px;
+}
+
+.tasklist-widget {
+    background: none;
+}
+
+/* .tasklist-widget:drop(active) {
+    background: rgba(255, 255, 255, 0.15);
+} */
+
+button.kiran-tasklist-button {
+    border: none;
+    border-radius: 0px;
+    -gtkmm__CustomObject_KiranTasklistAppButton-indicator-size: 4px;
+}
+
+
+window.app-previewer button.window-thumbnail {
+    min-width: 200px;
+    background: transparent;
+    padding: 8px;
+}
+
+window.app-previewer button.window-thumbnail.vertical {
+    border: 1px solid transparent;
+}
+
+window.app-previewer button.window-thumbnail.horizontal {
+    border: 1px solid transparent;
+    min-height: 140px;
+}
+
+window.app-previewer button.window-thumbnail.vertical:hover,
+window.app-previewer button.window-thumbnail.horizontal:hover,
+window.app-previewer button.window-thumbnail:hover {
+    border: 1px solid rgba(46,179,255, 0.6);
+}
+
+
+window.app-previewer scrolledwindow, window.app-previewer viewport {
+    background: transparent;
+    border: none;
+}
+
+button.kiran-thumbnail button.close-btn {
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 22px 22px;
+    background-image: url("/kiran-tasklist/icon/close_normal");
+    border: none;
+    padding: 0px;
+}
+
+button.kiran-thumbnail button.close-btn:hover{
+    background-image: url("/kiran-tasklist/icon/close_prelight");
+    padding: 0px;
+}
+
+button.kiran-thumbnail button.close-btn:active {
+    background-image: url("/kiran-tasklist/icon/close_active");
+    padding: 0px;
+}
+
+menu.opacity-menu menuitem{
+    min-height: 28px;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+
+scrollbar {
+    -GtkScrollbar-has-backward-stepper: 0;
+    -GtkScrollbar-has-forward-stepper: 0;
+    border-radius: 0px;
+}
+
+scrollbar.horizontal, scrollbar.vertical{
+    border: none;
+    background: transparent;
+    border-image: none;
+}
+
+/* workspace */
+
+window.workspace-previewer button.window-thumbnail,
+window.workspace-previewer button.window-thumbnail:hover {
+    color: white;
+    border: none;
+    padding: 0px;
+    box-shadow: none;
+    border-image: none;
+    background: transparent;
+    /* text-shadow: -1px 1px 2px alpha(#000000, 0.6), 1px 1px 2px alpha(#000000, 0.6),
+                1px -1px 2px alpha(#000000, 0.6), -1px -1px 2px alpha(#000000, 0.6); */
+    font-size: 13px;
+}
+
+
+
+button.toggle.kiran-showdesktop-button {
+    border: none;
+    border-left: 1px inset rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+button.toggle.kiran-showdesktop-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+button.toggle.kiran-showdesktop-button:checked,
+button.toggle.kiran-showdesktop-button:active
+{
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.stack-switcher button{
+    min-height: 30px;
+}
+
+list.menu-recent-list {
+    border: none;
+    background: transparent;
+    margin: 10px 0px 10px 0px;
+    padding: 0px;
+}
+
+list.menu-recent-list row {
+    padding: 2px 10px 2px 10px;
+    margin-right: 14px;
+    min-height: 40px;
+    border-width: 0px;
+}
+
+list.menu-recent-list row image:first-child {
+    padding: 0px;
+    margin-right: 8px;
+}
+
+scrolledwindow, scrolledwindow viewport {
+    background: none;
+    border: none;
+}
+
+#menu-left-container {
+    border-radius: 8px;
+}
+
+#menu-mid-container {
+    border-radius: 8px;
+}
+
+/* Tray */
+#iconWinButton
+{
+  border-radius: 0px;
+  border-width: 0px;
+  background-repeat: no-repeat;
+  background-position: center;
+  min-width: 24px;
+  margin: 0px;
+  padding: 0px;
+}
+
+#trayWindow
+{
+  border-radius: 6px;
+  border-width: 1px;
+}
+
+#trayGrid
+{
+  margin: 0px;
+}
+
+#trayBox
+{
+  margin: 0px 5px 0px 0px;
+}
