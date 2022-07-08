@@ -347,14 +347,15 @@ Gtk::SearchEntry *MenuAppletWindow::create_app_search_entry()
 
 void MenuAppletWindow::on_date_box_clicked()
 {
-    const char *app_names[] = {
-        "kiran-timedate-manager",
-        "mate-time-admin",
-        "system-config-date",
-        nullptr};
+    std::vector<Glib::RefPtr<Gio::File>> files;
+    auto app = Gio::AppInfo::create_from_commandline("kiran-control-panel -c timedate",
+                                                     std::string(),
+                                                     Gio::APP_INFO_CREATE_SUPPORTS_STARTUP_NOTIFICATION);
 
-    if (!KiranHelper::launch_app_from_list(app_names))
-        KLOG_WARNING("Failed to launch datetime manage tools");
+    if (!app->launch(files))
+    {
+        KLOG_WARNING("Failed to launch timedate tools.");
+    }
 
     hide();
 }
@@ -667,7 +668,7 @@ void MenuAppletWindow::add_sidebar_buttons()
 
     launcher_btn = create_launcher_button("kiran-menu-settings-symbolic",
                                           _("Control center"),
-                                          "mate-control-center");
+                                          "kiran-control-panel");
     side_box->add(*launcher_btn);
 
     launcher_btn = create_launcher_button("kiran-menu-task-monitor-symbolic",

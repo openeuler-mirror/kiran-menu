@@ -68,12 +68,15 @@ std::shared_ptr<App> App::create_from_desktop_id(const std::string &id, AppKind 
 void App::update_from_desktop_file(bool force)
 {
     KLOG_PROFILE("id: %s.", this->desktop_id_.c_str());
+
     g_return_if_fail(this->desktop_app_);
 
     this->file_name_ = this->desktop_app_->get_filename();
-
     if (force)
+    {
         this->desktop_app_ = Gio::DesktopAppInfo::create_from_filename(this->file_name_);
+        g_return_if_fail(this->desktop_app_);
+    }
 
 #define GET_STRING(key) this->desktop_app_->get_string(key).raw()
 #define GET_LOCALE_STRING(key) this->desktop_app_->get_locale_string(key).raw()
@@ -193,9 +196,8 @@ WindowVec App::get_windows()
 WindowVec App::get_taskbar_windows()
 {
     auto windows = get_windows();
-    auto iter = std::remove_if(windows.begin(), windows.end(), [](std::shared_ptr<Kiran::Window> window) {
-        return window->should_skip_taskbar();
-    });
+    auto iter = std::remove_if(windows.begin(), windows.end(), [](std::shared_ptr<Kiran::Window> window)
+                               { return window->should_skip_taskbar(); });
     windows.erase(iter, windows.end());
     return windows;
 }
