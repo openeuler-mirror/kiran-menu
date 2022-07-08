@@ -190,7 +190,8 @@ Kiran::WindowVec KiranHelper::get_active_workspace_windows(const std::shared_ptr
     auto windows = app->get_taskbar_windows();
 
     auto removed = std::remove_if(windows.begin(), windows.end(),
-                                  [](const std::shared_ptr<Kiran::Window> window) -> bool {
+                                  [](const std::shared_ptr<Kiran::Window> window) -> bool
+                                  {
                                       return !window_is_on_active_workspace(window);
                                   });
 
@@ -205,27 +206,6 @@ Kiran::WindowVec KiranHelper::get_taskbar_windows(const std::shared_ptr<Kiran::A
         return KiranHelper::get_active_workspace_windows(app);
     else
         return app->get_taskbar_windows();
-}
-
-bool KiranHelper::launch_app_from_list(const char **app_names)
-{
-    std::shared_ptr<Kiran::App> app;
-    auto app_manager = Kiran::AppManager::get_instance();
-
-    for (int i = 0; app_names[i] != nullptr; i++)
-    {
-        app = app_manager->lookup_app(std::string(app_names[i]) + ".desktop");
-        if (app)
-            break;
-    }
-
-    if (app)
-    {
-        app->launch();
-        return true;
-    }
-
-    return false;
 }
 
 void show_applet_about_dialog(const char *program_name,

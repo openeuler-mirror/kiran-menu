@@ -6,5 +6,3 @@
 #define GETTEXT_PACKAGE		   PACKAGE_NAME
 #define COPYRIGHT              "Copyright ©2020 KylinSec. All rights reserved."
 
-#cmakedefine BUILD_WITH_ACCOUNTSSERVICE
-#cmakedefine BUILD_WITH_KIRANACCOUNTS

@@ -117,16 +117,13 @@ bool MenuAvatarWidget::on_draw(const ::Cairo::RefPtr<Cairo::Context> &cr)
 
 void MenuAvatarWidget::on_clicked()
 {
-    const char *app_names[] = {
-#ifdef BUILD_WITH_KIRANACCOUNTS
-        "kiran-account-manager",
-        "kiran-cpanel-account",
-#else
-        "mate-about-me",
-#endif
-        "system-config-users",
-        nullptr};
+    std::vector<Glib::RefPtr<Gio::File>> files;
+    auto app = Gio::AppInfo::create_from_commandline("kiran-control-panel -c account-management",
+                                                     std::string(),
+                                                     Gio::APP_INFO_CREATE_SUPPORTS_STARTUP_NOTIFICATION);
 
-    if (!KiranHelper::launch_app_from_list(app_names))
-        KLOG_WARNING("Failed to launch avatar or account manage tools");
+    if (!app->launch(files))
+    {
+        KLOG_WARNING("Failed to launch timedate tools.");
+    }
 }
