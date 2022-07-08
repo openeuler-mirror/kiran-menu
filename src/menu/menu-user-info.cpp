@@ -38,7 +38,6 @@ bool MenuUserInfo::load()
     if (load_state != INFO_STATE_NOT_LOAD)
         return true;
 
-#ifdef BUILD_WITH_KIRANACCOUNTS
     auto manager = kiran_accounts_manager_get_default();
 
     user = kiran_accounts_manager_get_user_by_id(manager, uid);
@@ -48,17 +47,6 @@ bool MenuUserInfo::load()
         load_state = INFO_STATE_LOADING;
         handler_id = g_signal_connect_swapped(user, "loaded", G_CALLBACK(MenuUserInfo::on_loaded), this);
     }
-#else
-    auto manager = act_user_manager_get_default();
-
-    user = act_user_manager_get_user_by_id(manager, uid);
-    g_signal_connect_swapped(user, "changed", G_CALLBACK(&MenuUserInfo::on_changed), this);
-    if (!act_user_is_loaded(user))
-    {
-        load_state = INFO_STATE_LOADING;
-        handler_id = g_signal_connect_swapped(user, "notify::is-loaded", G_CALLBACK(MenuUserInfo::on_loaded), this);
-    }
-#endif
     else
         on_loaded(this);
 
@@ -79,20 +67,12 @@ void MenuUserInfo::on_loaded(MenuUserInfo *info)
 
 const char *MenuUserInfo::get_username() const
 {
-#ifdef BUILD_WITH_KIRANACCOUNTS
     return kiran_accounts_user_get_name(user);
-#else
-    return act_user_get_user_name(user);
-#endif
 }
 
 const char *MenuUserInfo::get_iconfile() const
 {
-#ifdef BUILD_WITH_KIRANACCOUNTS
     return kiran_accounts_user_get_icon_file(user);
-#else
-    return act_user_get_icon_file(user);
-#endif
 }
 
 sigc::signal<void> MenuUserInfo::signal_ready()
