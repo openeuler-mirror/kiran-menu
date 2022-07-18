@@ -68,11 +68,18 @@ KiranPower::KiranPower()
                                                                              SESSION_MANAGER_PATH,
                                                                              SESSION_MANAGER_INTERFACE);
 
-        // TODO: 这里直接选用seat0是有问题的，需要获取会话所在seat
-        this->seat_manager_proxy_ = Gio::DBus::Proxy::create_for_bus_sync(Gio::DBus::BUS_TYPE_SYSTEM,
-                                                                          DISPLAY_MANAGER_DBUS,
-                                                                          DISPLAY_MANAGER_SEAT_PATH,
-                                                                          DISPLAY_MANAGER_INTERFACE);
+        auto xdg_seat_object_path = Glib::getenv("XDG_SEAT_PATH");
+        if (!xdg_seat_object_path.empty())
+        {
+            this->seat_manager_proxy_ = Gio::DBus::Proxy::create_for_bus_sync(Gio::DBus::BUS_TYPE_SYSTEM,
+                                                                              DISPLAY_MANAGER_DBUS,
+                                                                              xdg_seat_object_path,
+                                                                              DISPLAY_MANAGER_INTERFACE);
+        }
+        else
+        {
+            KLOG_WARNING("Failed to get environment variable XDG_SEAT_PATH.");
+        }
     }
     catch (const Gio::DBus::Error &e)
     {
@@ -359,6 +366,17 @@ bool KiranPower::can_logout()
 bool KiranPower::can_switch_user()
 {
     RETURN_VAL_IF_TRUE(this->settings_->get_boolean(STARTMENU_LOCKDOWN_KEY_DISABLE_USER_SWITCHING), false);
+
+    try
+    {
+        Glib::VariantBase variant_value;
+        this->seat_manager_proxy_->get_cached_property(variant_value, "CanSwitch");
+        return Glib::VariantBase::cast_dynamic<Glib::Variant<bool>>(variant_value).get();
+    }
+    catch (const Glib::Error &e)
+    {
+        KLOG_WARNING("%s", e.what().c_str());
+    }
     return true;
 }
 
