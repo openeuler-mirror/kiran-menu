@@ -50,6 +50,7 @@ static const struct
     {"Mate-volume-control-status-icon", "~02-volume", KIRAN_NOTIFY_ICON_CATEGORY_HARDWARE},
     {"kiran-audio-status-icon", "~02-volume", KIRAN_NOTIFY_ICON_CATEGORY_HARDWARE},
     {"ibus-ui-gtk", "~01-keyboard", KIRAN_NOTIFY_ICON_CATEGORY_HARDWARE},
+    {"Fcitx", "~01-keyboard", KIRAN_NOTIFY_ICON_CATEGORY_HARDWARE},
     {"fcitx", "~01-keyboard", KIRAN_NOTIFY_ICON_CATEGORY_HARDWARE},
     {"fcitx-qimpanel", "~01-keyboard", KIRAN_NOTIFY_ICON_CATEGORY_HARDWARE},
     {"scim", "~01-keyboard", KIRAN_NOTIFY_ICON_CATEGORY_HARDWARE},
