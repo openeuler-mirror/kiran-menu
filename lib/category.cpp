@@ -18,7 +18,7 @@
 
 namespace Kiran
 {
-Category::Category(std::shared_ptr<CategoryNode> node) : repeat_(true),
+Category::Category(std::shared_ptr<CategoryNode> node) : repeat_(false),
                                                          node_(node)
 {
     if (node->get_type() != CategoryNodeType::CATEGORY_NODE_TYPE_CATEGORY)
