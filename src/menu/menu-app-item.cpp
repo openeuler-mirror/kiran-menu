@@ -47,10 +47,12 @@ MenuAppItem::MenuAppItem(const std::shared_ptr<Kiran::App> &app_, int _icon_size
     set_can_focus(true);
     set_tooltip_text(app_->get_locale_comment());
 
-    context_menu.signal_deactivate().connect(
-        sigc::mem_fun(*this, &MenuAppItem::on_context_menu_deactivated));
-
     init_drag_and_drop();
+}
+
+MenuAppItem::~MenuAppItem()
+{
+    this->idle_drag_connection_.disconnect();
 }
 
 const std::shared_ptr<Kiran::App> MenuAppItem::get_app() const
@@ -122,16 +124,19 @@ void MenuAppItem::on_drag_data_get(const Glib::RefPtr<Gdk::DragContext> &context
 
 void MenuAppItem::on_drag_end(const Glib::RefPtr<Gdk::DragContext> &context)
 {
-    /* 让开始菜单窗口重新获取输入焦点 */
-    Gtk::Container *toplevel = get_toplevel();
-    KiranHelper::grab_input(*toplevel);
-}
+    /* FIXME: 当拖动图标到任务栏时，无法收到drag-end信号，因为任务栏时kiran-panel的子窗口，kiran-panel是通过
+       代理的方式将拖拽信息发送给任务栏，但是任务栏拖拽完成后，这个代理并没有把完成的消息转发给源控件（开始菜单），
+       因此无法收到drag-end信号，当前函数也不会被调用。这个时候窗口不再被抓取，需要手动点击左下角开始菜单按钮才能隐藏。*/
 
-void MenuAppItem::on_context_menu_deactivated()
-{
-    /* 让开始菜单窗口重新获取输入焦点 */
-    auto toplevel = get_toplevel();
-    KiranHelper::grab_input(*toplevel);
+    // 如果拖拽被取消，拖拽的ungrab操作可能在drag-end信号之后，所以这里的grab操作放入到后面的事件循环处理。
+    if (this->idle_drag_connection_.empty())
+    {
+        this->idle_drag_connection_ = Glib::signal_idle().connect([this]() -> bool {
+            Gtk::Container *toplevel = this->get_toplevel();
+            KiranHelper::grab_input(*toplevel);
+            return false;
+        });
+    }
 }
 
 bool MenuAppItem::on_key_press_event(GdkEventKey *key_event)
