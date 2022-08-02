@@ -23,7 +23,7 @@ class MenuAppItem : public MenuListItemWidget
 {
 public:
     MenuAppItem(const std::shared_ptr<Kiran::App> &_app, int icon_size = 24, Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL);
-    ~MenuAppItem() = default;
+    virtual ~MenuAppItem();
     sigc::signal<void> signal_launched();
     virtual void set_orientation(Gtk::Orientation orient) override;
     void launch_app();
@@ -37,8 +37,6 @@ protected:
     virtual void on_drag_begin(const Glib::RefPtr<Gdk::DragContext> &context) override;
     virtual void on_drag_data_get(const Glib::RefPtr<Gdk::DragContext> &context, Gtk::SelectionData &selection, guint info, guint timestamp) override;
     virtual void on_drag_end(const Glib::RefPtr<Gdk::DragContext> &context) override;
-
-    virtual void on_context_menu_deactivated();
 
     virtual void init_drag_and_drop();
 
@@ -55,6 +53,7 @@ private:
 
     bool menu_shown;
     sigc::signal<void> m_signal_launched;
+    sigc::connection idle_drag_connection_;
 
     bool is_in_favorite();
     bool is_fixed_on_taskbar();
