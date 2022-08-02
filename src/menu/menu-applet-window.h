@@ -105,11 +105,6 @@ protected:
      */
     virtual bool on_grab_broken_event(GdkEventGrabBroken *grab_broken_event);
 
-    /**
-     * @brief 回调函数，电源菜单关闭时调用
-     */
-    virtual void on_power_menu_deactivated();
-
     virtual void init_ui();
     virtual void init_avatar_widget();
 
