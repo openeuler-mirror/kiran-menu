@@ -82,7 +82,8 @@ bool MenuAvatarWidget::on_draw(const ::Cairo::RefPtr<Cairo::Context> &cr)
     auto radius = image_size / 2.0;
     try
     {
-        pixbuf = Gdk::Pixbuf::create_from_file(user_info.get_iconfile(),
+        auto icon_file = user_info.get_iconfile();
+        pixbuf = Gdk::Pixbuf::create_from_file(icon_file ? icon_file : std::string(),
                                                allocation.get_width() * scale,
                                                allocation.get_height() * scale);
     }

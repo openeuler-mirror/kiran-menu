@@ -68,11 +68,7 @@ void MenuAppItem::init_drag_and_drop()
     targets.push_back(target);
     drag_source_set(targets, Gdk::BUTTON1_MASK, Gdk::ACTION_COPY);
 
-    signal_drag_failed().connect(
-        [this](const Glib::RefPtr<Gdk::DragContext> &context, Gtk::DragResult result) -> bool {
-            KLOG_DEBUG("drag failed, result %d\n", (int)result);
-            return true;
-        });
+    signal_drag_failed().connect(sigc::mem_fun(*this, &MenuAppItem::on_drag_failed));
 }
 
 bool MenuAppItem::on_button_press_event(GdkEventButton *button_event)
@@ -131,12 +127,20 @@ void MenuAppItem::on_drag_end(const Glib::RefPtr<Gdk::DragContext> &context)
     // 如果拖拽被取消，拖拽的ungrab操作可能在drag-end信号之后，所以这里的grab操作放入到后面的事件循环处理。
     if (this->idle_drag_connection_.empty())
     {
-        this->idle_drag_connection_ = Glib::signal_idle().connect([this]() -> bool {
-            Gtk::Container *toplevel = this->get_toplevel();
-            KiranHelper::grab_input(*toplevel);
-            return false;
-        });
+        this->idle_drag_connection_ = Glib::signal_idle().connect(
+            [this]() -> bool
+            {
+                Gtk::Container *toplevel = this->get_toplevel();
+                KiranHelper::grab_input(*toplevel);
+                return false;
+            });
     }
+}
+
+bool MenuAppItem::on_drag_failed(const Glib::RefPtr<Gdk::DragContext> &context, Gtk::DragResult result)
+{
+    KLOG_DEBUG("drag failed, result %d\n", (int)result);
+    return true;
 }
 
 bool MenuAppItem::on_key_press_event(GdkEventKey *key_event)
@@ -181,20 +185,12 @@ void MenuAppItem::create_context_menu()
     if (!is_in_favorite())
     {
         item = Gtk::make_managed<Gtk::MenuItem>(_("Add to favorites"));
-        item->signal_activate().connect(
-            [this]() -> void {
-                if (!app.expired())
-                    Kiran::MenuSkeleton::get_instance()->add_favorite_app(app.lock()->get_desktop_id());
-            });
+        item->signal_activate().connect(sigc::mem_fun(*this, &MenuAppItem::on_add_favorite_app));
     }
     else
     {
         item = Gtk::make_managed<Gtk::MenuItem>(_("Remove from favorites"));
-        item->signal_activate().connect(
-            [this]() -> void {
-                if (!app.expired())
-                    Kiran::MenuSkeleton::get_instance()->del_favorite_app(app.lock()->get_desktop_id());
-            });
+        item->signal_activate().connect(sigc::mem_fun(*this, &MenuAppItem::on_del_favorite_app));
     }
     context_menu.append(*item);
 
@@ -344,4 +340,20 @@ void MenuAppItem::launch_app()
      */
     signal_launched().emit();
     app.lock()->launch();
+}
+
+void MenuAppItem::on_add_favorite_app()
+{
+    if (!this->app.expired())
+    {
+        Kiran::MenuSkeleton::get_instance()->add_favorite_app(app.lock()->get_desktop_id());
+    }
+}
+
+void MenuAppItem::on_del_favorite_app()
+{
+    if (!app.expired())
+    {
+        Kiran::MenuSkeleton::get_instance()->del_favorite_app(app.lock()->get_desktop_id());
+    }
 }
