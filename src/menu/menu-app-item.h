@@ -37,6 +37,7 @@ protected:
     virtual void on_drag_begin(const Glib::RefPtr<Gdk::DragContext> &context) override;
     virtual void on_drag_data_get(const Glib::RefPtr<Gdk::DragContext> &context, Gtk::SelectionData &selection, guint info, guint timestamp) override;
     virtual void on_drag_end(const Glib::RefPtr<Gdk::DragContext> &context) override;
+    bool on_drag_failed(const Glib::RefPtr<Gdk::DragContext> &context, Gtk::DragResult result);
 
     virtual void init_drag_and_drop();
 
@@ -45,6 +46,10 @@ protected:
 
     void create_context_menu();
     bool add_app_to_desktop();
+
+private:
+    void on_add_favorite_app();
+    void on_del_favorite_app();
 
 private:
     KiranOpacityMenu context_menu;
