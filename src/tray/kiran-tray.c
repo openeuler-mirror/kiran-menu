@@ -992,7 +992,7 @@ get_widget_geometry(GtkWidget *widget)
     {
         window = gtk_widget_get_window(parent);
         {
-            gdk_window_get_position(window, &x, &y);
+            gdk_window_get_origin(window, &x, &y);
         }
         parent = gtk_widget_get_parent(parent);
     }
