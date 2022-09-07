@@ -202,9 +202,10 @@ kiran_sn_tooltip_new(GVariant *variant)
     return tooltip;
 }
 
-static GdkPixbuf *
+static cairo_surface_t *
 get_icon_by_name(const gchar *icon_name,
-                 gint requested_size)
+                 gint requested_size,
+                 gint scale)
 {
     GtkIconTheme *icon_theme;
     gint *sizes;
@@ -235,9 +236,9 @@ get_icon_by_name(const gchar *icon_name,
     if (chosen_size == 0)
         chosen_size = requested_size;
 
-    return gtk_icon_theme_load_icon(icon_theme, icon_name,
-                                    chosen_size, GTK_ICON_LOOKUP_FORCE_SIZE,
-                                    NULL);
+    return gtk_icon_theme_load_surface(icon_theme, icon_name,
+                                       chosen_size, scale,
+                                       NULL, GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
 }
 
 static cairo_surface_t *
@@ -501,44 +502,46 @@ update(KiranSnIcon *icon)
     KiranSnIconPrivate *priv;
     KiranSnTooltip *tip;
     gint icon_size;
-    gint scale;
 
     priv = KIRAN_SN_ICON_GET_PRIVATE(icon);
-    scale = gtk_widget_get_scale_factor(GTK_WIDGET(priv->image));
 
     if (priv->icon_size > 0)
         icon_size = priv->icon_size;
     else
         icon_size = MAX(1, priv->effective_icon_size);
 
-    icon_size = icon_size * scale;
-
     if (priv->icon_name != NULL && priv->icon_name[0] != '\0')
     {
-        GdkPixbuf *pixbuf;
-        pixbuf = get_icon_by_name(priv->icon_name, icon_size);
-        if (!pixbuf)
+        cairo_surface_t *surface;
+        gint scale;
+
+        scale = gtk_widget_get_scale_factor(GTK_WIDGET(priv->image));
+        surface = get_icon_by_name(priv->icon_name, icon_size, scale);
+        if (!surface)
         {
+            GdkPixbuf *pixbuf;
+
             /*try to find icons specified by path and filename*/
             pixbuf = gdk_pixbuf_new_from_file(priv->icon_name, NULL);
             if (pixbuf && icon_size > 1)
             {
                 /*An icon specified by path and filename may be the wrong size for the tray */
-                pixbuf = gdk_pixbuf_scale_simple(pixbuf, scale * icon_size - 2, scale * icon_size - 2, GDK_INTERP_BILINEAR);
+                pixbuf = gdk_pixbuf_scale_simple(pixbuf, icon_size - 2, icon_size - 2, GDK_INTERP_BILINEAR);
+                surface = gdk_cairo_surface_create_from_pixbuf(pixbuf, scale, NULL);
+            }
+
+            if (pixbuf)
+            {
+                g_object_unref(pixbuf);
             }
         }
-        if (!pixbuf)
+        if (!surface)
         {
             /*deal with missing icon or failure to load icon*/
-            pixbuf = get_icon_by_name("image-missing", icon_size);
+            surface = get_icon_by_name("image-missing", icon_size, scale);
         }
 
-        if (pixbuf)
-        {
-            gtk_image_set_from_pixbuf(GTK_IMAGE(priv->image), pixbuf);
-            g_object_unref(pixbuf);
-        }
-
+        gtk_image_set_from_surface(GTK_IMAGE(priv->image), surface);
         g_free(priv->icon);
         priv->icon = g_strdup(priv->icon_name);
     }
@@ -551,7 +554,6 @@ update(KiranSnIcon *icon)
                               icon_size);
         if (surface != NULL)
         {
-            cairo_surface_set_device_scale(surface, scale, scale);
             gtk_image_set_from_surface(GTK_IMAGE(priv->image), surface);
 
             g_free(priv->icon);
@@ -578,6 +580,11 @@ update(KiranSnIcon *icon)
 
             cairo_surface_destroy(surface);
         }
+    }
+    else
+    {
+        gtk_image_set_from_icon_name(GTK_IMAGE(priv->image), "image-missing", GTK_ICON_SIZE_MENU);
+        gtk_image_set_pixel_size(GTK_IMAGE(priv->image), icon_size);
     }
 
     tip = priv->tooltip;
