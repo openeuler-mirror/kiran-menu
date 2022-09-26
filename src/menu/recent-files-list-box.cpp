@@ -26,10 +26,7 @@ RecentFilesListBox::RecentFilesListBox() : filter_pattern("*")
     get_style_context()->add_class("menu-recent-list");
 
     /* 最近访问文件列表发生变化时重新加载 */
-    Gtk::RecentManager::get_default()->signal_changed().connect([this]() {
-        KLOG_DEBUG("The recent files are changed.");
-        this->load();
-    });
+    Gtk::RecentManager::get_default()->signal_changed().connect(sigc::mem_fun(this, &RecentFilesListBox::load));
 
     load();
 }
@@ -173,7 +170,8 @@ Gtk::Widget *RecentFilesListBox::create_recent_item(const Glib::RefPtr<Gtk::Rece
     g_assert(context_menu != nullptr);
     context_menu->attach_to_widget(*widget);
     context_menu->signal_deactivate().connect(
-        [this]() -> void {
+        [this]() -> void
+        {
             auto toplevel = get_toplevel();
             KiranHelper::grab_input(*toplevel);
         });
@@ -185,7 +183,8 @@ Gtk::Widget *RecentFilesListBox::create_recent_item(const Glib::RefPtr<Gtk::Rece
     widget->set_tooltip_text(item->get_display_name());
     widget->get_style_context()->add_class("row-box");
     widget->signal_button_press_event().connect_notify(
-        [widget, context_menu, this](const GdkEventButton *button_event) -> void {
+        [widget, context_menu, this](const GdkEventButton *button_event) -> void
+        {
             const GdkEvent *event = (const GdkEvent *)button_event;
             if (gdk_event_triggers_context_menu(event))
             {
