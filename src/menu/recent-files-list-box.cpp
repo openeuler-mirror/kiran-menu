@@ -169,12 +169,6 @@ Gtk::Widget *RecentFilesListBox::create_recent_item(const Glib::RefPtr<Gtk::Rece
 
     g_assert(context_menu != nullptr);
     context_menu->attach_to_widget(*widget);
-    context_menu->signal_deactivate().connect(
-        [this]() -> void
-        {
-            auto toplevel = get_toplevel();
-            KiranHelper::grab_input(*toplevel);
-        });
 
     label->set_ellipsize(Pango::ELLIPSIZE_END);
     label->set_xalign(0.0f);
