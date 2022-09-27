@@ -89,13 +89,6 @@ public:
     virtual bool load_applications(const Kiran::AppVec &apps);
 
     /**
-     * @brief signal_app_launched 信号，容器内的应用按钮启动时触发
-     * 
-     * @return 返回应用启动信号
-     */
-    sigc::signal<void> signal_app_launched();
-
-    /**
      * @brief siganl_category_clicked 信号，容器内的应用分类标签点击后触发
      */
     sigc::signal<void, const Glib::ustring &> signal_category_clicked();

@@ -71,11 +71,7 @@ void MenuAppItem::init_drag_and_drop()
     targets.push_back(target);
     drag_source_set(targets, Gdk::BUTTON1_MASK, Gdk::ACTION_COPY);
 
-    signal_drag_failed().connect(
-        [this](const Glib::RefPtr<Gdk::DragContext> &context, Gtk::DragResult result) -> bool {
-            KLOG_DEBUG("drag failed, result %d\n", (int)result);
-            return true;
-        });
+    signal_drag_failed().connect(sigc::mem_fun(*this, &MenuAppItem::on_drag_failed));
 }
 
 bool MenuAppItem::on_button_press_event(GdkEventButton *button_event)
@@ -132,6 +128,12 @@ void MenuAppItem::on_drag_end(const Glib::RefPtr<Gdk::DragContext> &context)
     KiranHelper::grab_input(*toplevel);
 }
 
+bool MenuAppItem::on_drag_failed(const Glib::RefPtr<Gdk::DragContext> &context, Gtk::DragResult result)
+{
+    KLOG_DEBUG("drag failed, result %d\n", (int)result);
+    return true;
+}
+
 void MenuAppItem::on_context_menu_deactivated()
 {
     /* 让开始菜单窗口重新获取输入焦点 */
@@ -181,20 +183,12 @@ void MenuAppItem::create_context_menu()
     if (!is_in_favorite())
     {
         item = Gtk::make_managed<Gtk::MenuItem>(_("Add to favorites"));
-        item->signal_activate().connect(
-            [this]() -> void {
-                if (!app.expired())
-                    Kiran::MenuSkeleton::get_instance()->add_favorite_app(app.lock()->get_desktop_id());
-            });
+        item->signal_activate().connect(sigc::mem_fun(*this, &MenuAppItem::on_add_favorite_app));
     }
     else
     {
         item = Gtk::make_managed<Gtk::MenuItem>(_("Remove from favorites"));
-        item->signal_activate().connect(
-            [this]() -> void {
-                if (!app.expired())
-                    Kiran::MenuSkeleton::get_instance()->del_favorite_app(app.lock()->get_desktop_id());
-            });
+        item->signal_activate().connect(sigc::mem_fun(*this, &MenuAppItem::on_del_favorite_app));
     }
     context_menu.append(*item);
 
@@ -344,4 +338,20 @@ void MenuAppItem::launch_app()
      */
     signal_launched().emit();
     app.lock()->launch();
+}
+
+void MenuAppItem::on_add_favorite_app()
+{
+    if (!this->app.expired())
+    {
+        Kiran::MenuSkeleton::get_instance()->add_favorite_app(app.lock()->get_desktop_id());
+    }
+}
+
+void MenuAppItem::on_del_favorite_app()
+{
+    if (!app.expired())
+    {
+        Kiran::MenuSkeleton::get_instance()->del_favorite_app(app.lock()->get_desktop_id());
+    }
 }

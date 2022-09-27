@@ -37,7 +37,8 @@ MenuAppsContainer::MenuAppsContainer(MenuAppsContainer::AppIconMode mode_,
     apps_box.get_style_context()->add_class("menu-apps-box");
 
     category_box.signal_clicked().connect_notify(
-        [this]() -> void {
+        [this]() -> void
+        {
             signal_category_clicked().emit(category_box.get_category_name());
         });
 
@@ -141,11 +142,6 @@ bool MenuAppsContainer::get_category_clickable() const
     return category_box.get_clickable();
 }
 
-sigc::signal<void> MenuAppsContainer::signal_app_launched()
-{
-    return m_signal_app_launched;
-}
-
 sigc::signal<void, const Glib::ustring &> MenuAppsContainer::signal_category_clicked()
 {
     return m_signal_category_clicked;
@@ -156,10 +152,6 @@ MenuAppItem *MenuAppsContainer::create_app_item(std::shared_ptr<Kiran::App> app,
     auto item = new MenuAppItem(app);
 
     item->set_orientation(orient);
-    item->signal_launched().connect(
-        [this]() -> void {
-            signal_app_launched().emit();
-        });
 
     return item;
 }
