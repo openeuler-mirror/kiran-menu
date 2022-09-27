@@ -39,11 +39,6 @@ MenuPowerButton::~MenuPowerButton()
     delete menu;
 }
 
-sigc::signal<void> MenuPowerButton::signal_power_menu_deactivated()
-{
-    return m_signal_power_menu_deactivated;
-}
-
 void MenuPowerButton::on_clicked()
 {
     GdkEvent *event = gtk_get_current_event();
@@ -52,16 +47,9 @@ void MenuPowerButton::on_clicked()
         delete menu;
 
     menu = new MenuPowerMenu();
-    menu->signal_deactivate().connect(
-        sigc::mem_fun(*this, &MenuPowerButton::on_power_menu_deactivated));
     menu->attach_to_widget(*this);
     menu->show_all();
     menu->popup_at_widget(this, Gdk::GRAVITY_SOUTH_EAST, Gdk::GRAVITY_SOUTH_WEST, event);
 
     gdk_event_free(event);
-}
-
-void MenuPowerButton::on_power_menu_deactivated()
-{
-    signal_power_menu_deactivated().emit();
 }
