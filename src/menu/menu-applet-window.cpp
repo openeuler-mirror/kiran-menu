@@ -63,8 +63,7 @@ MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type) : Glib::ObjectBa
     /* 监控工作区域大小变化 */
     auto screen = get_screen();
     monitor = new WorkareaMonitor(screen);
-    monitor->signal_size_changed().connect(
-        sigc::mem_fun(*this, &MenuAppletWindow::on_workarea_size_changed));
+    monitor->signal_size_changed().connect(sigc::mem_fun(*this, &MenuAppletWindow::on_workarea_size_changed));
 
     //加载当前用户信息
     set_display_mode(profile.get_display_mode());
