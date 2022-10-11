@@ -1,11 +1,22 @@
-/*
- * @Author       : tangjie02
- * @Date         : 2020-04-09 19:44:16
- * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 10:28:07
- * @Description  :
- * @FilePath     : /kiran-menu-2.0/lib/menu-usage.h
+/**
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     tangjie02 <tangjie02@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
+
 #pragma once
 
 #include "lib/menu-unit.h"
@@ -28,15 +39,13 @@ class MenuUsage : public MenuUnit
         int32_t last_seen;
     };
 
-   public:
+public:
     MenuUsage();
     virtual ~MenuUsage();
 
     virtual void init();
 
     virtual void flush(const AppVec &apps);
-
-    void active_window_changed(WnckScreen *screen, WnckWindow *previously_active_window);
 
     std::vector<std::string> get_nfrequent_apps(gint top_n);
 
@@ -45,7 +54,7 @@ class MenuUsage : public MenuUnit
     //signal accessor:
     sigc::signal<void()> &signal_app_changed() { return this->app_changed_; }
 
-   private:
+private:
     void on_session_status_changed(uint32_t status);
     void session_proxy_signal(const Glib::ustring &sender_name, const Glib::ustring &signal_name, const Glib::VariantContainerBase &parameters);
     long get_system_time(void);
@@ -54,11 +63,12 @@ class MenuUsage : public MenuUnit
     bool read_usages_from_settings();
     void ensure_queued_save();
     void increment_usage_for_app_at_time(const std::string &desktop_id, int32_t time);
+    void active_window_changed(std::shared_ptr<Window> prev_active_window, std::shared_ptr<Window> cur_active_window);
 
-   protected:
+protected:
     sigc::signal<void()> app_changed_;
 
-   private:
+private:
     Glib::RefPtr<Gio::Settings> settings_;
 
     std::map<uint32_t, UsageData> app_usages_;

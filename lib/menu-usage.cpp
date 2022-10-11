@@ -1,20 +1,30 @@
-/*
- * @Author       : tangjie02
- * @Date         : 2020-04-09 20:35:20
- * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 10:29:27
- * @Description  :
- * @FilePath     : /kiran-menu-2.0/lib/menu-usage.cpp
+/**
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     tangjie02 <tangjie02@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
+
 #include "lib/menu-usage.h"
 
 #include <libwnck/libwnck.h>
 
-#include "lib/helper.h"
+#include "lib/app-manager.h"
+#include "lib/base.h"
+#include "lib/common.h"
 #include "lib/math-helper.h"
-#include "lib/menu-common.h"
-#include "lib/menu-skeleton.h"
-#include "lib/menu-system.h"
 
 namespace Kiran
 {
@@ -29,14 +39,6 @@ namespace Kiran
 #define GNOME_SESSION_STATUS_IDLE 3
 
 #define SAVE_APPS_TIMEOUT_SECONDS 10
-
-static void s_active_window_changed(WnckScreen *screen,
-                                    WnckWindow *previously_active_window,
-                                    gpointer user_data)
-{
-    MenuUsage *self = (MenuUsage *)user_data;
-    self->active_window_changed(screen, previously_active_window);
-}
 
 MenuUsage::MenuUsage()
 {
@@ -64,51 +66,12 @@ void MenuUsage::init()
 {
     read_usages_from_settings();
 
-    WnckScreen *screen = wnck_screen_get_default();
-    if (screen)
-    {
-        wnck_screen_force_update(screen);
-        g_signal_connect(screen, "active-window-changed", G_CALLBACK(s_active_window_changed), this);
-    }
-    else
-    {
-        g_warning("the default screen is NULL. please run in GUI application.");
-    }
-
     this->session_proxy_->signal_signal().connect(sigc::mem_fun(this, &MenuUsage::session_proxy_signal));
+    WindowManager::get_instance()->signal_active_window_changed().connect(sigc::mem_fun(this, &MenuUsage::active_window_changed));
 }
 
 void MenuUsage::flush(const AppVec &apps)
 {
-}
-
-void MenuUsage::active_window_changed(WnckScreen *screen, WnckWindow *previously_active_window)
-{
-    int32_t cur_system_time = get_system_time();
-
-    if (this->focus_desktop_id_.length() > 0)
-    {
-        increment_usage_for_app_at_time(this->focus_desktop_id_, cur_system_time);
-        this->focus_desktop_id_.clear();
-    }
-
-    auto unit = MenuSkeleton::get_instance()->get_unit(MenuUnitType::KIRAN_MENU_TYPE_SYSTEM);
-    auto menu_system = std::dynamic_pointer_cast<MenuSystem>(unit);
-    WnckWindow *active_window = wnck_screen_get_active_window(screen);
-    auto app = menu_system->lookup_apps_with_window(active_window);
-
-    if (app)
-    {
-        this->focus_desktop_id_ = app->get_desktop_id();
-        auto &usage_data = get_usage_for_app(this->focus_desktop_id_);
-        usage_data.last_seen = cur_system_time;
-    }
-    else
-    {
-        g_debug("not found matching app for changed window: %s\n",
-                active_window ? wnck_window_get_name(active_window) : "null window name");
-    }
-    this->watch_start_time_ = cur_system_time;
 }
 
 std::vector<std::string> MenuUsage::get_nfrequent_apps(gint top_n)
@@ -138,7 +101,7 @@ std::vector<std::string> MenuUsage::get_nfrequent_apps(gint top_n)
         return a_score > b_score;
     });
 
-    if (top_n > 0 && top_n < apps.size())
+    if (top_n > 0 && top_n < (int)apps.size())
     {
         apps.resize(top_n);
     }
@@ -242,7 +205,7 @@ bool MenuUsage::read_usages_from_settings()
 
             if (child_base.get_type().get_string() != "{sv}")
             {
-                g_warning("the element format for frequen-apps in gsettings must be {sv}. but now it's %s\n", child_base.get_type().get_string().c_str());
+                KLOG_WARNING("the element format for frequen-apps in gsettings must be {sv}. but now it's %s\n", child_base.get_type().get_string().c_str());
                 return false;
             }
 
@@ -267,7 +230,7 @@ bool MenuUsage::read_usages_from_settings()
     }
     catch (std::bad_cast &bc)
     {
-        g_warning("failed to read frequent-apps: %s\n", bc.what());
+        KLOG_WARNING("failed to read frequent-apps: %s\n", bc.what());
         return false;
     }
 
@@ -300,6 +263,27 @@ void MenuUsage::increment_usage_for_app_at_time(const std::string &desktop_id, i
     ensure_queued_save();
 
     this->app_changed_.emit();
+}
+
+void MenuUsage::active_window_changed(std::shared_ptr<Window> prev_active_window, std::shared_ptr<Window> cur_active_window)
+{
+    int32_t cur_system_time = get_system_time();
+
+    if (this->focus_desktop_id_.length() > 0)
+    {
+        increment_usage_for_app_at_time(this->focus_desktop_id_, cur_system_time);
+        this->focus_desktop_id_.clear();
+    }
+
+    auto app = AppManager::get_instance()->lookup_app_with_window(cur_active_window);
+
+    if (app && app->should_show())
+    {
+        this->focus_desktop_id_ = app->get_desktop_id();
+        auto &usage_data = get_usage_for_app(this->focus_desktop_id_);
+        usage_data.last_seen = cur_system_time;
+    }
+    this->watch_start_time_ = cur_system_time;
 }
 
 }  // namespace Kiran

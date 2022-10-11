@@ -1,10 +1,20 @@
-/*
- * @Author       : tangjie02
- * @Date         : 2020-05-07 09:43:27
- * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 09:50:30
- * @Description  : 
- * @FilePath     : /kiran-menu-2.0/lib/category.h
+/**
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     tangjie02 <tangjie02@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #pragma once
@@ -20,7 +30,7 @@ namespace Kiran
 {
 class Category
 {
-   public:
+public:
     Category(std::shared_ptr<CategoryNode> node);
     virtual ~Category();
 
@@ -44,7 +54,7 @@ class Category
 
     bool add_rule_exclude_app(std::shared_ptr<App> app);
 
-   private:
+private:
     bool match_desktop_category(std::shared_ptr<CategoryNode> node, std::shared_ptr<App> app);
     bool match_desktop_id(std::shared_ptr<CategoryNode> node, std::shared_ptr<App> app);
     bool match_rule(std::shared_ptr<CategoryNode> node, std::shared_ptr<App> app);
@@ -52,7 +62,7 @@ class Category
 
     bool delete_node_with_desktop_id(std::shared_ptr<CategoryNode> node, const std::string &desktop_id);
 
-   private:
+private:
     std::string name_;
     std::string icon_;
 

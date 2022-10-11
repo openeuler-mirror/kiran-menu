@@ -1,9 +1,28 @@
+/**
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     tangjie02 <tangjie02@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
+ */
+
 #include "lib/menu-favorite.h"
 
 #include <set>
 
 #include "lib/app.h"
-#include "lib/menu-common.h"
+#include "lib/common.h"
 
 namespace Kiran
 {
@@ -26,7 +45,7 @@ void MenuFavorite::flush(const AppVec &apps)
 {
     std::set<int32_t> app_set;
 
-    for (int i = 0; i < apps.size(); ++i)
+    for (int i = 0; i < (int)apps.size(); ++i)
     {
         auto &app = apps[i];
         auto &desktop_id = app->get_desktop_id();

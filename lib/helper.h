@@ -1,16 +1,27 @@
-/*
- * @Author       : tangjie02
- * @Date         : 2020-04-09 22:54:02
- * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-04 13:59:41
- * @Description  :
- * @FilePath     : /kiran-menu-2.0/lib/helper.h
+/**
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     tangjie02 <tangjie02@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #pragma once
 
 #include <giomm.h>
 
+#include <cinttypes>
 #include <string>
 #include <vector>
 
@@ -46,6 +57,34 @@ namespace Kiran
         if (cond) continue;    \
     }
 
+#define RET_WRAP_NULL(expr)       \
+    {                             \
+        auto _ret = expr;         \
+        if (_ret == NULL)         \
+        {                         \
+            return std::string(); \
+        }                         \
+        return _ret;              \
+    }
+
+#define CONNECTION(text1, text2) text1##text2
+#define CONNECT(text1, text2) CONNECTION(text1, text2)
+
+class Defer
+{
+public:
+    Defer(std::function<void(std::string)> func, std::string fun_name) : func_(func),
+                                                                         fun_name_(fun_name) {}
+    ~Defer() { func_(fun_name_); }
+
+private:
+    std::function<void(std::string)> func_;
+    std::string fun_name_;
+};
+
+// helper macro for Defer class
+#define SCOPE_EXIT(block) Defer CONNECT(_defer_, __LINE__)([&](std::string _arg_function) block, __FUNCTION__)
+
 std::string str_trim(const std::string &str);
 
 std::string str_tolower(const std::string &str);
@@ -80,5 +119,16 @@ constexpr StringHash operator"" _hash(char const *p, size_t)
 {
     return hash_compile_time(p);
 }
+
+/// find characters in a string.
+size_t find_chars(const std::string &s, const char *chs, size_t char_cnt, size_t off);
+template <size_t _Size>
+inline size_t find_chars(const std::string &s, const char (&chs)[_Size], size_t off = 0)
+{
+    // _Size - 1 will exclude the '\0'
+    return find_chars(s, chs, _Size - 1, off);
+}
+
+std::string get_mainname(const std::string &file_name);
 
 }  // namespace Kiran

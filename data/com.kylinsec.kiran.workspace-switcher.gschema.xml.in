@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="com.kylinsec.kiran.workspace-switcher" path="/com/kylinsec/kiran/workspace-switcher/">
+    <key name="draw-windows-in-thumbnails" type="b">
+      <default>true</default>
+      <summary>Whether or not to draw windows in workspace thumbnails. Set to false can improve performance</summary>
+    </key>
+  </schema>
+</schemalist>

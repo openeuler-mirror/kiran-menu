@@ -1,15 +1,26 @@
-/*
- * @Author       : tangjie02
- * @Date         : 2020-05-20 20:12:59
- * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 10:27:28
- * @Description  : 
- * @FilePath     : /kiran-menu-2.0/test/test-menu-signal.cpp
+/**
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     tangjie02 <tangjie02@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
+
 #include <gtkmm.h>
 
 #include "lib/app.h"
-#include "lib/menu-skeleton.h"
+#include "lib/core_worker.h"
 
 void sig_hander(int signo)
 {
@@ -22,18 +33,16 @@ static void installed_changed()
 
 static void app_installed(Kiran::AppVec apps)
 {
-    for (int i = 0; i < apps.size(); ++i)
+    for (auto app : apps)
     {
-        auto &app = apps[i];
         g_print("recv app %s installed signal.\n", app->get_desktop_id().c_str());
     }
 }
 
 static void app_uninstalled(Kiran::AppVec apps)
 {
-    for (int i = 0; i < apps.size(); ++i)
+    for (auto app : apps)
     {
-        auto &app = apps[i];
         g_print("recv app %s uninstalled signal.\n", app->get_desktop_id().c_str());
     }
 }
@@ -45,18 +54,16 @@ static void new_app_changed()
 
 static void favorite_app_added(Kiran::AppVec apps)
 {
-    for (int i = 0; i < apps.size(); ++i)
+    for (auto app : apps)
     {
-        auto &app = apps[i];
         g_print("recv favorite app %s added signal.\n", app->get_desktop_id().c_str());
     }
 }
 
 static void favorite_app_deleted(Kiran::AppVec apps)
 {
-    for (int i = 0; i < apps.size(); ++i)
+    for (auto app : apps)
     {
-        auto &app = apps[i];
         g_print("recv favorite app %s deleted signal.\n", app->get_desktop_id().c_str());
     }
 }
@@ -72,7 +79,7 @@ int main(int argc, char **argv)
 
     Gtk::Main kit(argc, argv);
 
-    Kiran::MenuSkeleton::global_init();
+    Kiran::init_backend_system();
 
     auto menu = Kiran::MenuSkeleton::get_instance();
 
@@ -86,6 +93,5 @@ int main(int argc, char **argv)
 
     kit.run();
 
-    Kiran::MenuSkeleton::global_deinit();
     return 0;
 }

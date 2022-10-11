@@ -1,13 +1,25 @@
-/*
- * @Author       : tangjie02
- * @Date         : 2020-04-30 17:28:19
- * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-29 20:27:25
- * @Description  : 
- * @FilePath     : /kiran-menu-2.0/lib/category-writer.cpp
+/**
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     tangjie02 <tangjie02@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "lib/category-writer.h"
+
+#include "lib/base.h"
 
 namespace Kiran
 {
@@ -28,7 +40,7 @@ bool CategoryWriter::write_to_xml(std::shared_ptr<CategoryNode> node, const std:
 
     if (!config_file)
     {
-        g_warning("file %s create fail.\n", file_path.c_str());
+        KLOG_WARNING("file %s create fail.\n", file_path.c_str());
         return false;
     }
 
@@ -38,7 +50,7 @@ bool CategoryWriter::write_to_xml(std::shared_ptr<CategoryNode> node, const std:
     }
     catch (const Gio::Error &e)
     {
-        g_warning("Could not save menu category data: %s", e.what().c_str());
+        KLOG_WARNING("Could not save menu category data: %s", e.what().c_str());
         return false;
     }
 
@@ -51,7 +63,7 @@ bool CategoryWriter::write_to_xml(std::shared_ptr<CategoryNode> node, const std:
     }
     catch (const Glib::Error &e)
     {
-        g_warning("failed to save menu category data: %s", e.what().c_str());
+        KLOG_WARNING("failed to save menu category data: %s", e.what().c_str());
         return false;
     }
     return true;
@@ -92,36 +104,36 @@ bool CategoryWriter::write_rule(std::shared_ptr<CategoryNode> node, gint recurse
     {
         switch (iter->get_type())
         {
-            case CategoryNodeType::CATEGORY_NODE_TYPE_ALL:
-                PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<all> </all>\n");
-                break;
-            case CategoryNodeType::CATEGORY_NODE_TYPE_AND:
-                PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<and>\n");
-                write_rule(iter, recurse_level + 1, data_output);
-                PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "</and>\n");
-                break;
-            case CategoryNodeType::CATEGORY_NODE_TYPE_OR:
-                PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<or>\n");
-                write_rule(iter, recurse_level + 1, data_output);
-                PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "</or>\n");
-                break;
-            case CategoryNodeType::CATEGORY_NODE_TYPE_NOT:
-                PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<not>\n");
-                write_rule(iter, recurse_level + 1, data_output);
-                PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "</not>\n");
-                break;
-            case CategoryNodeType::CATEGORY_NODE_TYPE_DESKTOP_ID:
-                PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<desktop_id> ");
-                PUT_STR_TO_CATEGORY_FILE(iter->get_content());
-                PUT_STR_TO_CATEGORY_FILE(" </desktop_id>\n");
-                break;
-            case CategoryNodeType::CATEGORY_NODE_TYPE_DESKTOP_CATEGORY:
-                PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<desktop_category> ");
-                PUT_STR_TO_CATEGORY_FILE(iter->get_content());
-                PUT_STR_TO_CATEGORY_FILE(" </desktop_category>\n");
-                break;
-            default:
-                break;
+        case CategoryNodeType::CATEGORY_NODE_TYPE_ALL:
+            PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<all> </all>\n");
+            break;
+        case CategoryNodeType::CATEGORY_NODE_TYPE_AND:
+            PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<and>\n");
+            write_rule(iter, recurse_level + 1, data_output);
+            PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "</and>\n");
+            break;
+        case CategoryNodeType::CATEGORY_NODE_TYPE_OR:
+            PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<or>\n");
+            write_rule(iter, recurse_level + 1, data_output);
+            PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "</or>\n");
+            break;
+        case CategoryNodeType::CATEGORY_NODE_TYPE_NOT:
+            PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<not>\n");
+            write_rule(iter, recurse_level + 1, data_output);
+            PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "</not>\n");
+            break;
+        case CategoryNodeType::CATEGORY_NODE_TYPE_DESKTOP_ID:
+            PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<desktop_id> ");
+            PUT_STR_TO_CATEGORY_FILE(iter->get_content());
+            PUT_STR_TO_CATEGORY_FILE(" </desktop_id>\n");
+            break;
+        case CategoryNodeType::CATEGORY_NODE_TYPE_DESKTOP_CATEGORY:
+            PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<desktop_category> ");
+            PUT_STR_TO_CATEGORY_FILE(iter->get_content());
+            PUT_STR_TO_CATEGORY_FILE(" </desktop_category>\n");
+            break;
+        default:
+            break;
         }
     }
     return true;
@@ -138,38 +150,38 @@ bool CategoryWriter::write_category(std::shared_ptr<CategoryNode> node, gint rec
     {
         switch (iter->get_type())
         {
-            case CategoryNodeType::CATEGORY_NODE_TYPE_NAME:
-                PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<name> ");
-                PUT_STR_TO_CATEGORY_FILE(iter->get_content());
-                PUT_STR_TO_CATEGORY_FILE(" </name>\n");
-                break;
-            case CategoryNodeType::CATEGORY_NODE_TYPE_ICON:
-                PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<icon> ");
-                PUT_STR_TO_CATEGORY_FILE(iter->get_content());
-                PUT_STR_TO_CATEGORY_FILE(" </icon>\n");
-                break;
-            case CategoryNodeType::CATEGORY_NODE_TYPE_REPEAT:
-                PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<repeat> ");
-                PUT_STR_TO_CATEGORY_FILE(iter->get_content());
-                PUT_STR_TO_CATEGORY_FILE(" </repeat>\n");
-                break;
-            case CategoryNodeType::CATEGORY_NODE_TYPE_LOGIC:
-                PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<logic>\n");
-                write_rule(iter, recurse_level + 1, data_output);
-                PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "</logic>\n");
-                break;
-            case CategoryNodeType::CATEGORY_NODE_TYPE_INCLUDE:
-                PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<include>\n");
-                write_rule(iter, recurse_level + 1, data_output);
-                PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "</include>\n");
-                break;
-            case CategoryNodeType::CATEGORY_NODE_TYPE_EXCLUDE:
-                PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<exclude>\n");
-                write_rule(iter, recurse_level + 1, data_output);
-                PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "</exclude>\n");
-                break;
-            default:
-                break;
+        case CategoryNodeType::CATEGORY_NODE_TYPE_NAME:
+            PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<name> ");
+            PUT_STR_TO_CATEGORY_FILE(iter->get_content());
+            PUT_STR_TO_CATEGORY_FILE(" </name>\n");
+            break;
+        case CategoryNodeType::CATEGORY_NODE_TYPE_ICON:
+            PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<icon> ");
+            PUT_STR_TO_CATEGORY_FILE(iter->get_content());
+            PUT_STR_TO_CATEGORY_FILE(" </icon>\n");
+            break;
+        case CategoryNodeType::CATEGORY_NODE_TYPE_REPEAT:
+            PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<repeat> ");
+            PUT_STR_TO_CATEGORY_FILE(iter->get_content());
+            PUT_STR_TO_CATEGORY_FILE(" </repeat>\n");
+            break;
+        case CategoryNodeType::CATEGORY_NODE_TYPE_LOGIC:
+            PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<logic>\n");
+            write_rule(iter, recurse_level + 1, data_output);
+            PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "</logic>\n");
+            break;
+        case CategoryNodeType::CATEGORY_NODE_TYPE_INCLUDE:
+            PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<include>\n");
+            write_rule(iter, recurse_level + 1, data_output);
+            PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "</include>\n");
+            break;
+        case CategoryNodeType::CATEGORY_NODE_TYPE_EXCLUDE:
+            PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "<exclude>\n");
+            write_rule(iter, recurse_level + 1, data_output);
+            PUT_STR_WITH_LEV_TO_CATEGORY_FILE(recurse_level + 1, "</exclude>\n");
+            break;
+        default:
+            break;
         }
     }
 

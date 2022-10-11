@@ -5,53 +5,54 @@ if(COMMAND cmake_policy)
 endif(COMMAND cmake_policy)
 
 pkg_search_module(GTKMM REQUIRED gtkmm-3.0)
+pkg_search_module(CAIROMM REQUIRED cairomm-1.0)
 
 set(DEP_LIBDIR ${GTKMM_LIBDIR})
 
-
-set(TEST_MENU_UNIT test-menu-unit)
-
-add_executable(${TEST_MENU_UNIT}
-    "test-all-apps.cpp"
-    "test-app-category.cpp"
-    "test-app-favorite.cpp"
-    "test-app-frequent.cpp"
-    "test-app-search.cpp"
-    "test-menu-unit.cpp")
-
-target_include_directories(${TEST_MENU_UNIT} PRIVATE
-    ${PROJECT_SOURCE_DIR})
-
-target_include_directories(${TEST_MENU_UNIT} PRIVATE
-    ${PROJECT_SOURCE_DIR}
-    ${GTKMM_INCLUDE_DIRS})
-
-target_compile_options(${TEST_MENU_UNIT} PRIVATE
-    -L${DEP_LIBDIR}
-    -std=c++11)
-
-target_link_libraries(${TEST_MENU_UNIT} PRIVATE
-    kiran-menu-backend
-    ${GTKMM_LIBRARIES})
-
-
+set(TEST_APPS test-apps)
+set(TEST_UNIT test-unit)
 set(TEST_MENU_SIGNAL test-menu-signal)
+set(TEST_TASKBAR_SIGNAL test-taskbar-signal)
+set(TEST_DISPLAY test-display)
+set(TEST_LAUNCH_ACTION test-launch-action)
+
+add_executable(${TEST_APPS}
+    "test-all-apps.cpp")
+
+add_executable(${TEST_UNIT}
+    "test-unit.cpp")
 
 add_executable(${TEST_MENU_SIGNAL}
     "test-menu-signal.cpp")
 
-target_include_directories(${TEST_MENU_SIGNAL} PRIVATE
-    ${PROJECT_SOURCE_DIR}
-    ${GTKMM_INCLUDE_DIRS})
+add_executable(${TEST_TASKBAR_SIGNAL}
+    "test-taskbar-signal.cpp")
 
-target_compile_options(${TEST_MENU_SIGNAL} PRIVATE
-    -L${DEP_LIBDIR}
-    -std=c++11)
+add_executable(${TEST_DISPLAY}
+    "test-display.cpp")
 
-target_link_libraries(${TEST_MENU_SIGNAL} PRIVATE
-    kiran-menu-backend
-    ${GTKMM_LIBRARIES})
+add_executable(${TEST_LAUNCH_ACTION}
+    "test-launch-action.cpp")
+
+list (APPEND TESTS ${TEST_APPS} ${TEST_UNIT} ${TEST_MENU_SIGNAL} ${TEST_TASKBAR_SIGNAL} ${TEST_DISPLAY} ${TEST_LAUNCH_ACTION})
+
+foreach(TEST_ITEM IN ITEMS ${TESTS})
+
+    target_include_directories(${TEST_ITEM} PRIVATE
+        ${PROJECT_SOURCE_DIR}
+        ${GTKMM_INCLUDE_DIRS}
+        ${CAIROMM_INCLUDE_DIRS})
+
+    target_compile_options(${TEST_ITEM} PRIVATE
+        -L${DEP_LIBDIR}
+        -std=c++11)
+
+    target_link_libraries(${TEST_ITEM} PRIVATE
+        kiran-menu-backend
+        ${GTKMM_LIBRARIES}
+        ${CAIROMM_LIBRARIES})
+
+    add_test(menu_test ${TEST_ITEM})
+endforeach()
 
 
-#add_test(menu_test ${TEST_MENU_UNIT})
-add_test(menu_test ${TEST_MENU_SIGNAL})

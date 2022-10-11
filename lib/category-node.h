@@ -1,10 +1,20 @@
-/*
- * @Author       : tangjie02
- * @Date         : 2020-04-30 17:29:00
- * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-05 09:25:47
- * @Description  : 
- * @FilePath     : /kiran-menu-2.0/lib/category-node.h
+/**
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     tangjie02 <tangjie02@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #pragma once
@@ -35,7 +45,7 @@ enum class CategoryNodeType
 
 class CategoryNode : public std::enable_shared_from_this<CategoryNode>
 {
-   public:
+public:
     CategoryNode(CategoryNodeType type);
     virtual ~CategoryNode();
 
@@ -54,7 +64,7 @@ class CategoryNode : public std::enable_shared_from_this<CategoryNode>
 
     std::shared_ptr<CategoryNode> steal();
 
-   private:
+private:
     std::weak_ptr<CategoryNode> prev_;
     std::shared_ptr<CategoryNode> next_;
     std::weak_ptr<CategoryNode> parent_;

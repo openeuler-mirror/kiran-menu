@@ -1,0 +1,46 @@
+[Applet Factory]
+Id=KiranAppletFactory
+InProcess=false
+Location=@CMAKE_INSTALL_PREFIX@/lib/mate-panel/kiran-applet
+Name=Kiran Applet Factory
+Description=Factory for Kiran Applets on mate panel
+
+[KiranMenuApplet]
+Name=Kiran Start Menu
+Name[zh_CN]=Kiran开始菜单
+Description=Kiran Start Menu
+Description[zh_CN]=Kiran开始菜单
+Icon=kiran-menu
+MateComponentId=OAFIID:KiranMenuApplet;
+
+[KiranTasklistApplet]
+Name=Kiran Task list and switch applet
+Name[zh_CN]=Kiran应用窗口切换插件
+Description=Kiran task list and switch applet
+Description[zh_CN]=Kiran应用窗口切换插件
+Icon=kiran-window-switcher
+MateComponentId=OAFIID:KiranTasklistApplet;
+
+[KiranWorkspaceApplet]
+Name=Kiran Workspace switching applet
+Name[zh_CN]=Kiran工作区切换插件
+Description=Kiran Workspace switching applet
+Description[zh_CN]=Kiran工作区切换插件
+Icon=kiran-workspace-switcher
+MateComponentId=OAFIID:KiranWorkspaceApplet;
+
+[KiranShowDesktopApplet]
+Name=Kiran Show Desktop applet
+Name[zh_CN]=Kiran显示桌面插件
+Description=Kiran Show desktop applet
+Description[zh_CN]=Kiran显示桌面插件
+Icon=user-desktop
+MateComponentId=OAFIID:KiranShowDesktopApplet;
+
+[KiranTrayApplet]
+Name=KiranTray
+Name[zh_CN]=Kiran系统托盘
+Description=The kiran system tray for notify icon
+Description[zh_CN]=显示通知图标
+Icon=mate-panel-tray
+MateComponentId=OAFIID:MATE_KiranTrayApplet

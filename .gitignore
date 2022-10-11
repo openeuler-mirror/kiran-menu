@@ -7,3 +7,5 @@ menu.gresource
 *~
 po/*.mo
 *.user
+*.pro
+src/config.h

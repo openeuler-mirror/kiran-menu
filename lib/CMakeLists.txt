@@ -10,46 +10,36 @@ set (ALL_FILES ${CORE_H_FILES} ${CORE_CPP_FILES})
 
 add_library(${TARGET_NAME} ${ALL_FILES})
 
-pkg_search_module(GLIBMM REQUIRED glibmm-2.4)
-pkg_search_module(GIOMM REQUIRED giomm-2.4)
-pkg_search_module(GTHREAD REQUIRED gthread-2.0)
-pkg_search_module(WNCK3 REQUIRED libwnck-3.0)
-
 
 set(DEP_LIBDIR ${GLIBMM_LIBDIR})
 
+include_directories(${CMAKE_BINARY_DIR})
 
 target_include_directories(${TARGET_NAME} PUBLIC 
     ${PROJECT_SOURCE_DIR}
-    ${GLIBMM_INCLUDE_DIRS})
-
-target_include_directories(${TARGET_NAME} PRIVATE 
-    ${GIOMM_INCLUDE_DIRS} 
     ${GTHREAD_INCLUDE_DIRS}
-    ${WNCK3_INCLUDE_DIRS})
+    ${WNCK3_INCLUDE_DIRS}
+    ${GDKMM3_INCLUDE_DIRS}
+    ${X11_XCB_INCLUDE_DIRS}
+    ${XCB_RES_INCLUDE_DIRS}
+    ${XCOMPOSITE_INCLUDE_DIRS}
+    ${KLOG_GTK3_INCLUDE_DIRS})
+
 
 target_compile_options(${TARGET_NAME} PUBLIC
-    -std=c++11
-    -DWNCK_I_KNOW_THIS_IS_UNSTABLE)
+    -DWNCK_I_KNOW_THIS_IS_UNSTABLE
+    -Wno-parentheses)
 
 target_compile_options(${TARGET_NAME} PRIVATE
-    -L${DEP_LIBDIR})
+    -L${DEP_LIBDIR}
+    -DG_LOG_DOMAIN=\"${TARGET_NAME}\")
 
 target_link_libraries(${TARGET_NAME} PRIVATE
-    ${GLIBMM_LIBRARIES}
-    ${GIOMM_LIBRARIES}
     ${GTHREAD_LIBRARIES}
-    ${WNCK3_LIBRARIES})
+    ${WNCK3_LIBRARIES}
+    ${GDKMM3_LIBRARIES}
+    ${X11_XCB_LIBRARIES}
+    ${XCB_RES_LIBRARIES}
+    ${XCOMPOSITE_LIBRARIES}
+    ${KLOG_GTK3_LIBRARIES})
 
-
-
-install(FILES "com.unikylin.Kiran.StartMenu.gschema.xml.in" 
-    DESTINATION  ${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas/
-    RENAME "com.unikylin.Kiran.StartMenu.gschema.xml" 
-)
-
-install(FILES "com.unikylin.Kiran.MenuCategory.xml" 
-    DESTINATION  ${CMAKE_INSTALL_PREFIX}/share/kiran-menu/
-)
-
-install(CODE "execute_process(COMMAND glib-compile-schemas \"${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas/\")")

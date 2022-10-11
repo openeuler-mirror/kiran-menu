@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="com.kylinsec.kiran.taskbar" path="/com/kylinsec/kiran/taskbar/">
+    <key name="fixed-apps" type="as">
+      <default>['org.gnome.Software.desktop', 'firefox.desktop', 'caja.desktop', 'mate-terminal.desktop']</default>
+    </key>
+    <key name="show-active-workspace-apps" type="b">
+      <default>false</default>
+      <summary>Whether only show apps for current active workspace on the taskbar</summary>
+    </key>
+  </schema>
+</schemalist>

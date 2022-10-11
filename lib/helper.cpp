@@ -1,11 +1,22 @@
-/*
- * @Author       : tangjie02
- * @Date         : 2020-04-09 22:54:57
- * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-04 14:15:19
- * @Description  :
- * @FilePath     : /kiran-menu-2.0/lib/helper.cpp
+/**
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     tangjie02 <tangjie02@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
+
 #include "lib/helper.h"
 
 #include <algorithm>
@@ -38,13 +49,13 @@ std::vector<std::string> str_split(const std::string &s, const std::string &sepe
 
     int i = 0;
 
-    while (i != s.size())
+    while (i != (int)s.size())
     {
         int flag = 0;
-        while (i != s.size() && flag == 0)
+        while (i != (int)s.size() && flag == 0)
         {
             flag = 1;
-            for (int x = 0; x < seperator.size(); ++x)
+            for (int x = 0; x < (int)seperator.size(); ++x)
             {
                 if (s[i] == seperator[x])
                 {
@@ -57,9 +68,9 @@ std::vector<std::string> str_split(const std::string &s, const std::string &sepe
 
         flag = 0;
         int j = i;
-        while (j != s.size() && flag == 0)
+        while (j != (int)s.size() && flag == 0)
         {
-            for (int x = 0; x < seperator.size(); ++x)
+            for (int x = 0; x < (int)seperator.size(); ++x)
             {
                 if (s[j] == seperator[x])
                 {
@@ -80,4 +91,35 @@ std::vector<std::string> str_split(const std::string &s, const std::string &sepe
     }
     return result;
 }
+
+size_t find_chars(const std::string &s, const char *chs, size_t char_cnt, size_t off)
+{
+    for (size_t p = off; p < s.length(); p++)
+    {
+        auto c = s[p];
+        for (size_t i = 0; i < char_cnt; i++)
+        {
+            if (c == chs[i])
+            {
+                return p;
+            }
+        }
+    }
+    return std::string::npos;
 }
+
+std::string get_mainname(const std::string &file_name)
+{
+    auto pos = file_name.rfind('.');
+    if (pos == std::string::npos)
+    {
+        return file_name;
+    }
+    if (find_chars(file_name, "/\\", pos) != std::string::npos)
+    {
+        return file_name;
+    }
+    return file_name.substr(0, pos);
+}
+
+}  // namespace Kiran

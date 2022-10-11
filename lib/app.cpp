@@ -1,27 +1,84 @@
-/*
- * @Author       : tangjie02
- * @Date         : 2020-04-08 14:10:38
- * @LastEditors  : tangjie02
- * @LastEditTime : 2020-06-29 20:20:02
- * @Description  :
- * @FilePath     : /kiran-menu-2.0/lib/app.cpp
+/**
+ * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ *
+ * Author:     tangjie02 <tangjie02@kylinos.com.cn>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "lib/app.h"
 
+#include <cinttypes>
 #include <vector>
 
+#include "lib/base.h"
 #include "lib/helper.h"
+#include "lib/window-manager.h"
 
 namespace Kiran
 {
-App::App(const std::string &desktop_id)
+App::App(const std::string &desktop_id, AppKind kind) : desktop_id_(desktop_id),
+                                                        kind_(kind)
 {
-    this->desktop_id_ = desktop_id;
+}
 
-    this->desktop_app_ = Gio::DesktopAppInfo::create(desktop_id);
+App::~App()
+{
+}
+
+int32_t App::fake_id_count_ = 0;
+std::shared_ptr<App> App::create_fake()
+{
+    auto app = std::make_shared<App>();
+    app->kind_ = AppKind::FAKE_DESKTOP;
+
+    std::ostringstream oss;
+    oss << "fake_" << ++App::fake_id_count_;
+    app->desktop_id_ = oss.str();
+    KLOG_DEBUG("create fake app: %s.", app->desktop_id_.c_str());
+    return app;
+}
+
+std::shared_ptr<App> App::create_from_file(const std::string &path, AppKind kind)
+{
+    auto desktop_app = Gio::DesktopAppInfo::create_from_filename(path);
+    if (!desktop_app)
+        return nullptr;
+    auto app = std::make_shared<App>(desktop_app->get_id(), kind);
+
+    app->desktop_app_ = desktop_app;
+    app->update_from_desktop_file();
+    return app;
+}
+
+std::shared_ptr<App> App::create_from_desktop_id(const std::string &id, AppKind kind)
+{
+    auto app = std::make_shared<App>(id, kind);
+    app->desktop_app_ = Gio::DesktopAppInfo::create(id);
+    app->update_from_desktop_file();
+    return app;
+}
+
+void App::update_from_desktop_file(bool force)
+{
+    KLOG_PROFILE("id: %s.", this->desktop_id_.c_str());
+    g_return_if_fail(this->desktop_app_);
 
     this->file_name_ = this->desktop_app_->get_filename();
+
+    if (force)
+        this->desktop_app_ = Gio::DesktopAppInfo::create_from_filename(this->file_name_);
 
 #define GET_STRING(key) this->desktop_app_->get_string(key).raw()
 #define GET_LOCALE_STRING(key) this->desktop_app_->get_locale_string(key).raw()
@@ -40,52 +97,171 @@ App::App(const std::string &desktop_id)
 
     this->x_kiran_no_display_ = this->desktop_app_->get_boolean("X-KIRAN-NoDisplay");
 
-    init_app_kind();
-
 #undef GET_STRING
 #undef GET_LOCALE_STRING
 }
 
-App::~App()
-{
-}
-
 std::string App::get_categories()
 {
+    RETURN_VAL_IF_FALSE(this->desktop_app_, std::string());
+
     return this->desktop_app_->get_categories();
+}
+
+std::vector<std::string> App::get_actions()
+{
+    std::vector<std::string> raw_actions;
+
+    RETURN_VAL_IF_FALSE(this->desktop_app_, raw_actions);
+
+    auto actions = this->desktop_app_->list_actions();
+    for (auto iter = actions.begin(); iter != actions.end(); ++iter)
+    {
+        raw_actions.push_back((*iter).raw());
+    }
+    return raw_actions;
+}
+
+std::string App::get_action_name(const std::string &action)
+{
+    RETURN_VAL_IF_FALSE(this->desktop_app_, std::string());
+    return this->desktop_app_->get_action_name(action).raw();
 }
 
 const Glib::RefPtr<Gio::Icon> App::get_icon()
 {
+    RETURN_VAL_IF_FALSE(this->desktop_app_, Glib::RefPtr<Gio::Icon>());
     return this->desktop_app_->get_icon();
+}
+
+std::string App::get_startup_wm_class()
+{
+    RETURN_VAL_IF_FALSE(this->desktop_app_, std::string());
+    return this->desktop_app_->get_startup_wm_class();
+}
+
+bool App::should_show()
+{
+    RETURN_VAL_IF_FALSE(this->desktop_app_, false);
+    RETURN_VAL_IF_FALSE(get_kind() != AppKind::USER_TASKBAR, false);
+
+    return (this->desktop_app_->should_show() && !this->x_kiran_no_display_);
+}
+
+bool App::is_active()
+{
+    auto window_manager = Kiran::WindowManager::get_instance();
+    auto active_window = window_manager->get_active_window();
+
+    if (active_window)
+    {
+        if (!active_window->should_skip_taskbar())
+            return active_window->get_app().get() == this;
+    }
+
+    return false;
+}
+
+WindowVec App::get_windows()
+{
+    WindowVec windows;
+    for (auto iter = this->wnck_apps_.begin(); iter != wnck_apps_.end(); ++iter)
+    {
+        auto xid = (*iter);
+        auto wnck_app = wnck_application_get(xid);
+        if (!wnck_app)
+        {
+            KLOG_WARNING("cannot find the wnck_application. xid: %" PRIu64 "\n", xid);
+            continue;
+        }
+
+        auto wnck_windows = wnck_application_get_windows(wnck_app);
+        for (auto l = wnck_windows; l != NULL; l = l->next)
+        {
+            auto wnck_window = (WnckWindow *)(l->data);
+            auto window = WindowManager::get_instance()->lookup_window(wnck_window);
+            if (window)
+            {
+                windows.push_back(window);
+            }
+            else
+            {
+                KLOG_WARNING("failed to lookup window, id: %" PRIu64 ", name: %s",
+                             wnck_window_get_xid(wnck_window),
+                             wnck_window_get_name(wnck_window));
+            }
+        }
+    }
+    return windows;
+}
+
+WindowVec App::get_taskbar_windows()
+{
+    auto windows = get_windows();
+    auto iter = std::remove_if(windows.begin(), windows.end(), [](std::shared_ptr<Kiran::Window> window) {
+        return window->should_skip_taskbar();
+    });
+    windows.erase(iter, windows.end());
+    return windows;
+}
+
+void App::close_all_windows()
+{
+    KLOG_PROFILE("");
+
+    for (auto iter = this->wnck_apps_.begin(); iter != wnck_apps_.end(); ++iter)
+    {
+        auto xid = (*iter);
+        auto wnck_app = wnck_application_get(xid);
+        if (!wnck_app)
+        {
+            KLOG_WARNING("cannot find the wnck_application. xid: %" PRIu64 "\n", xid);
+            continue;
+        }
+
+        KLOG_DEBUG("close these windows belong to wnck_app<%" PRIu64 ", %s>.",
+                   wnck_application_get_xid(wnck_app),
+                   wnck_application_get_name(wnck_app));
+
+        auto wnck_windows = wnck_application_get_windows(wnck_app);
+        for (auto l = wnck_windows; l != NULL; l = l->next)
+        {
+            auto wnck_window = (WnckWindow *)(l->data);
+            auto window = WindowManager::get_instance()->lookup_window(wnck_window);
+            if (window)
+            {
+                window->close();
+            }
+            else
+            {
+                KLOG_WARNING("failed to lookup window, id: %" PRIu64 ", name: %s",
+                             wnck_window_get_xid(wnck_window),
+                             wnck_window_get_name(wnck_window));
+            }
+        }
+    }
+    this->close_all_windows_.emit(this->shared_from_this());
 }
 
 bool App::launch()
 {
+    KLOG_PROFILE("id: %s.", this->desktop_id_.c_str());
+
+    g_return_val_if_fail(this->desktop_app_, false);
+
     bool res = false;
     std::string error;
+    auto app_context = Gdk::Display::get_default()->get_app_launch_context();
 
-    // if (this->kind_ == AppKind::FLATPAK)
-    // {
-    //     GError *err;
-    //     res = launch_flatpak(&err);
-    //     if (!res)
-    //     {
-    //         error = err->message;
-    //     }
-    // }
-    // else
+    try
     {
-        try
-        {
-            std::vector<Glib::RefPtr<Gio::File> > files;
-            res = this->desktop_app_->launch(files);
-        }
-        catch (const Glib::Error &e)
-        {
-            res = false;
-            error = e.what().raw();
-        }
+        std::vector<Glib::RefPtr<Gio::File> > files;
+        res = this->desktop_app_->launch(files, app_context);
+    }
+    catch (const Glib::Error &e)
+    {
+        res = false;
+        error = e.what().raw();
     }
 
     if (res)
@@ -95,215 +271,55 @@ bool App::launch()
     else
     {
         this->launch_failed_.emit(this->shared_from_this());
-        g_warning("Failed to launch: %s", error.c_str());
+        KLOG_WARNING("failed to launch: %s", error.c_str());
     }
     return res;
 }
 
-void App::init_app_kind()
+bool App::launch_uris(const Glib::ListHandle<std::string> &uris)
 {
-    this->kind_ = AppKind::UNKNOWN;
+    KLOG_PROFILE("id: %s.", this->desktop_id_.c_str());
 
-    RETURN_IF_FALSE(this->exec_.length() > 0);
-    RETURN_IF_FALSE((bool)this->desktop_app_);
+    g_return_val_if_fail(this->desktop_app_, false);
+    g_warn_if_fail(uris.size() > 0);
 
-    auto exec_split = str_split(this->exec_, " ");
+    bool res = false;
+    std::string error;
+    auto app_context = Gdk::Display::get_default()->get_app_launch_context();
 
-    if (exec_split.size() == 0)
+    try
     {
-        return;
+        std::vector<Glib::RefPtr<Gio::File> > files;
+        res = this->desktop_app_->launch_uris(uris, app_context);
+    }
+    catch (const Glib::Error &e)
+    {
+        res = false;
+        error = e.what().raw();
     }
 
-    auto file = Gio::File::create_for_path(exec_split[0]);
-    if (!file)
+    if (res)
     {
-        g_warning("create file %s fail.", exec_split[0].c_str());
-        return;
-    }
-
-    auto exec_name = file->get_basename();
-
-    if (exec_name == "flatpak")
-    {
-        this->kind_ = AppKind::FLATPAK;
-        return;
-    }
-
-    auto x_flatpak = this->desktop_app_->get_string("X-Flatpak").raw();
-    if (x_flatpak.length() > 0)
-    {
-        this->kind_ = AppKind::FLATPAK;
-        return;
-    }
-
-    this->kind_ = AppKind::DESKTOP;
-}
-
-typedef struct
-{
-    GSpawnChildSetupFunc user_setup;
-    gpointer user_setup_data;
-
-    char *pid_envvar;
-} ChildSetupData;
-
-void App::expand_macro(char macro, GString *exec)
-{
-    char *expanded = NULL;
-
-    g_return_if_fail(exec != NULL);
-
-    switch (macro)
-    {
-        case 'i':
-            if (this->icon_name_.length() > 0)
-            {
-                g_string_append(exec, "--icon ");
-                expanded = g_shell_quote(this->icon_name_.c_str());
-                g_string_append(exec, expanded);
-                g_free(expanded);
-            }
-            break;
-
-        case 'c':
-            if (this->locale_name_.length() > 0)
-            {
-                expanded = g_shell_quote(this->locale_name_.c_str());
-                g_string_append(exec, expanded);
-                g_free(expanded);
-            }
-            break;
-
-        case 'k':
-            if (this->file_name_.length() > 0)
-            {
-                expanded = g_shell_quote(this->file_name_.c_str());
-                g_string_append(exec, expanded);
-                g_free(expanded);
-            }
-            break;
-
-        case '%':
-            g_string_append_c(exec, '%');
-            break;
-    }
-}
-
-bool App::expand_application_parameters(int *argc,
-                                        char ***argv,
-                                        GError **error)
-{
-    const char *p = this->exec_.c_str();
-    GString *expanded_exec;
-    bool res;
-
-    if (this->exec_.length() == 0)
-    {
-        g_set_error_literal(error,
-                            G_IO_ERROR,
-                            G_IO_ERROR_FAILED,
-                            "Desktop file didn’t specify Exec field");
-        return false;
-    }
-
-    expanded_exec = g_string_new(NULL);
-
-    while (*p)
-    {
-        if (p[0] == '%' && p[1] != '\0')
-        {
-            expand_macro(p[1], expanded_exec);
-            p++;
-        }
-        else
-            g_string_append_c(expanded_exec, *p);
-
-        p++;
-    }
-    res = g_shell_parse_argv(expanded_exec->str, argc, argv, error);
-    g_string_free(expanded_exec, TRUE);
-    return res;
-}
-
-static void child_setup(gpointer user_data)
-{
-    gchar *pid_envvar = (gchar *)user_data;
-
-    if (pid_envvar)
-    {
-        pid_t pid = getpid();
-        char buf[20];
-        int i;
-
-        /* Write the pid into the space already reserved for it in the
-       * environment array. We can't use sprintf because it might
-       * malloc, so we do it by hand. It's simplest to write the pid
-       * out backwards first, then copy it over.
-       */
-        for (i = 0; pid; i++, pid /= 10)
-            buf[i] = (pid % 10) + '0';
-        for (i--; i >= 0; i--)
-            *(pid_envvar++) = buf[i];
-        *pid_envvar = '\0';
-    }
-}
-
-bool App::launch_flatpak(GError **error)
-{
-    bool completed = false;
-
-    char **argv, **envp;
-    int argc;
-    gchar *pid_envvar;
-
-    argv = NULL;
-    envp = g_get_environ();
-
-    GPid pid;
-    GList *iter;
-
-    if (!expand_application_parameters(&argc, &argv, error))
-        goto out;
-
-    if (this->file_name_.size() > 0)
-    {
-        envp = g_environ_setenv(envp,
-                                "GIO_LAUNCHED_DESKTOP_FILE",
-                                this->file_name_.c_str(),
-                                TRUE);
-        envp = g_environ_setenv(envp,
-                                "GIO_LAUNCHED_DESKTOP_FILE_PID",
-                                "XXXXXXXXXXXXXXXXXXXX", /* filled in child_setup */
-                                TRUE);
-        pid_envvar = (char *)g_environ_getenv(envp, "GIO_LAUNCHED_DESKTOP_FILE_PID");
+        this->launched_.emit(this->shared_from_this());
     }
     else
     {
-        pid_envvar = NULL;
+        this->launch_failed_.emit(this->shared_from_this());
+        KLOG_WARNING("failed to launch uris: %s", error.c_str());
     }
+    return res;
+}
 
-    if (!g_spawn_async(this->path_.c_str(),
-                       argv,
-                       envp,
-                       G_SPAWN_SEARCH_PATH,
-                       child_setup,
-                       pid_envvar,
-                       &pid,
-                       error))
-    {
-        goto out;
-    }
+void App::launch_action(const std::string &action_name)
+{
+    KLOG_PROFILE("id: %s.", this->desktop_id_.c_str());
 
-    g_strfreev(argv);
-    argv = NULL;
+    g_return_if_fail(this->desktop_app_);
 
-    completed = true;
-
-out:
-    g_strfreev(argv);
-    g_strfreev(envp);
-
-    return completed;
+    auto app_context = Gdk::Display::get_default()->get_app_launch_context();
+    this->desktop_app_->launch_action(action_name, app_context);
+    // there is no way to detect failures that occur while using this function
+    // this->launched_.emit(this->shared_from_this());
 }
 
 }  // namespace Kiran

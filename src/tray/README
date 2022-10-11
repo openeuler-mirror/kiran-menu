@@ -1,0 +1,28 @@
+系统托盘, 用来放置系统的托盘图标.
+
+安装编译依赖：
+gtk3-devel
+mate-panel-devel
+libdbusmenu-devel
+libxml2-devel
+
+构建方法：
+meson build 
+cd build
+ninja
+
+构建完成后会在build/src目录下生成一个kiran-tray-test，用来测试.
+同时也会生成一个kiran-tray-applet程序, 用来添加到面板
+
+安装：
+ninja install
+
+执行：
+glib-compile-schemas /usr/share/glib-2.0/schemas/ 命令
+会添加panel-icon-ids设置项目，其中的id号表示将这些通知图标放置在面板上，
+如果没有在其中，则显示窗口托盘内。
+tray-icon-size可设置托盘内图标的大小。
+
+文件安装完后， 会生成一个叫做Kiran系统托盘的applet，
+需要将原来面板上的通知区域applet移除，再将该applet添加到面板上进行显示.
+
