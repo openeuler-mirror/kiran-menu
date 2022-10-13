@@ -90,9 +90,11 @@ Gtk::ToggleButton *MenuNewAppsContainer::create_expand_button()
     button->set_image_position(Gtk::POS_RIGHT);
     button->set_alignment(0.0, 0.5);
     button->get_style_context()->add_class("menu-expand-button");
+    button->get_style_context()->add_class("flat");
 
     button->signal_toggled().connect(
-        [this]() -> void {
+        [this]() -> void
+        {
             auto image = dynamic_cast<Gtk::Image *>(expand_button->get_image());
 
             if (expand_button->get_active())
