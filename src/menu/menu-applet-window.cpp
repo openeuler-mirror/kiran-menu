@@ -214,6 +214,7 @@ void MenuAppletWindow::init_ui()
     builder = Gtk::Builder::create_from_resource("/kiran-menu/ui/menu");
     builder->get_widget<Gtk::Box>("menu-container", main_box);
     builder->get_widget<Gtk::Box>("menu-sider-container", sider_box);
+    builder->get_widget<Gtk::StackSwitcher>("menu-view-stack-switcher", menu_view_stack_switcher);
     builder->get_widget<Gtk::Stack>("menu-view-stack", menu_view_stack);
     builder->get_widget<Gtk::Stack>("apps-list-stack", apps_list_stack);
 
@@ -233,6 +234,11 @@ void MenuAppletWindow::init_ui()
 
     sider_box->set_name("menu-left-container");
     menu_view_stack->set_name("menu-mid-container");
+
+    for (const auto &child : menu_view_stack_switcher->get_children())
+    {
+        child->get_style_context()->add_class("flat");
+    }
 
     /* 最近访问文档列表 */
     auto widget = Gtk::make_managed<RecentFilesWidget>();

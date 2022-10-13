@@ -33,6 +33,7 @@ MenuCategoryItem::MenuCategoryItem(const std::string &name,
     auto context = get_style_context();
 
     context->add_class("menu-category-item");
+    context->add_class("flat");
     set_clickable(clickable);
     category_name = name;
 }

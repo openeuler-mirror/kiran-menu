@@ -27,6 +27,7 @@ MenuPowerButton::MenuPowerButton() : menu(nullptr)
     set_focus_on_click(false);
 
     context->add_class("menu-app-launcher");
+    context->add_class("flat");
 }
 
 MenuPowerButton::~MenuPowerButton()

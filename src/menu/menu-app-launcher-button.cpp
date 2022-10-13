@@ -28,6 +28,7 @@ MenuAppLauncherButton::MenuAppLauncherButton(const std::string &icon_name, const
                                                 Gio::APP_INFO_CREATE_SUPPORTS_STARTUP_NOTIFICATION);
 
     context->add_class("menu-app-launcher");
+    context->add_class("flat");
 }
 
 void MenuAppLauncherButton::on_clicked()
