@@ -176,7 +176,9 @@ private:
     Glib::RefPtr<Gtk::Builder> builder;
 
     Gtk::SearchEntry *search_entry;
-    Gtk::Stack *menu_view_stack, *apps_list_stack;
+    Gtk::StackSwitcher *menu_view_stack_switcher;
+    Gtk::Stack *menu_view_stack;
+    Gtk::Stack *apps_list_stack;
     Gtk::Box *all_apps_page;          /* */
     Gtk::Box *compact_favorites_view; /* 紧凑模式下的收藏夹页面 */
 

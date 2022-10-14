@@ -30,6 +30,8 @@ MenuAppItem::MenuAppItem(const std::shared_ptr<Kiran::App> &app_, int _icon_size
     auto context = get_style_context();
 
     context->add_class("menu-app-item");
+    // 添加flat样式，保证在普通状态下按钮时透明背景
+    context->add_class("flat");
 
     set_text(app_->get_locale_name());
 
