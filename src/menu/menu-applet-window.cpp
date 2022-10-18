@@ -67,14 +67,23 @@ MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type) : Glib::ObjectBa
     /* 监控工作区域大小变化 */
     auto screen = get_screen();
     monitor = new WorkareaMonitor(screen);
-    monitor->signal_size_changed().connect(
-        sigc::mem_fun(*this, &MenuAppletWindow::on_workarea_size_changed));
+    monitor->signal_size_changed().connect(sigc::mem_fun(*this, &MenuAppletWindow::on_workarea_size_changed));
 
     //加载当前用户信息
     set_display_mode(profile.get_display_mode());
 
     signal_grab_broken_event().connect(
         sigc::mem_fun(*this, &MenuAppletWindow::on_grab_broken_event));
+
+    // 窗口激活时抓取窗口
+    this->property_is_active().signal_changed().connect(
+        [this]() -> void
+        {
+            if (this->property_is_active().get_value())
+            {
+                KiranHelper::grab_input(*this);
+            }
+        });
 }
 
 MenuAppletWindow::~MenuAppletWindow()
@@ -175,11 +184,6 @@ bool MenuAppletWindow::on_grab_broken_event(GdkEventGrabBroken *grab_broken_even
         hide();
     }
     return false;
-}
-
-void MenuAppletWindow::on_power_menu_deactivated()
-{
-    KiranHelper::grab_input(*this);
 }
 
 void MenuAppletWindow::init_ui()
@@ -522,10 +526,6 @@ bool MenuAppletWindow::on_map_event(GdkEventAny *any_event)
 
     on_search_stop();
 
-    /*
-     * 获取当前系统的鼠标事件，这样才能在鼠标点击窗口外部时及时隐藏窗口
-     */
-    KiranHelper::grab_input(*this);
     if (display_mode == DISPLAY_MODE_EXPAND || profile.get_default_page() == PAGE_ALL_APPS)
         search_entry->grab_focus();
     return true;
@@ -655,8 +655,6 @@ void MenuAppletWindow::add_sidebar_buttons()
     side_box->add(*launcher_btn);
 
     auto power_btn = Gtk::make_managed<MenuPowerButton>();
-    power_btn->signal_power_menu_deactivated().connect(
-        sigc::mem_fun(*this, &MenuAppletWindow::on_power_menu_deactivated));
     side_box->add(*power_btn);
 
     side_box->show_all();

@@ -52,10 +52,12 @@ MenuAppItem::MenuAppItem(const std::shared_ptr<Kiran::App> &app_, int _icon_size
     set_can_focus(true);
     set_tooltip_text(app_->get_locale_comment());
 
-    context_menu.signal_deactivate().connect(
-        sigc::mem_fun(*this, &MenuAppItem::on_context_menu_deactivated));
-
     init_drag_and_drop();
+}
+
+MenuAppItem::~MenuAppItem()
+{
+    this->idle_drag_connection_.disconnect();
 }
 
 const std::shared_ptr<Kiran::App> MenuAppItem::get_app() const
@@ -71,11 +73,7 @@ void MenuAppItem::init_drag_and_drop()
     targets.push_back(target);
     drag_source_set(targets, Gdk::BUTTON1_MASK, Gdk::ACTION_COPY);
 
-    signal_drag_failed().connect(
-        [this](const Glib::RefPtr<Gdk::DragContext> &context, Gtk::DragResult result) -> bool {
-            KLOG_DEBUG("drag failed, result %d\n", (int)result);
-            return true;
-        });
+    signal_drag_failed().connect(sigc::mem_fun(*this, &MenuAppItem::on_drag_failed));
 }
 
 bool MenuAppItem::on_button_press_event(GdkEventButton *button_event)
@@ -127,16 +125,26 @@ void MenuAppItem::on_drag_data_get(const Glib::RefPtr<Gdk::DragContext> &context
 
 void MenuAppItem::on_drag_end(const Glib::RefPtr<Gdk::DragContext> &context)
 {
-    /* 让开始菜单窗口重新获取输入焦点 */
-    Gtk::Container *toplevel = get_toplevel();
-    KiranHelper::grab_input(*toplevel);
+    /* FIXME: 当拖动图标到任务栏时，无法收到drag-end信号，因为任务栏时kiran-panel的子窗口，kiran-panel是通过
+       代理的方式将拖拽信息发送给任务栏，但是任务栏拖拽完成后，这个代理并没有把完成的消息转发给源控件（开始菜单），
+       因此无法收到drag-end信号，当前函数也不会被调用。这个时候窗口不再被抓取，需要手动点击左下角开始菜单按钮才能隐藏。*/
+
+    // 如果拖拽被取消，拖拽的ungrab操作可能在drag-end信号之后，所以这里的grab操作放入到后面的事件循环处理。
+    if (this->idle_drag_connection_.empty())
+    {
+        this->idle_drag_connection_ = Glib::signal_idle().connect([this]() -> bool
+                                                                  {
+                                                                      Gtk::Container *toplevel = this->get_toplevel();
+                                                                      KiranHelper::grab_input(*toplevel);
+                                                                      return false;
+                                                                  });
+    }
 }
 
-void MenuAppItem::on_context_menu_deactivated()
+bool MenuAppItem::on_drag_failed(const Glib::RefPtr<Gdk::DragContext> &context, Gtk::DragResult result)
 {
-    /* 让开始菜单窗口重新获取输入焦点 */
-    auto toplevel = get_toplevel();
-    KiranHelper::grab_input(*toplevel);
+    KLOG_DEBUG("drag failed, result %d\n", (int)result);
+    return true;
 }
 
 bool MenuAppItem::on_key_press_event(GdkEventKey *key_event)
@@ -181,20 +189,12 @@ void MenuAppItem::create_context_menu()
     if (!is_in_favorite())
     {
         item = Gtk::make_managed<Gtk::MenuItem>(_("Add to favorites"));
-        item->signal_activate().connect(
-            [this]() -> void {
-                if (!app.expired())
-                    Kiran::MenuSkeleton::get_instance()->add_favorite_app(app.lock()->get_desktop_id());
-            });
+        item->signal_activate().connect(sigc::mem_fun(*this, &MenuAppItem::on_add_favorite_app));
     }
     else
     {
         item = Gtk::make_managed<Gtk::MenuItem>(_("Remove from favorites"));
-        item->signal_activate().connect(
-            [this]() -> void {
-                if (!app.expired())
-                    Kiran::MenuSkeleton::get_instance()->del_favorite_app(app.lock()->get_desktop_id());
-            });
+        item->signal_activate().connect(sigc::mem_fun(*this, &MenuAppItem::on_del_favorite_app));
     }
     context_menu.append(*item);
 
@@ -344,4 +344,20 @@ void MenuAppItem::launch_app()
      */
     signal_launched().emit();
     app.lock()->launch();
+}
+
+void MenuAppItem::on_add_favorite_app()
+{
+    if (!this->app.expired())
+    {
+        Kiran::MenuSkeleton::get_instance()->add_favorite_app(app.lock()->get_desktop_id());
+    }
+}
+
+void MenuAppItem::on_del_favorite_app()
+{
+    if (!app.expired())
+    {
+        Kiran::MenuSkeleton::get_instance()->del_favorite_app(app.lock()->get_desktop_id());
+    }
 }

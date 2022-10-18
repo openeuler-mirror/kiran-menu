@@ -50,7 +50,10 @@ void MenuAvatarWidget::load_user_info_()
         return;
     }
 
-    set_tooltip_text(user_info.get_username());
+    if (user_info.get_username() != NULL)
+    {
+        set_tooltip_text(user_info.get_username());
+    }
     queue_draw();
 }
 
@@ -87,7 +90,8 @@ bool MenuAvatarWidget::on_draw(const ::Cairo::RefPtr<Cairo::Context> &cr)
     radius /= 2.0;
     try
     {
-        pixbuf = Gdk::Pixbuf::create_from_file(user_info.get_iconfile(),
+        auto icon_file = user_info.get_iconfile();
+        pixbuf = Gdk::Pixbuf::create_from_file(icon_file ? icon_file : std::string(),
                                                allocation.get_width() * scale,
                                                allocation.get_height() * scale);
     }
