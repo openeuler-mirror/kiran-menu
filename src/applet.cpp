@@ -20,7 +20,6 @@
 #include <glibmm/i18n.h>
 #include <gtkmm.h>
 #include <locale.h>
-#include <zlog_ex.h>
 #include <iostream>
 
 #include "app-manager.h"
