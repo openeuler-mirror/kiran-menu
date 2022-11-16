@@ -178,6 +178,7 @@ private:
     Gtk::SearchEntry *search_entry;
     Gtk::StackSwitcher *menu_view_stack_switcher;
     Gtk::Stack *menu_view_stack;
+    Gtk::Box *all_app_view;
     Gtk::Stack *apps_list_stack;
     Gtk::Box *all_apps_page;          /* */
     Gtk::Box *compact_favorites_view; /* 紧凑模式下的收藏夹页面 */

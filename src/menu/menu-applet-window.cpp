@@ -216,6 +216,7 @@ void MenuAppletWindow::init_ui()
     builder->get_widget<Gtk::Box>("menu-sider-container", sider_box);
     builder->get_widget<Gtk::StackSwitcher>("menu-view-stack-switcher", menu_view_stack_switcher);
     builder->get_widget<Gtk::Stack>("menu-view-stack", menu_view_stack);
+    builder->get_widget<Gtk::Box>("all-apps-view", all_app_view);
     builder->get_widget<Gtk::Stack>("apps-list-stack", apps_list_stack);
 
     builder->get_widget<Gtk::Box>("search-box", search_box);
@@ -492,7 +493,7 @@ void MenuAppletWindow::switch_to_category_overview(const std::string &selected_c
             true));
         category_list_box->add(*item);
     }
-    all_apps_scrolled->set_visible(false);
+    all_app_view->set_visible(false);
     category_list_scrolled->show_all();
 
     if (selected_item)
@@ -536,6 +537,7 @@ void MenuAppletWindow::switch_to_apps_overview(double position, bool animation)
     all_apps_scrolled->show_all();
 
     menu_view_stack->set_visible_child(ALL_APPS_VIEW);
+    all_app_view->set_visible(true);
     apps_list_stack->set_visible_child(APPS_LIST_PAGE);
     if (position >= 0)
     {
@@ -550,6 +552,7 @@ bool MenuAppletWindow::on_map_event(GdkEventAny *any_event)
 
     // Fix #53981
     category_list_scrolled->set_visible(false);
+    all_app_view->set_visible(true);
     all_apps_scrolled->set_visible(true);
 
     on_search_stop();
