@@ -198,6 +198,7 @@ kiran_notify_icon_window_focus_in_event(GtkWidget *widget,
                 break;
             }
         }
+        g_list_free(children);
     }
 
     return FALSE;
@@ -232,6 +233,7 @@ kiran_notify_icon_window_focus_out_event(GtkWidget *widget,
             break;
         }
     }
+    g_list_free(children);
 
     return FALSE;
 }
@@ -415,6 +417,7 @@ kiran_notify_icon_window_icons_refresh(KiranNotifyIconWindow *window,
     }
 
     gtk_widget_set_size_request(GTK_WIDGET(window), max_row * 40, (row + 1) * 40);
+    g_list_free(children);
 }
 
 static void

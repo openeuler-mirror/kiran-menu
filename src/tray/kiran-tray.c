@@ -218,6 +218,7 @@ gsettings_changed_panel_icon_ids(GSettings *settings,
 
         g_strfreev(panel_icon_ids);
     }
+    g_list_free(children);
 }
 
 static void
@@ -295,6 +296,7 @@ kiran_tray_icons_refresh(KiranTray *tray)
                                 NULL);
         col++;
     }
+    g_list_free(children);
 }
 
 static void
