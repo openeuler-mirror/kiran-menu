@@ -83,6 +83,7 @@ void App::update_from_desktop_file(bool force)
 
     this->name_ = GET_STRING("Name");
     this->locale_name_ = GET_LOCALE_STRING("Name");
+    this->locale_name_pinyin_list_ = convert_chinese_characters_to_pinyin(this->locale_name_);
 
     this->comment_ = GET_STRING("Comment");
     this->locale_comment_ = GET_LOCALE_STRING("Comment");

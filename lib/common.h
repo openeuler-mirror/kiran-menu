@@ -38,4 +38,5 @@ bool write_list_quark_to_as(Glib::RefPtr<Gio::Settings> settings,
                             const std::string &key,
                             const std::list<int32_t> &value);
 
+std::list<std::string> convert_chinese_characters_to_pinyin(const std::string &contents);
 }  // namespace Kiran

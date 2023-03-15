@@ -36,6 +36,50 @@ void MenuSearch::flush(const AppVec &apps)
 {
 }
 
+static int calculate_equal_position(const std::string &keyword,
+                                    const std::string &pinyin)
+{
+    int i = 0;
+
+    for (; i < keyword.length() && i < pinyin.length(); i++)
+    {
+        if (keyword[i] != pinyin[i])
+        {
+            break;
+        }
+    }
+
+    return i;
+}
+
+static bool contain_with_pinyin(const std::string &keyword,
+                                std::list<std::string> pinyin_list)
+{
+    int length = keyword.length();
+    int offset = 0;
+    auto sub_keyword = keyword.substr(0, length);
+
+    for (auto iter_string = pinyin_list.begin(); iter_string != pinyin_list.end(); iter_string++)
+    {
+        auto pinyin = *iter_string;
+        int position;
+
+        position = calculate_equal_position(sub_keyword, pinyin);
+        if (position > 0)
+        {
+            offset += position;
+            if (offset >= length)
+            {
+                return true;
+            }
+
+            sub_keyword = keyword.substr(offset, length);
+        }
+    }
+
+    return false;
+}
+
 AppVec MenuSearch::search_by_keyword(const std::string &keyword,
                                      bool ignore_case,
                                      AppKind kind,
@@ -54,11 +98,13 @@ AppVec MenuSearch::search_by_keyword(const std::string &keyword,
         auto &locale_comment = app->get_locale_comment();
         auto &name = app->get_name();
         auto &locale_name = app->get_locale_name();
+        auto &locale_name_pinyin_list = app->get_locale_name_pinyin_list();
 
 #define STRSTR_KEYWORD(a) (strstr_with_case(a, keyword, ignore_case))
 
         if (STRSTR_KEYWORD(name) || STRSTR_KEYWORD(locale_name) ||
-            STRSTR_KEYWORD(comment) || STRSTR_KEYWORD(locale_comment))
+            STRSTR_KEYWORD(comment) || STRSTR_KEYWORD(locale_comment) ||
+            contain_with_pinyin(keyword, locale_name_pinyin_list))
         {
             match_apps.push_back(app);
         }

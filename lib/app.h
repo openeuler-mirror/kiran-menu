@@ -83,6 +83,7 @@ public:
     const std::string &get_name() { return this->name_; }
     // 获取desktop文件中的Name[locale]字段值
     const std::string &get_locale_name() { return this->locale_name_; }
+    const std::list<std::string> &get_locale_name_pinyin_list() { return this->locale_name_pinyin_list_; }
     // 获取desktop文件中的Comment字段值
     const std::string &get_comment() { return this->comment_; }
     // 获取desktop文件中的Comment[locale]字段值
@@ -164,6 +165,7 @@ private:
 
     std::string name_;
     std::string locale_name_;
+    std::list<std::string> locale_name_pinyin_list_;
 
     std::string comment_;
     std::string locale_comment_;
