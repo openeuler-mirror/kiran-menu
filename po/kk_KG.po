@@ -1,0 +1,403 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020
+# This file is distributed under the same license as the kiran-menu package.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: 2.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-04-28 15:05+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../src/common/kiran-search-entry.cpp:31
+msgid "Search for applications"
+msgstr "Fufuzani ntchito"
+
+#: ../src/menu/menu-app-item.cpp:168
+#: ../src/tasklist/tasklist-app-context-menu.cpp:57
+msgid "Launch"
+msgstr "Ишке киргизүү"
+
+#: ../src/menu/menu-app-item.cpp:172
+msgid "Add to desktop"
+msgstr "Onjezerani ku desktop"
+
+#: ../src/menu/menu-app-item.cpp:178
+#: ../src/tasklist/tasklist-app-context-menu.cpp:79
+msgid "Add to favorites"
+msgstr "Onjezerani ku zokondedwa"
+
+#: ../src/menu/menu-app-item.cpp:187
+#: ../src/tasklist/tasklist-app-context-menu.cpp:86
+msgid "Remove from favorites"
+msgstr "Тандалмаларга жок кылуу"
+
+#: ../src/menu/menu-app-item.cpp:198
+#: ../src/tasklist/tasklist-app-context-menu.cpp:110
+msgid "Unpin to taskbar"
+msgstr "негизги тилкесин жокко чыгаруу"
+
+#: ../src/menu/menu-app-item.cpp:203
+#: ../src/tasklist/tasklist-app-context-menu.cpp:103
+msgid "Pin to taskbar"
+msgstr "тилкесине белгиленген"
+
+#: ../src/menu/menu-applet-button.cpp:24
+msgid "Kiran Start Menu"
+msgstr "Kiran менюсу башталат"
+
+#. 扩展模式下的常用应用布局
+#: ../src/menu/menu-applet-window.cpp:238
+msgid "Frequently used"
+msgstr "Kawirikawiri"
+
+#: ../src/menu/menu-applet-window.cpp:241
+msgid "No frequent apps"
+msgstr "Mapulogalamu osagwiritsidwa ntchito nthawi zambiri"
+
+#. 扩展模式下的收藏夹应用布局
+#. 紧凑模式下的收藏夹应用布局
+#: ../src/menu/menu-applet-window.cpp:245
+#: ../src/menu/menu-applet-window.cpp:252
+msgid "Favorite Apps"
+msgstr "Mapulogalamu omwe amakonda kwambiri"
+
+#: ../src/menu/menu-applet-window.cpp:248
+#: ../src/menu/menu-applet-window.cpp:255
+msgid "No favorite apps found"
+msgstr "Simungapeze mapulogalamu omwe mumakonda kwambiri"
+
+#. 搜索结果布局
+#: ../src/menu/menu-applet-window.cpp:266
+msgid "Search Results"
+msgstr "Zotsatira zosaka"
+
+#: ../src/menu/menu-applet-window.cpp:269
+msgid "No matched apps found!"
+msgstr "Simungapeze zofanana!"
+
+#: ../src/menu/menu-applet-window.cpp:321
+msgid "Hello"
+msgstr "Hello"
+
+#: ../src/menu/menu-applet-window.cpp:654
+msgid "Run"
+msgstr "Kuthamanga"
+
+#: ../src/menu/menu-applet-window.cpp:659
+msgid "Search Files"
+msgstr "Fufuzani fayilo"
+
+#: ../src/menu/menu-applet-window.cpp:664
+msgid "Home Directory"
+msgstr "■ Негизги каталог"
+
+#: ../src/menu/menu-applet-window.cpp:669
+msgid "Control center"
+msgstr "Malo olamulira"
+
+#: ../src/menu/menu-applet-window.cpp:674
+msgid "System monitor"
+msgstr "Kuwunika kwadongosolo"
+
+#: ../src/menu/menu-applet-window.cpp:835
+msgid "%a %b %e %Y"
+msgstr "%% б% e% Y%"
+
+#: ../src/menu/menu-applet.cpp:50
+msgid "Kiran Menu Applet"
+msgstr "Kiran меню чакан программа"
+
+#: ../src/menu/menu-applet.cpp:52
+msgid "Startup menu designed for Kiran Desktop"
+msgstr "Kiran рабочий дизайн менюсу баштоо үчүн"
+
+#: ../src/menu/menu-applet.cpp:62 ../src/tasklist/tasklist-applet.cpp:36
+#: ../src/workspace/workspace-applet.cpp:35
+msgid "About"
+msgstr "Жөнүндө"
+
+#: ../src/menu/menu-applet.cpp:62 ../src/tasklist/tasklist-applet.cpp:36
+#: ../src/workspace/workspace-applet.cpp:35
+msgid "About this applet"
+msgstr "Бул кичинекей программа жөнүндө"
+
+#. TODO: 菜单中的应用分类后端目前没有做翻译，暂时放到前端调用_("xxx")进行翻译，正常应该是后端翻译后返回给前端，后续需要调整这里的翻译逻辑
+#: ../src/menu/menu-category-item.cpp:20
+msgid "Office"
+msgstr "Office"
+
+#: ../src/menu/menu-category-item.cpp:21
+msgid "Development"
+msgstr "Өнүгүү"
+
+#: ../src/menu/menu-category-item.cpp:22
+msgid "Network"
+msgstr "7.48"
+
+#: ../src/menu/menu-category-item.cpp:23
+msgid "Graphics"
+msgstr "Graphics"
+
+#: ../src/menu/menu-category-item.cpp:24
+msgid "Multimedia"
+msgstr "Multimedia"
+
+#: ../src/menu/menu-category-item.cpp:25
+msgid "Utilities"
+msgstr "Коммуналдык"
+
+#: ../src/menu/menu-category-item.cpp:26
+msgid "Settings"
+msgstr "■ ■ ■ орнотуулары"
+
+#: ../src/menu/menu-category-item.cpp:27
+msgid "Others"
+msgstr "Башка"
+
+#: ../src/menu/menu-new-apps-container.cpp:83
+#: ../src/menu/menu-new-apps-container.cpp:109
+msgid "Expand"
+msgstr "Kuwonjezeka"
+
+#: ../src/menu/menu-new-apps-container.cpp:100
+msgid "Shrink"
+msgstr "■ жыйрылуу"
+
+#: ../src/menu/menu-new-apps-container.cpp:121
+msgid "New Installed"
+msgstr "■ жаңы орнотуу"
+
+#: ../src/menu/menu-power-button.cpp:26
+msgid "Power options"
+msgstr "Mphamvu zosankha"
+
+#: ../src/menu/menu-power-menu.cpp:29
+msgid "Lock screen"
+msgstr "Tsekani chinsalu"
+
+#: ../src/menu/menu-power-menu.cpp:39
+msgid "Switch user"
+msgstr "■ которулуу колдонуучулар"
+
+#: ../src/menu/menu-power-menu.cpp:47
+msgid "Logout"
+msgstr "Chotsani"
+
+#: ../src/menu/menu-power-menu.cpp:56
+msgid "Suspend"
+msgstr "■ токтотулган"
+
+#: ../src/menu/menu-power-menu.cpp:65
+msgid "Hibernate"
+msgstr "Уйкусуз"
+
+#: ../src/menu/menu-power-menu.cpp:75
+msgid "Reboot"
+msgstr "Yambani"
+
+#: ../src/menu/menu-power-menu.cpp:84
+msgid "Shutdown"
+msgstr "Жабуу"
+
+#: ../src/menu/menu-power-menu.cpp:120
+msgid ""
+"The logined users reach the maximum limit at the same time, you cannot "
+"switch to the greeter interface, Please log off some logined users first."
+msgstr ""
+"Ogwiritsa ntchito omwe alowetsa nthawi yomweyo kuti akwaniritse zoletsedwa, "
+"simungathe kusinthana ndi mawonekedwe ovomerezeka, chonde chotsani ena "
+"ogwiritsa ntchito omwe alowa kale."
+
+#: ../src/menu/menu-power-menu.cpp:123
+#: ../src/menu/recent-files-list-box.cpp:93
+#: ../src/menu/recent-files-list-box.cpp:113
+#: ../src/menu/recent-files-list-box.cpp:147
+msgid "System Warning"
+msgstr "Chenjezo la dongosolo"
+
+#: ../src/menu/recent-files-list-box.cpp:92
+#: ../src/menu/recent-files-list-box.cpp:112
+msgid "File does not exist"
+msgstr "Malemba salipo"
+
+#: ../src/menu/recent-files-list-box.cpp:141
+msgid ""
+"All recent files information will be lost.\n"
+"Are you sure to clear the whole lists?"
+msgstr ""
+"Mauthenga onse aposachedwa adzatayika. \n"
+"Сиз бардык тизмесин алып келет? "
+
+#: ../src/menu/recent-files-list-box.cpp:219
+msgid "Open File"
+msgstr "Tsegulani fayilo"
+
+#: ../src/menu/recent-files-list-box.cpp:224
+msgid "Open File Location"
+msgstr "Tsegulani malo a fayilo"
+
+#: ../src/menu/recent-files-list-box.cpp:229
+msgid "Remove from list"
+msgstr "тизмеден алынып салынды"
+
+#: ../src/menu/recent-files-list-box.cpp:234
+msgid "Clear the whole list"
+msgstr "Chotsani mndandanda wonse"
+
+#: ../src/menu/recent-files-widget.cpp:29
+msgid "The Recently files list is empty!"
+msgstr "Mndandanda wamakono wamakono ulibe kanthu!"
+
+#: ../src/menu/recent-files-widget.cpp:44
+msgid "Search files"
+msgstr "Fufuzani fayilo"
+
+#: ../src/tasklist/tasklist-app-context-menu.cpp:67
+msgid "Close all windows"
+msgstr "Бардык терезени жабуу"
+
+#: ../src/tasklist/tasklist-applet-widget.cpp:106
+msgid "Previous"
+msgstr "Мурунку"
+
+#: ../src/tasklist/tasklist-applet-widget.cpp:107
+msgid "Next"
+msgstr "Кийинки"
+
+#: ../src/tasklist/tasklist-applet.cpp:23
+msgid "Kiran Tasklist Applet"
+msgstr "Kiran тапшырма тизмеси программасы"
+
+#: ../src/tasklist/tasklist-applet.cpp:25
+msgid "Task switcher designed for Kiran Desktop"
+msgstr "Kiran рабочий дизайн милдети которуштуруу үчүн"
+
+#. 最大化
+#: ../src/tasklist/tasklist-window-context-menu.cpp:48
+msgid "Maximize"
+msgstr "Onjezerani"
+
+#. 最小化
+#: ../src/tasklist/tasklist-window-context-menu.cpp:65
+msgid "Minimize"
+msgstr "Kuchepetsa"
+
+#. 恢复大小
+#: ../src/tasklist/tasklist-window-context-menu.cpp:75
+msgid "Restore"
+msgstr "Kubwezeretsa"
+
+#. 移动
+#: ../src/tasklist/tasklist-window-context-menu.cpp:93
+msgid "Move"
+msgstr "Mobile"
+
+#. 总是置顶
+#: ../src/tasklist/tasklist-window-context-menu.cpp:105
+msgid "Always on top"
+msgstr "Nthawi zonse pamwamba"
+
+#. 仅在当前工作区
+#: ../src/tasklist/tasklist-window-context-menu.cpp:121
+msgid "Only on this workspace"
+msgstr "Бул иш чөйрөсүндө гана"
+
+#. 总在可见工作区
+#: ../src/tasklist/tasklist-window-context-menu.cpp:132
+msgid "Always on visible workspace"
+msgstr "Ар дайым көрүнүктүү иш чөйрөсүндө"
+
+#. 移动到其它工作区
+#: ../src/tasklist/tasklist-window-context-menu.cpp:143
+msgid "Move to another workspace"
+msgstr "Pitani kumadera ena ogwira ntchito"
+
+#. 关闭窗口选项
+#: ../src/tasklist/tasklist-window-context-menu.cpp:150
+msgid "Close Window"
+msgstr "Жабуу терезе"
+
+#: ../src/workspace/workspace-applet.cpp:22
+msgid "Kiran Workspace switcher Applet"
+msgstr "Kiran иш аянты которуштуруу чакан программа"
+
+#: ../src/workspace/workspace-applet.cpp:24
+msgid "Workspace switcher designed for Kiran Desktop"
+msgstr "Kiran рабочий дизайн иш аянты которуштуруу үчүн"
+
+#: ../data/menu.ui.xml.h:1
+msgid "Favorite applications"
+msgstr "Mapulogalamu omwe amakonda kwambiri"
+
+#: ../data/menu.ui.xml.h:2
+msgid "page0"
+msgstr "Tsamba 0"
+
+#: ../data/menu.ui.xml.h:3
+msgid "page1"
+msgstr "Tsamba 1"
+
+#: ../data/menu.ui.xml.h:4
+msgid "All applications"
+msgstr "Mapulogalamu onse"
+
+#: ../data/menu.ui.xml.h:5
+msgid "Recent files"
+msgstr "Malemba atsopano"
+
+#: ../data/menu.ui.xml.h:6
+msgid "Hello, ---"
+msgstr "Hello,----"
+
+#: ../data/menu.ui.xml.h:7
+msgid "Click to change date and time settings"
+msgstr "өзгөртүү датасы жана убакыт орнотууларды Даражасы"
+
+#: ../data/menu.ui.xml.h:8
+msgid "------"
+msgstr "------"
+
+#: ../data/workspace-applet-window.ui.xml.h:1
+msgid "Create new workspace"
+msgstr "Malo atsopano ogwira ntchito"
+
+#~ msgid "The logined users reach the maximum limit at the same time."
+#~ msgstr "Ogwiritsa ntchito omwe amalowetsa amafika pa nthawi yomweyo."
+
+#~ msgid "Open help"
+#~ msgstr "Tsegulani chithandizo"
+
+#~ msgid "Edit Profiles"
+#~ msgstr "Sinthani fayilo yosintha"
+
+#~ msgid "Tray"
+#~ msgstr "Tippo"
+
+#~ msgid "About Tray"
+#~ msgstr "табактын жөнүндө"
+
+#~ msgid "The Tray displays the system notify icon"
+#~ msgstr "Chithunzi chowonetsera mawonekedwe"
+
+#~ msgid "Click to edit user information"
+#~ msgstr "Колдонуучу маалыматты түзөтүү үчүн сокку"
+
+#~ msgid "Favorites"
+#~ msgstr "Favorites"
+
+#~ msgid "No favorite apps!"
+#~ msgstr "Palibe ntchito yomwe mumakonda!"
+
+#~ msgid "Preferences"
+#~ msgstr "биринчи тандоо"
+
+#~ msgid "_About"
+#~ msgstr "_ Жөнүндө"
