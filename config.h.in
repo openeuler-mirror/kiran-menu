@@ -5,4 +5,5 @@
 #define PACKAGE_VERSION           "@PROJECT_VERSION@"
 #define GETTEXT_PACKAGE		   PACKAGE_NAME
 #define COPYRIGHT              "Copyright ©2020 KylinSec. All rights reserved."
+#cmakedefine POWER_DIALOG
 

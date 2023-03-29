@@ -21,14 +21,16 @@
 #include "lib/base.h"
 #include "menu-app-launcher-button.h"
 #include "menu-power-button.h"
+#include "menu-power-dialog.h"
 #include "window-manager.h"
-
+#include "global.h"
 #include <glibmm/i18n.h>
 #include <unistd.h>
 #include <iostream>
 #include "global.h"
 #include "menu-apps-container.h"
 #include "recent-files-widget.h"
+#include "config.h"
 
 #define NEW_APPS_MAX_SIZE 3
 
@@ -643,6 +645,18 @@ Gtk::Button *MenuAppletWindow::create_launcher_button(const std::string &icon_na
     return button;
 }
 
+Gtk::Button *MenuAppletWindow::create_power_dialog_button()
+{
+    MenuPowerButton *button;
+    button = Gtk::make_managed<MenuPowerButton>();
+
+    set_transient_for(*this);
+
+    button->signal_menu_hide().connect(sigc::mem_fun(*this, &Gtk::Widget::hide));
+
+    return button;
+}
+
 void MenuAppletWindow::add_sidebar_buttons()
 {
     Gtk::Separator *separator;
@@ -685,7 +699,12 @@ void MenuAppletWindow::add_sidebar_buttons()
                                           "mate-system-monitor");
     side_box->add(*launcher_btn);
 
+
+#ifdef POWER_DIALOG
+    auto power_btn = create_power_dialog_button();
+#else
     auto power_btn = Gtk::make_managed<MenuPowerButton>();
+#endif
     side_box->add(*power_btn);
 
     side_box->show_all();
