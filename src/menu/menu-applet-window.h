@@ -242,4 +242,6 @@ private:
     Gtk::Button *create_page_button(const char *icon_resource,
                                     const char *tooltip,
                                     int page_index);
+
+    Gtk::Button *create_power_dialog_button();
 };

@@ -13,7 +13,10 @@
  */
 
 #include "menu-power-button.h"
+#include "menu-power-dialog.h"
 #include <glibmm/i18n.h>
+#include <gtkmm/menu.h>
+
 #include "kiran-helper.h"
 
 MenuPowerButton::MenuPowerButton() : menu(nullptr)
@@ -32,7 +35,12 @@ MenuPowerButton::MenuPowerButton() : menu(nullptr)
 
 MenuPowerButton::~MenuPowerButton()
 {
+#ifdef POWER_DIALOG
+    delete dialog_;
+#else
     delete menu;
+#endif
+
 }
 
 void MenuPowerButton::on_clicked()
@@ -42,10 +50,21 @@ void MenuPowerButton::on_clicked()
     if (menu)
         delete menu;
 
+#ifdef POWER_DIALOG
+    dialog_ = new MenuPowerDialog();
+    dialog_->show_all();
+#else
     menu = new MenuPowerMenu();
     menu->attach_to_widget(*this);
     menu->show_all();
     menu->popup_at_widget(this, Gdk::GRAVITY_SOUTH_EAST, Gdk::GRAVITY_SOUTH_WEST, event);
+#endif
 
     gdk_event_free(event);
+}
+
+
+sigc::signal<void> MenuPowerButton::signal_menu_hide()
+{
+    return m_signal_menu_hide;
 }
