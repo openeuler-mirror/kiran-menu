@@ -16,6 +16,7 @@
 #define MENU_POWER_BUTTON_H
 
 #include <gtkmm.h>
+#include "config.h"
 #include "menu-power-menu.h"
 
 class MenuPowerButton : public Gtk::Button
@@ -23,13 +24,18 @@ class MenuPowerButton : public Gtk::Button
 public:
     MenuPowerButton();
     ~MenuPowerButton();
+    sigc::signal<void> signal_menu_hide();
 
 protected:
     virtual void on_clicked() override;
+    sigc::signal<void> m_signal_menu_hide;
 
 private:
     Gtk::Image icon;
     Gtk::Menu *menu;
+#ifdef POWER_DIALOG
+    Gtk::Window *dialog_;
+#endif
 };
 
 #endif  // MENU_POWER_BUTTON_H
