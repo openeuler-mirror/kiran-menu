@@ -1,0 +1,402 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020
+# This file is distributed under the same license as the kiran-menu package.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: 2.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-04-28 15:05+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../src/common/kiran-search-entry.cpp:31
+msgid "Search for applications"
+msgstr "Програм хайх"
+
+#: ../src/menu/menu-app-item.cpp:168
+#: ../src/tasklist/tasklist-app-context-menu.cpp:57
+msgid "Launch"
+msgstr "Ажил"
+
+#: ../src/menu/menu-app-item.cpp:172
+msgid "Add to desktop"
+msgstr "Ширээн дээр нэмэх"
+
+#: ../src/menu/menu-app-item.cpp:178
+#: ../src/tasklist/tasklist-app-context-menu.cpp:79
+msgid "Add to favorites"
+msgstr "Дуртай"
+
+#: ../src/menu/menu-app-item.cpp:187
+#: ../src/tasklist/tasklist-app-context-menu.cpp:86
+msgid "Remove from favorites"
+msgstr "Дуртайгаас нь хас"
+
+#: ../src/menu/menu-app-item.cpp:198
+#: ../src/tasklist/tasklist-app-context-menu.cpp:110
+msgid "Unpin to taskbar"
+msgstr "Даалгаврын самбар"
+
+#: ../src/menu/menu-app-item.cpp:203
+#: ../src/tasklist/tasklist-app-context-menu.cpp:103
+msgid "Pin to taskbar"
+msgstr "Даалгаврын самбар руу зүү"
+
+#: ../src/menu/menu-applet-button.cpp:24
+msgid "Kiran Start Menu"
+msgstr "Киран эхлэх цэс"
+
+#. 扩展模式下的常用应用布局
+#: ../src/menu/menu-applet-window.cpp:238
+msgid "Frequently used"
+msgstr "Түгээмэл хэрэглэгддэг"
+
+#: ../src/menu/menu-applet-window.cpp:241
+msgid "No frequent apps"
+msgstr "Олон удаа апп"
+
+#. 扩展模式下的收藏夹应用布局
+#. 紧凑模式下的收藏夹应用布局
+#: ../src/menu/menu-applet-window.cpp:245
+#: ../src/menu/menu-applet-window.cpp:252
+msgid "Favorite Apps"
+msgstr "Дуртай програмууд"
+
+#: ../src/menu/menu-applet-window.cpp:248
+#: ../src/menu/menu-applet-window.cpp:255
+msgid "No favorite apps found"
+msgstr "Ямар ч дуртай апп олдсонгүй"
+
+#. 搜索结果布局
+#: ../src/menu/menu-applet-window.cpp:266
+msgid "Search Results"
+msgstr "Хайлтын үр"
+
+#: ../src/menu/menu-applet-window.cpp:269
+msgid "No matched apps found!"
+msgstr "Тохирсон апп олдсонгүй!"
+
+#: ../src/menu/menu-applet-window.cpp:321
+msgid "Hello"
+msgstr "Сайн уу"
+
+#: ../src/menu/menu-applet-window.cpp:654
+msgid "Run"
+msgstr "Ажил"
+
+#: ../src/menu/menu-applet-window.cpp:659
+msgid "Search Files"
+msgstr "Файл хайх"
+
+#: ../src/menu/menu-applet-window.cpp:664
+msgid "Home Directory"
+msgstr "Нүүр хуудас"
+
+#: ../src/menu/menu-applet-window.cpp:669
+msgid "Control center"
+msgstr "Хяналтын төв"
+
+#: ../src/menu/menu-applet-window.cpp:674
+msgid "System monitor"
+msgstr "Системийн хяналт"
+
+#: ../src/menu/menu-applet-window.cpp:835
+msgid "%a %b %e %Y"
+msgstr "%a% b% e% Y"
+
+#: ../src/menu/menu-applet.cpp:50
+msgid "Kiran Menu Applet"
+msgstr "Киран цэсийн товхимол"
+
+#: ../src/menu/menu-applet.cpp:52
+msgid "Startup menu designed for Kiran Desktop"
+msgstr "Киран ширээний зориулалттай эхлэх цэс"
+
+#: ../src/menu/menu-applet.cpp:62 ../src/tasklist/tasklist-applet.cpp:36
+#: ../src/workspace/workspace-applet.cpp:35
+msgid "About"
+msgstr "Ойролцоогоор"
+
+#: ../src/menu/menu-applet.cpp:62 ../src/tasklist/tasklist-applet.cpp:36
+#: ../src/workspace/workspace-applet.cpp:35
+msgid "About this applet"
+msgstr "Энэ апплетын тухай"
+
+#. TODO: 菜单中的应用分类后端目前没有做翻译，暂时放到前端调用_("xxx")进行翻译，正常应该是后端翻译后返回给前端，后续需要调整这里的翻译逻辑
+#: ../src/menu/menu-category-item.cpp:20
+msgid "Office"
+msgstr "Оффис"
+
+#: ../src/menu/menu-category-item.cpp:21
+msgid "Development"
+msgstr "Хөгжил"
+
+#: ../src/menu/menu-category-item.cpp:22
+msgid "Network"
+msgstr "Сүлжээ"
+
+#: ../src/menu/menu-category-item.cpp:23
+msgid "Graphics"
+msgstr "График"
+
+#: ../src/menu/menu-category-item.cpp:24
+msgid "Multimedia"
+msgstr "Мультим"
+
+#: ../src/menu/menu-category-item.cpp:25
+msgid "Utilities"
+msgstr "Хэрэглээний"
+
+#: ../src/menu/menu-category-item.cpp:26
+msgid "Settings"
+msgstr "Тохиргоо"
+
+#: ../src/menu/menu-category-item.cpp:27
+msgid "Others"
+msgstr "Бусад"
+
+#: ../src/menu/menu-new-apps-container.cpp:83
+#: ../src/menu/menu-new-apps-container.cpp:109
+msgid "Expand"
+msgstr "Өргөтгөх"
+
+#: ../src/menu/menu-new-apps-container.cpp:100
+msgid "Shrink"
+msgstr "Шринк"
+
+#: ../src/menu/menu-new-apps-container.cpp:121
+msgid "New Installed"
+msgstr "Шинэ"
+
+#: ../src/menu/menu-power-button.cpp:26
+msgid "Power options"
+msgstr "Эрчим хүчний сонголтууд"
+
+#: ../src/menu/menu-power-menu.cpp:29
+msgid "Lock screen"
+msgstr "Түгжээ"
+
+#: ../src/menu/menu-power-menu.cpp:39
+msgid "Switch user"
+msgstr "Хэрэглэгч"
+
+#: ../src/menu/menu-power-menu.cpp:47
+msgid "Logout"
+msgstr "Нэвтрэх"
+
+#: ../src/menu/menu-power-menu.cpp:56
+msgid "Suspend"
+msgstr "Түдгэлзүүлэх"
+
+#: ../src/menu/menu-power-menu.cpp:65
+msgid "Hibernate"
+msgstr "Хибер"
+
+#: ../src/menu/menu-power-menu.cpp:75
+msgid "Reboot"
+msgstr "Дахин"
+
+#: ../src/menu/menu-power-menu.cpp:84
+msgid "Shutdown"
+msgstr "Унтраа"
+
+#: ../src/menu/menu-power-menu.cpp:120
+msgid ""
+"The logined users reach the maximum limit at the same time, you cannot "
+"switch to the greeter interface, Please log off some logined users first."
+msgstr ""
+"Бүртгүүлсэн хэрэглэгчид хамгийн дээд хязгаарт хүрч, та мэндлэгч интерфейс "
+"рүү шилжих боломжгүй, эхлээд зарим модлог хэрэглэгчдийг бүртгүүлнэ үү."
+
+#: ../src/menu/menu-power-menu.cpp:123
+#: ../src/menu/recent-files-list-box.cpp:93
+#: ../src/menu/recent-files-list-box.cpp:113
+#: ../src/menu/recent-files-list-box.cpp:147
+msgid "System Warning"
+msgstr "Системийн"
+
+#: ../src/menu/recent-files-list-box.cpp:92
+#: ../src/menu/recent-files-list-box.cpp:112
+msgid "File does not exist"
+msgstr "Файл байхгүй"
+
+#: ../src/menu/recent-files-list-box.cpp:141
+msgid ""
+"All recent files information will be lost.\n"
+"Are you sure to clear the whole lists?"
+msgstr ""
+"Сүүлийн үеийн бүх файлын мэдээлэл алдагдах болно.\n"
+"Та бүх жагсаалтыг цэвэрлэхээ итгэлтэй байна уу?"
+
+#: ../src/menu/recent-files-list-box.cpp:219
+msgid "Open File"
+msgstr "Нээлттэй"
+
+#: ../src/menu/recent-files-list-box.cpp:224
+msgid "Open File Location"
+msgstr "Нээлттэй файлын байршил"
+
+#: ../src/menu/recent-files-list-box.cpp:229
+msgid "Remove from list"
+msgstr "Жагсаалтаас хасах"
+
+#: ../src/menu/recent-files-list-box.cpp:234
+msgid "Clear the whole list"
+msgstr "Жагсаалтыг бүхэлд нь цэвэрлэ"
+
+#: ../src/menu/recent-files-widget.cpp:29
+msgid "The Recently files list is empty!"
+msgstr "Саяхан файлуудын жагсаалт хоосон байна!"
+
+#: ../src/menu/recent-files-widget.cpp:44
+msgid "Search files"
+msgstr "Файл хайх"
+
+#: ../src/tasklist/tasklist-app-context-menu.cpp:67
+msgid "Close all windows"
+msgstr "Бүх цонхыг хаах"
+
+#: ../src/tasklist/tasklist-applet-widget.cpp:106
+msgid "Previous"
+msgstr "Өмнөх"
+
+#: ../src/tasklist/tasklist-applet-widget.cpp:107
+msgid "Next"
+msgstr "Дараачийн"
+
+#: ../src/tasklist/tasklist-applet.cpp:23
+msgid "Kiran Tasklist Applet"
+msgstr "Киран ажлын хуудасны товхимол"
+
+#: ../src/tasklist/tasklist-applet.cpp:25
+msgid "Task switcher designed for Kiran Desktop"
+msgstr "Киран ширээний зориулалттай ажлын слотчер"
+
+#. 最大化
+#: ../src/tasklist/tasklist-window-context-menu.cpp:48
+msgid "Maximize"
+msgstr "Хамгийн их"
+
+#. 最小化
+#: ../src/tasklist/tasklist-window-context-menu.cpp:65
+msgid "Minimize"
+msgstr "Миним"
+
+#. 恢复大小
+#: ../src/tasklist/tasklist-window-context-menu.cpp:75
+msgid "Restore"
+msgstr "Амрах"
+
+#. 移动
+#: ../src/tasklist/tasklist-window-context-menu.cpp:93
+msgid "Move"
+msgstr "Шилжүүлэх"
+
+#. 总是置顶
+#: ../src/tasklist/tasklist-window-context-menu.cpp:105
+msgid "Always on top"
+msgstr "Үргэлж дээд"
+
+#. 仅在当前工作区
+#: ../src/tasklist/tasklist-window-context-menu.cpp:121
+msgid "Only on this workspace"
+msgstr "Зөвхөн энэ ажлын талбар дээр"
+
+#. 总在可见工作区
+#: ../src/tasklist/tasklist-window-context-menu.cpp:132
+msgid "Always on visible workspace"
+msgstr "Үргэлж харагдахуйц ажлын талбар дээр"
+
+#. 移动到其它工作区
+#: ../src/tasklist/tasklist-window-context-menu.cpp:143
+msgid "Move to another workspace"
+msgstr "Өөр ажлын орон зайд шилжих"
+
+#. 关闭窗口选项
+#: ../src/tasklist/tasklist-window-context-menu.cpp:150
+msgid "Close Window"
+msgstr "Цонхыг хаах"
+
+#: ../src/workspace/workspace-applet.cpp:22
+msgid "Kiran Workspace switcher Applet"
+msgstr "Киран ажлын талбар сэлэгч Апплет"
+
+#: ../src/workspace/workspace-applet.cpp:24
+msgid "Workspace switcher designed for Kiran Desktop"
+msgstr "Киран ширээний зориулалттай ажлын зай"
+
+#: ../data/menu.ui.xml.h:1
+msgid "Favorite applications"
+msgstr "Дуртай програмууд"
+
+#: ../data/menu.ui.xml.h:2
+msgid "page0"
+msgstr "хуудас"
+
+#: ../data/menu.ui.xml.h:3
+msgid "page1"
+msgstr "хуудас"
+
+#: ../data/menu.ui.xml.h:4
+msgid "All applications"
+msgstr "Бүх програмууд"
+
+#: ../data/menu.ui.xml.h:5
+msgid "Recent files"
+msgstr "Сүүлийн үеийн файлууд"
+
+#: ../data/menu.ui.xml.h:6
+msgid "Hello, ---"
+msgstr "Сайн уу,"
+
+#: ../data/menu.ui.xml.h:7
+msgid "Click to change date and time settings"
+msgstr "Огноо, цаг хугацааны тохиргоог өөрчлөхийн тулд дарна уу"
+
+#: ../data/menu.ui.xml.h:8
+msgid "------"
+msgstr "-"
+
+#: ../data/workspace-applet-window.ui.xml.h:1
+msgid "Create new workspace"
+msgstr "Шинэ ажлын талбар үүсгэх"
+
+#~ msgid "The logined users reach the maximum limit at the same time."
+#~ msgstr "Бүртгүүлсэн хэрэглэгчид хамгийн дээд хязгаарт нэгэн зэрэг хүрдэг."
+
+#~ msgid "Open help"
+#~ msgstr "Нээлттэй тусламж"
+
+#~ msgid "Edit Profiles"
+#~ msgstr "Профайлыг засах"
+
+#~ msgid "Tray"
+#~ msgstr "Тайр"
+
+#~ msgid "About Tray"
+#~ msgstr "Хогийн тухай"
+
+#~ msgid "The Tray displays the system notify icon"
+#~ msgstr "Ачаа нь системийг мэдэгдэх дүрс"
+
+#~ msgid "Click to edit user information"
+#~ msgstr "Хэрэглэгчийн мэдээллийг засахын тулд дарна уу"
+
+#~ msgid "Favorites"
+#~ msgstr "Дуртай"
+
+#~ msgid "No favorite apps!"
+#~ msgstr "Дуртай апп байхгүй байна!"
+
+#~ msgid "Preferences"
+#~ msgstr "Бага"
+
+#~ msgid "_About"
+#~ msgstr "_Хадгал"
