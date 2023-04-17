@@ -1,0 +1,403 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020
+# This file is distributed under the same license as the kiran-menu package.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: 2.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-04-28 15:05+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../src/common/kiran-search-entry.cpp:31
+msgid "Search for applications"
+msgstr "Қолданбаларды іздеу"
+
+#: ../src/menu/menu-app-item.cpp:168
+#: ../src/tasklist/tasklist-app-context-menu.cpp:57
+msgid "Launch"
+msgstr "Іске қосу"
+
+#: ../src/menu/menu-app-item.cpp:172
+msgid "Add to desktop"
+msgstr "Жұмыс үстеліне қосу"
+
+#: ../src/menu/menu-app-item.cpp:178
+#: ../src/tasklist/tasklist-app-context-menu.cpp:79
+msgid "Add to favorites"
+msgstr "Таңдаулыларға қосу"
+
+#: ../src/menu/menu-app-item.cpp:187
+#: ../src/tasklist/tasklist-app-context-menu.cpp:86
+msgid "Remove from favorites"
+msgstr "Таңдаулылардан жою"
+
+#: ../src/menu/menu-app-item.cpp:198
+#: ../src/tasklist/tasklist-app-context-menu.cpp:110
+msgid "Unpin to taskbar"
+msgstr "Тапсырмалар тақтасын болдырмау"
+
+#: ../src/menu/menu-app-item.cpp:203
+#: ../src/tasklist/tasklist-app-context-menu.cpp:103
+msgid "Pin to taskbar"
+msgstr "Тапсырмалар тақтасына бекіту"
+
+#: ../src/menu/menu-applet-button.cpp:24
+msgid "Kiran Start Menu"
+msgstr "Киран бастау мәзірі"
+
+#. 扩展模式下的常用应用布局
+#: ../src/menu/menu-applet-window.cpp:238
+msgid "Frequently used"
+msgstr "Жиі қолданылатын"
+
+#: ../src/menu/menu-applet-window.cpp:241
+msgid "No frequent apps"
+msgstr "Жиі бағдарламалар жоқ"
+
+#. 扩展模式下的收藏夹应用布局
+#. 紧凑模式下的收藏夹应用布局
+#: ../src/menu/menu-applet-window.cpp:245
+#: ../src/menu/menu-applet-window.cpp:252
+msgid "Favorite Apps"
+msgstr "Таңдаулы бағдарламалар"
+
+#: ../src/menu/menu-applet-window.cpp:248
+#: ../src/menu/menu-applet-window.cpp:255
+msgid "No favorite apps found"
+msgstr "Таңдаулы бағдарламалар табылмады"
+
+#. 搜索结果布局
+#: ../src/menu/menu-applet-window.cpp:266
+msgid "Search Results"
+msgstr "Іздеу нәтижелері"
+
+#: ../src/menu/menu-applet-window.cpp:269
+msgid "No matched apps found!"
+msgstr "Сәйкес бағдарламалар табылмады!"
+
+#: ../src/menu/menu-applet-window.cpp:321
+msgid "Hello"
+msgstr "Сәлеметсіз бе"
+
+#: ../src/menu/menu-applet-window.cpp:654
+msgid "Run"
+msgstr "Іске қосу"
+
+#: ../src/menu/menu-applet-window.cpp:659
+msgid "Search Files"
+msgstr "Файлдарды іздеу"
+
+#: ../src/menu/menu-applet-window.cpp:664
+msgid "Home Directory"
+msgstr "Басты каталог"
+
+#: ../src/menu/menu-applet-window.cpp:669
+msgid "Control center"
+msgstr "Басқару орталығы"
+
+#: ../src/menu/menu-applet-window.cpp:674
+msgid "System monitor"
+msgstr "Жүйелік монитор"
+
+#: ../src/menu/menu-applet-window.cpp:835
+msgid "%a %b %e %Y"
+msgstr "% % b% e% Y"
+
+#: ../src/menu/menu-applet.cpp:50
+msgid "Kiran Menu Applet"
+msgstr "Киран мәзірі Аппл"
+
+#: ../src/menu/menu-applet.cpp:52
+msgid "Startup menu designed for Kiran Desktop"
+msgstr "Kiran Desktop үшін арналған стартап мәзірі"
+
+#: ../src/menu/menu-applet.cpp:62 ../src/tasklist/tasklist-applet.cpp:36
+#: ../src/workspace/workspace-applet.cpp:35
+msgid "About"
+msgstr "Шамамен"
+
+#: ../src/menu/menu-applet.cpp:62 ../src/tasklist/tasklist-applet.cpp:36
+#: ../src/workspace/workspace-applet.cpp:35
+msgid "About this applet"
+msgstr "Осы алма туралы"
+
+#. TODO: 菜单中的应用分类后端目前没有做翻译，暂时放到前端调用_("xxx")进行翻译，正常应该是后端翻译后返回给前端，后续需要调整这里的翻译逻辑
+#: ../src/menu/menu-category-item.cpp:20
+msgid "Office"
+msgstr "Office"
+
+#: ../src/menu/menu-category-item.cpp:21
+msgid "Development"
+msgstr "Даму"
+
+#: ../src/menu/menu-category-item.cpp:22
+msgid "Network"
+msgstr "Желі"
+
+#: ../src/menu/menu-category-item.cpp:23
+msgid "Graphics"
+msgstr "Графика"
+
+#: ../src/menu/menu-category-item.cpp:24
+msgid "Multimedia"
+msgstr "Мультимедиа"
+
+#: ../src/menu/menu-category-item.cpp:25
+msgid "Utilities"
+msgstr "Коммуналдық қызметтер"
+
+#: ../src/menu/menu-category-item.cpp:26
+msgid "Settings"
+msgstr "Параметрлер"
+
+#: ../src/menu/menu-category-item.cpp:27
+msgid "Others"
+msgstr "Басқалары"
+
+#: ../src/menu/menu-new-apps-container.cpp:83
+#: ../src/menu/menu-new-apps-container.cpp:109
+msgid "Expand"
+msgstr "Кеңейту"
+
+#: ../src/menu/menu-new-apps-container.cpp:100
+msgid "Shrink"
+msgstr "Кішірейту"
+
+#: ../src/menu/menu-new-apps-container.cpp:121
+msgid "New Installed"
+msgstr "Жаңа орнатылған"
+
+#: ../src/menu/menu-power-button.cpp:26
+msgid "Power options"
+msgstr "Қуат параметрлері"
+
+#: ../src/menu/menu-power-menu.cpp:29
+msgid "Lock screen"
+msgstr "Экранды құлыптау"
+
+#: ../src/menu/menu-power-menu.cpp:39
+msgid "Switch user"
+msgstr "Пайдаланушыны ауыстыру"
+
+#: ../src/menu/menu-power-menu.cpp:47
+msgid "Logout"
+msgstr "Logout"
+
+#: ../src/menu/menu-power-menu.cpp:56
+msgid "Suspend"
+msgstr "Тоқтата тұру"
+
+#: ../src/menu/menu-power-menu.cpp:65
+msgid "Hibernate"
+msgstr "Хибернате"
+
+#: ../src/menu/menu-power-menu.cpp:75
+msgid "Reboot"
+msgstr "Қайта жүктеу"
+
+#: ../src/menu/menu-power-menu.cpp:84
+msgid "Shutdown"
+msgstr "Өшіру"
+
+#: ../src/menu/menu-power-menu.cpp:120
+msgid ""
+"The logined users reach the maximum limit at the same time, you cannot "
+"switch to the greeter interface, Please log off some logined users first."
+msgstr ""
+"Кірген пайдаланушылар бір уақытта ең жоғары шегіне жетеді, сәлемдесу "
+"интерфейсіне ауыса алмайсыз, алдымен кейбір кірген пайдаланушыларды "
+"өшіруіңізді сұраймыз."
+
+#: ../src/menu/menu-power-menu.cpp:123
+#: ../src/menu/recent-files-list-box.cpp:93
+#: ../src/menu/recent-files-list-box.cpp:113
+#: ../src/menu/recent-files-list-box.cpp:147
+msgid "System Warning"
+msgstr "Жүйелік ескерту"
+
+#: ../src/menu/recent-files-list-box.cpp:92
+#: ../src/menu/recent-files-list-box.cpp:112
+msgid "File does not exist"
+msgstr "Файл жоқ"
+
+#: ../src/menu/recent-files-list-box.cpp:141
+msgid ""
+"All recent files information will be lost.\n"
+"Are you sure to clear the whole lists?"
+msgstr ""
+"Барлық соңғы файлдар туралы ақпарат жоғалады.\n"
+"Барлық тізімдерді міндетті түрде тазалайсыз ба?"
+
+#: ../src/menu/recent-files-list-box.cpp:219
+msgid "Open File"
+msgstr "Файлды ашу"
+
+#: ../src/menu/recent-files-list-box.cpp:224
+msgid "Open File Location"
+msgstr "Файл орнын ашу"
+
+#: ../src/menu/recent-files-list-box.cpp:229
+msgid "Remove from list"
+msgstr "Тізімнен алып тастау"
+
+#: ../src/menu/recent-files-list-box.cpp:234
+msgid "Clear the whole list"
+msgstr "Бүкіл тізімді тазалау"
+
+#: ../src/menu/recent-files-widget.cpp:29
+msgid "The Recently files list is empty!"
+msgstr "Соңғы файлдар тізімі бос!"
+
+#: ../src/menu/recent-files-widget.cpp:44
+msgid "Search files"
+msgstr "Файлдарды іздеу"
+
+#: ../src/tasklist/tasklist-app-context-menu.cpp:67
+msgid "Close all windows"
+msgstr "Барлық терезелерді жабу"
+
+#: ../src/tasklist/tasklist-applet-widget.cpp:106
+msgid "Previous"
+msgstr "Алдыңғы"
+
+#: ../src/tasklist/tasklist-applet-widget.cpp:107
+msgid "Next"
+msgstr "Келесі"
+
+#: ../src/tasklist/tasklist-applet.cpp:23
+msgid "Kiran Tasklist Applet"
+msgstr "Киран тапсырмалар тізімі Applet"
+
+#: ../src/tasklist/tasklist-applet.cpp:25
+msgid "Task switcher designed for Kiran Desktop"
+msgstr "Киран үстеліне арналған тапсырма ауыстырып қосқышы"
+
+#. 最大化
+#: ../src/tasklist/tasklist-window-context-menu.cpp:48
+msgid "Maximize"
+msgstr "Барынша көбейту"
+
+#. 最小化
+#: ../src/tasklist/tasklist-window-context-menu.cpp:65
+msgid "Minimize"
+msgstr "Кішірейту"
+
+#. 恢复大小
+#: ../src/tasklist/tasklist-window-context-menu.cpp:75
+msgid "Restore"
+msgstr "Қалпына келтіру"
+
+#. 移动
+#: ../src/tasklist/tasklist-window-context-menu.cpp:93
+msgid "Move"
+msgstr "Жылжыту"
+
+#. 总是置顶
+#: ../src/tasklist/tasklist-window-context-menu.cpp:105
+msgid "Always on top"
+msgstr "Әрқашан жоғарыдан"
+
+#. 仅在当前工作区
+#: ../src/tasklist/tasklist-window-context-menu.cpp:121
+msgid "Only on this workspace"
+msgstr "Тек осы жұмыс кеңістігінде"
+
+#. 总在可见工作区
+#: ../src/tasklist/tasklist-window-context-menu.cpp:132
+msgid "Always on visible workspace"
+msgstr "Әрқашан көрінетін жұмыс кеңістігінде"
+
+#. 移动到其它工作区
+#: ../src/tasklist/tasklist-window-context-menu.cpp:143
+msgid "Move to another workspace"
+msgstr "Басқа жұмыс кеңістігіне жылжу"
+
+#. 关闭窗口选项
+#: ../src/tasklist/tasklist-window-context-menu.cpp:150
+msgid "Close Window"
+msgstr "Терезені жабу"
+
+#: ../src/workspace/workspace-applet.cpp:22
+msgid "Kiran Workspace switcher Applet"
+msgstr "Kiran Workspace коммутаторы Applet"
+
+#: ../src/workspace/workspace-applet.cpp:24
+msgid "Workspace switcher designed for Kiran Desktop"
+msgstr "Киран жұмыс үстеліне арналған жұмыс кеңістігін ауыстырып қосқыш"
+
+#: ../data/menu.ui.xml.h:1
+msgid "Favorite applications"
+msgstr "Таңдаулы бағдарламалар"
+
+#: ../data/menu.ui.xml.h:2
+msgid "page0"
+msgstr "Бет0"
+
+#: ../data/menu.ui.xml.h:3
+msgid "page1"
+msgstr "1 бет"
+
+#: ../data/menu.ui.xml.h:4
+msgid "All applications"
+msgstr "Барлық қосымшалар"
+
+#: ../data/menu.ui.xml.h:5
+msgid "Recent files"
+msgstr "Соңғы файлдар"
+
+#: ../data/menu.ui.xml.h:6
+msgid "Hello, ---"
+msgstr "Сәлеметсіз бе---"
+
+#: ../data/menu.ui.xml.h:7
+msgid "Click to change date and time settings"
+msgstr "Күн және уақыт параметрлерін өзгерту үшін басыңыз"
+
+#: ../data/menu.ui.xml.h:8
+msgid "------"
+msgstr "------"
+
+#: ../data/workspace-applet-window.ui.xml.h:1
+msgid "Create new workspace"
+msgstr "Жаңа жұмыс кеңістігін жасау"
+
+#~ msgid "The logined users reach the maximum limit at the same time."
+#~ msgstr "Кірген пайдаланушылар бір мезгілде ең жоғары шегіне жетеді."
+
+#~ msgid "Open help"
+#~ msgstr "Анықтаманы ашу"
+
+#~ msgid "Edit Profiles"
+#~ msgstr "Профильдерді өңдеу"
+
+#~ msgid "Tray"
+#~ msgstr "Науа"
+
+#~ msgid "About Tray"
+#~ msgstr "Науа туралы"
+
+#~ msgid "The Tray displays the system notify icon"
+#~ msgstr "Науа жүйені хабарлау белгішесін көрсетеді"
+
+#~ msgid "Click to edit user information"
+#~ msgstr "Пайдаланушы ақпаратын өңдеу үшін басыңыз"
+
+#~ msgid "Favorites"
+#~ msgstr "Таңдаулылар"
+
+#~ msgid "No favorite apps!"
+#~ msgstr "Таңдаулы бағдарламалар жоқ!"
+
+#~ msgid "Preferences"
+#~ msgstr "Преференциялар"
+
+#~ msgid "_About"
+#~ msgstr "_About"
