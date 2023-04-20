@@ -32,12 +32,16 @@ public:
     void do_switch_user();
     void do_lock_screen();
 
+    sigc::signal<void> signal_dialog_hide();
+
     void add_power_button(Gtk::Grid *dialog_grid);
     void add_button(const char *button_icon_name,
                     const char *button_name,
                     Gtk::Grid *dialog_grid,
                     int space,
                     void (MenuPowerDialog::*power_func)());
+protected:
+    sigc::signal<void> signal_dialog_hide_;
 };
 
 #endif  // MENU_POWER_DIALOG_H
