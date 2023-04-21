@@ -64,6 +64,8 @@ MenuPowerDialog::MenuPowerDialog()
 
     add_power_button(dialog_grid);
 
+    this->signal_dialog_hide().connect(sigc::mem_fun(*this, &Gtk::Widget::hide));
+
     get_style_context()->add_class("power-menu-dialog");
 }
 
@@ -140,9 +142,16 @@ void MenuPowerDialog::add_button(const char *button_icon_name,
     dialog_grid->attach(*power_label, space, 1, 1, 1);
 }
 
+sigc::signal<void> MenuPowerDialog::signal_dialog_hide()
+{
+    return signal_dialog_hide_;
+}
+
 void MenuPowerDialog::do_reboot()
 {
     auto power = KiranPower::get_default();
+
+    signal_dialog_hide().emit();
 
     power->reboot();
 
@@ -153,6 +162,8 @@ void MenuPowerDialog::do_logout()
 {
     auto power = KiranPower::get_default();
 
+    signal_dialog_hide().emit();
+
     power->logout(LOGOUT_MODE_NOW);
 
     return;
@@ -161,6 +172,8 @@ void MenuPowerDialog::do_logout()
 void MenuPowerDialog::do_shutdown()
 {
     auto power = KiranPower::get_default();
+
+    signal_dialog_hide().emit();
 
     power->shutdown();
 
@@ -171,6 +184,8 @@ void MenuPowerDialog::do_hibernate()
 {
     auto power = KiranPower::get_default();
 
+    signal_dialog_hide().emit();
+
     power->hibernate();
 
     return;
@@ -178,6 +193,8 @@ void MenuPowerDialog::do_hibernate()
 void MenuPowerDialog::do_suspend()
 {
     auto power = KiranPower::get_default();
+
+    signal_dialog_hide().emit();
 
     power->suspend();
 
@@ -187,6 +204,8 @@ void MenuPowerDialog::do_suspend()
 void MenuPowerDialog::do_switch_user()
 {
     auto power = KiranPower::get_default();
+
+    signal_dialog_hide().emit();
 
     if (power->get_graphical_ntvs() >= power->get_ntvs_total())
     {
@@ -209,6 +228,8 @@ void MenuPowerDialog::do_switch_user()
 void MenuPowerDialog::do_lock_screen()
 {
     auto power = KiranPower::get_default();
+
+    signal_dialog_hide().emit();
 
     power->lock_screen();
 
