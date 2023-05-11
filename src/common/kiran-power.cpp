@@ -127,14 +127,12 @@ bool KiranPower::suspend()
 
     try
     {
-        Glib::Variant<bool> variant = Glib::Variant<bool>::create(false);
-        Glib::VariantContainerBase container = Glib::VariantContainerBase::create_tuple(variant);
-        this->login1_proxy_->call_sync("Suspend", container, DBUS_PROXY_TIMEOUT_MSEC);
+        this->session_manager_proxy_->call_sync("Suspend");
         return true;
     }
     catch (const Gio::DBus::Error &e)
     {
-        KLOG_WARNING("Failed to request suspend method: %s", e.what().c_str());
+        KLOG_WARNING("Failed to call suspend method: %s", e.what().c_str());
         return false;
     }
 }
@@ -145,14 +143,12 @@ bool KiranPower::hibernate()
 
     try
     {
-        Glib::Variant<bool> variant = Glib::Variant<bool>::create(false);
-        Glib::VariantContainerBase container = Glib::VariantContainerBase::create_tuple(variant);
-        this->login1_proxy_->call_sync("Hibernate", container, 300);
+        this->session_manager_proxy_->call_sync("Hibernate");
         return true;
     }
     catch (const Gio::DBus::Error &e)
     {
-        KLOG_WARNING("Failed to request hibernate method: %s", e.what().c_str());
+        KLOG_WARNING("Failed to call hibernate method: %s", e.what().c_str());
         return false;
     }
 }
@@ -163,12 +159,12 @@ bool KiranPower::shutdown()
 
     try
     {
-        this->session_manager_proxy_->call_sync("RequestShutdown");
+        this->session_manager_proxy_->call_sync("Shutdown");
         return true;
     }
     catch (const Gio::DBus::Error &e)
     {
-        KLOG_WARNING("Failed to request shutdown method: %s", e.what().c_str());
+        KLOG_WARNING("Failed to call shutdown method: %s", e.what().c_str());
         return false;
     }
 }
@@ -179,12 +175,12 @@ bool KiranPower::reboot()
 
     try
     {
-        this->session_manager_proxy_->call_sync("RequestReboot");
+        this->session_manager_proxy_->call_sync("Reboot");
         return true;
     }
     catch (const Gio::DBus::Error &e)
     {
-        KLOG_WARNING("Failed to request reboot method: %s", e.what().c_str());
+        KLOG_WARNING("Failed to call reboot method: %s", e.what().c_str());
         return false;
     }
 }
@@ -287,10 +283,8 @@ bool KiranPower::can_suspend()
 
     try
     {
-        auto result = this->login1_proxy_->call_sync("CanSuspend").get_child();
-        auto data = Glib::VariantBase::cast_dynamic<Glib::Variant<Glib::ustring>>(result).get();
-
-        return (data == "yes");
+        auto result = this->session_manager_proxy_->call_sync("CanSuspend").get_child();
+        return Glib::VariantBase::cast_dynamic<Glib::Variant<bool>>(result).get();
     }
     catch (const Gio::DBus::Error &e)
     {
@@ -306,10 +300,8 @@ bool KiranPower::can_hibernate()
 
     try
     {
-        auto result = this->login1_proxy_->call_sync("CanHibernate").get_child();
-        auto data = Glib::VariantBase::cast_dynamic<Glib::Variant<Glib::ustring>>(result).get();
-
-        return (data == "yes");
+        auto result = this->session_manager_proxy_->call_sync("CanHibernate").get_child();
+        return Glib::VariantBase::cast_dynamic<Glib::Variant<bool>>(result).get();
     }
     catch (const Gio::DBus::Error &e)
     {
@@ -325,10 +317,8 @@ bool KiranPower::can_shutdown()
 
     try
     {
-        auto result = this->login1_proxy_->call_sync("CanPowerOff").get_child();
-        auto data = Glib::VariantBase::cast_dynamic<Glib::Variant<Glib::ustring>>(result).get();
-
-        return (data == "yes");
+        auto result = this->session_manager_proxy_->call_sync("CanPowerOff").get_child();
+        return Glib::VariantBase::cast_dynamic<Glib::Variant<bool>>(result).get();
     }
     catch (const Gio::DBus::Error &e)
     {
@@ -344,10 +334,8 @@ bool KiranPower::can_reboot()
 
     try
     {
-        auto result = this->login1_proxy_->call_sync("CanReboot").get_child();
-        auto data = Glib::VariantBase::cast_dynamic<Glib::Variant<Glib::ustring>>(result).get();
-
-        return (data == "yes");
+        auto result = this->session_manager_proxy_->call_sync("CanReboot").get_child();
+        return Glib::VariantBase::cast_dynamic<Glib::Variant<bool>>(result).get();
     }
     catch (const Gio::DBus::Error &e)
     {
