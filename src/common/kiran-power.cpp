@@ -354,6 +354,7 @@ bool KiranPower::can_logout()
 bool KiranPower::can_switch_user()
 {
     RETURN_VAL_IF_TRUE(this->settings_->get_boolean(STARTMENU_LOCKDOWN_KEY_DISABLE_USER_SWITCHING), false);
+    RETURN_VAL_IF_FALSE(this->seat_manager_proxy_, false);
 
     try
     {
