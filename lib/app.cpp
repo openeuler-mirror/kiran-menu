@@ -73,7 +73,20 @@ void App::update_from_desktop_file(bool force)
     this->file_name_ = this->desktop_app_->get_filename();
 
     if (force)
-        this->desktop_app_ = Gio::DesktopAppInfo::create_from_filename(this->file_name_);
+    {
+        auto new_desktop_app = Gio::DesktopAppInfo::create_from_filename(this->file_name_);
+        /* 这里必须判空处理，否则可能会导致程序崩溃。例如，在升级firefo.rpm包的过程中，首先会安装新版本的rpm，然后卸载老版本的rpm包，
+           安装时会触发desktop文件变化信号然后执行到当前函数，但是当调用create_from_filename时，可能已经进入卸载老版本rpm包阶段，
+           导致file_name_找不到。例如firefox79版本有firefox-wayland.desktop，但是firefox112没有这个desktop，在升级时会触发崩溃。 */
+        if (new_desktop_app)
+        {
+            this->desktop_app_ = new_desktop_app;
+        }
+        else
+        {
+            KLOG_WARNING("The app %s is already deleted.", this->file_name_.c_str());
+        }
+    }
 
 #define GET_STRING(key) this->desktop_app_->get_string(key).raw()
 #define GET_LOCALE_STRING(key) this->desktop_app_->get_locale_string(key).raw()
@@ -193,9 +206,8 @@ WindowVec App::get_windows()
 WindowVec App::get_taskbar_windows()
 {
     auto windows = get_windows();
-    auto iter = std::remove_if(windows.begin(), windows.end(), [](std::shared_ptr<Kiran::Window> window) {
-        return window->should_skip_taskbar();
-    });
+    auto iter = std::remove_if(windows.begin(), windows.end(), [](std::shared_ptr<Kiran::Window> window)
+                               { return window->should_skip_taskbar(); });
     windows.erase(iter, windows.end());
     return windows;
 }
