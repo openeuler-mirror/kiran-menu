@@ -779,7 +779,7 @@ kiran_tray_notify_icon_added(KiranTrayManager *manager,
     priv = tray->priv;
 
     id = kiran_notify_icon_get_id(icon);
-    // type = kiran_tray_get_icon_type(priv->settings, id);
+    type = kiran_tray_get_icon_type(priv->settings, id);
 
     /* 系统已知的通知图标如声音，网络，电池等不需要记录 */
     if (kiran_notify_icon_get_category(icon) != KIRAN_NOTIFY_ICON_CATEGORY_HARDWARE)
@@ -792,9 +792,12 @@ kiran_tray_notify_icon_added(KiranTrayManager *manager,
 
     gtk_widget_set_name (GTK_WIDGET (icon), "iconWinButton");
 
-    gtk_box_pack_start(GTK_BOX(tray), GTK_WIDGET(icon), FALSE, TRUE, 0);
-    kiran_tray_icons_refresh(tray);
-    
+    if (type != ICON_NOT_SHOW)
+    {
+        gtk_box_pack_start(GTK_BOX(tray), GTK_WIDGET(icon), FALSE, TRUE, 0);
+        kiran_tray_icons_refresh(tray);
+    }
+
     /*
     if (type == ICON_SHOW_IN_PANEL)
     {
@@ -832,6 +835,12 @@ kiran_tray_notify_icon_removed(KiranTrayManager *manager,
     id = kiran_notify_icon_get_id(icon);
     type = kiran_tray_get_icon_type(priv->settings, id);
 
+    if(type != ICON_NOT_SHOW)
+    {
+        gtk_container_remove(GTK_CONTAINER(tray), GTK_WIDGET(icon));
+    }
+
+    /*
     if (type == ICON_SHOW_IN_PANEL)
     {
         gtk_container_remove(GTK_CONTAINER(tray), GTK_WIDGET(icon));
@@ -849,6 +858,7 @@ kiran_tray_notify_icon_removed(KiranTrayManager *manager,
 
         position_notify_icon_window(tray, FALSE);
     }
+    */
 
     priv->icons = g_slist_remove(priv->icons, icon);
 }
