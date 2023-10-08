@@ -1230,7 +1230,7 @@ kiran_sn_icon_button_press_event(GtkWidget *widget,
     }
     else if (event->button == 3)
     {
-        if (priv->gmenu != NULL)
+        if ((g_strcmp0(priv->menu, "/NO_DBUSMENU") != 0) && priv->gmenu != NULL)
         {
             gtk_menu_popup_at_widget(priv->gmenu, widget,
                                      GDK_GRAVITY_SOUTH_WEST,
