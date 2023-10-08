@@ -138,7 +138,6 @@ create_widget_from_menuitem(DbusmenuMenuitem *item)
                 GtkWidget *gmi = create_widget_from_menuitem(child->data);
 
                 gtk_menu_shell_append(GTK_MENU_SHELL(submenu), gmi);
-                gtk_widget_show(gmi);
 
                 g_signal_connect(gmi,
                                  "activate",
@@ -146,7 +145,6 @@ create_widget_from_menuitem(DbusmenuMenuitem *item)
                                  child->data);
             }
 
-            gtk_widget_show(submenu);
         }
 
         if (toggle_state != DBUSMENU_MENUITEM_TOGGLE_STATE_UNKNOWN &&
@@ -183,7 +181,6 @@ kiran_sn_icon_menu_create_widget_from_dbusmenuitem(KiranSnIconMenu *menu, Dbusme
     GtkWidget *gmi = create_widget_from_menuitem(item);
 
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), gmi);
-    gtk_widget_show(gmi);
 
     g_signal_connect(gmi,
                         "activate",
