@@ -31,6 +31,13 @@ MenuAppletButton::MenuAppletButton(MatePanelApplet *panel_applet) : KiranAppletB
     window.signal_map().connect(sigc::mem_fun(*this, &MenuAppletButton::reposition_applet_window));
 
     window.signal_unmap().connect(sigc::mem_fun(*this, &MenuAppletButton::on_window_hide_cb));
+
+    window.signal_unmap_event().connect(
+        [this](GdkEventAny *event) -> bool
+        {
+            set_active(false);
+            return false;
+        });
 }
 
 void MenuAppletButton::on_toggled()
