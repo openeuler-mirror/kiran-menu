@@ -174,7 +174,7 @@ void MenuAppItem::create_context_menu()
     KiranHelper::remove_all_for_container(context_menu);
 
     item = Gtk::make_managed<Gtk::MenuItem>(_("Launch"));
-    item->signal_activate().connect(sigc::hide_return(sigc::mem_fun(*this, &MenuAppItem::launch_app)));
+    item->signal_activate().connect(sigc::hide_return(sigc::mem_fun(*this, &MenuAppItem::on_clicked)));
     context_menu.append(*item);
 
     item = Gtk::make_managed<Gtk::MenuItem>(_("Add to desktop"));
