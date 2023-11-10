@@ -50,7 +50,7 @@ void on_applet_size_allocate(MatePanelApplet *applet UNUSED,
     }
 
     mate_panel_applet_set_size_hints(applet, hints, 2, 0);
-    delete hints;
+    delete[] hints;
 }
 
 TasklistAppletWidget::TasklistAppletWidget(MatePanelApplet *applet_) : button_box(Gtk::ORIENTATION_VERTICAL),
