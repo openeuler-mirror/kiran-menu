@@ -329,7 +329,8 @@ bool TasklistAppButton::on_button_press_event(GdkEventButton *button_event)
             context_menu = new TasklistAppContextMenu(app_);
             context_menu->attach_to_widget(*this);
             context_menu->signal_deactivate().connect(
-                [this]() -> void {
+                [this]() -> void
+                {
                     m_signal_context_menu_toggled.emit(false);
                 });
         }
@@ -569,7 +570,8 @@ void TasklistAppButton::on_windows_state_changed()
              * 闪烁5秒后停止，并绘制提示颜色
              */
             draw_attention_normal = Glib::signal_timeout().connect(
-                [this]() -> bool {
+                [this]() -> bool
+                {
                     draw_attention_flicker.disconnect();
                     if (needs_attention())
                         state = APP_BUTTON_STATE_ATTENTION;
@@ -596,7 +598,6 @@ void TasklistAppButton::on_windows_state_changed()
 
 void TasklistAppButton::draw_attentions(const Cairo::RefPtr<Cairo::Context> &cr)
 {
-    static bool hilight = true;
     Gdk::RGBA attention_color("red");
 
     /*
@@ -611,6 +612,7 @@ void TasklistAppButton::draw_attentions(const Cairo::RefPtr<Cairo::Context> &cr)
     cr->save();
     if (state == APP_BUTTON_STATE_FLICKER)
     {
+        static bool hilight = true;
         if (hilight)
         {
             Gdk::Cairo::set_source_rgba(cr, attention_color);

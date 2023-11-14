@@ -13,9 +13,9 @@
  */
 
 #include "menu-power-button.h"
-#include "menu-power-dialog.h"
 #include <glibmm/i18n.h>
 #include <gtkmm/menu.h>
+#include "menu-power-dialog.h"
 
 #include "kiran-helper.h"
 
@@ -40,7 +40,6 @@ MenuPowerButton::~MenuPowerButton()
 #else
     delete menu;
 #endif
-
 }
 
 void MenuPowerButton::on_clicked()
@@ -62,7 +61,6 @@ void MenuPowerButton::on_clicked()
 
     gdk_event_free(event);
 }
-
 
 sigc::signal<void> MenuPowerButton::signal_menu_hide()
 {

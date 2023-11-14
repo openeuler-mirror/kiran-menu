@@ -83,18 +83,19 @@ std::vector<std::string> MenuUsage::get_nfrequent_apps(gint top_n)
         }
     }
 
-    std::sort(apps.begin(), apps.end(), [this](const std::string &a, const std::string &b) -> bool {
-        Glib::Quark quarka(a);
-        Glib::Quark quarkb(b);
+    std::sort(apps.begin(), apps.end(), [this](const std::string &a, const std::string &b) -> bool
+              {
+                  Glib::Quark quarka(a);
+                  Glib::Quark quarkb(b);
 
-        auto itera = this->app_usages_.find(quarka.id());
-        auto iterb = this->app_usages_.find(quarkb.id());
+                  auto itera = this->app_usages_.find(quarka.id());
+                  auto iterb = this->app_usages_.find(quarkb.id());
 
-        double a_score = (itera == this->app_usages_.end()) ? 0 : itera->second.score;
-        double b_score = (iterb == this->app_usages_.end()) ? 0 : iterb->second.score;
+                  double a_score = (itera == this->app_usages_.end()) ? 0 : itera->second.score;
+                  double b_score = (iterb == this->app_usages_.end()) ? 0 : iterb->second.score;
 
-        return a_score > b_score;
-    });
+                  return a_score > b_score;
+              });
 
     if (top_n > 0 && top_n < (int)apps.size())
     {

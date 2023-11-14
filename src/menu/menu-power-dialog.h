@@ -40,6 +40,7 @@ public:
                     Gtk::Grid *dialog_grid,
                     int space,
                     void (MenuPowerDialog::*power_func)());
+
 protected:
     sigc::signal<void> signal_dialog_hide_;
 };

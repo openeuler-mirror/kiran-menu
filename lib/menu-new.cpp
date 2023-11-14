@@ -56,14 +56,15 @@ void MenuNew::flush(const AppVec &apps)
         app_ids.insert(quark.id());
     }
 
-    auto iter = std::remove_if(this->new_apps_.begin(), this->new_apps_.end(), [&app_ids, &new_app_change](int32_t elem) -> bool {
-        if (app_ids.find(elem) == app_ids.end())
-        {
-            new_app_change = true;
-            return true;
-        }
-        return false;
-    });
+    auto iter = std::remove_if(this->new_apps_.begin(), this->new_apps_.end(), [&app_ids, &new_app_change](int32_t elem) -> bool
+                               {
+                                   if (app_ids.find(elem) == app_ids.end())
+                                   {
+                                       new_app_change = true;
+                                       return true;
+                                   }
+                                   return false;
+                               });
 
     if (iter != this->new_apps_.end())
     {
@@ -101,9 +102,8 @@ void MenuNew::remove_from_new_apps(std::shared_ptr<App> app)
     Glib::Quark quark(desktop_id);
     int32_t remove_value = quark.id();
 
-    auto iter = std::remove_if(this->new_apps_.begin(), this->new_apps_.end(), [remove_value](int32_t elem) {
-        return elem == remove_value;
-    });
+    auto iter = std::remove_if(this->new_apps_.begin(), this->new_apps_.end(), [remove_value](int32_t elem)
+                               { return elem == remove_value; });
 
     if (iter != this->new_apps_.end())
     {
@@ -152,14 +152,15 @@ void MenuNew::app_uninstalled(AppVec apps)
         app_ids.insert(quark.id());
     }
 
-    auto iter = std::remove_if(this->new_apps_.begin(), this->new_apps_.end(), [&app_ids, &new_app_change](int32_t elem) -> bool {
-        if (app_ids.find(elem) != app_ids.end())
-        {
-            new_app_change = true;
-            return true;
-        }
-        return false;
-    });
+    auto iter = std::remove_if(this->new_apps_.begin(), this->new_apps_.end(), [&app_ids, &new_app_change](int32_t elem) -> bool
+                               {
+                                   if (app_ids.find(elem) != app_ids.end())
+                                   {
+                                       new_app_change = true;
+                                       return true;
+                                   }
+                                   return false;
+                               });
 
     if (iter != this->new_apps_.end())
     {

@@ -14,23 +14,21 @@
 
 #include "menu-applet-window.h"
 #include <fmt/format.h>
+#include <glibmm/i18n.h>
 #include <gtk/gtkx.h>
+#include <unistd.h>
+#include <iostream>
+#include "config.h"
 #include "global.h"
 #include "kiran-helper.h"
 #include "kiran-search-entry.h"
 #include "lib/base.h"
 #include "menu-app-launcher-button.h"
+#include "menu-apps-container.h"
 #include "menu-power-button.h"
 #include "menu-power-dialog.h"
-#include "window-manager.h"
-#include "global.h"
-#include <glibmm/i18n.h>
-#include <unistd.h>
-#include <iostream>
-#include "global.h"
-#include "menu-apps-container.h"
 #include "recent-files-widget.h"
-#include "config.h"
+#include "window-manager.h"
 
 #define NEW_APPS_MAX_SIZE 3
 
@@ -698,7 +696,6 @@ void MenuAppletWindow::add_sidebar_buttons()
                                           _("System monitor"),
                                           "mate-system-monitor");
     side_box->add(*launcher_btn);
-
 
 #ifdef POWER_DIALOG
     auto power_btn = create_power_dialog_button();

@@ -100,9 +100,8 @@ AppVec AppManager::get_running_apps()
             apps.push_back(iter->second.lock());
         }
     }
-    auto iter = std::unique(apps.begin(), apps.end(), [](decltype(*apps.begin()) a, decltype(*apps.begin()) b) {
-        return a.get() == b.get();
-    });
+    auto iter = std::unique(apps.begin(), apps.end(), [](decltype(*apps.begin()) a, decltype(*apps.begin()) b)
+                            { return a.get() == b.get(); });
     if (iter != apps.end())
     {
         apps.erase(iter, apps.end());
@@ -210,15 +209,16 @@ std::vector<std::string> AppManager::get_all_sorted_apps()
         apps.push_back(app->get_desktop_id());
     }
 
-    std::sort(apps.begin(), apps.end(), [this](std::string a, std::string b) -> bool {
-        auto appa = this->lookup_app(a);
-        auto appb = this->lookup_app(b);
+    std::sort(apps.begin(), apps.end(), [this](std::string a, std::string b) -> bool
+              {
+                  auto appa = this->lookup_app(a);
+                  auto appb = this->lookup_app(b);
 
-        auto &appa_name = appa->get_name();
-        auto &appb_name = appb->get_name();
+                  auto &appa_name = appa->get_name();
+                  auto &appb_name = appb->get_name();
 
-        return appa_name < appb_name;
-    });
+                  return appa_name < appb_name;
+              });
 
     return apps;
 }

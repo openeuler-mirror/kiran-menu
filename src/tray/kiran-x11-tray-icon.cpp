@@ -153,7 +153,6 @@ kiran_x11_tray_icon_draw(GtkWidget *widget,
             GdkWindow *gdk_window;
             cairo_t *cairo;
             cairo_surface_t *surface;
-
             gdk_window = gtk_widget_get_window(priv->socket);
             G_GNUC_BEGIN_IGNORE_DEPRECATIONS
             cairo = gdk_cairo_create(gdk_window);

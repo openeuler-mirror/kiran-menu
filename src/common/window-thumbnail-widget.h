@@ -28,7 +28,7 @@ public:
      * @brief 构造函数
      * @param window_ 要关联的窗口对象
      */
-    WindowThumbnailWidget(KiranWindowPointer &window_);
+    explicit WindowThumbnailWidget(KiranWindowPointer &window_);
 
     /**
      * @brief 获取关联的窗口对象
@@ -45,7 +45,7 @@ protected:
      * @param cr                  绘制相关的Cairo上下文
      * @return                    继续后续的绘制返回false,否则返回true
      */
-    virtual bool draw_icon_image(Gtk::Widget *icon_area, const Cairo::RefPtr<Cairo::Context> &cr);
+    virtual bool draw_icon_image(Gtk::Widget *icon_area, const Cairo::RefPtr<Cairo::Context> &cr) override;
 
     /**
      * @brief 回调函数，绘制窗口缩略图时调用
@@ -53,7 +53,7 @@ protected:
      * @param cr                  绘制相关的Cairo上下文
      * @return                    继续后续的绘制返回false,否则返回true
      */
-    virtual bool draw_thumbnail_image(Gtk::Widget *snapshot_area, const Cairo::RefPtr<Cairo::Context> &cr);
+    virtual bool draw_thumbnail_image(Gtk::Widget *snapshot_area, const Cairo::RefPtr<Cairo::Context> &cr) override;
 
     /**
      * @brief 根据窗口标题，更新标题标签内容

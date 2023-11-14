@@ -58,7 +58,6 @@ TasklistWindowPreviewer::~TasklistWindowPreviewer()
 bool TasklistWindowPreviewer::draw_thumbnail_image(Gtk::Widget *snapshot_area, const Cairo::RefPtr<Cairo::Context> &cr)
 {
     Gtk::Allocation allocation;
-    double scale_x, scale_y, scale;
     auto window = get_window_();
     int scale_factor = get_scale_factor();
 
@@ -68,6 +67,7 @@ bool TasklistWindowPreviewer::draw_thumbnail_image(Gtk::Widget *snapshot_area, c
     allocation = snapshot_area->get_allocation();
     try
     {
+        double scale_x, scale_y, scale;
         int width, height;
         cairo_surface_t *thumbnail = window->get_thumbnail(width, height);
         if (thumbnail == nullptr)
@@ -192,7 +192,8 @@ bool TasklistWindowPreviewer::on_button_press_event(GdkEventButton *button_event
             context_menu = new TasklistWindowContextMenu(window);
             context_menu->attach_to_widget(*this);
             context_menu->signal_deactivate().connect(
-                [this]() -> void {
+                [this]() -> void
+                {
                     signal_context_menu_toggled().emit(false);
                 });
         }

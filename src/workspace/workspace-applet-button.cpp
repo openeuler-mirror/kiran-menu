@@ -19,7 +19,8 @@ WorkspaceAppletButton::WorkspaceAppletButton(MatePanelApplet *applet_) : KiranAp
     set_icon_from_resource("/kiran-workspace/icon/button");
 
     applet_window.signal_unmap_event().connect(
-        [this](GdkEventAny *event) -> bool {
+        [this](GdkEventAny *event) -> bool
+        {
             set_active(false);
             return false;
         });

@@ -36,7 +36,7 @@ typedef enum
 class TasklistButtonsContainer : public Gtk::Layout
 {
 public:
-    TasklistButtonsContainer(MatePanelApplet *applet_, int child_spacing = 15);
+    explicit TasklistButtonsContainer(MatePanelApplet *applet_, int child_spacing = 15);
     ~TasklistButtonsContainer() override;
 
     Glib::PropertyProxy<Gtk::Orientation> property_orient();

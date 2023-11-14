@@ -542,7 +542,7 @@ update(KiranSnIcon *icon)
         }
 
         gtk_image_set_from_surface(GTK_IMAGE(priv->image), surface);
-        if(surface)
+        if (surface)
         {
             cairo_surface_destroy(surface);
         }

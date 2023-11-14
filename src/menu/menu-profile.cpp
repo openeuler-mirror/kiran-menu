@@ -20,9 +20,8 @@ const Glib::ustring display_mode_key = "display-mode";
 const Glib::ustring window_opacity_key = "background-opacity";
 const Glib::ustring profile_settings_path = "com.kylinsec.kiran.startmenu.profile";
 
-MenuProfile::MenuProfile()
+MenuProfile::MenuProfile() : settings(Gio::Settings::create(profile_settings_path))
 {
-    settings = Gio::Settings::create(profile_settings_path);
     settings->signal_changed().connect(
         sigc::mem_fun(*this, &MenuProfile::on_settings_changed));
 }

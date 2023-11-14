@@ -127,7 +127,6 @@ gsettings_changed_panel_icon_ids(GSettings *settings,
                                  KiranTray *tray)
 {
     KiranTrayPrivate *priv = tray->priv;
-    KiranNotifyIcon *icon;
     gchar **panel_icon_ids;
     gboolean find = TRUE;
     gint i;
@@ -141,6 +140,7 @@ gsettings_changed_panel_icon_ids(GSettings *settings,
     {
         for (i = 0; panel_icon_ids && panel_icon_ids[i]; i++)
         {
+            KiranNotifyIcon *icon;
             icon = kiran_tray_find_icon_by_id(tray, panel_icon_ids[i]);
 
             if (icon)
@@ -347,7 +347,6 @@ get_color_json_object(GdkRGBA *color)
 static gchar *
 get_widget_style(GtkWidget *widget)
 {
-    GtkAllocation allocation;
     JsonGenerator *generator;
     JsonNode *root;
     JsonObject *object;
@@ -820,7 +819,6 @@ static xmlNodePtr
 create_app_node(KiranNotifyIcon *icon)
 {
     xmlNodePtr node;
-    KiranNotifyIconCategory icon_cate;
     const char *id;
     const char *icon_name;
     const char *name;
@@ -1189,7 +1187,7 @@ kiran_tray_notify_icon_removed(KiranTrayManager *manager,
     id = kiran_notify_icon_get_id(icon);
     type = kiran_tray_get_icon_type(priv->settings, id);
 
-    if(type != ICON_NOT_SHOW)
+    if (type != ICON_NOT_SHOW)
     {
         gtk_container_remove(GTK_CONTAINER(tray), GTK_WIDGET(icon));
     }

@@ -27,9 +27,8 @@ MenuPowerMenu::MenuPowerMenu()
     if (power->can_lock_screen())
     {
         auto lock_item = Gtk::make_managed<Gtk::MenuItem>(_("Lock screen"));
-        lock_item->signal_activate().connect([power]() {
-            power->lock_screen();
-        });
+        lock_item->signal_activate().connect([power]()
+                                             { power->lock_screen(); });
 
         append(*lock_item);
     }
@@ -45,27 +44,24 @@ MenuPowerMenu::MenuPowerMenu()
     if (power->can_logout())
     {
         this->logout_item_ = Gtk::make_managed<Gtk::MenuItem>(_("Logout"));
-        this->logout_item_->signal_activate().connect([power]() {
-            power->logout(LOGOUT_MODE_NOW);
-        });
+        this->logout_item_->signal_activate().connect([power]()
+                                                      { power->logout(LOGOUT_MODE_NOW); });
         append(*this->logout_item_);
     }
 
     if (power->can_suspend())
     {
         this->suspend_item_ = Gtk::make_managed<Gtk::MenuItem>(_("Suspend"));
-        this->suspend_item_->signal_activate().connect([power]() {
-            power->suspend();
-        });
+        this->suspend_item_->signal_activate().connect([power]()
+                                                       { power->suspend(); });
         append(*this->suspend_item_);
     }
 
     if (power->can_hibernate())
     {
         this->hibernate_item_ = Gtk::make_managed<Gtk::MenuItem>(_("Hibernate"));
-        this->hibernate_item_->signal_activate().connect([power]() {
-            power->hibernate();
-        });
+        this->hibernate_item_->signal_activate().connect([power]()
+                                                         { power->hibernate(); });
 
         append(*this->hibernate_item_);
     }
@@ -73,18 +69,16 @@ MenuPowerMenu::MenuPowerMenu()
     if (power->can_reboot())
     {
         this->reboot_item = Gtk::make_managed<Gtk::MenuItem>(_("Reboot"));
-        this->reboot_item->signal_activate().connect([power]() {
-            power->reboot();
-        });
+        this->reboot_item->signal_activate().connect([power]()
+                                                     { power->reboot(); });
         append(*this->reboot_item);
     }
 
     if (power->can_shutdown())
     {
         this->shutdown_item_ = Gtk::make_managed<Gtk::MenuItem>(_("Shutdown"));
-        this->shutdown_item_->signal_activate().connect([power]() {
-            power->shutdown();
-        });
+        this->shutdown_item_->signal_activate().connect([power]()
+                                                        { power->shutdown(); });
         append(*this->shutdown_item_);
     }
 

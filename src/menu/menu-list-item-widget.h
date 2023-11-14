@@ -20,8 +20,8 @@
 class MenuListItemWidget : public Gtk::Button
 {
 public:
-    MenuListItemWidget(int icon_size,
-                       Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL);
+    explicit MenuListItemWidget(int icon_size,
+                                Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL);
 
     MenuListItemWidget(const Glib::RefPtr<Gio::Icon> &gicon,
                        const std::string &text,

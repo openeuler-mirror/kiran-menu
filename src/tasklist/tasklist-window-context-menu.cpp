@@ -47,7 +47,8 @@ void TasklistWindowContextMenu::refresh()
     /* 最大化 */
     item = Gtk::make_managed<Gtk::MenuItem>(_("Maximize"));
     item->signal_activate().connect(
-        [this]() -> void {
+        [this]() -> void
+        {
             auto window = win.lock();
             if (window)
             {
@@ -64,7 +65,8 @@ void TasklistWindowContextMenu::refresh()
     /* 最小化 */
     item = Gtk::make_managed<Gtk::MenuItem>(_("Minimize"));
     item->signal_activate().connect(
-        [this]() -> void {
+        [this]() -> void
+        {
             auto window = win.lock();
             if (window)
                 window->minimize();
@@ -74,7 +76,8 @@ void TasklistWindowContextMenu::refresh()
     /* 恢复大小 */
     item = Gtk::make_managed<Gtk::MenuItem>(_("Restore"));
     item->signal_activate().connect(
-        [this]() -> void {
+        [this]() -> void
+        {
             auto window = win.lock();
             if (window)
             {
@@ -92,7 +95,8 @@ void TasklistWindowContextMenu::refresh()
     /* 移动 */
     item = Gtk::make_managed<Gtk::MenuItem>(_("Move"));
     item->signal_activate().connect(
-        [this]() -> void {
+        [this]() -> void
+        {
             auto window = win.lock();
             if (window)
             {
@@ -104,7 +108,8 @@ void TasklistWindowContextMenu::refresh()
     /* 总是置顶 */
     check_item = Gtk::make_managed<Gtk::CheckMenuItem>(_("Always on top"));
     check_item->signal_activate().connect(
-        [this, check_item]() -> void {
+        [this, check_item]() -> void
+        {
             auto window = win.lock();
             if (window)
             {
@@ -120,7 +125,8 @@ void TasklistWindowContextMenu::refresh()
     /* 仅在当前工作区 */
     radio_item = Gtk::make_managed<Gtk::RadioMenuItem>(group, _("Only on this workspace"));
     radio_item->signal_toggled().connect(
-        [this, radio_item]() -> void {
+        [this, radio_item]() -> void
+        {
             auto window = win.lock();
             if (window && radio_item->get_active())
                 window->set_on_visible_workspace(false);
@@ -131,7 +137,8 @@ void TasklistWindowContextMenu::refresh()
     /* 总在可见工作区 */
     radio_item = Gtk::make_managed<Gtk::RadioMenuItem>(group, _("Always on visible workspace"));
     radio_item->signal_toggled().connect(
-        [this, radio_item]() -> void {
+        [this, radio_item]() -> void
+        {
             auto window = win.lock();
             if (window && radio_item->get_active())
                 window->set_on_visible_workspace(true);
@@ -149,7 +156,8 @@ void TasklistWindowContextMenu::refresh()
     /* 关闭窗口选项 */
     item = Gtk::make_managed<Gtk::MenuItem>(_("Close Window"));
     item->signal_activate().connect(
-        [this]() -> void {
+        [this]() -> void
+        {
             auto window = win.lock();
             if (!window)
                 return;
@@ -166,7 +174,6 @@ void TasklistWindowContextMenu::refresh()
  */
 Gtk::Menu *TasklistWindowContextMenu::create_workspace_submenu(void)
 {
-    Gtk::MenuItem *item;
     auto window = win.lock();
 
     if (!window)
@@ -175,6 +182,7 @@ Gtk::Menu *TasklistWindowContextMenu::create_workspace_submenu(void)
     auto menu = Gtk::make_managed<KiranOpacityMenu>();
     for (auto workspace : Kiran::WorkspaceManager::get_instance()->get_workspaces())
     {
+        Gtk::MenuItem *item = nullptr;
         item = Gtk::make_managed<Gtk::MenuItem>(workspace->get_name());
         item->signal_activate().connect(
             sigc::bind<int>(

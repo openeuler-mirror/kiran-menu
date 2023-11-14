@@ -27,7 +27,7 @@
 class TasklistWindowPreviewer : public WindowThumbnailWidget
 {
 public:
-    TasklistWindowPreviewer(std::shared_ptr<Kiran::Window> &window);
+    explicit TasklistWindowPreviewer(std::shared_ptr<Kiran::Window> &window);
     virtual ~TasklistWindowPreviewer() override;
 
     /**

@@ -168,7 +168,8 @@ void WorkspaceWindowsOverview::reload_thumbnails()
      */
     windows = workspace.lock()->get_windows();
     auto iter = std::remove_if(windows.begin(), windows.end(),
-                               [](KiranWindowPointer &w) -> bool {
+                               [](KiranWindowPointer &w) -> bool
+                               {
                                    return w->is_skip_pager();
                                });
 
@@ -207,15 +208,16 @@ void WorkspaceWindowsOverview::reload_thumbnails()
         int max_height = 0;
 
         //把窗口按照先宽度，后高度的方式进行排序，值大的在前，只是为了好看^^)
-        std::sort(row.begin(), row.end(), [&windows](uint32_t i, uint32_t j) {
-            auto w1 = windows.at(i);
-            auto w2 = windows.at(j);
+        std::sort(row.begin(), row.end(), [&windows](uint32_t i, uint32_t j)
+                  {
+                      auto w1 = windows.at(i);
+                      auto w2 = windows.at(j);
 
-            if (WINDOW_WIDTH(w1) != WINDOW_WIDTH(w2))
-                return WINDOW_WIDTH(w1) >= WINDOW_WIDTH(w2);
-            else
-                return WINDOW_HEIGHT(w1) >= WINDOW_HEIGHT(w2);
-        });
+                      if (WINDOW_WIDTH(w1) != WINDOW_WIDTH(w2))
+                          return WINDOW_WIDTH(w1) >= WINDOW_WIDTH(w2);
+                      else
+                          return WINDOW_HEIGHT(w1) >= WINDOW_HEIGHT(w2);
+                  });
 
         /*
          * 提取该行窗口的最大高度

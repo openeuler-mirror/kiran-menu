@@ -36,7 +36,8 @@ TasklistAppPreviewer::TasklistAppPreviewer() : Gtk::Window(Gtk::WINDOW_POPUP),
 
     box.set_spacing(4);
     box.signal_remove().connect(
-        [this](Gtk::Widget *widget) -> void {
+        [this](Gtk::Widget *widget) -> void
+        {
             if (box.get_children().size() == 0)
                 hide();
         });
@@ -304,7 +305,8 @@ void TasklistAppPreviewer::init_ui()
 {
     box.set_spacing(4);
     box.signal_remove().connect(
-        [this](Gtk::Widget *child UNUSED) -> void {
+        [this](Gtk::Widget *child UNUSED) -> void
+        {
             if (!box.get_children().size())
             {
                 //如果当前app没有已打开的窗口，隐藏预览窗口

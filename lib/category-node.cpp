@@ -66,7 +66,6 @@ void CategoryNode::append_child(std::shared_ptr<CategoryNode> sub_node)
 
 bool CategoryNode::has_child_of_type(CategoryNodeType type)
 {
-    auto iter = this->children_;
     for (auto iter = this->children_; iter; iter = iter->next_)
     {
         if (iter->type_ == type)

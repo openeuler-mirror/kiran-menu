@@ -90,7 +90,6 @@ std::list<std::string> convert_chinese_characters_to_pinyin(const std::string &c
 {
     std::list<std::string> pinyin_list;
     wchar_t *wcs;
-    int unicode;
 
     wcs = convert_chars_to_wchars(contents);
 
@@ -106,13 +105,13 @@ std::list<std::string> convert_chinese_characters_to_pinyin(const std::string &c
         if (unicode >= CHINESE_UNICODE_START &&
             unicode <= CHINESE_UNICODE_END)
         {
-            char pinyin[CHINESE_UNICODE_MAX_LENGTH + 1] = {'\0'};
             int offset = 0;
 
             offset = (unicode - CHINESE_UNICODE_START) * CHINESE_UNICODE_MAX_LENGTH;
 
             if (offset + CHINESE_UNICODE_MAX_LENGTH <= sizeof(chinese_basic_dict))
             {
+                char pinyin[CHINESE_UNICODE_MAX_LENGTH + 1] = {'\0'};
                 memcpy(pinyin, chinese_basic_dict + offset, CHINESE_UNICODE_MAX_LENGTH);
                 clear_space(pinyin);
                 pinyin_list.push_back(pinyin);

@@ -89,7 +89,7 @@ create_widget_from_menuitem(DbusmenuMenuitem *item)
     const gchar *label = dbusmenu_menuitem_property_get(item, DBUSMENU_MENUITEM_PROP_LABEL);
     const gchar *type = dbusmenu_menuitem_property_get(item, DBUSMENU_MENUITEM_PROP_TYPE);
     const gchar *toggle_type = dbusmenu_menuitem_property_get(item, DBUSMENU_MENUITEM_PROP_TOGGLE_TYPE);
-    const gchar *icon_name = dbusmenu_menuitem_property_get(item, DBUSMENU_MENUITEM_PROP_ICON_NAME);
+    dbusmenu_menuitem_property_get(item, DBUSMENU_MENUITEM_PROP_ICON_NAME);
     const gchar *children_display = dbusmenu_menuitem_property_get(item, DBUSMENU_MENUITEM_PROP_CHILD_DISPLAY);
     gint toggle_state = dbusmenu_menuitem_property_get_int(item, DBUSMENU_MENUITEM_PROP_TOGGLE_STATE);
     gboolean enabled = dbusmenu_menuitem_property_get_bool(item, DBUSMENU_MENUITEM_PROP_ENABLED);
@@ -144,7 +144,6 @@ create_widget_from_menuitem(DbusmenuMenuitem *item)
                                  G_CALLBACK(activate_cb),
                                  child->data);
             }
-
         }
 
         if (toggle_state != DBUSMENU_MENUITEM_TOGGLE_STATE_UNKNOWN &&
@@ -183,9 +182,9 @@ kiran_sn_icon_menu_create_widget_from_dbusmenuitem(KiranSnIconMenu *menu, Dbusme
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), gmi);
 
     g_signal_connect(gmi,
-                        "activate",
-                        G_CALLBACK(activate_cb),
-                        item);
+                     "activate",
+                     G_CALLBACK(activate_cb),
+                     item);
 }
 
 static void
@@ -221,7 +220,7 @@ property_changed_cb(DbusmenuMenuitem *item, gchar *property, GVariant *value, gp
     GList *dbus_menuitem_children = dbusmenu_menuitem_get_children(root);
     for (child = dbus_menuitem_children; child; child = child->next)
     {
-        kiran_sn_icon_menu_create_widget_from_dbusmenuitem(menu,child->data);
+        kiran_sn_icon_menu_create_widget_from_dbusmenuitem(menu, child->data);
     }
 }
 
@@ -271,7 +270,7 @@ layout_updated_cb(DbusmenuClient *client,
     GList *dbus_menuitem_children = dbusmenu_menuitem_get_children(root);
     for (child = dbus_menuitem_children; child; child = child->next)
     {
-        kiran_sn_icon_menu_create_widget_from_dbusmenuitem(menu,child->data);
+        kiran_sn_icon_menu_create_widget_from_dbusmenuitem(menu, child->data);
 
         // NOTE:只修改一个属性，可能会触发多个 PROPERTY_CHANGE 信号
         const gchar *children_display = dbusmenu_menuitem_property_get(child->data, DBUSMENU_MENUITEM_PROP_CHILD_DISPLAY);
@@ -397,9 +396,7 @@ kiran_sn_icon_menu_class_init(KiranSnIconMenuClass *klass)
 static void
 kiran_sn_icon_menu_init(KiranSnIconMenu *self)
 {
-    KiranSnIconMenuPrivate *priv;
-
-    priv = self->priv = kiran_sn_icon_menu_get_instance_private(self);
+    self->priv = kiran_sn_icon_menu_get_instance_private(self);
 }
 
 GtkMenu *
