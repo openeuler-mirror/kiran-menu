@@ -52,6 +52,7 @@ MenuAppletWindow::MenuAppletWindow(Gtk::WindowType window_type) : Glib::ObjectBa
     set_decorated(false);
     set_accept_focus(true);
     set_focus_on_map(true);
+    set_keep_above(true);
 
     init_ui();
 
