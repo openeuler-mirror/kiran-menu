@@ -21,7 +21,7 @@
 class TasklistWindowContextMenu : public KiranOpacityMenu
 {
 public:
-    TasklistWindowContextMenu(const std::shared_ptr<Kiran::Window> &win_);
+    explicit TasklistWindowContextMenu(const std::shared_ptr<Kiran::Window> &win_);
 
     sigc::signal<void> signal_window_move_required();
 

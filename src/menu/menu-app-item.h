@@ -22,7 +22,7 @@
 class MenuAppItem : public MenuListItemWidget
 {
 public:
-    MenuAppItem(const std::shared_ptr<Kiran::App> &_app, int icon_size = 24, Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL);
+    explicit MenuAppItem(const std::shared_ptr<Kiran::App> &_app, int icon_size = 24, Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL);
     virtual ~MenuAppItem();
     sigc::signal<void> signal_launched();
     virtual void set_orientation(Gtk::Orientation orient) override;

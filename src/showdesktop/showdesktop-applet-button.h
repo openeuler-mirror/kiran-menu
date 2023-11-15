@@ -21,7 +21,7 @@
 class ShowDesktopAppletButton : public Gtk::ToggleButton
 {
 public:
-    ShowDesktopAppletButton(MatePanelApplet *applet_);
+    explicit ShowDesktopAppletButton(MatePanelApplet *applet_);
 
 protected:
     virtual void on_map() override;

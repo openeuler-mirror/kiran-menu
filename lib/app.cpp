@@ -287,7 +287,6 @@ bool App::launch_uris(const Glib::ListHandle<std::string> &uris)
 
     try
     {
-        std::vector<Glib::RefPtr<Gio::File> > files;
         res = this->desktop_app_->launch_uris(uris, app_context);
     }
     catch (const Glib::Error &e)

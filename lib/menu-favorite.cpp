@@ -50,16 +50,17 @@ void MenuFavorite::flush(const AppVec &apps)
 
     std::vector<std::string> delete_apps;
 
-    auto iter = std::remove_if(this->favorite_apps_.begin(), this->favorite_apps_.end(), [this, &delete_apps, &app_set](int32_t elem) -> bool {
-        if (app_set.find(elem) == app_set.end())
-        {
-            Glib::QueryQuark query_quark((GQuark)elem);
-            Glib::ustring desktop_id = query_quark;
-            delete_apps.push_back(desktop_id.raw());
-            return true;
-        }
-        return false;
-    });
+    auto iter = std::remove_if(this->favorite_apps_.begin(), this->favorite_apps_.end(), [this, &delete_apps, &app_set](int32_t elem) -> bool
+                               {
+                                   if (app_set.find(elem) == app_set.end())
+                                   {
+                                       Glib::QueryQuark query_quark((GQuark)elem);
+                                       Glib::ustring desktop_id = query_quark;
+                                       delete_apps.push_back(desktop_id.raw());
+                                       return true;
+                                   }
+                                   return false;
+                               });
 
     if (iter != this->favorite_apps_.end())
     {

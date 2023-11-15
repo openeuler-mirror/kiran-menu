@@ -31,7 +31,7 @@ public:
      * @brief 构造函数
      * @param workspace_ 需要关联的工作区对象
      */
-    WorkspaceThumbnail(KiranWorkspacePointer &workspace_);
+    explicit WorkspaceThumbnail(KiranWorkspacePointer &workspace_);
     ~WorkspaceThumbnail() override;
 
     /**

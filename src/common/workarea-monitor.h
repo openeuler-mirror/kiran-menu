@@ -21,7 +21,7 @@
 class WorkareaMonitor : public sigc::trackable
 {
 public:
-    WorkareaMonitor(Glib::RefPtr<Gdk::Screen> &screen);
+    explicit WorkareaMonitor(Glib::RefPtr<Gdk::Screen> &screen);
     ~WorkareaMonitor();
     sigc::signal<void> signal_size_changed();
 

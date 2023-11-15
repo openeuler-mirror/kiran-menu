@@ -28,10 +28,10 @@ WorkspaceThumbnail::WorkspaceThumbnail(KiranWorkspacePointer &workspace_) : work
                                                                             bg_surface(nullptr),
                                                                             border_width(4),
                                                                             drop_check(false),
-                                                                            draw_windows(false)
+                                                                            draw_windows(false),
+                                                                            bg_settings(Gio::Settings::create(BACKGROUND_SETTINGS_PATH))
 {
     /*背景图片设置变化时重绘背景*/
-    bg_settings = Gio::Settings::create(BACKGROUND_SETTINGS_PATH);
     bg_settings->signal_changed().connect(
         sigc::hide(sigc::mem_fun(*this, &WorkspaceThumbnail::on_background_changed)));
 
@@ -149,7 +149,6 @@ bool WorkspaceThumbnail::draw_thumbnail_image(Gtk::Widget *thumbnail_area_, cons
     auto workspace_ = workspace.lock();
     Display *xdisplay = gdk_x11_get_default_xdisplay();
     Gtk::Allocation allocation;
-    std::vector<Glib::RefPtr<Gdk::Window>> windows_stack;
     Cairo::ImageSurface *surface = nullptr;
     auto screen = get_screen();
     double surface_offset_x, surface_offset_y;

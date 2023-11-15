@@ -209,7 +209,8 @@ std::vector<std::vector<int16_t>> arrange_data(std::vector<int> data, uint32_t r
 
     /* 把数据按照从大到小排序 */
     std::sort(new_data.begin(), new_data.end(),
-              [](const std::pair<int16_t, int> &a, const std::pair<int16_t, int> &b) -> bool {
+              [](const std::pair<int16_t, int> &a, const std::pair<int16_t, int> &b) -> bool
+              {
                   return a.second > b.second;
               });
 

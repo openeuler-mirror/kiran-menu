@@ -21,7 +21,7 @@
 class KiranAppletButton : public Gtk::ToggleButton
 {
 public:
-    KiranAppletButton(MatePanelApplet *applet_);
+    explicit KiranAppletButton(MatePanelApplet *applet_);
     ~KiranAppletButton() override;
 
     MatePanelApplet *get_applet();

@@ -21,7 +21,7 @@
 class TasklistAppletWidget : public Gtk::Box
 {
 public:
-    TasklistAppletWidget(MatePanelApplet *applet);
+    explicit TasklistAppletWidget(MatePanelApplet *applet);
 
     /**
      * @brief on_app_buttons_page_changed 回调函数，应用按钮当前分页发生变化时调用

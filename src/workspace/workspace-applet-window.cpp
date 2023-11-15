@@ -147,7 +147,8 @@ void WorkspaceAppletWindow::init_ui()
 
     /* 点击“创建工作区"按钮 */
     add_button->signal_clicked().connect(
-        []() -> void {
+        []() -> void
+        {
             auto workspace_manager = Kiran::WorkspaceManager::get_instance();
             auto workspace_count = workspace_manager->get_workspaces().size();
             workspace_manager->change_workspace_count(++workspace_count);
@@ -185,24 +186,25 @@ void WorkspaceAppletWindow::load_workspaces()
         workspaces_table.insert(std::make_pair(workspace_no, thumbnail_area));
 
         //点击工作区时切换右侧的窗口预览
-        thumbnail_area->signal_clicked().connect([this, workspace_no]() -> void {
-            for (auto data : workspaces_table)
-            {
-                auto num = data.first;
-                auto area = data.second;
-                if (num != workspace_no)
-                    area->set_selected(false);
-                else
-                {
-                    area->set_selected(true);
+        thumbnail_area->signal_clicked().connect([this, workspace_no]() -> void
+                                                 {
+                                                     for (auto data : workspaces_table)
+                                                     {
+                                                         auto num = data.first;
+                                                         auto area = data.second;
+                                                         if (num != workspace_no)
+                                                             area->set_selected(false);
+                                                         else
+                                                         {
+                                                             area->set_selected(true);
 
-                    //通知窗口列表预览控件重绘
-                    auto workspace = area->get_workspace();
-                    overview_area.set_workspace(workspace);
-                    selected_workspace = workspace->get_number();
-                }
-            }
-        });
+                                                             //通知窗口列表预览控件重绘
+                                                             auto workspace = area->get_workspace();
+                                                             overview_area.set_workspace(workspace);
+                                                             selected_workspace = workspace->get_number();
+                                                         }
+                                                     }
+                                                 });
         //默认显示当前工作区的窗口预览
         if (workspace == active_workspace)
             thumbnail_area->clicked();

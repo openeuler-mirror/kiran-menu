@@ -25,7 +25,8 @@ TaskBarSkeleton::TaskBarSkeleton(AppManager *app_manager) : app_manager_(app_man
     this->fixed_apps_ = read_as_to_list_quark(this->settings_, TASKBAR_KEY_FIXED_APPS);
 
     settings_->signal_changed().connect_notify(
-        [this](const Glib::ustring &key) -> void {
+        [this](const Glib::ustring &key) -> void
+        {
             if (key == TASKBAR_KEY_SHOW_ACTIVE_WORKSPACE)
                 signal_app_show_policy_changed().emit();
         });
@@ -159,20 +160,21 @@ void TaskBarSkeleton::desktop_app_changed()
 
     AppVec delete_apps;
 
-    auto iter = std::remove_if(this->fixed_apps_.begin(), this->fixed_apps_.end(), [this, &delete_apps, &app_set](int32_t elem) -> bool {
-        if (app_set.find(elem) == app_set.end())
-        {
-            Glib::QueryQuark query_quark((GQuark)elem);
-            Glib::ustring desktop_id = query_quark;
-            auto app = this->app_manager_->lookup_app(desktop_id.raw());
-            if (app)
-            {
-                delete_apps.push_back(app);
-            }
-            return true;
-        }
-        return false;
-    });
+    auto iter = std::remove_if(this->fixed_apps_.begin(), this->fixed_apps_.end(), [this, &delete_apps, &app_set](int32_t elem) -> bool
+                               {
+                                   if (app_set.find(elem) == app_set.end())
+                                   {
+                                       Glib::QueryQuark query_quark((GQuark)elem);
+                                       Glib::ustring desktop_id = query_quark;
+                                       auto app = this->app_manager_->lookup_app(desktop_id.raw());
+                                       if (app)
+                                       {
+                                           delete_apps.push_back(app);
+                                       }
+                                       return true;
+                                   }
+                                   return false;
+                               });
 
     if (iter != this->fixed_apps_.end())
     {

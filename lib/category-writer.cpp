@@ -29,7 +29,6 @@ CategoryWriter::~CategoryWriter()
 bool CategoryWriter::write_to_xml(std::shared_ptr<CategoryNode> node, const std::string &file_path)
 {
     Glib::RefPtr<Gio::FileOutputStream> output;
-    std::string error;
 
     auto config_file = Gio::File::create_for_path(file_path);
 

@@ -21,7 +21,7 @@
 class TasklistPagingButton : public Gtk::Button
 {
 public:
-    TasklistPagingButton(MatePanelApplet *applet_);
+    explicit TasklistPagingButton(MatePanelApplet *applet_);
 
     // void set_icon_image(const Glib::ustring icon_resource, int icon_size);
 

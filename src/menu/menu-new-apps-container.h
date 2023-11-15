@@ -20,8 +20,8 @@
 class MenuNewAppsContainer : public MenuAppsContainer
 {
 public:
-    MenuNewAppsContainer(int max_apps_);
-    bool load_applications(const Kiran::AppVec &apps);
+    explicit MenuNewAppsContainer(int max_apps_);
+    bool load_applications(const Kiran::AppVec &apps) override;
 
 protected:
     Gtk::ToggleButton *create_expand_button();

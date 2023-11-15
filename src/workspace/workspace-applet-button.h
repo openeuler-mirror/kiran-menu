@@ -28,7 +28,7 @@ public:
      * @brief 构造函数
      * @param applet_ 所属的面板插件
      */
-    WorkspaceAppletButton(MatePanelApplet *applet_);
+    explicit WorkspaceAppletButton(MatePanelApplet *applet_);
 
 protected:
     virtual void on_toggled() override;

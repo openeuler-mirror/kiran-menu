@@ -43,7 +43,6 @@ void CategoryReader::on_start_element(ParseContext &context,
         {
             throw Glib::MarkupError(Glib::MarkupError::PARSE,
                                     "Exist multiple <categories> elements in file.\n");
-            return;
         }
         start_categories_element(context,
                                  element_name.c_str(),

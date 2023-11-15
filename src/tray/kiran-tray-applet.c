@@ -86,8 +86,6 @@ enter_notify(GtkWidget *widget,
              GdkEvent *event,
              gpointer user_data)
 {
-    KiranTrayData *kcd = user_data;
-
     return FALSE;
 }
 

@@ -19,9 +19,8 @@
 #include "kiran-helper.h"
 #include "lib/base.h"
 
-TasklistAppContextMenu::TasklistAppContextMenu(const std::shared_ptr<Kiran::App> &app_)
+TasklistAppContextMenu::TasklistAppContextMenu(const std::shared_ptr<Kiran::App> &app_) : app(app_)
 {
-    app = app_;
     get_style_context()->add_class("previewer-context-menu");
     refresh();
 }
@@ -44,7 +43,8 @@ void TasklistAppContextMenu::refresh()
     {
         item = Gtk::make_managed<Gtk::MenuItem>(app_->get_action_name(action_name));
         item->signal_activate().connect(
-            [action_name, this]() -> void {
+            [action_name, this]() -> void
+            {
                 if (!app.expired())
                     app.lock()->launch_action(action_name);
             });
@@ -56,7 +56,8 @@ void TasklistAppContextMenu::refresh()
     {
         item = Gtk::make_managed<Gtk::MenuItem>(_("Launch"));
         item->signal_activate().connect(
-            [this]() -> void {
+            [this]() -> void
+            {
                 auto app_ = app.lock();
                 if (app_)
                     app_->launch();
@@ -66,7 +67,8 @@ void TasklistAppContextMenu::refresh()
     {
         item = Gtk::make_managed<Gtk::MenuItem>(_("Close all windows"));
         item->signal_activate().connect(
-            [this]() -> void {
+            [this]() -> void
+            {
                 auto app_ = app.lock();
                 if (app_)
                     app_->close_all_windows();
@@ -109,7 +111,8 @@ void TasklistAppContextMenu::refresh()
     {
         item = Gtk::make_managed<Gtk::MenuItem>(_("Unpin to taskbar"));
         item->signal_activate().connect(
-            [this]() -> void {
+            [this]() -> void
+            {
                 auto app_ = app.lock();
                 if (app_)
                 {

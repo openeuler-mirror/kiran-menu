@@ -249,8 +249,6 @@ bool Category::match_desktop_id(std::shared_ptr<CategoryNode> node, std::shared_
 
 bool Category::match_rule(std::shared_ptr<CategoryNode> node, std::shared_ptr<App> app)
 {
-    bool match_result = false;
-
     switch (node->get_type())
     {
     case CategoryNodeType::CATEGORY_NODE_TYPE_DESKTOP_CATEGORY:
@@ -264,6 +262,7 @@ bool Category::match_rule(std::shared_ptr<CategoryNode> node, std::shared_ptr<Ap
 
     default:
     {
+        bool match_result = false;
         bool match_finish = false;
         for (auto iter = node->get_children(); iter && !match_finish; iter = iter->get_next())
         {
