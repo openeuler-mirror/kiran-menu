@@ -44,7 +44,9 @@ void MenuAppletButton::on_toggled()
 {
     if (this->get_active())
     {
-        window.show();
+        // This may mean raising the window in the stacking order, deiconifying it, moving it to the current desktop,
+        // and/or giving it the keyboard focus, possibly dependent on the user’s platform, window manager, and preferences.
+        window.present();
     }
     else
     {
