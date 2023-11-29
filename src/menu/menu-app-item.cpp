@@ -94,8 +94,8 @@ void MenuAppItem::on_clicked()
     /*
      * 启动应用
      */
-    launch_app();
     get_toplevel()->hide();
+    launch_app();
 }
 
 void MenuAppItem::on_drag_begin(const Glib::RefPtr<Gdk::DragContext> &context)
