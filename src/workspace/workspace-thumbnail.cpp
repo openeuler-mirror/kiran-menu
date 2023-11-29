@@ -30,10 +30,10 @@ WorkspaceThumbnail::WorkspaceThumbnail(KiranWorkspacePointer &workspace_) : work
                                                                             drop_check(false),
                                                                             draw_windows(false)
 {
-    /*背景图片设置变化时重绘背景*/
-    bg_settings = Gio::Settings::create(BACKGROUND_SETTINGS_PATH);
-    bg_settings->signal_changed().connect(
-        sigc::hide(sigc::mem_fun(*this, &WorkspaceThumbnail::on_background_changed)));
+    // /*背景图片设置变化时重绘背景*/
+    // bg_settings = Gio::Settings::create(BACKGROUND_SETTINGS_PATH);
+    // bg_settings->signal_changed().connect(
+    //     sigc::hide(sigc::mem_fun(*this, &WorkspaceThumbnail::on_background_changed)));
 
     /* 插件设置变化时重绘 */
     applet_settings = Gio::Settings::create(WORKSPACE_SETTINGS_PATH);
