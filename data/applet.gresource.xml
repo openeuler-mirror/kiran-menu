@@ -7,7 +7,7 @@
   </gresource>
   <gresource prefix="/kiran-menu/">
     <file alias="ui/menu">data/menu.ui.xml</file>
-    <file alias="icon/logo">images/logo.svg</file>
+    <file alias="icon/logo">icons/kiran-menu.svg</file>
     <file alias="icon/avatar">images/avatar_default.png</file>
   </gresource>
   <gresource prefix="/kiran-tasklist/">
@@ -16,6 +16,6 @@
     <file alias="icon/close_active">images/close_active.png</file>
   </gresource>
   <gresource prefix="/kiran-workspace/">
-    <file alias="icon/button">images/workspace-switcher.svg</file>
+    <file alias="icon/button">icons/kiran-workspace-switcher.svg</file>
   </gresource>
 </gresources>
