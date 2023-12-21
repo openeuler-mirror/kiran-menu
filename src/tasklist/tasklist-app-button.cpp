@@ -400,6 +400,11 @@ void TasklistAppButton::on_gesture_drag_update(double x, double y)
 {
     Gtk::Allocation allocation;
 
+    if (x < 10 && y < 10)
+    {
+        return;
+    }
+
     /* 设置拖动过程中的光标样式 */
     auto cursor = Gdk::Cursor::create(get_display(), "move");
     get_window()->set_cursor(cursor);
