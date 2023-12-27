@@ -17,6 +17,7 @@
 #include "kiran-helper.h"
 #include "kiran-opacity-menu.h"
 #include "lib/base.h"
+#include <algorithm>
 
 RecentFilesListBox::RecentFilesListBox() : filter_pattern("*")
 {
@@ -51,7 +52,11 @@ void RecentFilesListBox::load()
         delete row;
     }
 
-    for (auto info : Gtk::RecentManager::get_default()->get_items())
+    std::vector<Glib::RefPtr<Gtk::RecentInfo>> items = Gtk::RecentManager::get_default()->get_items();
+    std::sort(items.begin(), items.end(), [](Glib::RefPtr<Gtk::RecentInfo> a, Glib::RefPtr<Gtk::RecentInfo> b)
+              { return a->get_modified() > b->get_modified(); });
+
+    for (auto info : items)
     {
         Gtk::ListBoxRow *row = nullptr;
         auto cell = create_recent_item(info);
