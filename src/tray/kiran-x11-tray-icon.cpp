@@ -540,11 +540,12 @@ kiran_x11_tray_icon_new(Window icon_window)
             icon->priv->has_desktop = FALSE;
         }
     }
-    else
-    {
-        g_free(res_name);
-    }
+    // else
+    // {
+    //     g_free(res_name);
+    // }
 
+    g_free(res_name);
     g_free(res_class);
 
     return GTK_WIDGET(icon);
