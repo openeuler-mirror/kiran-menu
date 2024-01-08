@@ -53,6 +53,12 @@ convert_chars_to_wchars(const std::string &contents)
     size_t mbs_len;
     wchar_t *wcs;
 
+    // mbstowcs 依赖全局 locale && GTK+中只认 UTF-8
+    // 当 /etc/locale.conf 为 zh_CN.utf8 时，结果正常; 当为 zh_CN.GB18030 时，结果不正常
+    // 所以此处需要设置为 utf-8
+    std::string prev_loc = std::setlocale(LC_CTYPE, nullptr);
+    setlocale(LC_CTYPE, "C.utf8");
+
     mbs_len = mbstowcs(NULL, contents.c_str(), 0);
     if (mbs_len == (size_t)-1)
     {
@@ -70,6 +76,9 @@ convert_chars_to_wchars(const std::string &contents)
         free(wcs);
         return NULL;
     }
+    
+    // 还原
+    std::setlocale(LC_CTYPE, prev_loc.c_str());
 
     return wcs;
 }
