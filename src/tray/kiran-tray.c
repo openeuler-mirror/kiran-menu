@@ -29,6 +29,7 @@
 #include "kiran-x11-tray-manager.h"
 #include "kiran-x11-tray-socket.h"
 #include "tray-i.h"
+#include "kiran-x11-tray-icon.h"
 
 #define ROOT_NODE_NAME "apps"
 #define APP_NODE_NAME "app"
@@ -1035,6 +1036,32 @@ get_widget_geometry(GtkWidget *widget)
     return data;
 }
 
+void kiran_tray_resize_x11_icon_window(GdkDisplay *display,Window icon_window,GtkWidget *widget)
+{
+    XWindowAttributes window_attributes;
+    Status status = XGetWindowAttributes(GDK_DISPLAY_XDISPLAY(display),icon_window,&window_attributes);
+    if(status == 0)
+    {
+        g_info("get window attributes failed");
+        return;
+    }
+    g_debug("window attributes: widget: %d, height:%d ",window_attributes.width , window_attributes.height);
+    
+    GtkAllocation icon_allocation;
+    gtk_widget_get_allocation(widget, &icon_allocation);
+    g_debug("icon container allocation height:%d",icon_allocation.height);
+
+    /**
+     * 这里只将window的高与图标容器的高保持一致，暂不限制window的宽 (#22117)
+    */
+    if(window_attributes.height != icon_allocation.height)
+    {
+        g_debug("resize X window");
+        XResizeWindow(GDK_DISPLAY_XDISPLAY(display),icon_window,window_attributes.width,icon_allocation.height);
+        XFlush(GDK_DISPLAY_XDISPLAY(display));
+    }
+}
+
 static void
 icon_size_allocate_callback(GtkWidget *widget,
                             GdkRectangle *allocation,
@@ -1043,6 +1070,7 @@ icon_size_allocate_callback(GtkWidget *widget,
     KiranTray *tray;
     KiranTrayPrivate *priv;
     gchar *geometry;
+    const char *id;
 
     if (!gtk_widget_is_visible(widget))
         return;
@@ -1051,11 +1079,37 @@ icon_size_allocate_callback(GtkWidget *widget,
     priv = tray->priv;
 
     geometry = get_widget_geometry(widget);
+    
+    id = kiran_notify_icon_get_id(KIRAN_NOTIFY_ICON(widget));
+    g_debug("icon size allocate changed: id:%s, %s",id ? id : "NULL",geometry);
+
     kiran_sn_manager_gen_emit_geometry_changed(KIRAN_SN_MANAGER_GEN(priv->skeleton),
                                                kiran_notify_icon_get_id(KIRAN_NOTIFY_ICON(widget)),
                                                geometry);
-
     g_free(geometry);
+
+    if(KIRAN_IS_X11_TRAY_ICON(KIRAN_X11_TRAY_ICON(widget)))
+    {
+        Window icon_window;
+        icon_window = kiran_x11_tray_icon_get_icon_window(KIRAN_X11_TRAY_ICON(widget));
+        g_debug("%s is x11 tray icon, window id : %d",id ? id : "NULL",icon_window);
+
+        if(!icon_window)
+        {
+            return;
+        }
+
+        GdkDisplay *display;
+        GdkScreen *screen;
+        screen = gtk_widget_get_screen(GTK_WIDGET(user_data));
+        display = gdk_screen_get_display(screen);
+
+        gdk_x11_display_error_trap_push(display);
+
+        kiran_tray_resize_x11_icon_window(display,icon_window,widget);
+
+        gdk_x11_display_error_trap_pop(display);
+    }   
 }
 
 static gboolean
