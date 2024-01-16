@@ -675,7 +675,7 @@ void MenuAppletWindow::add_sidebar_buttons()
 
     launcher_btn = create_launcher_button("kiran-menu-run-symbolic",
                                           _("Run"),
-                                          "mate-panel --run-dialog");
+                                          "kiran-panel --run-dialog");
     side_box->add(*launcher_btn);
 
     launcher_btn = create_launcher_button("kiran-menu-search-files-symbolic",
