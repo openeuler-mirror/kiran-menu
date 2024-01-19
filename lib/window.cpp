@@ -488,8 +488,7 @@ void Window::close()
     KLOG_PROFILE("xid: %" PRIu64 ", name: %s.", this->get_xid(), this->get_name().c_str());
 
     g_return_if_fail(this->wnck_window_ != nullptr);
-    uint64_t now = Glib::DateTime::create_now_local().to_unix();
-    wnck_window_close(this->wnck_window_, now);
+    wnck_window_close(this->wnck_window_, gtk_get_current_event_time());
 }
 
 WindowGeometry Window::get_geometry()
