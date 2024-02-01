@@ -13,6 +13,7 @@
  */
 
 #include "menu-applet-button.h"
+#include <gdk/gdkx.h>
 #include <glibmm/i18n.h>
 #include "kiran-helper.h"
 #include "lib/base.h"
@@ -44,8 +45,14 @@ void MenuAppletButton::on_toggled()
 {
     if (this->get_active())
     {
-        // This may mean raising the window in the stacking order, deiconifying it, moving it to the current desktop,
-        // and/or giving it the keyboard focus, possibly dependent on the user’s platform, window manager, and preferences.
+        window.show();  // 必须要先show,get_window才有值
+        auto gdk_window = window.get_window();
+        GdkWindow *gdk_x11_window = gdk_window->gobj();
+
+        // 当通过win快捷键触发时，gtk_get_current_event_time 值为0
+        guint32 server_time = gdk_x11_get_server_time(gdk_x11_window);
+
+        gdk_x11_window_set_user_time(gdk_x11_window, server_time);
         window.present();
     }
     else
