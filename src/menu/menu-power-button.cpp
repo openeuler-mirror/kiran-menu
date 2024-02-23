@@ -51,6 +51,7 @@ void MenuPowerButton::on_clicked()
         delete menu;
 
 #ifdef POWER_DIALOG
+    signal_menu_hide().emit();
     dialog_ = new MenuPowerDialog();
     dialog_->show_all();
 #else
