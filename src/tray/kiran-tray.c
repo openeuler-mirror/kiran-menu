@@ -1049,15 +1049,19 @@ void kiran_tray_resize_x11_icon_window(GdkDisplay *display,Window icon_window,Gt
     
     GtkAllocation icon_allocation;
     gtk_widget_get_allocation(widget, &icon_allocation);
-    g_debug("icon container allocation height:%d",icon_allocation.height);
+    int scale = gtk_widget_get_scale_factor(widget);
+    g_debug("icon container allocation height:%d , scale:%d",icon_allocation.height, scale);
 
     /**
+     * NOTE:
      * 这里只将window的高与图标容器的高保持一致，暂不限制window的宽 (#22117)
+     * 匹配window的高和容器的高时，需要考虑缩放率的影响。
+     * 例如缩放率设置为200%，在X协议层会对icon window的高度进行缩放 ,但是icon container容器高度没有变化
     */
-    if(window_attributes.height != icon_allocation.height)
+    if(window_attributes.height != (icon_allocation.height * scale))
     {
         g_debug("resize X window");
-        XResizeWindow(GDK_DISPLAY_XDISPLAY(display),icon_window,window_attributes.width,icon_allocation.height);
+        XResizeWindow(GDK_DISPLAY_XDISPLAY(display),icon_window,window_attributes.width,icon_allocation.height * scale);
         XFlush(GDK_DISPLAY_XDISPLAY(display));
     }
 }
