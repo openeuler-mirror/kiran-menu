@@ -150,9 +150,16 @@ Gtk::Button *TasklistAppletWidget::create_paging_button(const std::string &icon_
 {
     auto button = Gtk::make_managed<TasklistPagingButton>(applet);
 
-    button->set_size_request(16, 16);
-    // button->set_icon_image(icon_resource, 16);
-    button->set_image_from_icon_name(icon_name, Gtk::ICON_SIZE_BUTTON);
+    auto scale = Gdk::Window::get_default_root_window()->get_scale_factor();
+    auto icon_info = Gtk::IconTheme::get_default()->lookup_icon(icon_name, 6, scale);
+    auto style_context = Gtk::StyleContext::create();
+    bool was_symbolic = true;
+    auto pixbuf = icon_info.load_symbolic(style_context, was_symbolic);
+
+    auto image = Gtk::make_managed<Gtk::Image>();
+    image->set(pixbuf);
+    button->set_image(*image);
+    button->set_size_request(30, -1);
     button->set_tooltip_text(tooltip_text);
 
     return button;
