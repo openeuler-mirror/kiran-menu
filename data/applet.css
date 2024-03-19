@@ -132,6 +132,10 @@ button.kiran-tasklist-button {
     -gtkmm__CustomObject_KiranTasklistAppButton-indicator-size: 4px;
 }
 
+button.tasklist-arrow-button {
+    border: none;
+    border-radius: 0px;
+}
 
 window.app-previewer button.window-thumbnail {
     min-width: 200px;
