@@ -53,7 +53,7 @@ void on_applet_size_allocate(MatePanelApplet *applet UNUSED,
     delete[] hints;
 }
 
-TasklistAppletWidget::TasklistAppletWidget(MatePanelApplet *applet_) : button_box(Gtk::ORIENTATION_VERTICAL),
+TasklistAppletWidget::TasklistAppletWidget(MatePanelApplet *applet_) : button_box(Gtk::ORIENTATION_HORIZONTAL),
                                                                        prev_btn(nullptr),
                                                                        next_btn(nullptr),
                                                                        container(applet_),
@@ -106,14 +106,9 @@ void TasklistAppletWidget::init_ui()
     prev_btn = create_paging_button("kiran-tasklist-previous-symbolic", _("Previous"));
     next_btn = create_paging_button("kiran-tasklist-next-symbolic", _("Next"));
 
-    prev_btn->set_valign(Gtk::ALIGN_FILL);
-    next_btn->set_valign(Gtk::ALIGN_FILL);
-
     button_box.set_spacing(2);
     button_box.set_margin_start(5);
     button_box.set_margin_end(5);
-    button_box.set_valign(Gtk::ALIGN_FILL);
-    button_box.set_halign(Gtk::ALIGN_CENTER);
     button_box.pack_start(*prev_btn, true, true);
     button_box.pack_end(*next_btn, true, true);
 
@@ -125,13 +120,11 @@ void TasklistAppletWidget::init_ui()
         {
             if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL)
             {
-                button_box.set_orientation(Gtk::ORIENTATION_VERTICAL);
-                button_box.set_size_request(16, -1);
+                button_box.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
             }
             else
             {
-                button_box.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
-                button_box.set_size_request(-1, 16);
+                button_box.set_orientation(Gtk::ORIENTATION_VERTICAL);
             }
 
             container.update_orientation();
@@ -150,16 +143,7 @@ Gtk::Button *TasklistAppletWidget::create_paging_button(const std::string &icon_
 {
     auto button = Gtk::make_managed<TasklistPagingButton>(applet);
 
-    auto scale = Gdk::Window::get_default_root_window()->get_scale_factor();
-    auto icon_info = Gtk::IconTheme::get_default()->lookup_icon(icon_name, 6, scale);
-    auto style_context = Gtk::StyleContext::create();
-    bool was_symbolic = true;
-    auto pixbuf = icon_info.load_symbolic(style_context, was_symbolic);
-
-    auto image = Gtk::make_managed<Gtk::Image>();
-    image->set(pixbuf);
-    button->set_image(*image);
-    button->set_size_request(30, -1);
+    button->set_image_from_icon_name(icon_name, Gtk::ICON_SIZE_BUTTON);
     button->set_tooltip_text(tooltip_text);
 
     return button;
