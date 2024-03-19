@@ -29,6 +29,7 @@ TasklistPagingButton::TasklistPagingButton(MatePanelApplet *applet_) : applet(ap
     drag_dest_set(targets, Gtk::DEST_DEFAULT_ALL, Gdk::ACTION_MOVE);
 
     get_style_context()->add_class("tasklist-arrow-button");
+    get_style_context()->add_class("flat");
 }
 
 // void TasklistPagingButton::set_icon_image(const Glib::ustring icon_resource_, int icon_size_)
