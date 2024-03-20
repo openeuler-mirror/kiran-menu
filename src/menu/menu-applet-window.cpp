@@ -389,7 +389,10 @@ void MenuAppletWindow::init_window_visual()
 
     /*设置窗口的Visual为RGBA visual，确保窗口背景透明度可以正常绘制 */
     rgba_visual = get_screen()->get_rgba_visual();
-    gtk_widget_set_visual(widget, rgba_visual->gobj());
+    if (rgba_visual && rgba_visual->gobj())
+    {
+        gtk_widget_set_visual(widget, rgba_visual->gobj());
+    }
 }
 
 /* app列表页Stack */
