@@ -23,7 +23,7 @@
 MenuAppletButton::MenuAppletButton(MatePanelApplet *panel_applet) : KiranAppletButton(panel_applet)
 {
     set_tooltip_text(_("Kiran Start Menu"));
-    set_icon_from_resource("/kiran-menu/icon/logo");
+    set_icon_from_theme("kiran-menu");
     get_style_context()->add_class("menu-applet-button");
 
     window.signal_size_changed().connect(
