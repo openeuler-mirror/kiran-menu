@@ -123,16 +123,14 @@ void KiranAppletButton::generate_pixbuf()
 {
     int scale = get_scale_factor();
 
-    KLOG_INFO("generate pixbuf for button, resource %s\n",
-              icon_resource.c_str());
-    icon_pixbuf = Gdk::Pixbuf::create_from_resource(icon_resource,
-                                                    icon_size * scale,
-                                                    icon_size * scale);
+    KLOG_INFO("generate pixbuf for button, theme icon %s\n",
+              icon_name.c_str());
+    icon_pixbuf = Gtk::IconTheme::get_default()->load_icon(icon_name, icon_size, scale, Gtk::ICON_LOOKUP_USE_BUILTIN);
 }
 
-void KiranAppletButton::set_icon_from_resource(const std::string &resource)
+void KiranAppletButton::set_icon_from_theme(const std::string &name)
 {
-    icon_resource = resource;
+    icon_name = name;
 
     icon_pixbuf.clear();
     if (get_realized())

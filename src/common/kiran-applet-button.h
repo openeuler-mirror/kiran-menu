@@ -31,13 +31,13 @@ protected:
     virtual void get_preferred_height_vfunc(int &minimum_height, int &natural_height) const override;
     virtual void on_size_allocate(Gtk::Allocation &allocation) override;
     virtual bool on_draw(const ::Cairo::RefPtr<Cairo::Context> &cr) override;
-    virtual void set_icon_from_resource(const std::string &resource);
+    virtual void set_icon_from_theme(const std::string &name);
     void generate_pixbuf();
 
 private:
     MatePanelApplet *applet;
 
-    std::string icon_resource;
+    std::string icon_name;
     Glib::RefPtr<Gdk::Pixbuf> icon_pixbuf;  //图标
     int icon_size;                          //图标显示尺寸
 };
