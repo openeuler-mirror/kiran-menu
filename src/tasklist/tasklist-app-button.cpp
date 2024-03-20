@@ -397,7 +397,7 @@ void TasklistAppButton::on_gesture_drag_update(double x, double y)
 {
     Gtk::Allocation allocation;
 
-    if (x < 10 && y < 10)
+    if (ABS(x) < 10 && ABS(y) < 10)
     {
         return;
     }
