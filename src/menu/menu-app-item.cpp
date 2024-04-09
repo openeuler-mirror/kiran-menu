@@ -101,7 +101,10 @@ void MenuAppItem::on_drag_begin(const Glib::RefPtr<Gdk::DragContext> &context)
      * 设置拖动操作的Icon
      */
     auto app = get_app();
-    gtk_drag_set_icon_gicon(context->gobj(), app->get_icon()->gobj(), 0, 0);
+    if (app->get_icon())
+    {
+        gtk_drag_set_icon_gicon(context->gobj(), app->get_icon()->gobj(), 0, 0);
+    }
 }
 
 void MenuAppItem::on_drag_data_get(const Glib::RefPtr<Gdk::DragContext> &context, Gtk::SelectionData &selection, guint info, guint timestamp)
