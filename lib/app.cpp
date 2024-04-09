@@ -143,7 +143,7 @@ bool App::should_show()
     RETURN_VAL_IF_FALSE(this->desktop_app_, false);
     RETURN_VAL_IF_FALSE(get_kind() != AppKind::USER_TASKBAR, false);
 
-    return (this->desktop_app_->should_show() && !this->x_kiran_no_display_);
+    return (this->desktop_app_->should_show() && !this->x_kiran_no_display_ && !this->icon_name_.empty());
 }
 
 bool App::is_active()
