@@ -1,20 +1,21 @@
 /**
- * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd.
  * kiran-cc-daemon is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
  * You may obtain a copy of Mulan PSL v2 at:
- *          http://license.coscl.org.cn/MulanPSL2 
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
- * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
- * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
- * See the Mulan PSL v2 for more details.  
- * 
+ *          http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ *
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
  */
 
 #include "kiran-power.h"
 #include <iostream>
 #include "lib/base.h"
+#include "lib/common.h"
 
 #define SESSION_MANAGER_DBUS "org.gnome.SessionManager"
 #define SESSION_MANAGER_PATH "/org/gnome/SessionManager"
@@ -31,18 +32,10 @@
 
 #define DBUS_PROXY_TIMEOUT_MSEC 300
 
-#define STARTMENU_LOCKDOWN_SCHEMA_ID "com.kylinsec.kiran.startmenu.lockdown"
-#define STARTMENU_LOCKDOWN_KEY_DISABLE_LOCK_SCREEN "disable-lock-screen"
-#define STARTMENU_LOCKDOWN_KEY_DISABLE_USER_SWITCHING "disable-user-switching"
-#define STARTMENU_LOCKDOWN_KEY_DISABLE_LOG_OUT "disable-log-out"
-#define STARTMENU_LOCKDOWN_KEY_DISABLE_SUSPEND "disable-suspend"
-#define STARTMENU_LOCKDOWN_KEY_DISABLE_HIBERNATE "disable-hibernate"
-#define STARTMENU_LOCKDOWN_KEY_DISABLE_REBOOT "disable-reboot"
-#define STARTMENU_LOCKDOWN_KEY_DISABLE_SHUTDOWN "disable-shutdown"
-
 #define DEFAULT_N_AUTO_VTS 6
 
-std::shared_ptr<KiranPower> KiranPower::instance_ = nullptr;
+std::shared_ptr<KiranPower>
+    KiranPower::instance_ = nullptr;
 std::shared_ptr<KiranPower> KiranPower::get_default()
 {
     if (!instance_)
@@ -54,7 +47,7 @@ std::shared_ptr<KiranPower> KiranPower::get_default()
 
 KiranPower::KiranPower()
 {
-    this->settings_ = Gio::Settings::create(STARTMENU_LOCKDOWN_SCHEMA_ID);
+    this->settings_ = Gio::Settings::create(STARTMENU_LOCKDOWN_SCHEMA);
 
     try
     {
@@ -294,7 +287,7 @@ bool KiranPower::can_suspend()
     }
     catch (const Gio::DBus::Error &e)
     {
-        //如果获取失败，就假设其可以挂起，由挂起操作调用时做检查
+        // 如果获取失败，就假设其可以挂起，由挂起操作调用时做检查
         KLOG_WARNING("Failed to query CanSuspend: %s", e.what().c_str());
         return true;
     }
@@ -313,7 +306,7 @@ bool KiranPower::can_hibernate()
     }
     catch (const Gio::DBus::Error &e)
     {
-        //如果获取失败，就假设其可以挂起，由挂起操作调用时做检查
+        // 如果获取失败，就假设其可以挂起，由挂起操作调用时做检查
         KLOG_WARNING("Failed to query CanHibernate: %s", e.what().c_str());
         return true;
     }
@@ -332,7 +325,7 @@ bool KiranPower::can_shutdown()
     }
     catch (const Gio::DBus::Error &e)
     {
-        //如果获取失败，就假设其可以关机，由关机操作调用时做检查
+        // 如果获取失败，就假设其可以关机，由关机操作调用时做检查
         KLOG_WARNING("Failed to query CanPowerOff: %s", e.what().c_str());
         return true;
     }
@@ -351,7 +344,7 @@ bool KiranPower::can_reboot()
     }
     catch (const Gio::DBus::Error &e)
     {
-        //如果获取失败，就假设其可以关机，由关机操作调用时做检查
+        // 如果获取失败，就假设其可以关机，由关机操作调用时做检查
         KLOG_WARNING("Failed to query Reboot: %s", e.what().c_str());
         return true;
     }

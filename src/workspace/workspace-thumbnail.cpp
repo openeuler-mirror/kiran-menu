@@ -1,14 +1,14 @@
 /**
- * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd.
  * kiran-cc-daemon is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
  * You may obtain a copy of Mulan PSL v2 at:
- *          http://license.coscl.org.cn/MulanPSL2 
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
- * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
- * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
- * See the Mulan PSL v2 for more details.  
- * 
+ *          http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ *
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
  */
 
@@ -17,12 +17,9 @@
 #include <gtk/gtkx.h>
 #include "global.h"
 #include "lib/base.h"
+#include "lib/common.h"
 #include "window-manager.h"
 #include "workspace-manager.h"
-
-#define BACKGROUND_SETTINGS_PATH "org.mate.background"
-#define WORKSPACE_SETTINGS_PATH "com.kylinsec.kiran.workspace-switcher"
-#define DRAW_WINDOWS_KEY "draw-windows-in-thumbnails"
 
 WorkspaceThumbnail::WorkspaceThumbnail(KiranWorkspacePointer &workspace_) : workspace(workspace_),
                                                                             bg_surface(nullptr),
@@ -30,14 +27,9 @@ WorkspaceThumbnail::WorkspaceThumbnail(KiranWorkspacePointer &workspace_) : work
                                                                             drop_check(false),
                                                                             draw_windows(false)
 {
-    // /*背景图片设置变化时重绘背景*/
-    // bg_settings = Gio::Settings::create(BACKGROUND_SETTINGS_PATH);
-    // bg_settings->signal_changed().connect(
-    //     sigc::hide(sigc::mem_fun(*this, &WorkspaceThumbnail::on_background_changed)));
-
     /* 插件设置变化时重绘 */
-    applet_settings = Gio::Settings::create(WORKSPACE_SETTINGS_PATH);
-    draw_windows = applet_settings->get_boolean(DRAW_WINDOWS_KEY);
+    applet_settings = Gio::Settings::create(WORKSPACE_SCHEMA);
+    draw_windows = applet_settings->get_boolean(WORKSPACE_KEY_DRAW_WINDOWS);
     applet_settings->signal_changed().connect(
         sigc::mem_fun(*this, &WorkspaceThumbnail::on_settings_changed));
 
@@ -159,11 +151,11 @@ bool WorkspaceThumbnail::draw_thumbnail_image(Gtk::Widget *thumbnail_area_, cons
         return false;
 
     allocation = thumbnail_area_->get_allocation();
-    //调用mate-desktop接口来获取桌面背景图片, 省去缩放等相关操作
+    // 调用mate-desktop接口来获取桌面背景图片, 省去缩放等相关操作
     if (!bg_surface)
         reload_bg_surface();
 
-    //背景图片居中显示
+    // 背景图片居中显示
     surface_offset_x = (allocation.get_width() - surface_width) / 2.0;
     surface_offset_y = (allocation.get_height() - surface_height) / 2.0;
     surface = new Cairo::ImageSurface(bg_surface, false);
@@ -308,12 +300,12 @@ void WorkspaceThumbnail::on_thumbnail_clicked()
 
 void WorkspaceThumbnail::on_settings_changed(const Glib::ustring &key)
 {
-    if (key == DRAW_WINDOWS_KEY)
+    if (key == WORKSPACE_KEY_DRAW_WINDOWS)
     {
-        bool new_value = applet_settings->get_boolean(DRAW_WINDOWS_KEY);
+        bool new_value = applet_settings->get_boolean(WORKSPACE_KEY_DRAW_WINDOWS);
         if (new_value != draw_windows)
         {
-            KLOG_DEBUG("key '%s' changed to %d", DRAW_WINDOWS_KEY, new_value);
+            KLOG_DEBUG("key '%s' changed to %d", WORKSPACE_KEY_DRAW_WINDOWS, new_value);
             queue_draw();
         }
     }
@@ -368,7 +360,7 @@ void WorkspaceThumbnail::on_drag_data_received(const Glib::RefPtr<Gdk::DragConte
     }
 
     data = selection.get_data(length);
-    //传递的数据应该是Window的XID
+    // 传递的数据应该是Window的XID
     if (length < 0 || length != sizeof(Window))
     {
         if (!drop_check)
@@ -408,7 +400,7 @@ void WorkspaceThumbnail::on_drag_data_received(const Glib::RefPtr<Gdk::DragConte
 
     if (!drop_check)
     {
-        //将对应的窗口移动到该工作区
+        // 将对应的窗口移动到该工作区
         window->move_to_workspace(workspace.lock());
         context->drag_finish(true, true, time);
     }
