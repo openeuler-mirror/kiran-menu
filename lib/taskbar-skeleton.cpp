@@ -21,7 +21,7 @@ namespace Kiran
 {
 TaskBarSkeleton::TaskBarSkeleton(AppManager *app_manager) : app_manager_(app_manager)
 {
-    this->settings_ = Gio::Settings::create(KIRAN_TASKBAR_SCHEMA);
+    this->settings_ = Gio::Settings::create(TASKBAR_SCHEMA);
     this->fixed_apps_ = read_as_to_list_quark(this->settings_, TASKBAR_KEY_FIXED_APPS);
 
     settings_->signal_changed().connect_notify(

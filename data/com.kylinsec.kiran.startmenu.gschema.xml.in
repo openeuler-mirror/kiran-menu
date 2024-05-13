@@ -77,5 +77,11 @@
             <summary>Disable shutdown system</summary>
             <description>Prevent the user from shutdown the system.</description>
         </key>
+
+        <key name="disable-fixed-app" type="b">
+            <default>false</default>
+            <summary>Disable fixed app to taskbar</summary>
+            <description>Prevent the user from fixed app.</description>
+        </key>
     </schema>
 </schemalist>

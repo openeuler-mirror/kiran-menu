@@ -23,8 +23,8 @@ namespace Kiran
 {
 MenuFavorite::MenuFavorite()
 {
-    this->settings_ = Gio::Settings::create(KIRAN_MENU_SCHEMA);
-    this->favorite_apps_ = read_as_to_list_quark(this->settings_, MENU_KEY_FAVORITE_APPS);
+    this->settings_ = Gio::Settings::create(STARTMENU_SCHEMA);
+    this->favorite_apps_ = read_as_to_list_quark(this->settings_, STARTMENU_KEY_FAVORITE_APPS);
 }
 
 MenuFavorite::~MenuFavorite()
@@ -33,7 +33,7 @@ MenuFavorite::~MenuFavorite()
 
 void MenuFavorite::init()
 {
-    this->settings_->signal_changed(MENU_KEY_FAVORITE_APPS).connect(sigc::mem_fun(this, &MenuFavorite::app_changed));
+    this->settings_->signal_changed(STARTMENU_KEY_FAVORITE_APPS).connect(sigc::mem_fun(this, &MenuFavorite::app_changed));
 }
 
 void MenuFavorite::flush(const AppVec &apps)
@@ -65,7 +65,7 @@ void MenuFavorite::flush(const AppVec &apps)
     if (iter != this->favorite_apps_.end())
     {
         this->favorite_apps_.erase(iter, this->favorite_apps_.end());
-        write_list_quark_to_as(this->settings_, MENU_KEY_FAVORITE_APPS, this->favorite_apps_);
+        write_list_quark_to_as(this->settings_, STARTMENU_KEY_FAVORITE_APPS, this->favorite_apps_);
         this->app_deleted_.emit(delete_apps);
     }
 }
@@ -80,7 +80,7 @@ bool MenuFavorite::add_app(const std::string &desktop_id)
         this->favorite_apps_.push_back(quark.id());
         std::vector<std::string> add_apps = {desktop_id};
         this->app_added_.emit(add_apps);
-        return write_list_quark_to_as(this->settings_, MENU_KEY_FAVORITE_APPS, this->favorite_apps_);
+        return write_list_quark_to_as(this->settings_, STARTMENU_KEY_FAVORITE_APPS, this->favorite_apps_);
     }
     return FALSE;
 }
@@ -96,7 +96,7 @@ bool MenuFavorite::del_app(const std::string &desktop_id)
         this->favorite_apps_.erase(iter);
         std::vector<std::string> delete_apps = {desktop_id};
         this->app_deleted_.emit(delete_apps);
-        return write_list_quark_to_as(this->settings_, MENU_KEY_FAVORITE_APPS, this->favorite_apps_);
+        return write_list_quark_to_as(this->settings_, STARTMENU_KEY_FAVORITE_APPS, this->favorite_apps_);
     }
     return FALSE;
 }
@@ -124,7 +124,7 @@ std::vector<std::string> MenuFavorite::get_favorite_apps()
 
 void MenuFavorite::app_changed(const Glib::ustring &key)
 {
-    auto new_favorite_apps = read_as_to_list_quark(this->settings_, MENU_KEY_FAVORITE_APPS);
+    auto new_favorite_apps = read_as_to_list_quark(this->settings_, STARTMENU_KEY_FAVORITE_APPS);
 
     std::vector<std::string> add_apps;
     std::vector<std::string> delete_apps;
