@@ -1,14 +1,14 @@
 /**
- * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd.
  * kiran-cc-daemon is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
  * You may obtain a copy of Mulan PSL v2 at:
- *          http://license.coscl.org.cn/MulanPSL2 
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
- * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
- * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
- * See the Mulan PSL v2 for more details.  
- * 
+ *          http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ *
  * Author:     tangjie02 <tangjie02@kylinos.com.cn>
  */
 
@@ -27,7 +27,7 @@ namespace Kiran
 {
 MenuNew::MenuNew()
 {
-    this->settings_ = Gio::Settings::create(KIRAN_MENU_SCHEMA);
+    this->settings_ = Gio::Settings::create(STARTMENU_SCHEMA);
 }
 
 MenuNew::~MenuNew()
@@ -63,8 +63,7 @@ void MenuNew::flush(const AppVec &apps)
                                        new_app_change = true;
                                        return true;
                                    }
-                                   return false;
-                               });
+                                   return false; });
 
     if (iter != this->new_apps_.end())
     {
@@ -159,8 +158,7 @@ void MenuNew::app_uninstalled(AppVec apps)
                                        new_app_change = true;
                                        return true;
                                    }
-                                   return false;
-                               });
+                                   return false; });
 
     if (iter != this->new_apps_.end())
     {
@@ -193,12 +191,12 @@ void MenuNew::window_opened(std::shared_ptr<Window> window)
 void MenuNew::read_new_apps()
 {
     this->new_apps_.clear();
-    this->new_apps_ = read_as_to_list_quark(this->settings_, "new-apps");
+    this->new_apps_ = read_as_to_list_quark(this->settings_, STARTMENU_KEY_NEW_APPS);
 }
 
 void MenuNew::write_new_apps()
 {
-    write_list_quark_to_as(this->settings_, "new-apps", this->new_apps_);
+    write_list_quark_to_as(this->settings_, STARTMENU_KEY_NEW_APPS, this->new_apps_);
     this->new_app_changed_.emit();
 }
 

@@ -1,14 +1,14 @@
 /**
- * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd.
  * kiran-cc-daemon is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
  * You may obtain a copy of Mulan PSL v2 at:
- *          http://license.coscl.org.cn/MulanPSL2 
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
- * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
- * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
- * See the Mulan PSL v2 for more details.  
- * 
+ *          http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ *
  * Author:     tangjie02 <tangjie02@kylinos.com.cn>
  */
 
@@ -37,7 +37,7 @@ namespace Kiran
 
 MenuUsage::MenuUsage()
 {
-    this->settings_ = Gio::Settings::create(KIRAN_MENU_SCHEMA);
+    this->settings_ = Gio::Settings::create(STARTMENU_SCHEMA);
 
     this->screen_idle_ = false;
 
@@ -94,8 +94,7 @@ std::vector<std::string> MenuUsage::get_nfrequent_apps(gint top_n)
                   double a_score = (itera == this->app_usages_.end()) ? 0 : itera->second.score;
                   double b_score = (iterb == this->app_usages_.end()) ? 0 : iterb->second.score;
 
-                  return a_score > b_score;
-              });
+                  return a_score > b_score; });
 
     if (top_n > 0 && top_n < (int)apps.size())
     {
@@ -181,13 +180,13 @@ bool MenuUsage::write_usages_to_settings()
         apps.push_back(entry);
     }
 
-    return this->settings_->set_value("frequent-apps", Glib::Variant<std::vector<UsagePair>>::create(apps));
+    return this->settings_->set_value(STARTMENU_KEY_FREQUENT_APPS, Glib::Variant<std::vector<UsagePair>>::create(apps));
 }
 
 bool MenuUsage::read_usages_from_settings()
 {
     Glib::VariantBase base;
-    this->settings_->get_value("frequent-apps", base);
+    this->settings_->get_value(STARTMENU_KEY_FREQUENT_APPS, base);
 
     try
     {
