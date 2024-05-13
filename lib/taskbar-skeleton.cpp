@@ -1,14 +1,14 @@
 /**
- * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd.
  * kiran-cc-daemon is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
  * You may obtain a copy of Mulan PSL v2 at:
- *          http://license.coscl.org.cn/MulanPSL2 
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
- * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
- * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
- * See the Mulan PSL v2 for more details.  
- * 
+ *          http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ *
  * Author:     tangjie02 <tangjie02@kylinos.com.cn>
  */
 
@@ -21,11 +21,12 @@ namespace Kiran
 {
 TaskBarSkeleton::TaskBarSkeleton(AppManager *app_manager) : app_manager_(app_manager)
 {
-    this->settings_ = Gio::Settings::create(KIRAN_TASKBAR_SCHEMA);
+    this->settings_ = Gio::Settings::create(TASKBAR_SCHEMA);
     this->fixed_apps_ = read_as_to_list_quark(this->settings_, TASKBAR_KEY_FIXED_APPS);
 
     settings_->signal_changed().connect_notify(
-        [this](const Glib::ustring &key) -> void {
+        [this](const Glib::ustring &key) -> void
+        {
             if (key == TASKBAR_KEY_SHOW_ACTIVE_WORKSPACE)
                 signal_app_show_policy_changed().emit();
         });
@@ -159,7 +160,8 @@ void TaskBarSkeleton::desktop_app_changed()
 
     AppVec delete_apps;
 
-    auto iter = std::remove_if(this->fixed_apps_.begin(), this->fixed_apps_.end(), [this, &delete_apps, &app_set](int32_t elem) -> bool {
+    auto iter = std::remove_if(this->fixed_apps_.begin(), this->fixed_apps_.end(), [this, &delete_apps, &app_set](int32_t elem) -> bool
+                               {
         if (app_set.find(elem) == app_set.end())
         {
             Glib::QueryQuark query_quark((GQuark)elem);
@@ -171,8 +173,7 @@ void TaskBarSkeleton::desktop_app_changed()
             }
             return true;
         }
-        return false;
-    });
+        return false; });
 
     if (iter != this->fixed_apps_.end())
     {

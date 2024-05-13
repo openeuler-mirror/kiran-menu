@@ -1,14 +1,14 @@
 /**
- * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd.
  * kiran-cc-daemon is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
  * You may obtain a copy of Mulan PSL v2 at:
- *          http://license.coscl.org.cn/MulanPSL2 
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
- * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
- * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
- * See the Mulan PSL v2 for more details.  
- * 
+ *          http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ *
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
  */
 
@@ -20,6 +20,7 @@
 #include "global.h"
 #include "kiran-helper.h"
 #include "lib/base.h"
+#include "lib/common.h"
 
 #define MENU_ITEM_COUNT G_N_ELEMENTS(item_labels)
 
@@ -50,6 +51,8 @@ MenuAppItem::MenuAppItem(const std::shared_ptr<Kiran::App> &app_, int _icon_size
     set_tooltip_text(app_->get_locale_comment());
 
     init_drag_and_drop();
+
+    this->settings_ = Gio::Settings::create(STARTMENU_LOCKDOWN_SCHEMA);
 }
 
 MenuAppItem::~MenuAppItem()
@@ -77,7 +80,7 @@ bool MenuAppItem::on_button_press_event(GdkEventButton *button_event)
 {
     if (gdk_event_triggers_context_menu((GdkEvent *)button_event))
     {
-        //鼠标右键点击，显示上下文菜单
+        // 鼠标右键点击，显示上下文菜单
         create_context_menu();
         context_menu.popup_at_pointer((GdkEvent *)button_event);
         return false;
@@ -161,7 +164,7 @@ bool MenuAppItem::on_key_press_event(GdkEventKey *key_event)
             allocation.set_y(0);
         }
 
-        //重新创建右键菜单，以确保收藏夹相关的选项能及时更新
+        // 重新创建右键菜单，以确保收藏夹相关的选项能及时更新
         create_context_menu();
         context_menu.popup_at_rect(get_window(), allocation,
                                    Gdk::GRAVITY_CENTER,
@@ -199,18 +202,20 @@ void MenuAppItem::create_context_menu()
     }
     context_menu.append(*item);
 
-    if (is_fixed_on_taskbar())
+    if (!this->settings_->get_boolean(STARTMENU_LOCKDOWN_KEY_DISABLE_FIXED_APP))
     {
-        item = Gtk::make_managed<Gtk::MenuItem>(_("Unpin to taskbar"));
-        item->signal_activate().connect(sigc::hide_return(sigc::mem_fun(*this, &MenuAppItem::unpin_app_from_taskbar)));
+        if (is_fixed_on_taskbar())
+        {
+            item = Gtk::make_managed<Gtk::MenuItem>(_("Unpin to taskbar"));
+            item->signal_activate().connect(sigc::hide_return(sigc::mem_fun(*this, &MenuAppItem::unpin_app_from_taskbar)));
+        }
+        else
+        {
+            item = Gtk::make_managed<Gtk::MenuItem>(_("Pin to taskbar"));
+            item->signal_activate().connect(sigc::hide_return(sigc::mem_fun(*this, &MenuAppItem::pin_app_to_taskbar)));
+        }
+        context_menu.append(*item);
     }
-    else
-    {
-        item = Gtk::make_managed<Gtk::MenuItem>(_("Pin to taskbar"));
-        item->signal_activate().connect(sigc::hide_return(sigc::mem_fun(*this, &MenuAppItem::pin_app_to_taskbar)));
-    }
-
-    context_menu.append(*item);
 
     if (!context_menu.get_attach_widget())
         context_menu.attach_to_widget(*this);
@@ -263,7 +268,7 @@ bool MenuAppItem::add_app_to_desktop()
         auto src_file = Gio::File::create_for_path(app_->get_file_name());
         auto dest_file = Gio::File::create_for_path(target_dir + "/" + src_file->get_basename());
 
-        //如果桌面上已经存在相同的文件，跳过拷贝操作
+        // 如果桌面上已经存在相同的文件，跳过拷贝操作
         if (dest_file->query_exists())
             return true;
 
@@ -273,7 +278,7 @@ bool MenuAppItem::add_app_to_desktop()
             return false;
         }
 
-        //将desktop文件标记为可执行
+        // 将desktop文件标记为可执行
         chmod(dest_file->get_path().data(), 0755);
         return true;
     }
