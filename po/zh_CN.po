@@ -249,7 +249,7 @@ msgid "Clear the whole list"
 msgstr "清空最近访问列表"
 
 #: ../src/menu/recent-files-widget.cpp:29
-msgid "The Recently files list is empty!"
+msgid "The recent files list is empty!"
 msgstr "暂无最近访问的文档信息"
 
 #: ../src/menu/recent-files-widget.cpp:44
