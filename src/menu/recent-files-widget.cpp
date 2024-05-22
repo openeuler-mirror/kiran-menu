@@ -26,7 +26,7 @@ RecentFilesWidget::RecentFilesWidget() : box(Gtk::ORIENTATION_VERTICAL, 0)
 
 void RecentFilesWidget::init_ui()
 {
-    empty_label.set_text(_("The Recently files list is empty!"));
+    empty_label.set_text(_("The recent files list is empty!"));
     empty_label.get_style_context()->add_class("empty-prompt-text");
     scrolled.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
     scrolled.set_hexpand(true);
