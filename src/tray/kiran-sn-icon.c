@@ -1,14 +1,14 @@
 /**
- * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd.
  * kiran-cc-daemon is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
  * You may obtain a copy of Mulan PSL v2 at:
- *          http://license.coscl.org.cn/MulanPSL2 
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
- * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
- * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
- * See the Mulan PSL v2 for more details.  
- * 
+ *          http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ *
  * Author:     wangxiaoqing <wangxiaoqing@kylinos.com.cn>
  */
 
@@ -589,35 +589,6 @@ update(KiranSnIcon *icon)
     {
         gtk_image_set_from_icon_name(GTK_IMAGE(priv->image), "image-missing", GTK_ICON_SIZE_MENU);
         gtk_image_set_pixel_size(GTK_IMAGE(priv->image), icon_size);
-    }
-
-    tip = priv->tooltip;
-    if (tip != NULL)
-    {
-        gchar *markup;
-
-        markup = NULL;
-
-        if ((tip->title != NULL && *tip->title != '\0') &&
-            (tip->text != NULL && *tip->text != '\0'))
-        {
-            markup = g_strdup_printf("%s\n%s", tip->title, tip->text);
-        }
-        else if (tip->title != NULL && *tip->title != '\0')
-        {
-            markup = g_strdup(tip->title);
-        }
-        else if (tip->text != NULL && *tip->text != '\0')
-        {
-            markup = g_strdup(tip->text);
-        }
-
-        gtk_widget_set_tooltip_markup(GTK_WIDGET(icon), markup);
-        g_free(markup);
-    }
-    else
-    {
-        gtk_widget_set_tooltip_markup(GTK_WIDGET(icon), NULL);
     }
 }
 
@@ -1318,6 +1289,48 @@ kiran_sn_icon_class_init(KiranSnIconClass *klass)
     g_type_class_add_private(gobject_class, sizeof(KiranSnIconPrivate));
 }
 
+/**
+ * NOTE:
+ * 直接使用gtk_widget_set_tooltip_markup
+ * 将会触发 gtk_widget_queue_tooltip_query
+ * 存在几率Popup已弹出但触发Tooltip显示，后续由于无法拿到鼠标事件导致该提示框不会消失
+ *
+ * 直接连接GtkWidget::query-tooltip进行处理
+*/
+static gboolean kiran_sn_icon_query_tooltip(GtkWidget *widget,
+                                            gint x, gint y,
+                                            gboolean keyboard_mode,
+                                            GtkTooltip *tooltip, gpointer user_data)
+{
+    KiranSnIcon *icon = NULL;
+    KiranSnTooltip *tip = NULL;
+    gchar *markup = NULL;
+
+    icon = KIRAN_SN_ICON(user_data);
+    tip = icon->priv->tooltip;
+
+    if (!icon->priv->tooltip)
+        return FALSE;
+
+    if ((tip->title != NULL && *tip->title != '\0') &&
+        (tip->text != NULL && *tip->text != '\0'))
+    {
+        markup = g_strdup_printf("%s\n%s", tip->title, tip->text);
+    }
+    else if (tip->title != NULL && *tip->title != '\0')
+    {
+        markup = g_strdup(tip->title);
+    }
+    else if (tip->text != NULL && *tip->text != '\0')
+    {
+        markup = g_strdup(tip->text);
+    }
+
+    gtk_tooltip_set_markup(tooltip,markup);
+    g_free(markup);
+    return TRUE;
+}
+
 static void
 kiran_sn_icon_init(KiranSnIcon *self)
 {
@@ -1332,6 +1345,9 @@ kiran_sn_icon_init(KiranSnIcon *self)
     priv->category = KIRAN_NOTIFY_ICON_CATEGORY_APPLICATION_STATUS;
     priv->app_category = NULL;
     priv->icon = NULL;
+
+    g_signal_connect(GTK_WIDGET(self), "query-tooltip", G_CALLBACK(kiran_sn_icon_query_tooltip), self);
+    gtk_widget_set_has_tooltip(GTK_WIDGET(self), TRUE);
 
     priv->image = gtk_image_new();
     gtk_container_add(GTK_CONTAINER(self), priv->image);
