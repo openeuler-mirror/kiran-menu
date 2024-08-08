@@ -1,14 +1,14 @@
 /**
- * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd.
  * kiran-cc-daemon is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
  * You may obtain a copy of Mulan PSL v2 at:
- *          http://license.coscl.org.cn/MulanPSL2 
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
- * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
- * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
- * See the Mulan PSL v2 for more details.  
- * 
+ *          http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ *
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
  */
 
@@ -25,7 +25,11 @@ TasklistAppPreviewer::TasklistAppPreviewer() : Gtk::Window(Gtk::WINDOW_POPUP),
 {
     set_rgba_visual();
 
-    //signal_composited_changed().connect(sigc::mem_fun(*this, &KiranAppPreviewer::set_position));
+    signal_composited_changed().connect(sigc::mem_fun(*this, &TasklistAppPreviewer::on_composite_changed));
+
+    settings = Gio::Settings::create(TASKBAR_SCHEMA);
+    settings->signal_changed().connect(
+        sigc::mem_fun(*this, &TasklistAppPreviewer::on_settings_changed));
 
     init_ui();
 
@@ -34,9 +38,9 @@ TasklistAppPreviewer::TasklistAppPreviewer() : Gtk::Window(Gtk::WINDOW_POPUP),
     set_skip_pager_hint(true);
     set_no_show_all(true);
 
-    box.set_spacing(4);
     box.signal_remove().connect(
-        [this](Gtk::Widget *widget) -> void {
+        [this](Gtk::Widget *widget) -> void
+        {
             if (box.get_children().size() == 0)
                 hide();
         });
@@ -92,7 +96,7 @@ void TasklistAppPreviewer::reposition()
 
     if (!relative_to->get_has_window())
     {
-        //如果父控件没有自己的GdkWindow，那么需要重新计算其位置
+        // 如果父控件没有自己的GdkWindow，那么需要重新计算其位置
         parent_x += parent_allocation.get_x();
         parent_y += parent_allocation.get_y();
     }
@@ -118,7 +122,7 @@ void TasklistAppPreviewer::reposition()
         break;
     }
 
-    //检查位置是否超出当前显示器的工作区范围
+    // 检查位置是否超出当前显示器的工作区范围
     auto display = relative_to->get_display();
     auto monitor = display->get_monitor_at_window(relative_window);
 
@@ -163,6 +167,7 @@ void TasklistAppPreviewer::get_preferred_height_vfunc(int &minimum_height, int &
     monitor = relative_to->get_display()->get_monitor_at_window(window);
     monitor->get_workarea(workarea);
     scroll_window.get_preferred_size(unused_size, natural_size);
+    box.get_preferred_size(unused_size, natural_size);
 
     if (natural_size.height + border_spacing * 2 <= workarea.get_height())
     {
@@ -249,7 +254,7 @@ void TasklistAppPreviewer::adjust_size()
     if (!get_realized())
         realize();
 
-    //重新调整窗口大小
+    // 重新调整窗口大小
     get_preferred_size(mini, natural);
     if (natural.width > 0 && natural.height > 0)
         resize(natural.width, natural.height);
@@ -269,7 +274,7 @@ bool TasklistAppPreviewer::on_leave_notify_event(GdkEventCrossing *crossing_even
     if (pointer_x > 0 && pointer_x < width &&
         pointer_y > 0 && pointer_y < height)
     {
-        //鼠标仍旧在窗口范围内
+        // 鼠标仍旧在窗口范围内
         return true;
     }
 
@@ -292,7 +297,7 @@ void TasklistAppPreviewer::on_child_context_menu_toggled(bool active)
 
 void TasklistAppPreviewer::set_rgba_visual()
 {
-    //FIXME, 使用default_screen是否合适??
+    // FIXME, 使用default_screen是否合适??
     auto visual = get_screen()->get_rgba_visual();
     if (!visual)
         KLOG_WARNING("no rgba visual found\n");
@@ -304,26 +309,29 @@ void TasklistAppPreviewer::init_ui()
 {
     box.set_spacing(4);
     box.signal_remove().connect(
-        [this](Gtk::Widget *child UNUSED) -> void {
+        [this](Gtk::Widget *child UNUSED) -> void
+        {
             if (!box.get_children().size())
             {
-                //如果当前app没有已打开的窗口，隐藏预览窗口
+                // 如果当前app没有已打开的窗口，隐藏预览窗口
                 hide();
             }
         });
 
     scroll_window.set_propagate_natural_height(true);
     scroll_window.set_propagate_natural_width(true);
-    scroll_window.set_margin_top(5);
-    scroll_window.set_margin_bottom(5);
-    scroll_window.set_margin_start(5);
-    scroll_window.set_margin_end(5);
+    box.set_margin_top(5);
+    box.set_margin_bottom(5);
+    box.set_margin_start(5);
+    box.set_margin_end(5);
     scroll_window.add(box);
 
     scroll_window.show_all();
     scroll_window.signal_scroll_event().connect(sigc::mem_fun(*this, &TasklistAppPreviewer::on_scroll_event));
 
     add(scroll_window);
+
+    refresh_layout();
 }
 
 bool TasklistAppPreviewer::contains_pointer() const
@@ -400,14 +408,14 @@ void TasklistAppPreviewer::add_window_thumbnail(std::shared_ptr<Kiran::Window> &
     auto data = std::make_pair(window->get_xid(), previewer);
     win_previewers.insert(data);
 
-    //调整预览窗口大小和位置
+    // 调整预览窗口大小和位置
     adjust_size();
 }
 
 void TasklistAppPreviewer::remove_window_thumbnail(std::shared_ptr<Kiran::Window> &window)
 {
     auto iter = win_previewers.find(window->get_xid());
-    if (iter == win_previewers.end())  //没有找到窗口的预览控件
+    if (iter == win_previewers.end())  // 没有找到窗口的预览控件
         return;
 
     auto previewer = iter->second;
@@ -435,14 +443,31 @@ bool TasklistAppPreviewer::has_context_menu_opened()
 
 void TasklistAppPreviewer::set_position(Gtk::PositionType pos)
 {
-    Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL;
-
     if (position == pos && relative_to != nullptr)
         return;
 
-    if (pos == Gtk::POS_LEFT || pos == Gtk::POS_RIGHT || !is_composited())
+    position = pos;
+
+    refresh_layout();
+
+    reposition();
+}
+
+void TasklistAppPreviewer::on_composite_changed()
+{
+    refresh_layout();
+}
+
+void TasklistAppPreviewer::refresh_layout()
+{
+    Gtk::Orientation orient = Gtk::ORIENTATION_HORIZONTAL;
+
+    // 纵向排列 条件
+    // 1. 预览窗口位于左右侧
+    // 2. 窗口管理器未开混成
+    // 3. gsettings 配置预览简单显示
+    if (position == Gtk::POS_LEFT || position == Gtk::POS_RIGHT || !is_composited() || settings->get_boolean(TASKBAR_KEY_SIMPLY_WINDOW_PREVIEWER))
     {
-        /* 只有窗口管理器未开混成模式或者预览窗口位于左右侧时，窗口缩略图才需要纵向排列 */
         orient = Gtk::ORIENTATION_VERTICAL;
     }
 
@@ -453,8 +478,14 @@ void TasklistAppPreviewer::set_position(Gtk::PositionType pos)
     else
         scroll_window.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-    position = pos;
-    reposition();
+    adjust_size();
+}
+void TasklistAppPreviewer::on_settings_changed(const Glib::ustring &changed_key)
+{
+    if (changed_key == TASKBAR_KEY_SIMPLY_WINDOW_PREVIEWER)
+    {
+        refresh_layout();
+    }
 }
 
 bool TasklistAppPreviewer::on_scroll_event(GdkEventScroll *event)
