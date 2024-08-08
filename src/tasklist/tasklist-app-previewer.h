@@ -1,14 +1,14 @@
 /**
- * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd.
  * kiran-cc-daemon is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
  * You may obtain a copy of Mulan PSL v2 at:
- *          http://license.coscl.org.cn/MulanPSL2 
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
- * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
- * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
- * See the Mulan PSL v2 for more details.  
- * 
+ *          http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ *
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
  */
 
@@ -119,6 +119,11 @@ protected:
      */
     void set_position(Gtk::PositionType pos);
 
+    void on_composite_changed();
+    void on_settings_changed(const Glib::ustring &changed_key);
+
+    void refresh_layout();
+
 private:
     Gtk::ScrolledWindow scroll_window;
     Gtk::Box box;
@@ -140,6 +145,8 @@ private:
     void set_rgba_visual();
 
     static const int border_spacing;
+
+    Glib::RefPtr<Gio::Settings> settings; /* 任务栏gsettings*/
 };
 
 #endif  // TASKLIST_APP_PREVIEWER_H
