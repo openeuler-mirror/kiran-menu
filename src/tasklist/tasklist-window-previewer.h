@@ -1,14 +1,14 @@
 /**
- * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd.
  * kiran-cc-daemon is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
  * You may obtain a copy of Mulan PSL v2 at:
- *          http://license.coscl.org.cn/MulanPSL2 
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
- * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
- * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
- * See the Mulan PSL v2 for more details.  
- * 
+ *          http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ *
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
  */
 
@@ -51,14 +51,19 @@ protected:
     virtual void on_thumbnail_clicked() override;
 
     /**
-     * @brief on_composite_changed  回调函数，窗口管理器复合状态(composite)打开或关闭时调用
-     */
-    void on_composite_changed();
-
-    /**
      * @brief on_window_state_changed 回调函数，窗口状态发生变化时调用
      */
     void on_window_state_changed();
+
+    /*混成器变化响应*/
+    void on_composite_changed();
+    /*gsettings 配置变化响应*/
+    void on_settings_changed(const Glib::ustring &changed_key);
+
+private:
+    /*显示布局调整*/
+    void refresh_layout();
+    void refresh_layout(bool is_simply);
 
 private:
     TasklistWindowContextMenu *context_menu;                /* 右键菜单 */
@@ -67,6 +72,8 @@ private:
     sigc::connection window_state_change; /* 窗口状态变化监控 */
     bool needs_attention;                 /* 窗口是否需要注意 */
     Gdk::RGBA attention_color;            /* 窗口需要注意时的提示颜色 */
+
+    Glib::RefPtr<Gio::Settings> settings; /* 任务栏gsettings*/
 };
 
 #endif  // TASKLIST_WINDOW_PREVIEWER_H

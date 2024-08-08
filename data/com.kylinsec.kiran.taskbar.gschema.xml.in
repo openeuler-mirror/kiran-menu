@@ -8,5 +8,9 @@
       <default>true</default>
       <summary>Whether only show apps for current active workspace on the taskbar</summary>
     </key>
+    <key name="simply-window-previewer" type="b">
+      <default>false</default>
+      <summary>Whether only show simply window previewer</summary>
+    </key>
   </schema>
 </schemalist>
