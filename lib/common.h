@@ -26,6 +26,7 @@ namespace Kiran
 #define TASKBAR_SCHEMA "com.kylinsec.kiran.taskbar"
 #define TASKBAR_KEY_FIXED_APPS "fixed-apps"
 #define TASKBAR_KEY_SHOW_ACTIVE_WORKSPACE "show-active-workspace-apps"
+#define TASKBAR_KEY_SIMPLY_WINDOW_PREVIEWER "simply-window-previewer"
 
 #define STARTMENU_LOCKDOWN_SCHEMA "com.kylinsec.kiran.startmenu.lockdown"
 #define STARTMENU_LOCKDOWN_KEY_DISABLE_LOCK_SCREEN "disable-lock-screen"
