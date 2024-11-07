@@ -21,6 +21,7 @@
 #include "kiran-helper.h"
 #include "lib/base.h"
 #include "lib/common.h"
+#include <glibmm/random.h>
 
 #define MENU_ITEM_COUNT G_N_ELEMENTS(item_labels)
 
@@ -273,14 +274,27 @@ bool MenuAppItem::add_app_to_desktop()
         if (dest_file->query_exists())
             return true;
 
-        if (!src_file->copy(dest_file, flags))
+        // 创建临时文件
+        char temp_path[PATH_MAX] = {0};
+        int random = Glib::Rand().get_int_range(0,9999);
+        snprintf(temp_path, PATH_MAX, "/tmp/%d-%s",random,src_file->get_basename().c_str());
+        auto dest_file_temp = Gio::File::create_for_path(temp_path);
+
+        if (!src_file->copy(dest_file_temp, flags))
         {
             KLOG_WARNING("Failed to copy file");
+            dest_file_temp->remove();
             return false;
         }
+        chmod(dest_file_temp->get_path().data(), 0755);
 
-        // 将desktop文件标记为可执行
-        chmod(dest_file->get_path().data(), 0755);
+        // 移动到桌面
+        if (!dest_file_temp->move(dest_file,Gio::FILE_COPY_BACKUP))
+        {
+            KLOG_WARNING("Failed to move file");
+            dest_file_temp->remove();
+            return false;
+        }
         return true;
     }
     catch (const Glib::Error &e)
