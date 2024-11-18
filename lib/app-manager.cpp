@@ -826,7 +826,7 @@ void AppManager::load_desktop_apps()
         register_app(old_apps, app, AppKind::NORMAL);
     }
 
-    // 更新WnckApplicatin和应用绑定
+    // 更新WnckApplication和应用绑定
     this->update_wnckapps_binding();
     // 清理不再使用的fake app
     this->clear_nouse_fake_app();

@@ -36,10 +36,10 @@ public:
 
     static void global_deinit() { delete instance_; };
 
-    // 将desktop_id加入固定列表，如果dekstop_id不合法, 或者已经在列表中, 则返回false, 否则返回true.
+    // 将desktop_id加入固定列表，如果desktop_id不合法, 或者已经在列表中, 则返回false, 否则返回true.
     bool add_fixed_app(const std::string &desktop_id);
 
-    // 从固定列表删除desktop_id，如果dekstop_id不在列表中, 则返回false, 否则返回true
+    // 从固定列表删除desktop_id，如果desktop_id不在列表中, 则返回false, 否则返回true
     bool del_fixed_app(const std::string &desktop_id);
 
     // 查询desktop_id是否在固定列表中，如果未查询到，则返回空指针

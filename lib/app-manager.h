@@ -40,7 +40,7 @@ public:
     // 获取所有App列表(每个App对应一个desktop文件)
     AppVec get_apps();
 
-    // 获取制定类型的App列表
+    // 获取指定类型的App列表
     AppVec get_apps_by_kind(AppKind kind);
 
     // 获取可以在菜单中显示的App列表
