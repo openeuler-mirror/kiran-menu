@@ -412,6 +412,7 @@ void TasklistAppPreviewer::remove_window_thumbnail(std::shared_ptr<Kiran::Window
 
     auto previewer = iter->second;
     box.remove(*previewer);
+    delete previewer;
     win_previewers.erase(iter);
     adjust_size();
 }
