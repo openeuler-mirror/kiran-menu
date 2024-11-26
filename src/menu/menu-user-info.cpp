@@ -31,6 +31,10 @@ MenuUserInfo::MenuUserInfo(uid_t id) : uid(id),
 
 MenuUserInfo::~MenuUserInfo()
 {
+    if (user)
+    {
+        delete user;
+    }
 }
 
 bool MenuUserInfo::load()
