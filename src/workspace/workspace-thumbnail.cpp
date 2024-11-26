@@ -141,7 +141,6 @@ bool WorkspaceThumbnail::draw_thumbnail_image(Gtk::Widget *thumbnail_area_, cons
     auto workspace_ = workspace.lock();
     Display *xdisplay = gdk_x11_get_default_xdisplay();
     Gtk::Allocation allocation;
-    Cairo::ImageSurface *surface = nullptr;
     auto screen = get_screen();
     double surface_offset_x, surface_offset_y;
     int scale_factor = get_scale_factor();
@@ -157,8 +156,9 @@ bool WorkspaceThumbnail::draw_thumbnail_image(Gtk::Widget *thumbnail_area_, cons
     // 背景图片居中显示
     surface_offset_x = (allocation.get_width() - surface_width) / 2.0;
     surface_offset_y = (allocation.get_height() - surface_height) / 2.0;
-    surface = new Cairo::ImageSurface(bg_surface, false);
-    cr->set_source(Cairo::RefPtr<Cairo::ImageSurface>(surface),
+
+    Cairo::RefPtr<Cairo::ImageSurface> surface(new Cairo::ImageSurface(bg_surface, false));
+    cr->set_source(surface,
                    surface_offset_x,
                    surface_offset_y);
     cr->paint();
