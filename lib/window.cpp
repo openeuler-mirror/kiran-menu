@@ -26,6 +26,7 @@
 #include "lib/app.h"
 #include "lib/base.h"
 #include "lib/workspace-manager.h"
+#include "window.h"
 
 namespace Kiran
 {
@@ -41,6 +42,7 @@ Window::Window(WnckWindow *wnck_window) : wnck_window_(wnck_window),
                                           state_changed_handler(0)
 {
     xid_ = wnck_window_get_xid(wnck_window_);
+    real_toplevle_xid_ = xid_;
     auto workspace = this->get_workspace();
     if (workspace)
     {
@@ -52,12 +54,14 @@ Window::Window(WnckWindow *wnck_window) : wnck_window_(wnck_window),
     this->workspace_changed_handler_ = g_signal_connect(this->wnck_window_, "workspace-changed", G_CALLBACK(Window::workspace_changed), NULL);
     this->geometry_changed_handler_ = g_signal_connect(this->wnck_window_, "geometry-changed", G_CALLBACK(Window::geometry_changed), NULL);
     this->state_changed_handler = g_signal_connect(this->wnck_window_, "state-changed", G_CALLBACK(Window::state_changed), NULL);
+    this->update_real_toplevel_xid();
     this->update_window_pixmap();
 }
 
 Window::Window(gulong xid) : wnck_window_(nullptr),
                              gdk_window_(NULL),
                              xid_(xid),
+                             real_toplevle_xid_(xid),
                              last_workspace_number_(-1),
                              last_is_pinned_(false),
                              pixmap_(None),
@@ -90,6 +94,7 @@ Window::Window(gulong xid) : wnck_window_(nullptr),
     {
         KLOG_WARNING("No WnckWindow found for Window with ID 0x%x", xid);
     }
+    this->update_real_toplevel_xid();
     this->update_window_pixmap();
 }
 
@@ -164,7 +169,7 @@ cairo_surface_t *Window::get_thumbnail(int &thumbnail_width, int &thumbnail_heig
     if (pixmap != None)
     {
         gdk_x11_display_error_trap_push(display);
-        XGetWindowAttributes(xdisplay, get_xid(), &attrs);
+        XGetWindowAttributes(xdisplay, this->real_toplevle_xid_, &attrs);
         surface = cairo_xlib_surface_create(xdisplay,
                                             pixmap,
                                             attrs.visual,
@@ -506,6 +511,25 @@ WindowGeometry Window::get_client_window_geometry()
     return std::make_tuple(x, y, w, h);
 }
 
+WindowGeometry Window::get_real_toplevel_window_geometry()
+{
+    auto display = gdk_x11_get_default_xdisplay();
+    auto gdk_display = gdk_x11_lookup_xdisplay(display);
+
+    if ( this->real_toplevle_xid_ && gdk_display)
+    {
+        gdk_x11_display_error_trap_push(gdk_display);
+        XWindowAttributes attrs;
+        XGetWindowAttributes(display, this->real_toplevle_xid_, &attrs);
+        if (gdk_x11_display_error_trap_pop(gdk_display) == 0)
+        {
+            return std::make_tuple(attrs.x, attrs.y, attrs.width, attrs.height);
+        }
+    }
+
+    return std::make_tuple(0, 0, 0, 0);
+}
+
 void Window::set_geometry(WnckWindowGravity gravity,
                           WnckWindowMoveResizeMask geometry_mask,
                           int x,
@@ -676,7 +700,12 @@ void Window::process_events(GdkXEvent *xevent, GdkEvent *event)
 {
     auto x_event = (XEvent *)xevent;
 
-    if (x_event->type == MapNotify || x_event->type == ConfigureNotify)
+    if ( x_event->type == ReparentNotify )
+    {
+        update_real_toplevel_xid();
+        update_window_pixmap();
+    }
+    else if (x_event->type == MapNotify || x_event->type == ConfigureNotify )
     {
         this->update_window_pixmap();
     }
@@ -697,13 +726,53 @@ bool Window::update_window_pixmap()
     }
 
     gdk_x11_display_error_trap_push(gdk_display);
-    this->pixmap_ = XCompositeNameWindowPixmap(display, this->get_xid());
 
+    uint64_t thumbnail_window = this->real_toplevle_xid_;
+    this->pixmap_ = XCompositeNameWindowPixmap(display, thumbnail_window);
+    
     if (gdk_x11_display_error_trap_pop(gdk_display))
     {
         this->pixmap_ = None;
     }
     return false;
+}
+
+void Window::update_real_toplevel_xid()
+{
+    auto display = gdk_x11_get_default_xdisplay();
+    g_return_if_fail(display);
+
+    auto gdk_display = gdk_x11_lookup_xdisplay(display);
+    g_return_if_fail(gdk_display);
+
+    uint64_t window = this->get_xid();
+    uint64_t root_window=0,parent_window=0;
+    uint64_t* children_windows = NULL;
+    unsigned int n_children = 0;
+
+    gdk_x11_display_error_trap_push(gdk_display);
+
+    XQueryTree(display, window, &root_window, &parent_window, &children_windows, &n_children);
+    if( n_children )
+    {
+        XFree(children_windows);
+    }
+
+    if (gdk_x11_display_error_trap_pop(gdk_display))
+    {
+        KLOG_WARNING("update window real toplevel id failed, xid: 0x%lx\n",window);
+        this->real_toplevle_xid_ = window;
+        return;
+    }
+
+    if ( parent_window != root_window )
+    {
+        this->real_toplevle_xid_ = parent_window;
+    }
+    else
+    {
+        this->real_toplevle_xid_ = window;
+    }
 }
 
 void Window::set_on_visible_workspace(bool on)
