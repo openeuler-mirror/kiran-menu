@@ -192,7 +192,7 @@ void WorkspaceWindowsOverview::reload_thumbnails()
     std::vector<std::vector<int16_t>> results;
     for (auto window : windows)
     {
-        width_vector.push_back(WINDOW_WIDTH(window));
+        width_vector.push_back(REAL_WINDOW_WIDTH(window));
     }
     results = arrange_data(width_vector, rows);
 
@@ -211,11 +211,11 @@ void WorkspaceWindowsOverview::reload_thumbnails()
             auto w1 = windows.at(i);
             auto w2 = windows.at(j);
 
-            if (WINDOW_WIDTH(w1) != WINDOW_WIDTH(w2))
-                return WINDOW_WIDTH(w1) >= WINDOW_WIDTH(w2);
-            else
-                return WINDOW_HEIGHT(w1) >= WINDOW_HEIGHT(w2);
-        });
+                      if (REAL_WINDOW_WIDTH(w1) != REAL_WINDOW_WIDTH(w2))
+                          return REAL_WINDOW_WIDTH(w1) >= REAL_WINDOW_WIDTH(w2);
+                      else
+                          return REAL_WINDOW_HEIGHT(w1) >= REAL_WINDOW_HEIGHT(w2);
+                  });
 
         /*
          * 提取该行窗口的最大高度
@@ -224,8 +224,8 @@ void WorkspaceWindowsOverview::reload_thumbnails()
         {
             auto window = windows.at(index);
 
-            sum += WINDOW_WIDTH(window);
-            max_height = std::max(max_height, WINDOW_HEIGHT(window));
+            sum += REAL_WINDOW_WIDTH(window);
+            max_height = std::max(max_height, REAL_WINDOW_HEIGHT(window));
         }
 
         /*
@@ -274,8 +274,8 @@ int WorkspaceWindowsOverview::calculate_rows(std::vector<std::shared_ptr<Kiran::
     {
         int width, height;
 
-        width = WINDOW_WIDTH(window);
-        height = WINDOW_HEIGHT(window);
+        width = REAL_WINDOW_WIDTH(window);
+        height = REAL_WINDOW_HEIGHT(window);
 
         sum_width += width;
         min_width = std::min(min_width, width);
