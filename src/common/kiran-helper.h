@@ -26,6 +26,9 @@ using KiranWorkspacePointer = std::shared_ptr<Kiran::Workspace>;
 #define WINDOW_WIDTH(w) (std::get<2>(w->get_client_window_geometry()))
 #define WINDOW_HEIGHT(w) (std::get<3>(w->get_client_window_geometry()))
 
+#define REAL_WINDOW_WIDTH(w) (std::get<2>(w->get_real_toplevel_window_geometry()))
+#define REAL_WINDOW_HEIGHT(w) (std::get<3>(w->get_real_toplevel_window_geometry()))
+
 #define UNUSED __attribute__((unused))
 
 class KiranHelper
