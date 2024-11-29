@@ -51,10 +51,10 @@ public:
     // 通过keyword字段进行检索, 会跟desktop文件的name/localename/comment字段进行字符串匹配, 最重返回所有匹配成功的App。如果ignore_case设置为true，则忽略大小写匹配。
     AppVec search_app(const std::string &keyword, bool ignore_case = false, AppKind kind = AppKind::NORMAL);
 
-    // 将desktop_id加入收藏列表，如果dekstop_id不合法, 或者已经在收藏列表中, 则返回false, 否则返回true.
+    // 将desktop_id加入收藏列表，如果desktop_id不合法, 或者已经在收藏列表中, 则返回false, 否则返回true.
     bool add_favorite_app(const std::string &desktop_id);
 
-    // 从收藏列表删除desktop_id，如果dekstop_id不在收藏列表中, 则返回false, 否则返回true
+    // 从收藏列表删除desktop_id，如果desktop_id不在收藏列表中, 则返回false, 否则返回true
     bool del_favorite_app(const std::string &desktop_id);
 
     // 查询desktop_id是否在收藏列表中，如果未查询到，则返回空指针
