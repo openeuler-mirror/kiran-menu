@@ -119,7 +119,7 @@ void MenuAppItem::on_drag_data_get(const Glib::RefPtr<Gdk::DragContext> &context
     auto app = get_app();
     if (!app)
     {
-        KLOG_WARNING("init_drag_and_drop: app alreay expired\n");
+        KLOG_WARNING("init_drag_and_drop: app already expired\n");
         return;
     }
     Glib::ustring uri = Glib::filename_to_uri(app->get_file_name()) + "\r\n";

@@ -23,7 +23,7 @@ void test_favorite_apps(gconstpointer data)
 
     g_print("\n---------------------------------------------\n");
 
-    // delte all favorite apps
+    // delete all favorite apps
     auto favorite_apps = menu_skeleton->get_favorite_apps();
 
     for (auto app : favorite_apps)
@@ -196,7 +196,7 @@ void test_fixed_apps(gconstpointer data)
 
     g_print("\n---------------------------------------------\n");
 
-    // delte all fixed apps
+    // delete all fixed apps
     auto fixed_apps = taskbar_skeleton->get_fixed_apps();
 
     for (auto app : fixed_apps)
