@@ -135,6 +135,7 @@ public:
     // 获取窗口位置和大小，get_geometry函数包含窗口管理器添加边框的大小，如果需要获取(未被窗口管理器处理过的)实际大小，可以使用get_client_window_geometry
     WindowGeometry get_geometry();
     WindowGeometry get_client_window_geometry();
+    WindowGeometry get_real_toplevel_window_geometry();
 
     // 设置窗口的位置和大小，位置和大小包含了窗口管理器添加的边框大小
     void set_geometry(WnckWindowGravity gravity,
@@ -169,12 +170,17 @@ private:
     static void state_changed(WnckWindow* wnck_window, gpointer user_data);
 
     void process_events(GdkXEvent* xevent, GdkEvent* event);
+
+    // 更新窗口真正顶层窗口ID
+    void update_real_toplevel_xid();
+
     bool update_window_pixmap();
 
 private:
     WnckWindow* wnck_window_;
     GdkWindow* gdk_window_;
     gulong xid_;
+    gulong real_toplevle_xid_;
 
     int32_t last_workspace_number_;
 
