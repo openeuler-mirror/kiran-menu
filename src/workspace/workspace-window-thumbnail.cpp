@@ -35,8 +35,8 @@ WorkspaceWindowThumbnail::WorkspaceWindowThumbnail(KiranWindowPointer &win_, dou
     init_drag_and_drop();
 
     int scale_factor = get_scale_factor();
-    window_width = WINDOW_WIDTH(win_);
-    window_height = WINDOW_HEIGHT(win_);
+    window_width = REAL_WINDOW_WIDTH(win_);
+    window_height = REAL_WINDOW_HEIGHT(win_);
     set_thumbnail_size(static_cast<int>(window_width / scale_factor * scale),
                        static_cast<int>(window_height / scale_factor * scale));
 }
