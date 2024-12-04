@@ -1,33 +1,39 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "menu-category-item.h"
 #include <glibmm/i18n.h>
 #include <iostream>
 
+// TODO: 菜单中的应用分类后端目前没有做翻译，暂时放到前端调用_("xxx")进行翻译，正常应该是后端翻译后返回给前端，后续需要调整这里的翻译逻辑
+#define MENU_CATEGORY_OFFICE N_("Office")
+#define MENU_CATEGORY_DEVELOPMENT N_("Development")
+#define MENU_CATEGORY_NETWORK N_("Network")
+#define MENU_CATEGORY_GRAPHICS N_("Graphics")
+#define MENU_CATEGORY_MULTIMEDIA N_("Multimedia")
+#define MENU_CATEGORY_UTILITIES N_("Utilities")
+#define MENU_CATEGORY_SETTINGS N_("Settings")
+#define MENU_CATEGORY_OTHERS N_("Others")
+
 MenuCategoryItem::MenuCategoryItem(const std::string &name,
                                    bool clickable) : Glib::ObjectBase("KiranMenuCategoryItem"),
-                                                     MenuListItemWidget("/kiran-menu/icon/group", _(name.c_str()))
+                                                     MenuListItemWidget("kiran-menu-group-symbolic", _(name.c_str()))
 {
     auto context = get_style_context();
 
     context->add_class("menu-category-item");
+    context->add_class("flat");
     set_clickable(clickable);
     category_name = name;
 }

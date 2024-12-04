@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd.
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
  *
  * Author:     tangjie02 <tangjie02@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "menu-new.h"
@@ -32,7 +27,7 @@ namespace Kiran
 {
 MenuNew::MenuNew()
 {
-    this->settings_ = Gio::Settings::create(KIRAN_MENU_SCHEMA);
+    this->settings_ = Gio::Settings::create(STARTMENU_SCHEMA);
 }
 
 MenuNew::~MenuNew()
@@ -61,14 +56,14 @@ void MenuNew::flush(const AppVec &apps)
         app_ids.insert(quark.id());
     }
 
-    auto iter = std::remove_if(this->new_apps_.begin(), this->new_apps_.end(), [&app_ids, &new_app_change](int32_t elem) -> bool {
-        if (app_ids.find(elem) == app_ids.end())
-        {
-            new_app_change = true;
-            return true;
-        }
-        return false;
-    });
+    auto iter = std::remove_if(this->new_apps_.begin(), this->new_apps_.end(), [&app_ids, &new_app_change](int32_t elem) -> bool
+                               {
+                                   if (app_ids.find(elem) == app_ids.end())
+                                   {
+                                       new_app_change = true;
+                                       return true;
+                                   }
+                                   return false; });
 
     if (iter != this->new_apps_.end())
     {
@@ -106,9 +101,8 @@ void MenuNew::remove_from_new_apps(std::shared_ptr<App> app)
     Glib::Quark quark(desktop_id);
     int32_t remove_value = quark.id();
 
-    auto iter = std::remove_if(this->new_apps_.begin(), this->new_apps_.end(), [remove_value](int32_t elem) {
-        return elem == remove_value;
-    });
+    auto iter = std::remove_if(this->new_apps_.begin(), this->new_apps_.end(), [remove_value](int32_t elem)
+                               { return elem == remove_value; });
 
     if (iter != this->new_apps_.end())
     {
@@ -157,14 +151,14 @@ void MenuNew::app_uninstalled(AppVec apps)
         app_ids.insert(quark.id());
     }
 
-    auto iter = std::remove_if(this->new_apps_.begin(), this->new_apps_.end(), [&app_ids, &new_app_change](int32_t elem) -> bool {
-        if (app_ids.find(elem) != app_ids.end())
-        {
-            new_app_change = true;
-            return true;
-        }
-        return false;
-    });
+    auto iter = std::remove_if(this->new_apps_.begin(), this->new_apps_.end(), [&app_ids, &new_app_change](int32_t elem) -> bool
+                               {
+                                   if (app_ids.find(elem) != app_ids.end())
+                                   {
+                                       new_app_change = true;
+                                       return true;
+                                   }
+                                   return false; });
 
     if (iter != this->new_apps_.end())
     {
@@ -197,12 +191,12 @@ void MenuNew::window_opened(std::shared_ptr<Window> window)
 void MenuNew::read_new_apps()
 {
     this->new_apps_.clear();
-    this->new_apps_ = read_as_to_list_quark(this->settings_, "new-apps");
+    this->new_apps_ = read_as_to_list_quark(this->settings_, STARTMENU_KEY_NEW_APPS);
 }
 
 void MenuNew::write_new_apps()
 {
-    write_list_quark_to_as(this->settings_, "new-apps", this->new_apps_);
+    write_list_quark_to_as(this->settings_, STARTMENU_KEY_NEW_APPS, this->new_apps_);
     this->new_app_changed_.emit();
 }
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
+<!-- Generated with glade 3.36.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkWindow" id="menu-window">
@@ -11,15 +11,15 @@
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <child>
-      <placeholder/>
-    </child>
-    <child>
       <object class="GtkBox" id="menu-container">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_bottom">3</property>
+        <property name="margin_left">4</property>
+        <property name="margin_right">4</property>
+        <property name="margin_top">4</property>
+        <property name="margin_bottom">4</property>
         <child>
-          <object class="GtkBox">
+          <object class="GtkBox" id="menu-sider-container">
             <property name="width_request">62</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
@@ -53,7 +53,7 @@
                 <property name="vexpand">True</property>
                 <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkStackSwitcher">
+                  <object class="GtkStackSwitcher" id="menu-view-stack-switcher">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="hexpand">True</property>
@@ -72,6 +72,9 @@
                 <property name="position">1</property>
               </packing>
             </child>
+            <style>
+              <class name="block-section"/>
+            </style>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -80,23 +83,14 @@
           </packing>
         </child>
         <child>
-          <object class="GtkSeparator">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="margin_left">1</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
+          <placeholder/>
         </child>
         <child>
           <object class="GtkStack" id="menu-view-stack">
             <property name="width_request">284</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_right">1</property>
+            <property name="margin_left">4</property>
             <property name="hexpand">False</property>
             <property name="vexpand">True</property>
             <child>
@@ -114,7 +108,7 @@
               <packing>
                 <property name="name">compact-favorites-view</property>
                 <property name="title" translatable="yes">Favorite applications</property>
-                <property name="icon_name">menu-favorite-apps</property>
+                <property name="icon_name">kiran-menu-favorite-apps-symbolic</property>
               </packing>
             </child>
             <child>
@@ -218,7 +212,7 @@
               <packing>
                 <property name="name">all-apps-view</property>
                 <property name="title" translatable="yes">All applications</property>
-                <property name="icon_name">menu-apps-list</property>
+                <property name="icon_name">kiran-menu-apps-list-symbolic</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -235,10 +229,13 @@
               <packing>
                 <property name="name">recently-files-view</property>
                 <property name="title" translatable="yes">Recent files</property>
-                <property name="icon_name">menu-recent-files</property>
+                <property name="icon_name">kiran-menu-recent-files-symbolic</property>
                 <property name="position">2</property>
               </packing>
             </child>
+            <style>
+              <class name="block-section"/>
+            </style>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -251,9 +248,6 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_left">4</property>
-            <property name="margin_right">4</property>
-            <property name="margin_top">4</property>
-            <property name="margin_bottom">4</property>
             <property name="orientation">vertical</property>
             <property name="spacing">4</property>
             <child>
@@ -341,6 +335,7 @@
                     </child>
                     <style>
                       <class name="menu-section-box"/>
+                      <class name="block-section"/>
                     </style>
                   </object>
                 </child>
@@ -359,6 +354,9 @@
           </packing>
         </child>
       </object>
+    </child>
+    <child type="titlebar">
+      <placeholder/>
     </child>
   </object>
 </interface>

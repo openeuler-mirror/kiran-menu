@@ -1,37 +1,32 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "menu-list-item-widget.h"
 #include <iostream>
 
-MenuListItemWidget::MenuListItemWidget(const std::string &icon_resource,
+MenuListItemWidget::MenuListItemWidget(const std::string &icon_name,
                                        const std::string &text,
                                        Gtk::Orientation orient,
-                                       int icon_size) : Glib::ObjectBase("KiranMenuListItem"),
-                                                        box(orient),
-                                                        space_property(*this, "icon-spacing", 0),
-                                                        max_width_property(*this, "max-width", G_MAXINT32),
-                                                        max_height_property(*this, "max-height", G_MAXINT32)
+                                       Gtk::IconSize icon_size) : Glib::ObjectBase("KiranMenuListItem"),
+                                                                  box(orient),
+                                                                  space_property(*this, "icon-spacing", 0),
+                                                                  max_width_property(*this, "max-width", G_MAXINT32),
+                                                                  max_height_property(*this, "max-height", G_MAXINT32)
 {
     init_ui();
     set_text(text);
-    set_icon(icon_resource, icon_size);
+    image.set_from_icon_name(icon_name, icon_size);
 
     on_orient_changed();
 }
@@ -181,12 +176,6 @@ void MenuListItemWidget::set_icon(const Glib::RefPtr<Gio::Icon> &gicon, int icon
         image.set(Glib::RefPtr<const Gio::Icon>::cast_dynamic(gicon), Gtk::ICON_SIZE_LARGE_TOOLBAR);
     else
         image.set_from_icon_name("gtk-missing", Gtk::ICON_SIZE_LARGE_TOOLBAR);
-}
-
-void MenuListItemWidget::set_icon(const std::string &resource, int icon_size)
-{
-    image.set_pixel_size(icon_size);
-    image.set_from_resource(resource);
 }
 
 void MenuListItemWidget::set_icon_size(int icon_size)

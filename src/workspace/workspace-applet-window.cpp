@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "workspace-applet-window.h"
@@ -152,7 +147,8 @@ void WorkspaceAppletWindow::init_ui()
 
     /* 点击“创建工作区"按钮 */
     add_button->signal_clicked().connect(
-        []() -> void {
+        []() -> void
+        {
             auto workspace_manager = Kiran::WorkspaceManager::get_instance();
             auto workspace_count = workspace_manager->get_workspaces().size();
             workspace_manager->change_workspace_count(++workspace_count);
@@ -190,24 +186,25 @@ void WorkspaceAppletWindow::load_workspaces()
         workspaces_table.insert(std::make_pair(workspace_no, thumbnail_area));
 
         //点击工作区时切换右侧的窗口预览
-        thumbnail_area->signal_clicked().connect([this, workspace_no]() -> void {
-            for (auto data : workspaces_table)
-            {
-                auto num = data.first;
-                auto area = data.second;
-                if (num != workspace_no)
-                    area->set_selected(false);
-                else
-                {
-                    area->set_selected(true);
+        thumbnail_area->signal_clicked().connect([this, workspace_no]() -> void
+                                                 {
+                                                     for (auto data : workspaces_table)
+                                                     {
+                                                         auto num = data.first;
+                                                         auto area = data.second;
+                                                         if (num != workspace_no)
+                                                             area->set_selected(false);
+                                                         else
+                                                         {
+                                                             area->set_selected(true);
 
-                    //通知窗口列表预览控件重绘
-                    auto workspace = area->get_workspace();
-                    overview_area.set_workspace(workspace);
-                    selected_workspace = workspace->get_number();
-                }
-            }
-        });
+                                                             //通知窗口列表预览控件重绘
+                                                             auto workspace = area->get_workspace();
+                                                             overview_area.set_workspace(workspace);
+                                                             selected_workspace = workspace->get_number();
+                                                         }
+                                                     }
+                                                 });
         //默认显示当前工作区的窗口预览
         if (workspace == active_workspace)
             thumbnail_area->clicked();

@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=org.kiran.panel.applet.KiranAppletFactory
+Exec=@CMAKE_INSTALL_PREFIX@/libexec/@PANEL_NAME@/kiran-applet

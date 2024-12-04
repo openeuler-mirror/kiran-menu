@@ -1,30 +1,25 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "menu-app-launcher-button.h"
 
-MenuAppLauncherButton::MenuAppLauncherButton(const char *icon_file, const char *tooltip, const char *cmdline)
+MenuAppLauncherButton::MenuAppLauncherButton(const std::string &icon_name, const char *tooltip, const char *cmdline)
 {
     auto context = get_style_context();
     set_tooltip_text(tooltip);
 
-    icon.set_from_resource(icon_file);
+    icon.set_from_icon_name(icon_name, Gtk::ICON_SIZE_BUTTON);
     add(icon);
     set_hexpand(true);
     set_halign(Gtk::ALIGN_FILL);
@@ -33,6 +28,7 @@ MenuAppLauncherButton::MenuAppLauncherButton(const char *icon_file, const char *
                                                 Gio::APP_INFO_CREATE_SUPPORTS_STARTUP_NOTIFICATION);
 
     context->add_class("menu-app-launcher");
+    context->add_class("flat");
 }
 
 void MenuAppLauncherButton::on_clicked()

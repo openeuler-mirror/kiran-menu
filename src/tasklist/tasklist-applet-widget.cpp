@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "tasklist-applet-widget.h"
@@ -55,10 +50,10 @@ void on_applet_size_allocate(MatePanelApplet *applet UNUSED,
     }
 
     mate_panel_applet_set_size_hints(applet, hints, 2, 0);
-    delete hints;
+    delete[] hints;
 }
 
-TasklistAppletWidget::TasklistAppletWidget(MatePanelApplet *applet_) : button_box(Gtk::ORIENTATION_VERTICAL),
+TasklistAppletWidget::TasklistAppletWidget(MatePanelApplet *applet_) : button_box(Gtk::ORIENTATION_HORIZONTAL),
                                                                        prev_btn(nullptr),
                                                                        next_btn(nullptr),
                                                                        container(applet_),
@@ -108,17 +103,12 @@ void TasklistAppletWidget::on_applet_orient_changed()
 
 void TasklistAppletWidget::init_ui()
 {
-    prev_btn = create_paging_button("/kiran-tasklist/icon/go-previous", _("Previous"));
-    next_btn = create_paging_button("/kiran-tasklist/icon/go-next", _("Next"));
-
-    prev_btn->set_valign(Gtk::ALIGN_FILL);
-    next_btn->set_valign(Gtk::ALIGN_FILL);
+    prev_btn = create_paging_button("kiran-tasklist-previous-symbolic", _("Previous"));
+    next_btn = create_paging_button("kiran-tasklist-next-symbolic", _("Next"));
 
     button_box.set_spacing(2);
     button_box.set_margin_start(5);
     button_box.set_margin_end(5);
-    button_box.set_valign(Gtk::ALIGN_FILL);
-    button_box.set_halign(Gtk::ALIGN_CENTER);
     button_box.pack_start(*prev_btn, true, true);
     button_box.pack_end(*next_btn, true, true);
 
@@ -126,16 +116,15 @@ void TasklistAppletWidget::init_ui()
     pack_end(button_box, false, false);
 
     property_orientation().signal_changed().connect(
-        [this]() -> void {
+        [this]() -> void
+        {
             if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL)
             {
-                button_box.set_orientation(Gtk::ORIENTATION_VERTICAL);
-                button_box.set_size_request(16, -1);
+                button_box.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
             }
             else
             {
-                button_box.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
-                button_box.set_size_request(-1, 16);
+                button_box.set_orientation(Gtk::ORIENTATION_VERTICAL);
             }
 
             container.update_orientation();
@@ -150,12 +139,11 @@ void TasklistAppletWidget::init_ui()
     next_btn->signal_clicked().connect(sigc::mem_fun(container, &TasklistButtonsContainer::move_to_next_page));
 }
 
-Gtk::Button *TasklistAppletWidget::create_paging_button(std::string icon_resource, std::string tooltip_text)
+Gtk::Button *TasklistAppletWidget::create_paging_button(const std::string &icon_name, const std::string &tooltip_text)
 {
     auto button = Gtk::make_managed<TasklistPagingButton>(applet);
 
-    button->set_size_request(16, 16);
-    button->set_icon_image(icon_resource, 16);
+    button->set_image_from_icon_name(icon_name, Gtk::ICON_SIZE_BUTTON);
     button->set_tooltip_text(tooltip_text);
 
     return button;

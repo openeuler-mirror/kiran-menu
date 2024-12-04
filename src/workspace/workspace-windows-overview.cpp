@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "workspace-windows-overview.h"
@@ -173,7 +168,8 @@ void WorkspaceWindowsOverview::reload_thumbnails()
      */
     windows = workspace.lock()->get_windows();
     auto iter = std::remove_if(windows.begin(), windows.end(),
-                               [](KiranWindowPointer &w) -> bool {
+                               [](KiranWindowPointer &w) -> bool
+                               {
                                    return w->is_skip_pager();
                                });
 
@@ -212,15 +208,16 @@ void WorkspaceWindowsOverview::reload_thumbnails()
         int max_height = 0;
 
         //把窗口按照先宽度，后高度的方式进行排序，值大的在前，只是为了好看^^)
-        std::sort(row.begin(), row.end(), [&windows](uint32_t i, uint32_t j) {
-            auto w1 = windows.at(i);
-            auto w2 = windows.at(j);
+        std::sort(row.begin(), row.end(), [&windows](uint32_t i, uint32_t j)
+                  {
+                      auto w1 = windows.at(i);
+                      auto w2 = windows.at(j);
 
-            if (WINDOW_WIDTH(w1) != WINDOW_WIDTH(w2))
-                return WINDOW_WIDTH(w1) >= WINDOW_WIDTH(w2);
-            else
-                return WINDOW_HEIGHT(w1) >= WINDOW_HEIGHT(w2);
-        });
+                      if (WINDOW_WIDTH(w1) != WINDOW_WIDTH(w2))
+                          return WINDOW_WIDTH(w1) >= WINDOW_WIDTH(w2);
+                      else
+                          return WINDOW_HEIGHT(w1) >= WINDOW_HEIGHT(w2);
+                  });
 
         /*
          * 提取该行窗口的最大高度

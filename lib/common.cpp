@@ -1,23 +1,19 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     tangjie02 <tangjie02@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "lib/common.h"
+#include "lib/pinyin.h"
 
 namespace Kiran
 {
@@ -49,6 +45,92 @@ bool write_list_quark_to_as(Glib::RefPtr<Gio::Settings> settings,
     }
     // g_print("key: %s value: %d\n", key.c_str(), new_value.size());
     return settings->set_string_array(key, new_value);
+}
+
+static wchar_t *
+convert_chars_to_wchars(const std::string &contents)
+{
+    size_t mbs_len;
+    wchar_t *wcs;
+
+    // mbstowcs 依赖全局 locale && GTK+中只认 UTF-8
+    // 当 /etc/locale.conf 为 zh_CN.utf8 时，结果正常; 当为 zh_CN.GB18030 时，结果不正常
+    // 所以此处需要设置为 utf-8
+    std::string prev_loc = std::setlocale(LC_CTYPE, nullptr);
+    setlocale(LC_CTYPE, "C.utf8");
+
+    mbs_len = mbstowcs(NULL, contents.c_str(), 0);
+    if (mbs_len == (size_t)-1)
+    {
+        return NULL;
+    }
+
+    wcs = (wchar_t *)calloc(mbs_len + 1, sizeof(wchar_t));
+    if (wcs == NULL)
+    {
+        return NULL;
+    }
+
+    if (mbstowcs(wcs, contents.c_str(), mbs_len + 1) == (size_t)-1)
+    {
+        free(wcs);
+        return NULL;
+    }
+    
+    // 还原
+    std::setlocale(LC_CTYPE, prev_loc.c_str());
+
+    return wcs;
+}
+
+static void
+clear_space(char *pinyin)
+{
+    for (; *pinyin != '\0'; pinyin++)
+    {
+        if (*pinyin == ' ')
+        {
+            *pinyin = '\0';
+        }
+    }
+}
+
+std::list<std::string> convert_chinese_characters_to_pinyin(const std::string &contents)
+{
+    std::list<std::string> pinyin_list;
+    wchar_t *wcs;
+
+    wcs = convert_chars_to_wchars(contents);
+
+    if (wcs == NULL)
+    {
+        return pinyin_list;
+    }
+
+    for (auto wp = wcs; *wp != '\0'; wp++)
+    {
+        int unicode = *wp;
+
+        if (unicode >= CHINESE_UNICODE_START &&
+            unicode <= CHINESE_UNICODE_END)
+        {
+            int offset = 0;
+
+            offset = (unicode - CHINESE_UNICODE_START) * CHINESE_UNICODE_MAX_LENGTH;
+
+            if (offset + CHINESE_UNICODE_MAX_LENGTH <= sizeof(chinese_basic_dict))
+            {
+                char pinyin[CHINESE_UNICODE_MAX_LENGTH + 1] = {'\0'};
+                memcpy(pinyin, chinese_basic_dict + offset, CHINESE_UNICODE_MAX_LENGTH);
+                clear_space(pinyin);
+                pinyin_list.push_back(pinyin);
+            }
+        }
+    }
+
+    free(wcs);
+
+    return pinyin_list;
 }
 
 }  // namespace Kiran

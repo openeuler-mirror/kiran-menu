@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "kiran-applet-button.h"
@@ -39,6 +34,8 @@ KiranAppletButton::KiranAppletButton(MatePanelApplet *applet_)
     g_signal_connect_after(applet, "change-size", G_CALLBACK(on_applet_size_change), this);
 
     get_style_context()->add_class("kiran-applet-button");
+    // 添加flat样式，保证在普通状态下按钮时透明背景
+    get_style_context()->add_class("flat");
 }
 
 KiranAppletButton::~KiranAppletButton()
@@ -126,16 +123,14 @@ void KiranAppletButton::generate_pixbuf()
 {
     int scale = get_scale_factor();
 
-    KLOG_INFO("generate pixbuf for button, resource %s\n",
-              icon_resource.c_str());
-    icon_pixbuf = Gdk::Pixbuf::create_from_resource(icon_resource,
-                                                    icon_size * scale,
-                                                    icon_size * scale);
+    KLOG_INFO("generate pixbuf for button, theme icon %s\n",
+              icon_name.c_str());
+    icon_pixbuf = Gtk::IconTheme::get_default()->load_icon(icon_name, icon_size, scale, Gtk::ICON_LOOKUP_USE_BUILTIN);
 }
 
-void KiranAppletButton::set_icon_from_resource(const std::string &resource)
+void KiranAppletButton::set_icon_from_theme(const std::string &name)
 {
-    icon_resource = resource;
+    icon_name = name;
 
     icon_pixbuf.clear();
     if (get_realized())

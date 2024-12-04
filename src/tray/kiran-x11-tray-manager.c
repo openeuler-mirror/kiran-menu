@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     wangxiaoqing <wangxiaoqing@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "kiran-x11-tray-manager.h"
@@ -63,6 +58,7 @@ static void kiran_x11_tray_manager_handle_dock_request(KiranX11TrayManager *mana
 static gboolean kiran_x11_tray_manager_plug_removed(GtkSocket *socket,
                                                     KiranX11TrayManager *manager);
 static void kiran_x11_manager_set_icon_size_property(KiranX11TrayManager *manager);
+static void kiran_x11_manager_set_colors_property(KiranX11TrayManager *manager);
 
 #define KIRAN_X11_TRAY_MANAGER_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE((o), KIRAN_TYPE_X11_TRAY_MANAGER, KiranX11TrayManagerPrivate))
 G_DEFINE_TYPE_WITH_CODE(KiranX11TrayManager, kiran_x11_tray_manager, G_TYPE_OBJECT,
@@ -80,9 +76,59 @@ kiran_x11_tray_manager_set_icon_size(KiranTrayManager *manager,
 }
 
 static void
+kiran_x11_tray_manager_set_colors(KiranX11TrayManager *manager,
+                                  GdkRGBA *fg,
+                                  GdkRGBA *error,
+                                  GdkRGBA *warning,
+                                  GdkRGBA *success)
+{
+    KiranX11TrayManagerPrivate *priv = manager->priv;
+
+    if (!gdk_rgba_equal(&priv->fg, fg) ||
+        !gdk_rgba_equal(&priv->error, error) ||
+        !gdk_rgba_equal(&priv->warning, warning) ||
+        !gdk_rgba_equal(&priv->success, success))
+    {
+        priv->fg = *fg;
+        priv->error = *error;
+        priv->warning = *warning;
+        priv->success = *success;
+
+        kiran_x11_manager_set_colors_property(manager);
+    }
+}
+
+static void
+kiran_x11_tray_manager_style_updated(KiranTrayManager *manager,
+                                     GtkStyleContext *context)
+{
+    GdkRGBA fg;
+    GdkRGBA error;
+    GdkRGBA warning;
+    GdkRGBA success;
+
+    gtk_style_context_save(context);
+    gtk_style_context_set_state(context, GTK_STATE_FLAG_NORMAL);
+
+    gtk_style_context_get_color(context, GTK_STATE_FLAG_NORMAL, &fg);
+
+    if (!gtk_style_context_lookup_color(context, "error_color", &error))
+        error = fg;
+    if (!gtk_style_context_lookup_color(context, "warning_color", &warning))
+        warning = fg;
+    if (!gtk_style_context_lookup_color(context, "success_color", &success))
+        success = fg;
+
+    gtk_style_context_restore(context);
+
+    kiran_x11_tray_manager_set_colors(KIRAN_X11_TRAY_MANAGER(manager), &fg, &error, &warning, &success);
+}
+
+static void
 kiran_tray_manager_init(KiranTrayManagerInterface *iface)
 {
     iface->set_icon_size = kiran_x11_tray_manager_set_icon_size;
+    iface->style_updated = kiran_x11_tray_manager_style_updated;
 }
 
 static void

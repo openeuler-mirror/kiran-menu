@@ -1,20 +1,15 @@
 ﻿/**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "tasklist-app-button.h"
@@ -37,6 +32,7 @@ TasklistAppButton::TasklistAppButton(const std::shared_ptr<Kiran::App> &app_, in
     add_events(Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::BUTTON_PRESS_MASK);
 
     get_style_context()->add_class("kiran-tasklist-button");
+    get_style_context()->add_class("flat");
 
     set_app(app_);
 
@@ -333,7 +329,8 @@ bool TasklistAppButton::on_button_press_event(GdkEventButton *button_event)
             context_menu = new TasklistAppContextMenu(app_);
             context_menu->attach_to_widget(*this);
             context_menu->signal_deactivate().connect(
-                [this]() -> void {
+                [this]() -> void
+                {
                     m_signal_context_menu_toggled.emit(false);
                 });
         }
@@ -400,7 +397,7 @@ void TasklistAppButton::on_gesture_drag_update(double x, double y)
 {
     Gtk::Allocation allocation;
 
-    if (x < 10 && y < 10)
+    if (ABS(x) < 10 && ABS(y) < 10)
     {
         return;
     }
@@ -550,9 +547,11 @@ Glib::RefPtr<Gdk::Pixbuf> TasklistAppButton::get_app_icon_pixbuf()
     if (!pixbuf)
     {
         //未能找到对应应用的图标，使用内置的默认图标
-        pixbuf = Gdk::Pixbuf::create_from_resource("/kiran-tasklist/icon/executable",
-                                                   icon_size * scale,
-                                                   icon_size * scale);
+        // pixbuf = Gdk::Pixbuf::create_from_resource("/kiran-tasklist/icon/executable",
+        //                                            icon_size * scale,
+        //                                            icon_size * scale);
+
+        pixbuf = Gtk::IconTheme::get_default()->load_icon("kiran-tasklist-executable", icon_size, scale);
     }
 
     return pixbuf;
@@ -576,7 +575,8 @@ void TasklistAppButton::on_windows_state_changed()
              * 闪烁5秒后停止，并绘制提示颜色
              */
             draw_attention_normal = Glib::signal_timeout().connect(
-                [this]() -> bool {
+                [this]() -> bool
+                {
                     draw_attention_flicker.disconnect();
                     if (needs_attention())
                         state = APP_BUTTON_STATE_ATTENTION;
@@ -603,7 +603,6 @@ void TasklistAppButton::on_windows_state_changed()
 
 void TasklistAppButton::draw_attentions(const Cairo::RefPtr<Cairo::Context> &cr)
 {
-    static bool hilight = true;
     Gdk::RGBA attention_color("red");
 
     /*
@@ -618,6 +617,7 @@ void TasklistAppButton::draw_attentions(const Cairo::RefPtr<Cairo::Context> &cr)
     cr->save();
     if (state == APP_BUTTON_STATE_FLICKER)
     {
+        static bool hilight = true;
         if (hilight)
         {
             Gdk::Cairo::set_source_rgba(cr, attention_color);

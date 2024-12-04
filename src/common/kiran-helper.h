@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #ifndef KIRANHELPER_H
@@ -59,13 +54,6 @@ public:
     static void geometry_to_rect(const Kiran::WindowGeometry &geometry, Gdk::Rectangle &rect);
 
     static void run_commandline(const char *cmdline);
-
-    /**
-     * @brief 从指定的app列表中启动第一个当前系统中存在的app
-     * @param app_names   指定的app名称列表，最后一个元素需要以nullptr(NULL)结尾
-     * @return  启动成功返回true，失败返回false
-     */
-    static bool launch_app_from_list(const char **app_names);
 
     static bool window_is_on_active_workspace(const std::shared_ptr<Kiran::Window> &window);
     static Kiran::WindowVec get_active_workspace_windows(const std::shared_ptr<Kiran::App> &app);

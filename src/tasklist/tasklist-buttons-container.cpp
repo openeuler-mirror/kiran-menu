@@ -1,20 +1,15 @@
 ﻿/**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "tasklist-buttons-container.h"
@@ -138,7 +133,8 @@ void TasklistButtonsContainer::add_app_button(const KiranAppPointer &app)
 
     //鼠标点击时开关预览窗口
     button->signal_clicked().connect(
-        [button, this]() -> void {
+        [button, this]() -> void
+        {
             stop_pointer_check();
 
             auto target_app = button->get_app();
@@ -152,7 +148,8 @@ void TasklistButtonsContainer::add_app_button(const KiranAppPointer &app)
 
     //应用右键菜单打开时，隐藏预览窗口
     button->signal_context_menu_toggled().connect(
-        [this](bool active) -> void {
+        [this](bool active) -> void
+        {
             if (!active)
                 return;
             stop_pointer_check();
@@ -298,7 +295,7 @@ void TasklistButtonsContainer::on_active_window_changed(KiranWindowPointer previ
                                                         KiranWindowPointer active)
 {
     KiranAppPointer current_app = nullptr;
-    TasklistAppButton *last_button, *active_button;
+    TasklistAppButton *active_button;
 
     if (!KiranHelper::window_is_ignored(active))
         current_app = active->get_app();
@@ -307,6 +304,7 @@ void TasklistButtonsContainer::on_active_window_changed(KiranWindowPointer previ
     if (current_app != active_app)
     {
         //active app changed
+        TasklistAppButton *last_button;
 
         KLOG_DEBUG("active app changed, new '%s', old '%s'\n",
                    current_app ? current_app->get_name().data() : "null",
@@ -443,7 +441,6 @@ void TasklistButtonsContainer::on_window_closed(KiranWindowPointer window)
 void TasklistButtonsContainer::move_previewer(TasklistAppButton *target_button)
 {
     auto target_app = target_button->get_app();
-    auto previewer_app = previewer->get_app();
 
     /* 当前预览窗口的右键菜单已经打开，不允许移动预览窗口 */
     if (previewer->has_context_menu_opened())
@@ -645,8 +642,9 @@ void TasklistButtonsContainer::on_size_allocate(Gtk::Allocation &allocation)
          * 计算每页能放的child的最大个数，同时调整child间距，使其排列更均匀
          */
         n_child_page = n_child;
-        for (n_child_page = n_child - 1; n_child_page > 0; n_child_page--)
+        for (int i = n_child - 1; i > 0; i--)
         {
+            n_child_page = i;
             child_computed_size = (page_size - (n_child_page - 1) * real_child_spacing) / n_child_page;
             if (child_computed_size >= child_min_size)
             {
@@ -664,7 +662,8 @@ void TasklistButtonsContainer::on_size_allocate(Gtk::Allocation &allocation)
      * child拖动之后其在父控件上的位置会发生变化。
      */
     std::sort(children.begin(), children.end(),
-              [this](const Gtk::Widget *c1, const Gtk::Widget *c2) -> bool {
+              [this](const Gtk::Widget *c1, const Gtk::Widget *c2) -> bool
+              {
                   int x1, x2, y1, y2;
 
                   x1 = child_property_x(*c1).get_value();
@@ -830,9 +829,9 @@ void TasklistButtonsContainer::on_drag_data_received(const Glib::RefPtr<Gdk::Dra
         try
         {
             auto file = Gio::File::create_for_uri(uri);
-            auto info = file->query_info(G_FILE_ATTRIBUTE_STANDARD_TYPE);
+            auto file_info = file->query_info(G_FILE_ATTRIBUTE_STANDARD_TYPE);
 
-            if (!info || info->get_type() == Gio::FILE_TYPE_DIRECTORY)
+            if (!file_info || file_info->get_type() == Gio::FILE_TYPE_DIRECTORY)
                 continue;
 
             auto source_app = Gio::DesktopAppInfo::create_from_filename(file->get_path());
@@ -850,7 +849,8 @@ void TasklistButtonsContainer::on_drag_data_received(const Glib::RefPtr<Gdk::Dra
                     if (!new_id.empty())
                     {
                         Glib::signal_idle().connect_once(
-                            [new_id]() -> void {
+                            [new_id]() -> void
+                            {
                                 Kiran::TaskBarSkeleton::get_instance()->add_fixed_app(new_id);
                             });
                     }
@@ -890,12 +890,18 @@ void TasklistButtonsContainer::put_child_after(Gtk::Widget *source, Gtk::Widget 
 
     if (get_orientation() == Gtk::ORIENTATION_HORIZONTAL)
     {
-        dest_pos = child_property_x(*dest).get_value();
+        if (dest != nullptr)
+        {
+            dest_pos = child_property_x(*dest).get_value();
+        }
         child_property_x(*source).set_value(dest_pos + 1);
     }
     else
     {
-        dest_pos = child_property_y(*dest).get_value();
+        if (dest != nullptr)
+        {
+            dest_pos = child_property_y(*dest).get_value();
+        }
         child_property_y(*source).set_value(dest_pos + 1);
     }
     queue_allocate();
@@ -982,8 +988,6 @@ void TasklistButtonsContainer::on_button_drag_end(Gtk::Widget *source_widget)
 
 void TasklistButtonsContainer::on_orientation_changed()
 {
-    Glib::RefPtr<Gtk::Adjustment> adjustment = get_adjustment();
-
     /*
      *  滚动方向发生变化后，adjustment对象也会发生变化.
      *  因此需要重新连接信号
@@ -1010,7 +1014,8 @@ void TasklistButtonsContainer::init_paging_monitor()
     if (adjustment_changed.connected())
         adjustment_changed.disconnect();
     adjustment_changed = adjustment->signal_changed().connect(
-        [this]() -> void {
+        [this]() -> void
+        {
             signal_page_changed().emit();
             ensure_active_app_button_visible();
         });
@@ -1018,17 +1023,19 @@ void TasklistButtonsContainer::init_paging_monitor()
     if (paging_notify.connected())
         paging_notify.disconnect();
     paging_notify = adjustment->signal_value_changed().connect(
-        [this]() -> void {
+        [this]() -> void
+        {
             signal_page_changed().emit();
 
             /* 要重新定位面板上应用按钮对应的所有窗口最小化时的位置 */
-            Glib::signal_idle().connect_once([this]() -> void {
-                for (auto child : this->get_children())
-                {
-                    auto button = dynamic_cast<TasklistAppButton *>(child);
-                    button->update_windows_icon_geometry();
-                }
-            });
+            Glib::signal_idle().connect_once([this]() -> void
+                                             {
+                                                 for (auto child : this->get_children())
+                                                 {
+                                                     auto button = dynamic_cast<TasklistAppButton *>(child);
+                                                     button->update_windows_icon_geometry();
+                                                 }
+                                             });
         });
 }
 
@@ -1333,17 +1340,18 @@ void TasklistButtonsContainer::get_pointer_position(int &pointer_x, int &pointer
 
 void TasklistButtonsContainer::reorder_child(Gtk::Widget *widget, PointerMotionDirection motion_dir)
 {
-    bool found = false;
     Gtk::Orientation orient = get_orientation();
 
     if (motion_dir != MOTION_DIR_UNKNOWN)
     {
+        bool found = false;
         int pointer_x, pointer_y;
         std::vector<Gtk::Widget *> children = get_children();
 
         /* 按照屏幕位置将按钮从左到右(或从上向下)进行排序 */
         std::sort(children.begin(), children.end(),
-                  [this](Gtk::Widget *c1, Gtk::Widget *c2) -> bool {
+                  [this](Gtk::Widget *c1, Gtk::Widget *c2) -> bool
+                  {
                       return this->child_is_before(c1, c2);
                   });
 

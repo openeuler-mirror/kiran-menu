@@ -1,74 +1,38 @@
 @define-color placeholder_text_color #c8c8c8;
 @define-color tasklist_app_indicator_color #3ca8ea;
-@define-color tasklist_app_active_color rgba(255, 255, 255, 0.3);
 @define-color thumbnail-hover-color #569CD6;
 @define-color tasklist_attention_color alpha(#fbaf43, 0.6);
-
-* {
-    font-family: "Noto Sans CJK SC";
-    text-shadow: none;
-    box-shadow: none;
-    -gtk-icon-shadow: none;
-    -gtk-icon-effect: none;
-}
 
 button.kiran-applet-button {
     border-radius: 0px;
     border: none;
 }
 
+
 /* 开始菜单主窗口 */
 window#menu-applet-window {
-    background: rgba(28, 28, 28, 0.9);
     min-width: 760px;
     min-height: 682px;
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
 
     -gtkmm__CustomObject_KiranMenuWindow-compact-min-height: 682px;
     -gtkmm__CustomObject_KiranMenuWindow-expand-min-height: 682px;
 }
 
-/* 开始菜单任务栏按钮 */
-button.toggle.menu-applet-button {
-    background: transparent;
-    box-shadow: none;
-}
-button.toggle.menu-applet-button:active {
-    background: rgba(255, 255, 255, 0.35);
-    box-shadow: none;
-}
-button.toggle.menu-applet-button:hover {
-    background: rgba(255, 255, 255, 0.2);
-    box-shadow: none;
-}
-
 /* 开始菜单应用按钮和分类标签 */
 button.menu-app-item.horizontal, button.menu-category-item {
-    background: transparent;
-    color: #ffffff;
     border-width: 0px;
-    border-right-width: 3px;
-    border-style: solid;
-    border-color: transparent;
     border-radius: 0px;
-    border-image: none;
     outline: none;
-    box-shadow: none;
 }
-button.menu-app-item.horizontal:hover, button.menu-category-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: #4cb5ff;
-    border-style: solid;
-    border-width: 0px;
-    border-right-width: 3px;
-}
+
 button.menu-app-item.horizontal {
     min-height: 40px;
     padding: 0px;
     padding-left: 24px;
     -gtkmm__CustomObject_KiranMenuAppItem-icon-spacing: 12px;
 }
+
 button.menu-category-item {
     min-height: 40px;
     margin-top: 10px;
@@ -79,6 +43,7 @@ button.menu-category-item {
 
     -gtkmm__CustomObject_KiranMenuCategoryItem-icon-spacing: 12px;
 }
+
 button.menu-app-item.vertical {
     min-height: 100px;
     min-width: 88px;
@@ -90,82 +55,33 @@ button.menu-app-item.vertical {
     padding: 10px 8px 10px 8px;
     border-image: none;
     outline: none;
-    background: transparent;
-    color: white;
 }
-button.menu-app-item.vertical:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
+
 
 button.menu-app-item:focus,
 button.menu-category-item:focus
 {
     outline-offset: -2px;
     outline-style: dotted;
-    outline-color: #ffffff;
     outline-width: 1px;
 }
 
 /* 开始菜单侧边栏按钮 */
 button.menu-app-launcher {
-    border-width: 1px;
-    border-style: solid;
     border-color: transparent;
-    background: transparent;
-    box-shadow: none;
-    border-image: none;
-
     min-height: 30px;
-}
-button.menu-app-launcher:focus{
-    outline-offset: -2px;
-    outline-style: dotted;
-    outline-color: #ffffff;
-    outline-width: 1px;
-    border-color: transparent;
-    box-shadow: none;
-    border-image: none;
-}
-button.menu-app-launcher:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: transparent;
-    box-shadow: none;
-    outline: none;
-    border-image: none;
-}
-
-/* 开始菜单窗口 分割线 */
-window#menu-applet-window separator.horizontal, window.menu-applet-window separator.vertical
-{
-    background-color: rgba(255, 255, 255, 0.2);
 }
 
 /* 开始菜单应用搜索框 */
 entry.menu-search-entry {
     margin: 10px 10px 10px 10px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 3px;
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
     padding: 3px 10px 3px 10px;
     box-shadow: none;
-    caret-color: #ffffff;
     min-height: 24px;
-}
-entry.menu-search-entry:focus {
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: none;
-}
-entry.menu-search-entry selection {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.2);
 }
 
 /* 开始菜单区域框 */
 .menu-section-box {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     padding-bottom: 10px;
     padding-left: 5px;
@@ -181,68 +97,49 @@ label.empty-prompt-text {
 /* 开始菜单：应用列表展开按钮 */
 button.toggle.menu-expand-button {
     box-shadow: none;
-    background: transparent;
     border: none;
     border-image: none;
-    color: #ffffff;
     padding-left: 24px;
     min-height: 32px;
 }
 
-button.toggle.menu-expand-button:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
 
 button.toggle.menu-expand-button:focus{
     outline-offset: -2px;
     outline-style: dotted;
-    outline-color: #ffffff;
     outline-width: 1px;
     border-color: transparent;
     box-shadow: none;
     border-image: none;
 }
 
+/* 所有应用列表页 */
+.all-apps-page {
+    margin-right: 10px;
+}
+
 .tasklist-widget {
     background: none;
 }
 
-.tasklist-widget:drop(active) {
+/* .tasklist-widget:drop(active) {
     background: rgba(255, 255, 255, 0.15);
-}
+} */
 
 button.kiran-tasklist-button {
     border: none;
     border-radius: 0px;
-    background: transparent;
     -gtkmm__CustomObject_KiranTasklistAppButton-indicator-size: 4px;
 }
-button.kiran-tasklist-button:hover{
-    border: none;
-    border-radius: 0px;
-    background: rgba(255, 255, 255, 0.2);
-}
 
-button.kiran-tasklist-button:active,
-button.kiran-tasklist-button:drop(active)
-{
+button.tasklist-arrow-button {
     border: none;
-    border-radius: 0px;
-    background: rgba(255, 255, 255, 0.35);
-}
-
-window.app-previewer {
-    /*background: transparent;*/
-    background: rgba(0, 0, 0, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 0px;
 }
 
 window.app-previewer button.window-thumbnail {
-    border-radius: 0px;
     min-width: 200px;
     background: transparent;
-    color: #ffffff;
     padding: 8px;
 }
 
@@ -251,7 +148,6 @@ window.app-previewer button.window-thumbnail.vertical {
 }
 
 window.app-previewer button.window-thumbnail.horizontal {
-    /*border: 1px solid rgba(255, 255, 255, 0.2);*/
     border: 1px solid transparent;
     min-height: 140px;
 }
@@ -259,10 +155,7 @@ window.app-previewer button.window-thumbnail.horizontal {
 window.app-previewer button.window-thumbnail.vertical:hover,
 window.app-previewer button.window-thumbnail.horizontal:hover,
 window.app-previewer button.window-thumbnail:hover {
-    border: 1px solid gray;
-    border-radius: 0px;
-    border-color: rgba(46,179,255, 0.6);
-    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(46,179,255, 0.6);
 }
 
 
@@ -291,33 +184,10 @@ button.kiran-thumbnail button.close-btn:active {
     padding: 0px;
 }
 
-menu.opacity-menu {
-    background: rgba(0, 0, 0, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 8px;
-    padding-top: 10px;
-    padding-bottom: 10px;
-}
-
 menu.opacity-menu menuitem{
-    color: white;
-    background: transparent;
     min-height: 28px;
     padding-left: 12px;
     padding-right: 12px;
-
-    border-width: 0px;
-    border-right-width: 4px;
-    border-color: transparent;
-    border-style: solid;
-}
-
-menu.opacity-menu menuitem:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-width: 0px;
-    border-right-width: 4px;
-    border-color: #3ca8ea;
-    border-style: solid;
 }
 
 
@@ -333,112 +203,21 @@ scrollbar.horizontal, scrollbar.vertical{
     border-image: none;
 }
 
-scrollbar.horizontal {
-    min-height:5px;
-    margin-top: 3px;
-    margin-bottom: 3px;
-}
-
-scrollbar.vertical, scrollbar.vertical trough {
-    min-width:5px;
-}
-
-
-scrollbar.horizontal trough, scrollbar.vertical trough {
-   background: none;
-   border-image: none;
-   border: none;
-}
-
-scrollbar.horizontal button, scrollbar.horizontal button {
-    min-height: 0px;
-    min-width: 0px;
-    background: transparent;
-    border: none;
-}
-
-scrollbar.horizontal slider, scrollbar.vertical slider {
-    background: rgba(255, 255, 255, 0.2);
-    border-image: none;
-    border: none;
-    border-radius: 0px;
-}
-
-scrollbar.horizontal slider {
-    min-width: 40px;
-    min-height: 5px;
-}
-
-scrollbar.vertical slider {
-    min-width: 5px;
-    min-height: 40px;
-}
-
-scrollbar.horizontal slider:active, scrollbar.horizontal slider:hover, scrollbar.vertical slider:active, scrollbar.vertical slider:hover{
-    background-color: rgba(255, 255, 255, 0.3);
-    border: none;
-    border-radius: 0px;
-}
-
-button.tasklist-arrow-button {
-    padding: 0px;
-    min-width: 16px;
-    min-height: 16px;
-    border: none;
-    background: transparent;
-}
-
-button.tasklist-arrow-button:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-button.tasklist-arrow-button:disabled {
-    /*background: rgba(255, 255, 255, 0.2);*/
-    border: none;
-}
-
 /* workspace */
-
-window.workspace-previewer .workspace-list-box {
-    background: rgba(0, 0, 0, 0.7);
-}
-
-
-
-window.workspace-previewer button.workspace-thumbnail {
-    background: transparent;
-    color: #ffffff;
-    border: none;
-}
-
-window.workspace-previewer button.workspace-thumbnail:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: transparent;
-}
 
 window.workspace-previewer button.window-thumbnail,
 window.workspace-previewer button.window-thumbnail:hover {
-    color: #ffffff;
+    color: white;
     border: none;
     padding: 0px;
     box-shadow: none;
     border-image: none;
     background: transparent;
-    text-shadow: -1px 1px 2px alpha(#000000, 0.6), 1px 1px 2px alpha(#000000, 0.6),
-                1px -1px 2px alpha(#000000, 0.6), -1px -1px 2px alpha(#000000, 0.6);
+    /* text-shadow: -1px 1px 2px alpha(#000000, 0.6), 1px 1px 2px alpha(#000000, 0.6),
+                1px -1px 2px alpha(#000000, 0.6), -1px -1px 2px alpha(#000000, 0.6); */
     font-size: 13px;
 }
 
-window.workspace-previewer button#add-button {
-    background: transparent;
-    color: #ffffff;
-    border: none;
-}
-
-window.workspace-previewer button#add-button:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border: none;
-}
 
 
 button.toggle.kiran-showdesktop-button {
@@ -457,45 +236,22 @@ button.toggle.kiran-showdesktop-button:active
     background: rgba(255, 255, 255, 0.4);
 }
 
-scrolledwindow.category-list-box, scrolledwindow.category-list-box viewport {
-    background: rgba(28, 28, 28, 0.9);
-}
-
 .stack-switcher button{
-    background: none;
-    border: none;
-    border-radius: 0px;
     min-height: 30px;
-}
-
-.stack-switcher button:hover{
-    background: rgba(255, 255, 255, 0.15);
-    border: none;
-    border-radius: 0px;
-    box-shadow: none;
-}
-
-.stack-switcher button:active, .stack-switcher button:checked{
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    box-shadow: none;
 }
 
 list.menu-recent-list {
     border: none;
-    background: none;
+    background: transparent;
     margin: 10px 0px 10px 0px;
     padding: 0px;
 }
 
 list.menu-recent-list row {
-    background: transparent;
-    color: #ffffff;
     padding: 2px 10px 2px 10px;
-    margin: 0px;
+    margin-right: 14px;
     min-height: 40px;
     border-width: 0px;
-    border-right: 3px solid transparent;
 }
 
 list.menu-recent-list row image:first-child {
@@ -503,54 +259,24 @@ list.menu-recent-list row image:first-child {
     margin-right: 8px;
 }
 
-list.menu-recent-list row:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-width: 0px;
-    border-right: 3px solid #2eb3ff;
-}
-
-list.menu-recent-list row:selected {
-    background: rgba(255, 255, 255, 0.20);
-    border-width: 0px;
-    border-right: 3px solid #2eb3ff;
-}
-
 scrolledwindow, scrolledwindow viewport {
     background: none;
     border: none;
 }
 
+#menu-left-container {
+    border-radius: 8px;
+}
+
+#menu-mid-container {
+    border-radius: 8px;
+}
+
 /* Tray */
-#iconButton
-{
-  border-color: rgba(255, 255, 255, 0.1);
-  border-width: 0px;
-  background-color: rgb(34, 34, 34);
-}
-
-#iconButton:hover
-{
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-#iconButtonPanel
-{
-  border-radius: 0px;
-  border-color: rgba(255, 255, 256, 0.1);
-  border-width: 0px;
-  background-color: @taskbar_bg_color;
-}
-
-#iconButtonPanel:hover
-{
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
 #iconWinButton
 {
+  border-radius: 0px;
   border-width: 0px;
-  background-color: @taskbar_bg_color;
-  background-image: url("/kiran-tray/icon/arrow-up");
   background-repeat: no-repeat;
   background-position: center;
   min-width: 24px;
@@ -558,18 +284,10 @@ scrolledwindow, scrolledwindow viewport {
   padding: 0px;
 }
 
-#iconWinButton:hover
+#trayWindow
 {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-#trayWindowBox
-{
-  border-color: rgba(255, 255, 255, 0.2);
-  background-color: rgb(34, 34, 34);
+  border-radius: 6px;
   border-width: 1px;
-  margin: 0px;
-  padding: 0px;
 }
 
 #trayGrid

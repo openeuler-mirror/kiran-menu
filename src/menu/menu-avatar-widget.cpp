@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "menu-avatar-widget.h"
@@ -74,9 +69,6 @@ void MenuAvatarWidget::set_icon_size(int size_)
 
 bool MenuAvatarWidget::on_draw(const ::Cairo::RefPtr<Cairo::Context> &cr)
 {
-    int scale;
-    double radius;
-    Gtk::Allocation allocation;
     Glib::RefPtr<Gdk::Pixbuf> pixbuf;
 
     if (!user_info.is_ready())
@@ -84,10 +76,10 @@ bool MenuAvatarWidget::on_draw(const ::Cairo::RefPtr<Cairo::Context> &cr)
         return false;
     }
 
-    allocation = get_allocation();
-    scale = get_scale_factor();
-    radius = allocation.get_width() > allocation.get_height() ? allocation.get_height() : allocation.get_width();
-    radius /= 2.0;
+    auto allocation = get_allocation();
+    auto scale = get_scale_factor();
+    auto image_size = allocation.get_width() > allocation.get_height() ? allocation.get_height() : allocation.get_width();
+    auto radius = image_size / 2.0;
     try
     {
         auto icon_file = user_info.get_iconfile();
@@ -114,11 +106,11 @@ bool MenuAvatarWidget::on_draw(const ::Cairo::RefPtr<Cairo::Context> &cr)
     cr->paint();
 
     /* 绘制头像边框 */
-    cr->scale(1.0 * scale, 1.0 * scale);
+    /* cr->scale(1.0 * scale, 1.0 * scale);
     cr->arc(radius, radius, radius, 0, 2 * M_PI);
     cr->set_source_rgba(1.0, 1.0, 1.0, 0.2);
     cr->set_line_width(1);
-    cr->stroke();
+    cr->stroke(); */
 
     cr->restore();
     return false;
@@ -126,16 +118,13 @@ bool MenuAvatarWidget::on_draw(const ::Cairo::RefPtr<Cairo::Context> &cr)
 
 void MenuAvatarWidget::on_clicked()
 {
-    const char *app_names[] = {
-#ifdef BUILD_WITH_KIRANACCOUNTS
-        "kiran-account-manager",
-        "kiran-cpanel-account",
-#else
-        "mate-about-me",
-#endif
-        "system-config-users",
-        nullptr};
+    std::vector<Glib::RefPtr<Gio::File>> files;
+    auto app = Gio::AppInfo::create_from_commandline("kiran-control-panel -c account-management",
+                                                     std::string(),
+                                                     Gio::APP_INFO_CREATE_SUPPORTS_STARTUP_NOTIFICATION);
 
-    if (!KiranHelper::launch_app_from_list(app_names))
-        KLOG_WARNING("Failed to launch avatar or account manage tools");
+    if (!app->launch(files))
+    {
+        KLOG_WARNING("Failed to launch timedate tools.");
+    }
 }
