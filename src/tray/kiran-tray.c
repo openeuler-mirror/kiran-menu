@@ -1092,28 +1092,29 @@ icon_size_allocate_callback(GtkWidget *widget,
                                                geometry);
     g_free(geometry);
 
-    if(KIRAN_IS_X11_TRAY_ICON(KIRAN_X11_TRAY_ICON(widget)))
-    {
-        Window icon_window;
-        icon_window = kiran_x11_tray_icon_get_icon_window(KIRAN_X11_TRAY_ICON(widget));
-        g_debug("%s is x11 tray icon, window id : %d",id ? id : "NULL",icon_window);
+    // 绘制方式改变，不需要改变外部窗口大小
+    // if(KIRAN_IS_X11_TRAY_ICON(KIRAN_X11_TRAY_ICON(widget)))
+    // {
+    //     Window icon_window;
+    //     icon_window = kiran_x11_tray_icon_get_icon_window(KIRAN_X11_TRAY_ICON(widget));
+    //     g_debug("%s is x11 tray icon, window id : %d",id ? id : "NULL",icon_window);
 
-        if(!icon_window)
-        {
-            return;
-        }
+    //     if(!icon_window)
+    //     {
+    //         return;
+    //     }
 
-        GdkDisplay *display;
-        GdkScreen *screen;
-        screen = gtk_widget_get_screen(GTK_WIDGET(user_data));
-        display = gdk_screen_get_display(screen);
+    //     GdkDisplay *display;
+    //     GdkScreen *screen;
+    //     screen = gtk_widget_get_screen(GTK_WIDGET(user_data));
+    //     display = gdk_screen_get_display(screen);
 
-        gdk_x11_display_error_trap_push(display);
+    //     gdk_x11_display_error_trap_push(display);
 
-        kiran_tray_resize_x11_icon_window(display,icon_window,widget);
+    //     kiran_tray_resize_x11_icon_window(display,icon_window,widget);
 
-        gdk_x11_display_error_trap_pop(display);
-    }   
+    //     gdk_x11_display_error_trap_pop(display);
+    // }   
 }
 
 static gboolean

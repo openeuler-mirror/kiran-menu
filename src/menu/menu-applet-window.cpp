@@ -360,7 +360,7 @@ Gtk::SearchEntry *MenuAppletWindow::create_app_search_entry()
 void MenuAppletWindow::on_date_box_clicked()
 {
     std::vector<Glib::RefPtr<Gio::File>> files;
-    auto app = Gio::AppInfo::create_from_commandline("kiran-control-panel -c timedate",
+    auto app = Gio::AppInfo::create_from_commandline("kiran-cpanel-launcher --cpanel-plugin kiran-cpanel-timedate",
                                                      std::string(),
                                                      Gio::APP_INFO_CREATE_SUPPORTS_STARTUP_NOTIFICATION);
 
@@ -678,7 +678,7 @@ void MenuAppletWindow::add_sidebar_buttons()
 
     launcher_btn = create_launcher_button("kiran-menu-run-symbolic",
                                           _("Run"),
-                                          "kiran-panel --run-dialog");
+                                          "mate-panel --run-dialog");
     side_box->add(*launcher_btn);
 
     launcher_btn = create_launcher_button("kiran-menu-search-files-symbolic",
@@ -693,7 +693,7 @@ void MenuAppletWindow::add_sidebar_buttons()
 
     launcher_btn = create_launcher_button("kiran-menu-settings-symbolic",
                                           _("Control center"),
-                                          "kiran-control-panel");
+                                          "mate-control-center");
     side_box->add(*launcher_btn);
 
     launcher_btn = create_launcher_button("kiran-menu-task-monitor-symbolic",

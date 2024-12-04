@@ -22,10 +22,11 @@ install(
   FILES ${PROJECT_BINARY_DIR}/data/org.mate.panel.KiranApplet.mate-panel-applet
   DESTINATION "${CMAKE_INSTALL_PREFIX}/share/${PANEL_NAME}/applets")
 
-install(
-  FILES
-    ${PROJECT_BINARY_DIR}/data/org.kiran.panel.applet.KiranAppletFactory.service
-  DESTINATION "${CMAKE_INSTALL_PREFIX}/share/dbus-1/services")
+#install(FILES ${PROJECT_BINARY_DIR}/data/org.kiran.panel.applet.KiranAppletFactory.service
+#        DESTINATION "${CMAKE_INSTALL_PREFIX}/share/dbus-1/services")
+
+install(FILES ${PROJECT_BINARY_DIR}/data/org.mate.panel.applet.KiranAppletFactory.service
+        DESTINATION "${CMAKE_INSTALL_PREFIX}/share/dbus-1/services")
 
 install(
   FILES "com.kylinsec.kiran.startmenu.gschema.xml.in"

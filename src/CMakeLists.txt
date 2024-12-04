@@ -81,7 +81,8 @@ target_compile_options(${TARGET_NAME} PUBLIC -g "-L${PROJECT_BINARY_DIR}/lib"
 target_include_directories(
   ${TARGET_NAME}
   PUBLIC "${PROJECT_SOURCE_DIR}/lib"
-         "${PANEL_INCLUDE_DIRS}"
+         #"${PANEL_INCLUDE_DIRS}"
+  	     "${MATEPANEL_INCLUDE_DIRS}"
          "${GTKMM_INCLUDE_DIRS}"
          "${MATEDESKTOP_INCLUDE_DIRS}"
          "${ACCOUNTSSERVICE_INCLUDE_DIRS}"
@@ -99,7 +100,8 @@ target_include_directories(
 
 target_link_libraries(
   ${TARGET_NAME}
-  PUBLIC "${PANEL_LIBRARIES}"
+  PUBLIC "${MATEPANEL_LIBRARIES}" 
+  	     #"${PANEL_LIBRARIES}"
          "${GTKMM_LIBRARIES}"
          "${MATEDESKTOP_LIBRARIES}"
          "${ACCOUNTSSERVICE_LIBRARIES}"
@@ -111,6 +113,7 @@ target_link_libraries(
          "${KLOG_GTK3_LIBRARIES}"
          "${FMT_LIBRARIES}"
          "X11"
-         "m")
+         "m"
+         ${XCB_IMAGE_LIBRARIES})
 
 target_link_libraries(${TARGET_NAME} PRIVATE kiran-menu-backend)

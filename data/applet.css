@@ -3,9 +3,202 @@
 @define-color thumbnail-hover-color #569CD6;
 @define-color tasklist_attention_color alpha(#fbaf43, 0.6);
 
+
+/* from 2.6 /usr/share/themes/Kiran-dark/gtk-3.0/gtk.css */
+/*
+widget text/foreground color */
+@define-color theme_fg_color #ffffff;
+/*
+text color for entries, views and content in general */
+@define-color theme_text_color #ffffff;
+/*
+widget base background color */
+@define-color theme_bg_color #222222;
+/*
+text widgets and the like base background color */
+@define-color theme_base_color #222222;
+/*
+base background color of selections */
+@define-color theme_selected_bg_color #2eb3ff;
+/*
+text/foreground color of selections */
+@define-color theme_selected_fg_color #ffffff;
+/*
+base background color of insensitive widgets */
+@define-color insensitive_bg_color #1f1f1f;
+/*
+text foreground color of insensitive widgets */
+@define-color insensitive_fg_color rgba(232, 232, 232, 0.35);
+/*
+insensitive text widgets and the like base background color */
+@define-color insensitive_base_color #1f1f1f;
+/*
+insensitive text color for entries, views and content in general */
+@define-color insensitive_text_color rgba(232, 232, 232, 0.35);
+/*
+base background color of insensitive selections */
+@define-color insensitive_selected_bg_color rgba(19, 169, 255, 0.35);
+/*
+text foreground color of insensitive selections */
+@define-color insensitive_selected_fg_color rgba(232, 232, 232, 0.35);
+/*
+text foreground color of insensitive unfocused selections */
+@define-color insensitive_unfocused_selected_fg_color rgba(186, 185, 185, 0.37);
+/*
+widget text/foreground color on backdrop windows */
+@define-color theme_unfocused_fg_color rgba(239, 239, 239, 0.955);
+/*
+text color for entries, views and content in general on backdrop windows */
+@define-color theme_unfocused_text_color rgba(239, 239, 239, 0.955);
+/*
+widget base background color on backdrop windows */
+@define-color theme_unfocused_bg_color #2a2a2a;
+/*
+text widgets and the like base background color on backdrop windows */
+@define-color theme_unfocused_base_color #2a2a2a;
+/*
+base background color of selections on backdrop windows */
+@define-color theme_unfocused_selected_bg_color rgba(53, 172, 239, 0.955);
+/*
+text/foreground color of selections on backdrop windows */
+@define-color theme_unfocused_selected_fg_color rgba(239, 239, 239, 0.955);
+/*
+insensitive color on backdrop windows*/
+@define-color unfocused_insensitive_color #272727;
+/*
+backdground color of insensitive widgets on backdrop windows*/
+@define-color insensitive_unfocused_bg_color #272727;
+/*
+text foreground color of insensitive widgets on backdrop windows*/
+@define-color insensitive_unfocused_fg_color rgba(186, 185, 185, 0.37);
+/*
+widgets main borders color */
+@define-color borders #393939;
+/*
+widgets main borders color on backdrop windows */
+@define-color unfocused_borders rgba(63, 63, 63, 0.955);
+/*
+widgets main borders color insensitive */
+@define-color insensitive_borders rgba(52, 52, 52, 0.35);
+/*
+widgets main borders color insensitive backdrop */
+@define-color unfocused_insensitive_borders rgba(75, 75, 74, 0.37);
+/*
+textview main backgound color */
+@define-color switch_slider_color #ffffff;
+@define-color container_hover_color mix(@theme_bg_color, @theme_fg_color, 0.1);
+@define-color container_active_color mix(@theme_bg_color, @theme_fg_color, 0.2);
+@define-color backdrop_base_color @theme_base_color;
+@define-color backdrop_borders_color mix(@borders, @theme_bg_color, 0.8);
+/* --------------------------------------------------------------- Default Colors --------------------------------------------------------------- */
+@define-color theme_default_background_normal #222222;
+@define-color theme_default_background_insensitive #1f1f1f;
+@define-color theme_default_background_backdrop #2a2a2a;
+@define-color theme_default_background_backdrop_insensitive rgba(38, 38, 38, 0.35);
+@define-color theme_default_foreground_normal #ffffff;
+@define-color theme_default_foreground_insensitive rgba(232, 232, 232, 0.35);
+@define-color theme_default_foreground_backdrop rgba(239, 239, 239, 0.955);
+@define-color theme_default_foreground_backdrop_insensitive rgba(217, 217, 217, 0.305);
+@define-color theme_default_border_normal #393939;
+@define-color theme_default_border_insensitive rgba(52, 52, 52, 0.35);
+@define-color theme_default_border_backdrop rgba(63, 63, 63, 0.955);
+@define-color theme_default_border_backdrop_insensitive rgba(57, 57, 57, 0.305);
+@define-color theme_default_warning #fa4949;
+@define-color theme_default_warning_backdrop rgba(235, 77, 77, 0.955);
+@define-color theme_default_error #cc0000;
+@define-color theme_default_error_backdrop rgba(194, 12, 12, 0.955);
+@define-color theme_default_success #68be14;
+@define-color theme_default_success_backdrop rgba(105, 181, 30, 0.955);
+/* these are pretty self explicative */
+@define-color warning_color #fa4949;
+@define-color error_color #cc0000;
+@define-color success_color #68be14;
+/* --------------------------------------------------------------- Widget Colors --------------------------------------------------------------- */
+@define-color theme_widget_background_normal #2c2c2c;
+@define-color theme_widget_background_hover #414141;
+@define-color theme_widget_background_active #565656;
+@define-color theme_widget_background_checked #2eb3ff;
+@define-color theme_widget_background_insensitive rgba(40, 40, 40, 0.35);
+@define-color theme_widget_background_backdrop rgba(51, 51, 51, 0.955);
+@define-color theme_widget_background_backdrop_checked rgba(53, 172, 239, 0.955);
+@define-color theme_widget_background_backdrop_insensitive rgba(46, 46, 46, 0.305);
+@define-color theme_widget_foreground_normal #ffffff;
+@define-color theme_widget_foreground_hover #bfbfbf;
+@define-color theme_widget_foreground_active #aaaaaa;
+@define-color theme_widget_foreground_checked #2eb3ff;
+@define-color theme_widget_foreground_insensitive rgba(232, 232, 232, 0.35);
+@define-color theme_widget_foreground_backdrop rgba(239, 239, 239, 0.955);
+@define-color theme_widget_foreground_backdrop_checked rgba(53, 172, 239, 0.955);
+@define-color theme_widget_foreground_backdrop_insensitive rgba(217, 217, 217, 0.305);
+@define-color theme_widget_border_normal #393939;
+@define-color theme_widget_border_hover #c3c3c3;
+@define-color theme_widget_border_focus #2eb3ff;
+@define-color theme_widget_border_insensitive rgba(52, 52, 52, 0.35);
+@define-color theme_widget_border_backdrop rgba(63, 63, 63, 0.955);
+@define-color theme_widget_border_backdrop_insensitive rgba(57, 57, 57, 0.305);
+/* --------------------------------------------------------------- Bare Colors --------------------------------------------------------------- */
+@define-color theme_bare_background_normal #595959;
+@define-color theme_bare_background_hover #696969;
+@define-color theme_bare_background_active #7a7a7a;
+@define-color theme_bare_background_checked #2eb3ff;
+@define-color theme_bare_background_insensitive rgba(81, 81, 81, 0.35);
+@define-color theme_bare_background_backdrop rgba(92, 91, 91, 0.955);
+@define-color theme_bare_background_backdrop_checked rgba(53, 172, 239, 0.955);
+@define-color theme_bare_background_backdrop_insensitive rgba(84, 83, 83, 0.305);
+@define-color theme_bare_foreground_normal #ffffff;
+@define-color theme_bare_foreground_hover #cdcdcd;
+@define-color theme_bare_foreground_active #bcbcbc;
+@define-color theme_bare_foreground_checked #2eb3ff;
+@define-color theme_bare_foreground_insensitive rgba(232, 232, 232, 0.35);
+@define-color theme_bare_foreground_backdrop rgba(239, 239, 239, 0.955);
+@define-color theme_bare_foreground_backdrop_checked rgba(53, 172, 239, 0.955);
+@define-color theme_bare_foreground_backdrop_insensitive rgba(217, 217, 217, 0.305);
+/* --------------------------------------------------------------- Window Colors --------------------------------------------------------------- */
+@define-color theme_window_background_normal #222222;
+@define-color theme_window_background_insensitive #1f1f1f;
+@define-color theme_window_background_backdrop #2a2a2a;
+@define-color theme_window_background_backdrop_insensitive rgba(38, 38, 38, 0.35);
+@define-color theme_window_foreground_normal #ffffff;
+@define-color theme_window_foreground_insensitive rgba(232, 232, 232, 0.35);
+@define-color theme_window_foreground_backdrop rgba(239, 239, 239, 0.955);
+@define-color theme_window_foreground_backdrop_insensitive rgba(217, 217, 217, 0.305);
+@define-color theme_window_border_normal #393939;
+@define-color theme_window_border_insensitive rgba(52, 52, 52, 0.35);
+@define-color theme_window_border_backdrop rgba(63, 63, 63, 0.955);
+@define-color theme_window_border_backdrop_insensitive rgba(57, 57, 57, 0.305);
+/* --------------------------------------------------------------- View Colors --------------------------------------------------------------- */
+@define-color theme_view_background_normal #222222;
+@define-color theme_view_background_insensitive #1f1f1f;
+@define-color theme_view_background_backdrop #2a2a2a;
+@define-color theme_view_background_backdrop_insensitive rgba(38, 38, 38, 0.35);
+@define-color theme_view_foreground_normal #ffffff;
+@define-color theme_view_foreground_insensitive rgba(232, 232, 232, 0.35);
+@define-color theme_view_foreground_backdrop rgba(239, 239, 239, 0.955);
+@define-color theme_view_foreground_backdrop_insensitive rgba(217, 217, 217, 0.305);
+@define-color theme_view_border_normal #393939;
+@define-color theme_view_border_focus #2eb3ff;
+@define-color theme_view_border_insensitive rgba(52, 52, 52, 0.35);
+@define-color theme_view_border_backdrop rgba(63, 63, 63, 0.955);
+@define-color theme_view_border_backdrop_insensitive rgba(57, 57, 57, 0.305);
+/* -------------------------------------------------------------- Titlebar Colors -------------------------------------------------------------- */
+@define-color theme_titlebar_background_normal #222222;
+@define-color theme_titlebar_background_insensitive #1f1f1f;
+@define-color theme_titlebar_background_backdrop #2a2a2a;
+@define-color theme_titlebar_background_backdrop_insensitive rgba(38, 38, 38, 0.35);
+@define-color theme_titlebar_foreground_normal #ffffff;
+@define-color theme_titlebar_foreground_insensitive rgba(232, 232, 232, 0.35);
+@define-color theme_titlebar_foreground_backdrop rgba(239, 239, 239, 0.955);
+@define-color theme_titlebar_foreground_backdrop_insensitive rgba(217, 217, 217, 0.305);
+@define-color theme_titlebar_border_normal #393939;
+@define-color theme_titlebar_border_insensitive rgba(52, 52, 52, 0.35);
+@define-color theme_titlebar_border_backdrop rgba(63, 63, 63, 0.955);
+@define-color theme_titlebar_border_backdrop_insensitive rgba(57, 57, 57, 0.305);
+
+
 button.kiran-applet-button {
     border-radius: 0px;
     border: none;
+    background: #0c0c0c;
 }
 
 
@@ -20,7 +213,8 @@ window#menu-applet-window {
 }
 
 /* 开始菜单应用按钮和分类标签 */
-button.menu-app-item.horizontal, button.menu-category-item {
+button.menu-app-item.horizontal,
+button.menu-category-item {
     border-width: 0px;
     border-radius: 0px;
     outline: none;
@@ -59,8 +253,7 @@ button.menu-app-item.vertical {
 
 
 button.menu-app-item:focus,
-button.menu-category-item:focus
-{
+button.menu-category-item:focus {
     outline-offset: -2px;
     outline-style: dotted;
     outline-width: 1px;
@@ -86,6 +279,7 @@ entry.menu-search-entry {
     padding-bottom: 10px;
     padding-left: 5px;
     padding-right: 5px;
+    color: #000000;
 }
 
 
@@ -93,6 +287,7 @@ label.empty-prompt-text {
     font-size: 18px;
     color: #8b8b8b;
 }
+
 
 /* 开始菜单：应用列表展开按钮 */
 button.toggle.menu-expand-button {
@@ -104,7 +299,7 @@ button.toggle.menu-expand-button {
 }
 
 
-button.toggle.menu-expand-button:focus{
+button.toggle.menu-expand-button:focus {
     outline-offset: -2px;
     outline-style: dotted;
     outline-width: 1px;
@@ -119,20 +314,18 @@ button.toggle.menu-expand-button:focus{
 }
 
 .tasklist-widget {
-    background: none;
+    background: #0c0c0c;
 }
 
-/* .tasklist-widget:drop(active) {
-    background: rgba(255, 255, 255, 0.15);
-} */
-
 button.kiran-tasklist-button {
+    background: transparent;
     border: none;
     border-radius: 0px;
     -gtkmm__CustomObject_KiranTasklistAppButton-indicator-size: 4px;
 }
 
 button.tasklist-arrow-button {
+    background: transparent;
     border: none;
     border-radius: 0px;
 }
@@ -155,11 +348,12 @@ window.app-previewer button.window-thumbnail.horizontal {
 window.app-previewer button.window-thumbnail.vertical:hover,
 window.app-previewer button.window-thumbnail.horizontal:hover,
 window.app-previewer button.window-thumbnail:hover {
-    border: 1px solid rgba(46,179,255, 0.6);
+    border: 1px solid rgba(46, 179, 255, 0.6);
 }
 
 
-window.app-previewer scrolledwindow, window.app-previewer viewport {
+window.app-previewer scrolledwindow,
+window.app-previewer viewport {
     background: transparent;
     border: none;
 }
@@ -174,7 +368,7 @@ button.kiran-thumbnail button.close-btn {
     padding: 0px;
 }
 
-button.kiran-thumbnail button.close-btn:hover{
+button.kiran-thumbnail button.close-btn:hover {
     background-image: url("/kiran-tasklist/icon/close_prelight");
     padding: 0px;
 }
@@ -182,25 +376,6 @@ button.kiran-thumbnail button.close-btn:hover{
 button.kiran-thumbnail button.close-btn:active {
     background-image: url("/kiran-tasklist/icon/close_active");
     padding: 0px;
-}
-
-menu.opacity-menu menuitem{
-    min-height: 28px;
-    padding-left: 12px;
-    padding-right: 12px;
-}
-
-
-scrollbar {
-    -GtkScrollbar-has-backward-stepper: 0;
-    -GtkScrollbar-has-forward-stepper: 0;
-    border-radius: 0px;
-}
-
-scrollbar.horizontal, scrollbar.vertical{
-    border: none;
-    background: transparent;
-    border-image: none;
 }
 
 /* workspace */
@@ -231,12 +406,11 @@ button.toggle.kiran-showdesktop-button:hover {
 }
 
 button.toggle.kiran-showdesktop-button:checked,
-button.toggle.kiran-showdesktop-button:active
-{
+button.toggle.kiran-showdesktop-button:active {
     background: rgba(255, 255, 255, 0.4);
 }
 
-.stack-switcher button{
+.stack-switcher button {
     min-height: 30px;
 }
 
@@ -259,7 +433,8 @@ list.menu-recent-list row image:first-child {
     margin-right: 8px;
 }
 
-scrolledwindow, scrolledwindow viewport {
+scrolledwindow,
+scrolledwindow viewport {
     background: none;
     border: none;
 }
@@ -273,29 +448,214 @@ scrolledwindow, scrolledwindow viewport {
 }
 
 /* Tray */
-#iconWinButton
-{
-  border-radius: 0px;
-  border-width: 0px;
-  background-repeat: no-repeat;
-  background-position: center;
-  min-width: 24px;
-  margin: 0px;
-  padding: 0px;
+#iconWinButton {
+    border-radius: 0px;
+    border-width: 0px;
+    background-color: #0c0c0c;
+    background-repeat: no-repeat;
+    background-position: center;
+    min-width: 24px;
+    margin: 0px;
+    padding: 0px;
 }
 
-#trayWindow
-{
-  border-radius: 6px;
-  border-width: 1px;
+#iconWinButton:hover {
+    background-color: #414141;
 }
 
-#trayGrid
-{
-  margin: 0px;
+#iconWinButton:disabled,
+label:disabled selection#iconWinButton {
+    background-color: rgba(40, 40, 40, 0.35);
 }
 
-#trayBox
-{
-  margin: 0px 5px 0px 0px;
+#trayWindow {
+    border-radius: 6px;
+    border-width: 1px;
+    background-color: #0c0c0c;
+}
+
+#trayGrid {
+    margin: 0px;
+    background-color: #0c0c0c;
+}
+
+#trayBox {
+    margin: 0px;
+    background-color: #0c0c0c;
+}
+
+/***************
+ * Base States *
+ ***************/
+
+.background {
+    background: @theme_bg_color;
+}
+
+button {
+    border: 1px solid;
+    border-radius: 4px;
+    padding: 6px 6px;
+    background-clip: border-box;
+    box-shadow: none;
+    text-shadow: none;
+    -gtk-icon-shadow: none;
+    color: @theme_widget_foreground_normal;
+    border-color: @theme_widget_border_normal;
+    background-color: @theme_widget_background_normal;
+}
+
+button:hover {
+    border-color: @theme_widget_border_normal;
+    background-color: @theme_widget_background_hover;
+    -gtk-icon-effect: none;
+}
+
+button:checked {
+    border-color: @theme_widget_border_normal;
+    background-color: @theme_widget_background_active;
+    transition-duration: 50ms;
+}
+
+button:disabled {
+    color: @theme_widget_foreground_insensitive;
+    border-color: @theme_widget_border_insensitive;
+    background-color: @theme_widget_background_insensitive;
+}
+
+button separator {
+    background-color: transparent;
+    background-image: none;
+    color: transparent;
+}
+
+scrollbar {
+    -GtkScrollbar-has-backward-stepper: 0;
+    -GtkScrollbar-has-forward-stepper: 0;
+    border-radius: 0px;
+}
+
+scrollbar.horizontal,
+scrollbar.vertical {
+    border: none;
+    background: transparent;
+    border-image: none;
+}
+
+scrollbar {
+    background-color: @theme_widget_background_normal;
+    border: none;
+}
+
+scrollbar:backdrop {
+    background-color: @theme_widget_background_backdrop;
+    border-color: @theme_widget_border_backdrop;
+    transition: 200ms ease-out;
+}
+
+scrollbar slider {
+    min-width: 6px;
+    min-height: 6px;
+    margin: -1px;
+    border: 4px solid transparent;
+    border-radius: 8px;
+    background-clip: padding-box;
+    background-color: @theme_bare_background_normal;
+}
+
+scrollbar slider:hover {
+    background-color: @theme_bare_background_hover;
+}
+
+scrollbar slider:active,
+scrollbar slider:checked {
+    background-color: @theme_bare_background_checked;
+}
+
+scrollbar slider:backdrop {
+    background-color: @theme_bare_background_backdrop;
+}
+
+scrollbar.horizontal slider {
+    min-width: 40px;
+}
+
+scrollbar.vertical slider {
+    min-height: 40px;
+}
+
+window#menu-applet-window .block-section {
+    background-color: @theme_widget_background_normal;
+}
+
+window#menu-applet-window .block-section:backdrop,
+window#menu-applet-window label:backdrop selection.block-section,
+label:backdrop window#menu-applet-window selection.block-section {
+    background-color: @theme_widget_background_backdrop;
+}
+
+@define-color tasklist_app_active_color alpha(@theme_widget_foreground_normal, 0.3);
+
+menu.opacity-menu {
+    background-color: alpha(@theme_window_background_normal, 0.85);
+}
+
+menu.opacity-menu menuitem {
+    background-color: transparent;
+    color: @theme_text_color;
+    min-height: 28px;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+menu.opacity-menu menuitem:hover {
+    background-color: alpha(@theme_widget_foreground_normal, 0.15);
+}
+
+window.app-previewer {
+    background-color: alpha(@theme_window_background_normal, 0.85);
+    border: 1px solid @theme_window_border_normal;
+}
+
+window.workspace-previewer .workspace-list-box {
+    background-color: alpha(@theme_window_background_normal, 0.7);
+}
+
+window.workspace-previewer button.workspace-thumbnail {
+    background-color: transparent;
+    border: none;
+}
+
+window.workspace-previewer button.workspace-thumbnail:hover {
+    background-color: alpha(@theme_window_foreground_normal, 0.15);
+    border-color: transparent;
+}
+
+window.workspace-previewer button#add-button {
+    background: transparent;
+    border: none;
+}
+
+window.workspace-previewer button#add-button:hover {
+    background-color: alpha(@theme_window_foreground_normal, 0.15);
+}
+
+tooltip {
+    padding: 2px;
+    border-radius: 6px;
+}
+
+tooltip label {
+    color: @theme_text_color;
+}
+
+tooltip.background {
+    background-color: @theme_window_background_normal;
+    background-clip: padding-box;
+    border: 1px solid @theme_window_border_normal;
+}
+
+label#username-label,
+label#date-label {
+    color: @theme_text_color;
 }
