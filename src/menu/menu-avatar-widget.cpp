@@ -119,7 +119,7 @@ bool MenuAvatarWidget::on_draw(const ::Cairo::RefPtr<Cairo::Context> &cr)
 void MenuAvatarWidget::on_clicked()
 {
     std::vector<Glib::RefPtr<Gio::File>> files;
-    auto app = Gio::AppInfo::create_from_commandline("mate-about-me",
+    auto app = Gio::AppInfo::create_from_commandline("kiran-cpanel-launcher --cpanel-plugin=kiran-cpanel-account",
                                                      std::string(),
                                                      Gio::APP_INFO_CREATE_SUPPORTS_STARTUP_NOTIFICATION);
 

@@ -13,7 +13,8 @@
  */
 
 #include "kiran-x11-tray-socket.h"
-#include <xcb/xcb_image.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
 
 struct _KiranX11TraySocketPrivate
 {
@@ -74,48 +75,45 @@ kiran_x11_tray_socket_init(KiranX11TraySocket *self)
     gtk_widget_set_hexpand(GTK_WIDGET(self), FALSE);
 }
 
-void resizeWindow(xcb_connection_t *c, xcb_window_t xcb_window_id)
-{
-    uint16_t widthNormalized = 18;
-    uint16_t heighNormalized = 18;
+void resizeWindow(Display *display, Window x_window) {
+    unsigned int widthNormalized = 18;
+    unsigned int heightNormalized = 18;
 
-    const uint32_t windowSizeConfigVals[2] = {widthNormalized, heighNormalized};
-    xcb_configure_window(c, xcb_window_id, XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT, windowSizeConfigVals);
+    XWindowChanges changes;
+    changes.width = widthNormalized;
+    changes.height = heightNormalized;
 
-    xcb_flush(c);
+    XConfigureWindow(display, x_window, CWWidth | CWHeight, &changes);
+    XFlush(display);
 }
+// 计算客户端窗口大小
+void calculateClientWindowSize(Display *display, Window x_window, int *w, int *h) {
+    XWindowAttributes attributes;
 
-void calculateClientWindowSize(xcb_connection_t *c, xcb_window_t xcb_window_id, int *w, int *h)
-{
-    xcb_get_geometry_cookie_t cookie = xcb_get_geometry(c, xcb_window_id);
-    xcb_get_geometry_reply_t *clientGeom = xcb_get_geometry_reply(c, cookie, NULL);
-
-    if (clientGeom)
-    {
-        *w = clientGeom->width;
-        *h = clientGeom->height;
-        free(clientGeom);
+    // 获取窗口属性
+    if (XGetWindowAttributes(display, x_window, &attributes)) {
+        *w = attributes.width;
+        *h = attributes.height;
+    } else {
+        g_print(stderr, "Failed to get window attributes\n");
+        *w = 0;
+        *h = 0;
     }
 
-
-    // if the window is a clearly stupid size resize to be something sensible
-    // this is needed as chromium and such when resized just fill the icon with transparent space and only draw in the middle
-    // however KeePass2 does need this as by default the window size is 273px wide and is not transparent
-    // use an arbitrary heuristic to make sure icons are always sensible
-    if (*w <= 0 || *h <= 0)
-    {
-        resizeWindow(c, xcb_window_id);
+    // 如果窗口大小无效，调整为默认值
+    if (*w <= 0 || *h <= 0) {
+        resizeWindow(display, x_window);
         *w = 18;
         *h = 18;
     }
 }
 
-void detect_non_blank_region(xcb_image_t *image, int *left, int *top, int *right, int *bottom)
+void detect_non_blank_region(XImage *image, int *left, int *top, int *right, int *bottom)
 {
     int width = image->width;
     int height = image->height;
-    int stride = image->stride;
-    int pixel_size = image->bpp / 8;
+    int stride = image->bytes_per_line;
+    int pixel_size = image->bits_per_pixel / 8;
 
     *left = width;
     *right = 0;
@@ -184,24 +182,21 @@ void kiran_x11_tray_socket_draw_on_parent(KiranX11TraySocket *socket,
                                           GtkWidget *parent,
                                           cairo_t *cr)
 {
-    auto xdisplay = gdk_x11_get_default_xdisplay();
-    xcb_connection_t *c = XGetXCBConnection(xdisplay);
 
+    Display *display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
     GdkWindow *window = gtk_widget_get_window(socket);
-    xcb_window_t xcb_window_id = GDK_WINDOW_XID(window);
-
-    int w = 0;
-    int h = 0;
-    calculateClientWindowSize(c, xcb_window_id, &w, &h);
-    xcb_image_t *image = xcb_image_get(c, xcb_window_id, 0, 0, w, h, ~0, XCB_IMAGE_FORMAT_Z_PIXMAP);
-
+    Window x_window = GDK_WINDOW_XID(window);
+    int w = 18;
+    int h = 18;
+    calculateClientWindowSize(display, x_window, &w, &h);
+    XImage *image = XGetImage(display, x_window, 0, 0, w, h, AllPlanes, ZPixmap);
     if (!image)
         return;
 
     // 图像属性
     // 使用图像深度推出Cairo格式
     cairo_format_t format;
-    switch (image->bpp)
+    switch (image->bits_per_pixel)
     {
     case 32:
         format = CAIRO_FORMAT_ARGB32;
@@ -210,21 +205,22 @@ void kiran_x11_tray_socket_draw_on_parent(KiranX11TraySocket *socket,
         format = CAIRO_FORMAT_RGB24;
         break;
     default:
-        g_print("Unsupported image format with %d bits per pixel\n", image->bpp);
-        xcb_image_destroy(image);
+        g_print("Unsupported image format with %d bits per pixel\n", image->bits_per_pixel);
+        XDestroyImage(image);
         return;
     }
+
 
     cairo_surface_t *surface = cairo_image_surface_create_for_data(
         image->data,
         format,
         image->width,
         image->height,
-        image->stride);
+        image->bytes_per_line);
     if (cairo_surface_status(surface) != CAIRO_STATUS_SUCCESS)
     {
         g_print("Failed to create Cairo image surface\n");
-        xcb_image_destroy(image);
+        XDestroyImage(image);
         return;
     }
 
@@ -262,7 +258,7 @@ void kiran_x11_tray_socket_draw_on_parent(KiranX11TraySocket *socket,
 
     // 清理
     cairo_surface_destroy(surface);
-    xcb_image_destroy(image);
+    XDestroyImage(image);
 }
 
 void kiran_x11_tray_socket_add_id(KiranX11TraySocket *socket,
