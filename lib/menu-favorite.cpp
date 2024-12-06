@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     tangjie02 <tangjie02@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "lib/menu-favorite.h"
@@ -28,8 +23,8 @@ namespace Kiran
 {
 MenuFavorite::MenuFavorite()
 {
-    this->settings_ = Gio::Settings::create(KIRAN_MENU_SCHEMA);
-    this->favorite_apps_ = read_as_to_list_quark(this->settings_, MENU_KEY_FAVORITE_APPS);
+    this->settings_ = Gio::Settings::create(STARTMENU_SCHEMA);
+    this->favorite_apps_ = read_as_to_list_quark(this->settings_, STARTMENU_KEY_FAVORITE_APPS);
 }
 
 MenuFavorite::~MenuFavorite()
@@ -38,7 +33,7 @@ MenuFavorite::~MenuFavorite()
 
 void MenuFavorite::init()
 {
-    this->settings_->signal_changed(MENU_KEY_FAVORITE_APPS).connect(sigc::mem_fun(this, &MenuFavorite::app_changed));
+    this->settings_->signal_changed(STARTMENU_KEY_FAVORITE_APPS).connect(sigc::mem_fun(this, &MenuFavorite::app_changed));
 }
 
 void MenuFavorite::flush(const AppVec &apps)
@@ -55,21 +50,22 @@ void MenuFavorite::flush(const AppVec &apps)
 
     std::vector<std::string> delete_apps;
 
-    auto iter = std::remove_if(this->favorite_apps_.begin(), this->favorite_apps_.end(), [this, &delete_apps, &app_set](int32_t elem) -> bool {
-        if (app_set.find(elem) == app_set.end())
-        {
-            Glib::QueryQuark query_quark((GQuark)elem);
-            Glib::ustring desktop_id = query_quark;
-            delete_apps.push_back(desktop_id.raw());
-            return true;
-        }
-        return false;
-    });
+    auto iter = std::remove_if(this->favorite_apps_.begin(), this->favorite_apps_.end(), [this, &delete_apps, &app_set](int32_t elem) -> bool
+                               {
+                                   if (app_set.find(elem) == app_set.end())
+                                   {
+                                       Glib::QueryQuark query_quark((GQuark)elem);
+                                       Glib::ustring desktop_id = query_quark;
+                                       delete_apps.push_back(desktop_id.raw());
+                                       return true;
+                                   }
+                                   return false;
+                               });
 
     if (iter != this->favorite_apps_.end())
     {
         this->favorite_apps_.erase(iter, this->favorite_apps_.end());
-        write_list_quark_to_as(this->settings_, MENU_KEY_FAVORITE_APPS, this->favorite_apps_);
+        write_list_quark_to_as(this->settings_, STARTMENU_KEY_FAVORITE_APPS, this->favorite_apps_);
         this->app_deleted_.emit(delete_apps);
     }
 }
@@ -84,7 +80,7 @@ bool MenuFavorite::add_app(const std::string &desktop_id)
         this->favorite_apps_.push_back(quark.id());
         std::vector<std::string> add_apps = {desktop_id};
         this->app_added_.emit(add_apps);
-        return write_list_quark_to_as(this->settings_, MENU_KEY_FAVORITE_APPS, this->favorite_apps_);
+        return write_list_quark_to_as(this->settings_, STARTMENU_KEY_FAVORITE_APPS, this->favorite_apps_);
     }
     return FALSE;
 }
@@ -100,7 +96,7 @@ bool MenuFavorite::del_app(const std::string &desktop_id)
         this->favorite_apps_.erase(iter);
         std::vector<std::string> delete_apps = {desktop_id};
         this->app_deleted_.emit(delete_apps);
-        return write_list_quark_to_as(this->settings_, MENU_KEY_FAVORITE_APPS, this->favorite_apps_);
+        return write_list_quark_to_as(this->settings_, STARTMENU_KEY_FAVORITE_APPS, this->favorite_apps_);
     }
     return FALSE;
 }
@@ -128,7 +124,7 @@ std::vector<std::string> MenuFavorite::get_favorite_apps()
 
 void MenuFavorite::app_changed(const Glib::ustring &key)
 {
-    auto new_favorite_apps = read_as_to_list_quark(this->settings_, MENU_KEY_FAVORITE_APPS);
+    auto new_favorite_apps = read_as_to_list_quark(this->settings_, STARTMENU_KEY_FAVORITE_APPS);
 
     std::vector<std::string> add_apps;
     std::vector<std::string> delete_apps;

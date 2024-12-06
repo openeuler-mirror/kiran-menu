@@ -1,38 +1,34 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "menu-applet-window.h"
+#include <fmt/format.h>
+#include <glibmm/i18n.h>
 #include <gtk/gtkx.h>
+#include <unistd.h>
+#include <iostream>
+#include "config.h"
 #include "global.h"
 #include "kiran-helper.h"
 #include "kiran-search-entry.h"
 #include "lib/base.h"
 #include "menu-app-launcher-button.h"
-#include "menu-power-button.h"
-#include "window-manager.h"
-
-#include <glibmm/i18n.h>
-#include <unistd.h>
-#include <iostream>
-#include "global.h"
 #include "menu-apps-container.h"
+#include "menu-power-button.h"
+#include "menu-power-dialog.h"
 #include "recent-files-widget.h"
+#include "window-manager.h"
 
 #define NEW_APPS_MAX_SIZE 3
 
@@ -140,13 +136,27 @@ bool MenuAppletWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
     Gtk::Widget *child;
     Gtk::Allocation allocation;
     auto context = get_style_context();
+    auto provider = Gtk::CssProvider::create();
 
     allocation = get_allocation();
     background_color = context->get_background_color(get_state_flags());
     opacity = profile.get_opacity();
+    background_color.set_alpha(opacity);
+
+    auto str = fmt::format("window#menu-applet-window {{background: rgba({0}, {1}, {2}, {3});}}",
+                           background_color.get_red() * 255,
+                           background_color.get_green() * 255,
+                           background_color.get_blue() * 255,
+                           background_color.get_alpha());
+
+    provider->load_from_data(str);
+    Gtk::StyleContext::add_provider_for_screen(Gdk::Screen::get_default(),
+                                               provider,
+                                               GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+    /*
     cr->save();
 
-    background_color.set_alpha(opacity);
     Gdk::Cairo::set_source_rgba(cr, background_color);
     cr->set_operator(Cairo::OPERATOR_SOURCE);
 
@@ -154,6 +164,12 @@ bool MenuAppletWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
     cr->restore();
 
     context->render_frame(cr, 0, 0, allocation.get_width(), allocation.get_height());
+*/
+
+    context->render_background(cr, 0, 0, allocation.get_width(), allocation.get_height());
+
+    Gtk::StyleContext::remove_provider_for_screen(Gdk::Screen::get_default(),
+                                                  provider);
 
     child = get_child();
     propagate_draw(*child, cr);
@@ -189,17 +205,19 @@ bool MenuAppletWindow::on_grab_broken_event(GdkEventGrabBroken *grab_broken_even
 
 void MenuAppletWindow::init_ui()
 {
-    Gtk::Box *search_box, *main_box;
+    Gtk::Box *search_box, *main_box, *sider_box;
     Gtk::EventBox *date_box;
     Gtk::Box *expand_panel, *search_results_page;
-    Gtk::ScrolledWindow *all_apps_scrolled;
     Gtk::Box *recent_files_view;
 
     init_window_visual();
 
     builder = Gtk::Builder::create_from_resource("/kiran-menu/ui/menu");
     builder->get_widget<Gtk::Box>("menu-container", main_box);
+    builder->get_widget<Gtk::Box>("menu-sider-container", sider_box);
+    builder->get_widget<Gtk::StackSwitcher>("menu-view-stack-switcher", menu_view_stack_switcher);
     builder->get_widget<Gtk::Stack>("menu-view-stack", menu_view_stack);
+    builder->get_widget<Gtk::Box>("all-apps-view", all_app_view);
     builder->get_widget<Gtk::Stack>("apps-list-stack", apps_list_stack);
 
     builder->get_widget<Gtk::Box>("search-box", search_box);
@@ -215,6 +233,14 @@ void MenuAppletWindow::init_ui()
     category_list_viewport = Gtk::make_managed<Gtk::Viewport>(Glib::RefPtr<Gtk::Adjustment>(), Glib::RefPtr<Gtk::Adjustment>());
     category_list_scrolled->add(*category_list_viewport);
     category_list_scrolled->get_style_context()->add_class("category-list-box");
+
+    sider_box->set_name("menu-left-container");
+    menu_view_stack->set_name("menu-mid-container");
+
+    for (const auto &child : menu_view_stack_switcher->get_children())
+    {
+        child->get_style_context()->add_class("flat");
+    }
 
     /* 最近访问文档列表 */
     auto widget = Gtk::make_managed<RecentFilesWidget>();
@@ -243,6 +269,7 @@ void MenuAppletWindow::init_ui()
 
     /* 系统应用列表布局 */
     all_apps_page = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL);
+    all_apps_page->get_style_context()->add_class("all-apps-page");
     all_apps_scrolled->add(*all_apps_page);
     new_apps_container = Gtk::make_managed<MenuNewAppsContainer>(NEW_APPS_MAX_SIZE);
     all_apps_page->pack_start(*new_apps_container, Gtk::PACK_SHRINK);
@@ -332,14 +359,15 @@ Gtk::SearchEntry *MenuAppletWindow::create_app_search_entry()
 
 void MenuAppletWindow::on_date_box_clicked()
 {
-    const char *app_names[] = {
-        "kiran-timedate-manager",
-        "mate-time-admin",
-        "system-config-date",
-        nullptr};
+    std::vector<Glib::RefPtr<Gio::File>> files;
+    auto app = Gio::AppInfo::create_from_commandline("kiran-cpanel-launcher --cpanel-plugin kiran-cpanel-timedate",
+                                                     std::string(),
+                                                     Gio::APP_INFO_CREATE_SUPPORTS_STARTUP_NOTIFICATION);
 
-    if (!KiranHelper::launch_app_from_list(app_names))
-        KLOG_WARNING("Failed to launch datetime manage tools");
+    if (!app->launch(files))
+    {
+        KLOG_WARNING("Failed to launch timedate tools.");
+    }
 
     hide();
 }
@@ -359,7 +387,10 @@ void MenuAppletWindow::init_window_visual()
 
     /*设置窗口的Visual为RGBA visual，确保窗口背景透明度可以正常绘制 */
     rgba_visual = get_screen()->get_rgba_visual();
-    gtk_widget_set_visual(widget, rgba_visual->gobj());
+    if (rgba_visual && rgba_visual->gobj())
+    {
+        gtk_widget_set_visual(widget, rgba_visual->gobj());
+    }
 }
 
 /* app列表页Stack */
@@ -466,6 +497,7 @@ void MenuAppletWindow::switch_to_category_overview(const std::string &selected_c
             true));
         category_list_box->add(*item);
     }
+    all_app_view->set_visible(false);
     category_list_scrolled->show_all();
 
     if (selected_item)
@@ -482,6 +514,7 @@ void MenuAppletWindow::switch_to_apps_overview(const std::string &selected_categ
     {
         //找到分类标签对应的控件
         auto iter = category_items.find(selected_category);
+
         if (iter != category_items.end())
         {
             std::pair<std::string, MenuAppsContainer *> data = *iter;
@@ -503,18 +536,16 @@ void MenuAppletWindow::switch_to_apps_overview(const std::string &selected_categ
 
 void MenuAppletWindow::switch_to_apps_overview(double position, bool animation)
 {
-    Gtk::ScrolledWindow *all_apps_area;
-
     //切换到应用程序列表
     category_list_scrolled->set_visible(false);
+    all_apps_scrolled->show_all();
 
     menu_view_stack->set_visible_child(ALL_APPS_VIEW);
+    all_app_view->set_visible(true);
     apps_list_stack->set_visible_child(APPS_LIST_PAGE);
     if (position >= 0)
     {
-        builder->get_widget<Gtk::ScrolledWindow>("all-apps-scroll", all_apps_area);
-
-        auto adjustment = all_apps_area->get_vadjustment();
+        auto adjustment = all_apps_scrolled->get_vadjustment();
         adjustment->set_value(position);
     }
 }
@@ -523,7 +554,10 @@ bool MenuAppletWindow::on_map_event(GdkEventAny *any_event)
 {
     Gtk::Window::on_map_event(any_event);
 
+    // Fix #53981
     category_list_scrolled->set_visible(false);
+    all_app_view->set_visible(true);
+    all_apps_scrolled->set_visible(true);
 
     on_search_stop();
 
@@ -599,17 +633,29 @@ bool MenuAppletWindow::on_leave_notify_event(GdkEventCrossing *crossing_event)
     return false;
 }
 
-Gtk::Button *MenuAppletWindow::create_launcher_button(const char *icon_resource,
+Gtk::Button *MenuAppletWindow::create_launcher_button(const std::string &icon_name,
                                                       const char *tooltip,
                                                       const char *cmdline)
 {
     MenuAppLauncherButton *button;
 
-    button = Gtk::make_managed<MenuAppLauncherButton>(icon_resource,
+    button = Gtk::make_managed<MenuAppLauncherButton>(icon_name,
                                                       tooltip,
                                                       cmdline);
 
     button->signal_app_launched().connect(sigc::mem_fun(*this, &Gtk::Widget::hide));
+    return button;
+}
+
+Gtk::Button *MenuAppletWindow::create_power_dialog_button()
+{
+    MenuPowerButton *button;
+    button = Gtk::make_managed<MenuPowerButton>();
+
+    set_transient_for(*this);
+
+    button->signal_menu_hide().connect(sigc::mem_fun(*this, &Gtk::Widget::hide));
+
     return button;
 }
 
@@ -630,32 +676,36 @@ void MenuAppletWindow::add_sidebar_buttons()
     side_box->set_orientation(Gtk::ORIENTATION_VERTICAL);
     side_box->add(*separator);
 
-    launcher_btn = create_launcher_button("/kiran-menu/sidebar/run",
+    launcher_btn = create_launcher_button("kiran-menu-run-symbolic",
                                           _("Run"),
                                           "mate-panel --run-dialog");
     side_box->add(*launcher_btn);
 
-    launcher_btn = create_launcher_button("/kiran-menu/sidebar/search-files",
+    launcher_btn = create_launcher_button("kiran-menu-search-files-symbolic",
                                           _("Search Files"),
                                           "mate-search-tool");
     side_box->add(*launcher_btn);
 
-    launcher_btn = create_launcher_button("/kiran-menu/sidebar/home-dir",
+    launcher_btn = create_launcher_button("kiran-menu-home-dir-symbolic",
                                           _("Home Directory"),
                                           "caja");
     side_box->add(*launcher_btn);
 
-    launcher_btn = create_launcher_button("/kiran-menu/sidebar/settings",
+    launcher_btn = create_launcher_button("kiran-menu-settings-symbolic",
                                           _("Control center"),
                                           "mate-control-center");
     side_box->add(*launcher_btn);
 
-    launcher_btn = create_launcher_button("/kiran-menu/sidebar/monitor",
+    launcher_btn = create_launcher_button("kiran-menu-task-monitor-symbolic",
                                           _("System monitor"),
                                           "mate-system-monitor");
     side_box->add(*launcher_btn);
 
+#ifdef POWER_DIALOG
+    auto power_btn = create_power_dialog_button();
+#else
     auto power_btn = Gtk::make_managed<MenuPowerButton>();
+#endif
     side_box->add(*power_btn);
 
     side_box->show_all();

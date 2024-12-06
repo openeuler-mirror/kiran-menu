@@ -14,24 +14,22 @@
   * libX11-devel
   * libxcb-devel
   * gtk-update-icon-cache
-  * accountsservice-devel
 
 ## 编译安装
 
 ```
    # mkdir build
-   # cd build && cmake -DCMAKE_INSTALL_PREFIX=/usr .. -DBUILD_WITH_ACCOUNTSSERVICE=on
+   # cd build && cmake -DCMAKE_INSTALL_PREFIX=/usr .. 
    # make
    # sudo make install
    # sudo glib-compile-schemas /usr/share/glib-2.0/schemas/
    # sudo gtk-update-icon-cache -f /usr/share/icons/hicolor/
 ```
-> 插件默认依赖`accountsservice`来提供当前用户的账户信息。如果需要用`kiran-session-daemon`来替代`accountsservice`来提供账户信息，请安装 `kiran-cc-daemon-devel`，并将编译指令中的`BUILD_WITH_ACCOUNTSSERVICE`参数替换为`BUILD_WITH_KIRANACCOUNTS`
 
 ## 运行
 1. 安装以下运行依赖:
     * mate-screensaver
-    * accountsservice 或 kiran-session-daemon
+    * kiran-session-daemon
     * mate-session-manager
     * mate-control-center
     * caja

@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #ifndef KIRAN_RECENTLY_WIDGET_INCLUDE_H
@@ -22,12 +17,11 @@
 
 #include <gtkmm.h>
 
-class RecentFilesListBox: public Gtk::ListBox
+class RecentFilesListBox : public Gtk::ListBox
 {
 public:
     RecentFilesListBox();
     void set_filter_pattern(const Glib::ustring &filter_pattern);
-    void load();
 
 protected:
     virtual void on_row_activated(Gtk::ListBoxRow *row) override;
@@ -56,7 +50,9 @@ protected:
     static void clear_files_list(void);
 
 private:
-    bool on_filter(Gtk::ListBoxRow* row);
+    void load();
+
+    bool on_filter(Gtk::ListBoxRow *row);
 
     Gtk::Widget *create_recent_item(const Glib::RefPtr<Gtk::RecentInfo> &info);
     Gtk::Menu *create_context_menu(const Glib::RefPtr<Gtk::RecentInfo> &info);

@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd.
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
  *
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "workspace-window-thumbnail.h"
@@ -57,7 +52,6 @@ bool WorkspaceWindowThumbnail::draw_thumbnail_image(Gtk::Widget *area, const Cai
     auto context = get_style_context();
     Gtk::Allocation allocation;
     auto window = get_window_();
-    Cairo::ImageSurface *source_surface = nullptr;
     int scale_factor = get_scale_factor();
 
     if (!window)
@@ -71,14 +65,14 @@ bool WorkspaceWindowThumbnail::draw_thumbnail_image(Gtk::Widget *area, const Cai
 
     allocation = area->get_allocation();
 
-    source_surface = new Cairo::ImageSurface(thumbnail_surface, false);
+    Cairo::RefPtr<Cairo::ImageSurface> source_surface(new Cairo::ImageSurface(thumbnail_surface, false));
 
     /**
      * 绘制窗口缩略图时不缩放
      */
     cr->save();
     cr->scale(1.0 / scale_factor, 1.0 / scale_factor);
-    cr->set_source(Cairo::RefPtr<Cairo::Surface>(source_surface),
+    cr->set_source(source_surface,
                    (allocation.get_width() * scale_factor - thumbnail_width) / 2.0,
                    (allocation.get_height() * scale_factor - thumbnail_height) / 2.0);
     cr->paint();
@@ -86,7 +80,7 @@ bool WorkspaceWindowThumbnail::draw_thumbnail_image(Gtk::Widget *area, const Cai
 
     if (get_state_flags() & Gtk::STATE_FLAG_PRELIGHT)
     {
-        //绘制边框
+        // 绘制边框
         Gdk::RGBA color("#ff0000");
         Gdk::Rectangle rect;
         if (!context->lookup_color("thumbnail-hover-color", color))
@@ -132,7 +126,7 @@ void WorkspaceWindowThumbnail::on_drag_data_delete(const Glib::RefPtr<Gdk::DragC
 
 void WorkspaceWindowThumbnail::on_drag_data_get(const Glib::RefPtr<Gdk::DragContext> &context, Gtk::SelectionData &selection_data, guint info, guint time)
 {
-    //传递窗口的XID
+    // 传递窗口的XID
     Window wid;
     auto window = get_window_();
 
@@ -150,9 +144,8 @@ void WorkspaceWindowThumbnail::on_drag_begin(const Glib::RefPtr<Gdk::DragContext
 {
 #define DRAG_THUMBNAIL_WIDTH 250
 #define DRAG_THUMBNAIL_HEIGHT 200
-    //设置拖动的图标为半透明的窗口截图
+    // 设置拖动的图标为半透明的窗口截图
     Cairo::RefPtr<Cairo::ImageSurface> target_surface;
-    Cairo::ImageSurface *source_surface = nullptr;
     Cairo::RefPtr<Cairo::Context> cr;
     double x_scale, y_scale, scale;
 
@@ -160,17 +153,17 @@ void WorkspaceWindowThumbnail::on_drag_begin(const Glib::RefPtr<Gdk::DragContext
     y_scale = DRAG_THUMBNAIL_HEIGHT * 1.0 / thumbnail_height;
     scale = std::min(x_scale, y_scale);
 
-    source_surface = new Cairo::ImageSurface(thumbnail_surface, false);
+    Cairo::RefPtr<Cairo::ImageSurface> source_surface(new Cairo::ImageSurface(thumbnail_surface, false));
     target_surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32,
                                                  thumbnail_width * scale,
                                                  thumbnail_height * scale);
     cr = Cairo::Context::create(target_surface);
     cr->scale(scale, scale);
-    cr->set_source(Cairo::RefPtr<Cairo::Surface>(source_surface), 0, 0);
+    cr->set_source(source_surface, 0, 0);
     cr->paint_with_alpha(0.8);
     target_surface->flush();
 
-    //将鼠标定位到拖动的图片中间位置
+    // 将鼠标定位到拖动的图片中间位置
     target_surface->set_device_offset(0 - target_surface->get_width() / 2.0,
                                       0 - target_surface->get_height() / 2.0);
     context->set_icon(target_surface);

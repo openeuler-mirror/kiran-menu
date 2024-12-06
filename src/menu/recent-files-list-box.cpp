@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "recent-files-list-box.h"
@@ -33,7 +28,6 @@ RecentFilesListBox::RecentFilesListBox() : filter_pattern("*")
 
     /* 最近访问文件列表发生变化时重新加载 */
     Gtk::RecentManager::get_default()->signal_changed().connect(sigc::mem_fun(this, &RecentFilesListBox::load));
-
     load();
 }
 
@@ -93,8 +87,18 @@ void RecentFilesListBox::open_file(const Glib::RefPtr<Gtk::RecentInfo> &item)
 {
     g_return_if_fail(item && !item->get_uri().empty());
 
-    /* 使用系统默认方式打开文件 */
-    Gio::AppInfo::launch_default_for_uri_async(item->get_uri());
+    auto file = Gio::File::create_for_uri(item->get_uri());
+    if (!file->query_exists())
+    {
+        Gtk::MessageDialog dialog(_("File does not exist"), true, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
+        dialog.set_title(_("System Warning"));
+        dialog.run();
+    }
+    else
+    {
+        /* 使用系统默认方式打开文件 */
+        Gio::AppInfo::launch_default_for_uri_async(item->get_uri());
+    }
 }
 
 void RecentFilesListBox::open_file_location(const Glib::RefPtr<Gtk::RecentInfo> &item)
@@ -104,10 +108,23 @@ void RecentFilesListBox::open_file_location(const Glib::RefPtr<Gtk::RecentInfo> 
     auto file = Gio::File::create_for_uri(item->get_uri());
     auto dir = file->get_parent();
 
-    if (dir)
-        Gio::AppInfo::launch_default_for_uri_async(dir->get_uri());
+    if (!file->query_exists())
+    {
+        Gtk::MessageDialog dialog(_("File does not exist"), true, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
+        dialog.set_title(_("System Warning"));
+        dialog.run();
+    }
     else
-        KLOG_WARNING("%s: no parent found for file '%s'", __func__, item->get_uri().c_str());
+    {
+        if (dir)
+        {
+            Gio::AppInfo::launch_default_for_uri_async(dir->get_uri());
+        }
+        else
+        {
+            KLOG_WARNING("%s: no parent found for file '%s'", __func__, item->get_uri().c_str());
+        }
+    }
 }
 
 void RecentFilesListBox::remove_file_from_list(const Glib::RefPtr<Gtk::RecentInfo> &item)
@@ -156,7 +173,6 @@ Gtk::Widget *RecentFilesListBox::create_recent_item(const Glib::RefPtr<Gtk::Rece
 
     g_assert(context_menu != nullptr);
     context_menu->attach_to_widget(*widget);
-
     label->set_ellipsize(Pango::ELLIPSIZE_END);
     label->set_xalign(0.0f);
 

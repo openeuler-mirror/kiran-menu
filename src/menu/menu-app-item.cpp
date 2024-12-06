@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd.
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
  *
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "menu-app-item.h"
@@ -25,6 +20,7 @@
 #include "global.h"
 #include "kiran-helper.h"
 #include "lib/base.h"
+#include "lib/common.h"
 
 #define MENU_ITEM_COUNT G_N_ELEMENTS(item_labels)
 
@@ -35,6 +31,8 @@ MenuAppItem::MenuAppItem(const std::shared_ptr<Kiran::App> &app_, int _icon_size
     auto context = get_style_context();
 
     context->add_class("menu-app-item");
+    // 添加flat样式，保证在普通状态下按钮时透明背景
+    context->add_class("flat");
 
     set_text(app_->get_locale_name());
 
@@ -53,6 +51,8 @@ MenuAppItem::MenuAppItem(const std::shared_ptr<Kiran::App> &app_, int _icon_size
     set_tooltip_text(app_->get_locale_comment());
 
     init_drag_and_drop();
+
+    this->settings_ = Gio::Settings::create(STARTMENU_LOCKDOWN_SCHEMA);
 }
 
 MenuAppItem::~MenuAppItem()
@@ -80,7 +80,7 @@ bool MenuAppItem::on_button_press_event(GdkEventButton *button_event)
 {
     if (gdk_event_triggers_context_menu((GdkEvent *)button_event))
     {
-        //鼠标右键点击，显示上下文菜单
+        // 鼠标右键点击，显示上下文菜单
         create_context_menu();
         context_menu.popup_at_pointer((GdkEvent *)button_event);
         return false;
@@ -104,7 +104,10 @@ void MenuAppItem::on_drag_begin(const Glib::RefPtr<Gdk::DragContext> &context)
      * 设置拖动操作的Icon
      */
     auto app = get_app();
-    gtk_drag_set_icon_gicon(context->gobj(), app->get_icon()->gobj(), 0, 0);
+    if (app->get_icon())
+    {
+        gtk_drag_set_icon_gicon(context->gobj(), app->get_icon()->gobj(), 0, 0);
+    }
 }
 
 void MenuAppItem::on_drag_data_get(const Glib::RefPtr<Gdk::DragContext> &context, Gtk::SelectionData &selection, guint info, guint timestamp)
@@ -132,12 +135,13 @@ void MenuAppItem::on_drag_end(const Glib::RefPtr<Gdk::DragContext> &context)
     // 如果拖拽被取消，拖拽的ungrab操作可能在drag-end信号之后，所以这里的grab操作放入到后面的事件循环处理。
     if (this->idle_drag_connection_.empty())
     {
-        this->idle_drag_connection_ = Glib::signal_idle().connect([this]() -> bool
-                                                                  {
-                                                                      Gtk::Container *toplevel = this->get_toplevel();
-                                                                      KiranHelper::grab_input(*toplevel);
-                                                                      return false;
-                                                                  });
+        this->idle_drag_connection_ = Glib::signal_idle().connect(
+            [this]() -> bool
+            {
+                Gtk::Container *toplevel = this->get_toplevel();
+                KiranHelper::grab_input(*toplevel);
+                return false;
+            });
     }
 }
 
@@ -160,7 +164,7 @@ bool MenuAppItem::on_key_press_event(GdkEventKey *key_event)
             allocation.set_y(0);
         }
 
-        //重新创建右键菜单，以确保收藏夹相关的选项能及时更新
+        // 重新创建右键菜单，以确保收藏夹相关的选项能及时更新
         create_context_menu();
         context_menu.popup_at_rect(get_window(), allocation,
                                    Gdk::GRAVITY_CENTER,
@@ -198,18 +202,21 @@ void MenuAppItem::create_context_menu()
     }
     context_menu.append(*item);
 
-    if (is_fixed_on_taskbar())
+    if (!this->settings_->get_boolean(STARTMENU_LOCKDOWN_KEY_DISABLE_FIXED_APP))
     {
-        item = Gtk::make_managed<Gtk::MenuItem>(_("Unpin to taskbar"));
-        item->signal_activate().connect(sigc::hide_return(sigc::mem_fun(*this, &MenuAppItem::unpin_app_from_taskbar)));
-    }
-    else
-    {
-        item = Gtk::make_managed<Gtk::MenuItem>(_("Pin to taskbar"));
-        item->signal_activate().connect(sigc::hide_return(sigc::mem_fun(*this, &MenuAppItem::pin_app_to_taskbar)));
-    }
+        if (is_fixed_on_taskbar())
+        {
+            item = Gtk::make_managed<Gtk::MenuItem>(_("Unpin to taskbar"));
+            item->signal_activate().connect(sigc::hide_return(sigc::mem_fun(*this, &MenuAppItem::unpin_app_from_taskbar)));
+        }
+        else
+        {
+            item = Gtk::make_managed<Gtk::MenuItem>(_("Pin to taskbar"));
+            item->signal_activate().connect(sigc::hide_return(sigc::mem_fun(*this, &MenuAppItem::pin_app_to_taskbar)));
+        }
 
-    context_menu.append(*item);
+        context_menu.append(*item);
+    }
 
     if (!context_menu.get_attach_widget())
         context_menu.attach_to_widget(*this);
@@ -262,7 +269,7 @@ bool MenuAppItem::add_app_to_desktop()
         auto src_file = Gio::File::create_for_path(app_->get_file_name());
         auto dest_file = Gio::File::create_for_path(target_dir + "/" + src_file->get_basename());
 
-        //如果桌面上已经存在相同的文件，跳过拷贝操作
+        // 如果桌面上已经存在相同的文件，跳过拷贝操作
         if (dest_file->query_exists())
             return true;
 
@@ -272,7 +279,7 @@ bool MenuAppItem::add_app_to_desktop()
             return false;
         }
 
-        //将desktop文件标记为可执行
+        // 将desktop文件标记为可执行
         chmod(dest_file->get_path().data(), 0755);
         return true;
     }

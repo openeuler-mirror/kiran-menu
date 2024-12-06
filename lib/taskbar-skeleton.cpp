@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     tangjie02 <tangjie02@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "lib/taskbar-skeleton.h"
@@ -26,11 +21,12 @@ namespace Kiran
 {
 TaskBarSkeleton::TaskBarSkeleton(AppManager *app_manager) : app_manager_(app_manager)
 {
-    this->settings_ = Gio::Settings::create(KIRAN_TASKBAR_SCHEMA);
+    this->settings_ = Gio::Settings::create(TASKBAR_SCHEMA);
     this->fixed_apps_ = read_as_to_list_quark(this->settings_, TASKBAR_KEY_FIXED_APPS);
 
     settings_->signal_changed().connect_notify(
-        [this](const Glib::ustring &key) -> void {
+        [this](const Glib::ustring &key) -> void
+        {
             if (key == TASKBAR_KEY_SHOW_ACTIVE_WORKSPACE)
                 signal_app_show_policy_changed().emit();
         });
@@ -164,20 +160,21 @@ void TaskBarSkeleton::desktop_app_changed()
 
     AppVec delete_apps;
 
-    auto iter = std::remove_if(this->fixed_apps_.begin(), this->fixed_apps_.end(), [this, &delete_apps, &app_set](int32_t elem) -> bool {
-        if (app_set.find(elem) == app_set.end())
-        {
-            Glib::QueryQuark query_quark((GQuark)elem);
-            Glib::ustring desktop_id = query_quark;
-            auto app = this->app_manager_->lookup_app(desktop_id.raw());
-            if (app)
-            {
-                delete_apps.push_back(app);
-            }
-            return true;
-        }
-        return false;
-    });
+    auto iter = std::remove_if(this->fixed_apps_.begin(), this->fixed_apps_.end(), [this, &delete_apps, &app_set](int32_t elem) -> bool
+                               {
+                                   if (app_set.find(elem) == app_set.end())
+                                   {
+                                       Glib::QueryQuark query_quark((GQuark)elem);
+                                       Glib::ustring desktop_id = query_quark;
+                                       auto app = this->app_manager_->lookup_app(desktop_id.raw());
+                                       if (app)
+                                       {
+                                           delete_apps.push_back(app);
+                                       }
+                                       return true;
+                                   }
+                                   return false;
+                               });
 
     if (iter != this->fixed_apps_.end())
     {

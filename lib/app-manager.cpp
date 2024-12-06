@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     tangjie02 <tangjie02@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "lib/app-manager.h"
@@ -105,9 +100,8 @@ AppVec AppManager::get_running_apps()
             apps.push_back(iter->second.lock());
         }
     }
-    auto iter = std::unique(apps.begin(), apps.end(), [](decltype(*apps.begin()) a, decltype(*apps.begin()) b) {
-        return a.get() == b.get();
-    });
+    auto iter = std::unique(apps.begin(), apps.end(), [](decltype(*apps.begin()) a, decltype(*apps.begin()) b)
+                            { return a.get() == b.get(); });
     if (iter != apps.end())
     {
         apps.erase(iter, apps.end());
@@ -134,7 +128,10 @@ std::shared_ptr<App> AppManager::lookup_app_with_window(std::shared_ptr<Window> 
 {
     RETURN_VAL_IF_FALSE(window != nullptr, nullptr);
 
-    KLOG_DEBUG("lookup app for window: %s.", window->get_name().c_str());
+    KLOG_DEBUG("Lookup app for window: %s, window id: %" PRIu64 ", leader window id: %" PRIu64 ".",
+               window->get_name().c_str(),
+               window->get_xid(),
+               window->get_window_group());
 
     auto transient_for = window->get_transient();
     if (transient_for)
@@ -212,15 +209,16 @@ std::vector<std::string> AppManager::get_all_sorted_apps()
         apps.push_back(app->get_desktop_id());
     }
 
-    std::sort(apps.begin(), apps.end(), [this](std::string a, std::string b) -> bool {
-        auto appa = this->lookup_app(a);
-        auto appb = this->lookup_app(b);
+    std::sort(apps.begin(), apps.end(), [this](std::string a, std::string b) -> bool
+              {
+                  auto appa = this->lookup_app(a);
+                  auto appb = this->lookup_app(b);
 
-        auto &appa_name = appa->get_name();
-        auto &appb_name = appb->get_name();
+                  auto &appa_name = appa->get_name();
+                  auto &appb_name = appb->get_name();
 
-        return appa_name < appb_name;
-    });
+                  return appa_name < appb_name;
+              });
 
     return apps;
 }

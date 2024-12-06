@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "kiran-helper.h"
@@ -46,9 +41,7 @@ bool KiranHelper::grab_input(Gtk::Widget &widget)
     Gdk::GrabStatus status;
     auto display = Gdk::Display::get_default();
     auto seat = display->get_default_seat();
-    status = seat->grab(widget.get_window(),
-                        Gdk::SEAT_CAPABILITY_ALL_POINTING | Gdk::SEAT_CAPABILITY_KEYBOARD,
-                        true);
+    status = seat->grab(widget.get_window(), Gdk::SEAT_CAPABILITY_ALL_POINTING, true);
     return status == Gdk::GRAB_SUCCESS;
 }
 
@@ -197,7 +190,8 @@ Kiran::WindowVec KiranHelper::get_active_workspace_windows(const std::shared_ptr
     auto windows = app->get_taskbar_windows();
 
     auto removed = std::remove_if(windows.begin(), windows.end(),
-                                  [](const std::shared_ptr<Kiran::Window> window) -> bool {
+                                  [](const std::shared_ptr<Kiran::Window> window) -> bool
+                                  {
                                       return !window_is_on_active_workspace(window);
                                   });
 
@@ -212,27 +206,6 @@ Kiran::WindowVec KiranHelper::get_taskbar_windows(const std::shared_ptr<Kiran::A
         return KiranHelper::get_active_workspace_windows(app);
     else
         return app->get_taskbar_windows();
-}
-
-bool KiranHelper::launch_app_from_list(const char **app_names)
-{
-    std::shared_ptr<Kiran::App> app;
-    auto app_manager = Kiran::AppManager::get_instance();
-
-    for (int i = 0; app_names[i] != nullptr; i++)
-    {
-        app = app_manager->lookup_app(std::string(app_names[i]) + ".desktop");
-        if (app)
-            break;
-    }
-
-    if (app)
-    {
-        app->launch();
-        return true;
-    }
-
-    return false;
 }
 
 void show_applet_about_dialog(const char *program_name,

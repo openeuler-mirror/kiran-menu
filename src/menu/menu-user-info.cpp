@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd.
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
  *
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "menu-user-info.h"
@@ -36,6 +31,10 @@ MenuUserInfo::MenuUserInfo(uid_t id) : uid(id),
 
 MenuUserInfo::~MenuUserInfo()
 {
+    if (user)
+    {
+        g_object_unref(user);
+    }
 }
 
 bool MenuUserInfo::load()
@@ -43,7 +42,6 @@ bool MenuUserInfo::load()
     if (load_state != INFO_STATE_NOT_LOAD)
         return true;
 
-#ifdef BUILD_WITH_KIRANACCOUNTS
     auto manager = kiran_accounts_manager_get_default();
 
     user = kiran_accounts_manager_get_user_by_id(manager, uid);
@@ -53,17 +51,6 @@ bool MenuUserInfo::load()
         load_state = INFO_STATE_LOADING;
         handler_id = g_signal_connect_swapped(user, "loaded", G_CALLBACK(MenuUserInfo::on_loaded), this);
     }
-#else
-    auto manager = act_user_manager_get_default();
-
-    user = act_user_manager_get_user_by_id(manager, uid);
-    g_signal_connect_swapped(user, "changed", G_CALLBACK(&MenuUserInfo::on_changed), this);
-    if (!act_user_is_loaded(user))
-    {
-        load_state = INFO_STATE_LOADING;
-        handler_id = g_signal_connect_swapped(user, "notify::is-loaded", G_CALLBACK(MenuUserInfo::on_loaded), this);
-    }
-#endif
     else
         on_loaded(this);
 
@@ -84,20 +71,12 @@ void MenuUserInfo::on_loaded(MenuUserInfo *info)
 
 const char *MenuUserInfo::get_username() const
 {
-#ifdef BUILD_WITH_KIRANACCOUNTS
     return kiran_accounts_user_get_name(user);
-#else
-    return act_user_get_user_name(user);
-#endif
 }
 
 const char *MenuUserInfo::get_iconfile() const
 {
-#ifdef BUILD_WITH_KIRANACCOUNTS
     return kiran_accounts_user_get_icon_file(user);
-#else
-    return act_user_get_icon_file(user);
-#endif
 }
 
 sigc::signal<void> MenuUserInfo::signal_ready()

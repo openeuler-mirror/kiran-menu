@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     tangjie02 <tangjie02@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "lib/app.h"
@@ -73,18 +68,22 @@ std::shared_ptr<App> App::create_from_desktop_id(const std::string &id, AppKind 
 void App::update_from_desktop_file(bool force)
 {
     KLOG_PROFILE("id: %s.", this->desktop_id_.c_str());
+
     g_return_if_fail(this->desktop_app_);
 
     this->file_name_ = this->desktop_app_->get_filename();
-
     if (force)
+    {
         this->desktop_app_ = Gio::DesktopAppInfo::create_from_filename(this->file_name_);
+        g_return_if_fail(this->desktop_app_);
+    }
 
 #define GET_STRING(key) this->desktop_app_->get_string(key).raw()
 #define GET_LOCALE_STRING(key) this->desktop_app_->get_locale_string(key).raw()
 
     this->name_ = GET_STRING("Name");
     this->locale_name_ = GET_LOCALE_STRING("Name");
+    this->locale_name_pinyin_list_ = convert_chinese_characters_to_pinyin(this->locale_name_);
 
     this->comment_ = GET_STRING("Comment");
     this->locale_comment_ = GET_LOCALE_STRING("Comment");
@@ -145,7 +144,7 @@ bool App::should_show()
     RETURN_VAL_IF_FALSE(this->desktop_app_, false);
     RETURN_VAL_IF_FALSE(get_kind() != AppKind::USER_TASKBAR, false);
 
-    return (this->desktop_app_->should_show() && !this->x_kiran_no_display_);
+    return (this->desktop_app_->should_show() && !this->x_kiran_no_display_ && !this->icon_name_.empty());
 }
 
 bool App::is_active()
@@ -198,9 +197,8 @@ WindowVec App::get_windows()
 WindowVec App::get_taskbar_windows()
 {
     auto windows = get_windows();
-    auto iter = std::remove_if(windows.begin(), windows.end(), [](std::shared_ptr<Kiran::Window> window) {
-        return window->should_skip_taskbar();
-    });
+    auto iter = std::remove_if(windows.begin(), windows.end(), [](std::shared_ptr<Kiran::Window> window)
+                               { return window->should_skip_taskbar(); });
     windows.erase(iter, windows.end());
     return windows;
 }
@@ -289,7 +287,6 @@ bool App::launch_uris(const Glib::ListHandle<std::string> &uris)
 
     try
     {
-        std::vector<Glib::RefPtr<Gio::File> > files;
         res = this->desktop_app_->launch_uris(uris, app_context);
     }
     catch (const Glib::Error &e)

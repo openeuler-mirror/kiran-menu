@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd.
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
  *
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "tasklist-window-previewer.h"
@@ -34,7 +29,8 @@ TasklistWindowPreviewer::TasklistWindowPreviewer(std::shared_ptr<Kiran::Window> 
     set_no_show_all(true);
     set_vspacing(10);
 
-    //如果窗口管理器混合模式关闭，我们需要隐藏窗口预览图，因为窗口预览图已经无法获取
+    // 窗口管理器复合状态(composite)打开或关闭时调用
+    // 如果窗口管理器混合模式关闭，我们需要隐藏窗口预览图，因为窗口预览图已经无法获取
     signal_composited_changed().connect(sigc::mem_fun(*this, &TasklistWindowPreviewer::on_composite_changed));
 
     window_state_change = window_->signal_state_changed().connect(
@@ -48,7 +44,10 @@ TasklistWindowPreviewer::TasklistWindowPreviewer(std::shared_ptr<Kiran::Window> 
         KLOG_WARNING("Failed to load attention-color from style");
     }
 
-    on_composite_changed();
+    settings = Gio::Settings::create(TASKBAR_SCHEMA);
+    settings->signal_changed().connect(
+        sigc::mem_fun(*this, &TasklistWindowPreviewer::on_settings_changed));
+    refresh_layout();
 }
 
 TasklistWindowPreviewer::~TasklistWindowPreviewer()
@@ -63,7 +62,6 @@ TasklistWindowPreviewer::~TasklistWindowPreviewer()
 bool TasklistWindowPreviewer::draw_thumbnail_image(Gtk::Widget *snapshot_area, const Cairo::RefPtr<Cairo::Context> &cr)
 {
     Gtk::Allocation allocation;
-    double scale_x, scale_y, scale;
     auto window = get_window_();
     int scale_factor = get_scale_factor();
 
@@ -73,11 +71,12 @@ bool TasklistWindowPreviewer::draw_thumbnail_image(Gtk::Widget *snapshot_area, c
     allocation = snapshot_area->get_allocation();
     try
     {
+        double scale_x, scale_y, scale;
         int width, height;
         cairo_surface_t *thumbnail = window->get_thumbnail(width, height);
         if (thumbnail == nullptr)
         {
-            //如果无法获取到窗口截图，同时窗口不可见，那么在预览区域绘制窗口图标
+            // 如果无法获取到窗口截图，同时窗口不可见，那么在预览区域绘制窗口图标
             int pixbuf_width, pixbuf_height;
             Glib::RefPtr<Gdk::Pixbuf> pixbuf;
             GdkPixbuf *c_pixbuf = window->get_icon();
@@ -191,13 +190,14 @@ bool TasklistWindowPreviewer::on_button_press_event(GdkEventButton *button_event
     event = reinterpret_cast<GdkEvent *>(button_event);
     if (gdk_event_triggers_context_menu(event))
     {
-        //show context menu
+        // show context menu
         if (!context_menu)
         {
             context_menu = new TasklistWindowContextMenu(window);
             context_menu->attach_to_widget(*this);
             context_menu->signal_deactivate().connect(
-                [this]() -> void {
+                [this]() -> void
+                {
                     signal_context_menu_toggled().emit(false);
                 });
         }
@@ -213,26 +213,6 @@ bool TasklistWindowPreviewer::on_button_press_event(GdkEventButton *button_event
     return WindowThumbnailWidget::on_button_press_event(button_event);
 }
 
-void TasklistWindowPreviewer::on_composite_changed()
-{
-    Gtk::Widget *snapshot_area = get_thumbnail_area();
-    if (is_composited())
-    {
-        snapshot_area->show();
-        get_style_context()->remove_class("vertical");
-        get_style_context()->add_class("horizontal");
-    }
-    else
-    {
-        snapshot_area->set_visible(false);
-        get_style_context()->remove_class("horizontal");
-        get_style_context()->add_class("vertical");
-    }
-
-    if (get_realized())
-        queue_resize();
-}
-
 void TasklistWindowPreviewer::on_window_state_changed()
 {
     auto window = get_window_();
@@ -243,6 +223,52 @@ void TasklistWindowPreviewer::on_window_state_changed()
     {
         needs_attention = window->needs_attention();
         queue_draw();
+    }
+}
+
+void TasklistWindowPreviewer::on_composite_changed()
+{
+    refresh_layout();
+}
+
+void TasklistWindowPreviewer::on_settings_changed(const Glib::ustring &changed_key)
+{
+    if (changed_key == TASKBAR_KEY_SIMPLY_WINDOW_PREVIEWER)
+    {
+        refresh_layout();
+    }
+}
+
+void TasklistWindowPreviewer::refresh_layout()
+{
+    bool is_simply_show = false;
+    // 混成器不开启时，使用简单预览
+    // gsettings 简单预览配置开启时，使用简单预览
+    if (!is_composited() || settings->get_boolean(TASKBAR_KEY_SIMPLY_WINDOW_PREVIEWER))
+    {
+        is_simply_show = true;
+    }
+    refresh_layout(is_simply_show);
+
+    if (get_realized())
+        queue_resize();
+}
+
+void TasklistWindowPreviewer::refresh_layout(bool is_simply)
+{
+    Gtk::Widget *snapshot_area = get_thumbnail_area();
+
+    if (is_simply)
+    {
+        snapshot_area->hide();
+        get_style_context()->remove_class("horizontal");
+        get_style_context()->add_class("vertical");
+    }
+    else
+    {
+        snapshot_area->show();
+        get_style_context()->remove_class("vertical");
+        get_style_context()->add_class("horizontal");
     }
 }
 

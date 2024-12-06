@@ -1,24 +1,20 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd.
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
  *
  * Author:     wangxiaoqing <wangxiaoqing@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "kiran-sn-icon-menu.h"
 #include <libdbusmenu-glib/dbusmenu-glib.h>
+#include <libdbusmenu-glib/menuitem.h>
 struct _KiranSnIconMenuPrivate
 {
     gchar *bus_name;
@@ -35,6 +31,7 @@ enum
     LAST_PROP
 };
 
+#define DATA_KEY_SIGNAL_PROPERTY_CHANGED_IS_CONNECTED "signal_property_changed_is_connected"
 static GParamSpec *properties[LAST_PROP] = {NULL};
 
 G_DEFINE_TYPE_WITH_PRIVATE(KiranSnIconMenu, kiran_sn_icon_menu, GTK_TYPE_MENU)
@@ -92,7 +89,7 @@ create_widget_from_menuitem(DbusmenuMenuitem *item)
     const gchar *label = dbusmenu_menuitem_property_get(item, DBUSMENU_MENUITEM_PROP_LABEL);
     const gchar *type = dbusmenu_menuitem_property_get(item, DBUSMENU_MENUITEM_PROP_TYPE);
     const gchar *toggle_type = dbusmenu_menuitem_property_get(item, DBUSMENU_MENUITEM_PROP_TOGGLE_TYPE);
-    const gchar *icon_name = dbusmenu_menuitem_property_get(item, DBUSMENU_MENUITEM_PROP_ICON_NAME);
+    dbusmenu_menuitem_property_get(item, DBUSMENU_MENUITEM_PROP_ICON_NAME);
     const gchar *children_display = dbusmenu_menuitem_property_get(item, DBUSMENU_MENUITEM_PROP_CHILD_DISPLAY);
     gint toggle_state = dbusmenu_menuitem_property_get_int(item, DBUSMENU_MENUITEM_PROP_TOGGLE_STATE);
     gboolean enabled = dbusmenu_menuitem_property_get_bool(item, DBUSMENU_MENUITEM_PROP_ENABLED);
@@ -141,15 +138,12 @@ create_widget_from_menuitem(DbusmenuMenuitem *item)
                 GtkWidget *gmi = create_widget_from_menuitem(child->data);
 
                 gtk_menu_shell_append(GTK_MENU_SHELL(submenu), gmi);
-                gtk_widget_show(gmi);
 
                 g_signal_connect(gmi,
                                  "activate",
                                  G_CALLBACK(activate_cb),
                                  child->data);
             }
-
-            gtk_widget_show(submenu);
         }
 
         if (toggle_state != DBUSMENU_MENUITEM_TOGGLE_STATE_UNKNOWN &&
@@ -181,27 +175,116 @@ create_widget_from_menuitem(DbusmenuMenuitem *item)
 }
 
 static void
+kiran_sn_icon_menu_create_widget_from_dbusmenuitem(KiranSnIconMenu *menu, DbusmenuMenuitem *item)
+{
+    GtkWidget *gmi = create_widget_from_menuitem(item);
+
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), gmi);
+
+    g_signal_connect(gmi,
+                     "activate",
+                     G_CALLBACK(activate_cb),
+                     item);
+}
+
+static void
+kiran_sn_icon_menu_remove_widget_all(KiranSnIconMenu *menu)
+{
+    GList *child;
+    GList *container_children = gtk_container_get_children(GTK_CONTAINER(menu));
+    for (child = container_children; child; child = child->next)
+    {
+        gtk_container_remove(GTK_CONTAINER(menu), GTK_WIDGET(child->data));
+        gtk_widget_destroy(GTK_WIDGET(child->data));
+    }
+}
+
+static void
+property_changed_cb(DbusmenuMenuitem *item, gchar *property, GVariant *value, gpointer user_data)
+{
+    GList *child;
+    KiranSnIconMenu *menu = KIRAN_SN_ICON_MENU(user_data);
+
+    kiran_sn_icon_menu_remove_widget_all(menu);
+
+    // 遍历MenuItem，以找到root
+    DbusmenuMenuitem *root = dbusmenu_menuitem_get_parent(item);
+    gboolean is_root = dbusmenu_menuitem_get_root(root);
+
+    while (!is_root)
+    {
+        root = dbusmenu_menuitem_get_parent(root);
+        is_root = dbusmenu_menuitem_get_root(root);
+    }
+
+    GList *dbus_menuitem_children = dbusmenu_menuitem_get_children(root);
+    for (child = dbus_menuitem_children; child; child = child->next)
+    {
+        kiran_sn_icon_menu_create_widget_from_dbusmenuitem(menu, child->data);
+    }
+}
+
+static void
+submenu_get_children_to_connect(DbusmenuMenuitem *submenu, gpointer user_data)
+{
+    KiranSnIconMenu *menu = KIRAN_SN_ICON_MENU(user_data);
+    GList *submenu_children = dbusmenu_menuitem_get_children(submenu);
+    GList *submenu_child;
+    for (submenu_child = submenu_children; submenu_child; submenu_child = submenu_child->next)
+    {
+        const gchar *children_display = dbusmenu_menuitem_property_get(submenu_child->data, DBUSMENU_MENUITEM_PROP_CHILD_DISPLAY);
+        if (g_strcmp0(children_display, "submenu") == 0)
+        {
+            submenu_get_children_to_connect(submenu_child->data, menu);
+        }
+
+        gboolean is_connected = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(submenu_child->data), DATA_KEY_SIGNAL_PROPERTY_CHANGED_IS_CONNECTED));
+        if (!is_connected)
+        {
+            g_signal_connect(submenu_child->data, DBUSMENU_MENUITEM_SIGNAL_PROPERTY_CHANGED, G_CALLBACK(property_changed_cb), menu);
+            g_object_set_data(G_OBJECT(submenu_child->data), DATA_KEY_SIGNAL_PROPERTY_CHANGED_IS_CONNECTED, GINT_TO_POINTER(TRUE));
+        }
+    }
+}
+
+/**
+ * NOTE:
+ * dbus_menuitem 移除某个menuitem时，没有类似REMOVE_MENUITEM的信号，
+ * 而是会触发 DBUSMENU_CLIENT_SIGNAL_LAYOUT_UPDATED 信号。
+ * 新增时会触发 DBUSMENU_CLIENT_SIGNAL_NEW_MENUITEM 信号
+ *
+ * 因此layout_updated_cb中还会处理menuitem变化的情况
+ */
+static void
 layout_updated_cb(DbusmenuClient *client,
                   gpointer user_data)
 {
     KiranSnIconMenu *menu;
     DbusmenuMenuitem *root = dbusmenu_client_get_root(client);
     GList *child;
-    GList *children = dbusmenu_menuitem_get_children(root);
 
     menu = KIRAN_SN_ICON_MENU(user_data);
 
-    for (child = children; child; child = child->next)
+    kiran_sn_icon_menu_remove_widget_all(menu);
+
+    GList *dbus_menuitem_children = dbusmenu_menuitem_get_children(root);
+    for (child = dbus_menuitem_children; child; child = child->next)
     {
-        GtkWidget *gmi = create_widget_from_menuitem(child->data);
+        kiran_sn_icon_menu_create_widget_from_dbusmenuitem(menu, child->data);
 
-        gtk_menu_shell_append(GTK_MENU_SHELL(menu), gmi);
-        gtk_widget_show(gmi);
+        // NOTE:只修改一个属性，可能会触发多个 PROPERTY_CHANGE 信号
+        const gchar *children_display = dbusmenu_menuitem_property_get(child->data, DBUSMENU_MENUITEM_PROP_CHILD_DISPLAY);
+        if (g_strcmp0(children_display, "submenu") == 0)
+        {
+            submenu_get_children_to_connect(child->data, menu);
+        }
 
-        g_signal_connect(gmi,
-                         "activate",
-                         G_CALLBACK(activate_cb),
-                         child->data);
+        gboolean is_connected = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(child->data), DATA_KEY_SIGNAL_PROPERTY_CHANGED_IS_CONNECTED));
+        if (!is_connected)
+        {
+            g_signal_connect(child->data, DBUSMENU_MENUITEM_SIGNAL_PROPERTY_CHANGED, G_CALLBACK(property_changed_cb), menu);
+            g_object_set_data(G_OBJECT(child->data), DATA_KEY_SIGNAL_PROPERTY_CHANGED_IS_CONNECTED, GINT_TO_POINTER(TRUE));
+        }
     }
 }
 
@@ -313,9 +396,7 @@ kiran_sn_icon_menu_class_init(KiranSnIconMenuClass *klass)
 static void
 kiran_sn_icon_menu_init(KiranSnIconMenu *self)
 {
-    KiranSnIconMenuPrivate *priv;
-
-    priv = self->priv = kiran_sn_icon_menu_get_instance_private(self);
+    self->priv = kiran_sn_icon_menu_get_instance_private(self);
 }
 
 GtkMenu *

@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd.
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
  *
  * Author:     wangxiaoqing <wangxiaoqing@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "kiran-sn-icon.h"
@@ -207,9 +202,10 @@ kiran_sn_tooltip_new(GVariant *variant)
     return tooltip;
 }
 
-static GdkPixbuf *
+static cairo_surface_t *
 get_icon_by_name(const gchar *icon_name,
-                 gint requested_size)
+                 gint requested_size,
+                 gint scale)
 {
     GtkIconTheme *icon_theme;
     gint *sizes;
@@ -240,9 +236,9 @@ get_icon_by_name(const gchar *icon_name,
     if (chosen_size == 0)
         chosen_size = requested_size;
 
-    return gtk_icon_theme_load_icon(icon_theme, icon_name,
-                                    chosen_size, GTK_ICON_LOOKUP_FORCE_SIZE,
-                                    NULL);
+    return gtk_icon_theme_load_surface(icon_theme, icon_name,
+                                       chosen_size, scale,
+                                       NULL, GTK_ICON_LOOKUP_FORCE_SIZE, NULL);
 }
 
 static cairo_surface_t *
@@ -506,40 +502,50 @@ update(KiranSnIcon *icon)
     KiranSnIconPrivate *priv;
     KiranSnTooltip *tip;
     gint icon_size;
-    gint scale;
 
     priv = KIRAN_SN_ICON_GET_PRIVATE(icon);
-    scale = gtk_widget_get_scale_factor(GTK_WIDGET(priv->image));
 
     if (priv->icon_size > 0)
         icon_size = priv->icon_size;
     else
         icon_size = MAX(1, priv->effective_icon_size);
 
-    icon_size = icon_size * scale;
-
     if (priv->icon_name != NULL && priv->icon_name[0] != '\0')
     {
-        GdkPixbuf *pixbuf;
-        pixbuf = get_icon_by_name(priv->icon_name, icon_size);
-        if (!pixbuf)
+        cairo_surface_t *surface;
+        gint scale;
+
+        scale = gtk_widget_get_scale_factor(GTK_WIDGET(priv->image));
+        surface = get_icon_by_name(priv->icon_name, icon_size, scale);
+        if (!surface)
         {
+            GdkPixbuf *pixbuf;
+
             /*try to find icons specified by path and filename*/
             pixbuf = gdk_pixbuf_new_from_file(priv->icon_name, NULL);
             if (pixbuf && icon_size > 1)
             {
                 /*An icon specified by path and filename may be the wrong size for the tray */
                 pixbuf = gdk_pixbuf_scale_simple(pixbuf, icon_size - 2, icon_size - 2, GDK_INTERP_BILINEAR);
+                surface = gdk_cairo_surface_create_from_pixbuf(pixbuf, scale, NULL);
+            }
+
+            if (pixbuf)
+            {
+                g_object_unref(pixbuf);
             }
         }
-        if (!pixbuf)
+        if (!surface)
         {
             /*deal with missing icon or failure to load icon*/
-            pixbuf = get_icon_by_name("image-missing", icon_size);
+            surface = get_icon_by_name("image-missing", icon_size, scale);
         }
-        gtk_image_set_from_pixbuf_with_scale(GTK_IMAGE(priv->image), pixbuf, scale);
-        g_object_unref(pixbuf);
 
+        gtk_image_set_from_surface(GTK_IMAGE(priv->image), surface);
+        if (surface)
+        {
+            cairo_surface_destroy(surface);
+        }
         g_free(priv->icon);
         priv->icon = g_strdup(priv->icon_name);
     }
@@ -552,7 +558,6 @@ update(KiranSnIcon *icon)
                               icon_size);
         if (surface != NULL)
         {
-            cairo_surface_set_device_scale(surface, scale, scale);
             gtk_image_set_from_surface(GTK_IMAGE(priv->image), surface);
 
             g_free(priv->icon);
@@ -580,34 +585,10 @@ update(KiranSnIcon *icon)
             cairo_surface_destroy(surface);
         }
     }
-
-    tip = priv->tooltip;
-    if (tip != NULL)
-    {
-        gchar *markup;
-
-        markup = NULL;
-
-        if ((tip->title != NULL && *tip->title != '\0') &&
-            (tip->text != NULL && *tip->text != '\0'))
-        {
-            markup = g_strdup_printf("%s\n%s", tip->title, tip->text);
-        }
-        else if (tip->title != NULL && *tip->title != '\0')
-        {
-            markup = g_strdup(tip->title);
-        }
-        else if (tip->text != NULL && *tip->text != '\0')
-        {
-            markup = g_strdup(tip->text);
-        }
-
-        gtk_widget_set_tooltip_markup(GTK_WIDGET(icon), markup);
-        g_free(markup);
-    }
     else
     {
-        gtk_widget_set_tooltip_markup(GTK_WIDGET(icon), NULL);
+        gtk_image_set_from_icon_name(GTK_IMAGE(priv->image), "image-missing", GTK_ICON_SIZE_MENU);
+        gtk_image_set_pixel_size(GTK_IMAGE(priv->image), icon_size);
     }
 }
 
@@ -811,9 +792,6 @@ get_all_cb(GObject *source_object,
     gchar *key;
     GVariant *value;
 
-    icon = KIRAN_SN_ICON(user_data);
-    priv = KIRAN_SN_ICON_GET_PRIVATE(icon);
-
     error = NULL;
     properties = g_dbus_connection_call_finish(G_DBUS_CONNECTION(source_object),
                                                res,
@@ -831,6 +809,9 @@ get_all_cb(GObject *source_object,
         g_error_free(error);
         return;
     }
+
+    icon = KIRAN_SN_ICON(user_data);
+    priv = KIRAN_SN_ICON_GET_PRIVATE(icon);
 
     g_variant_get(properties, "(a{sv})", &iter);
     while (g_variant_iter_next(iter, "{sv}", &key, &value))
@@ -1220,7 +1201,7 @@ kiran_sn_icon_button_press_event(GtkWidget *widget,
     }
     else if (event->button == 3)
     {
-        if (priv->gmenu != NULL)
+        if ((g_strcmp0(priv->menu, "/NO_DBUSMENU") != 0) && priv->gmenu != NULL)
         {
             gtk_menu_popup_at_widget(priv->gmenu, widget,
                                      GDK_GRAVITY_SOUTH_WEST,
@@ -1308,6 +1289,48 @@ kiran_sn_icon_class_init(KiranSnIconClass *klass)
     g_type_class_add_private(gobject_class, sizeof(KiranSnIconPrivate));
 }
 
+/**
+ * NOTE:
+ * 直接使用gtk_widget_set_tooltip_markup
+ * 将会触发 gtk_widget_queue_tooltip_query
+ * 存在几率Popup已弹出但触发Tooltip显示，后续由于无法拿到鼠标事件导致该提示框不会消失
+ *
+ * 直接连接GtkWidget::query-tooltip进行处理
+*/
+static gboolean kiran_sn_icon_query_tooltip(GtkWidget *widget,
+                                            gint x, gint y,
+                                            gboolean keyboard_mode,
+                                            GtkTooltip *tooltip, gpointer user_data)
+{
+    KiranSnIcon *icon = NULL;
+    KiranSnTooltip *tip = NULL;
+    gchar *markup = NULL;
+
+    icon = KIRAN_SN_ICON(user_data);
+    tip = icon->priv->tooltip;
+
+    if (!icon->priv->tooltip)
+        return FALSE;
+
+    if ((tip->title != NULL && *tip->title != '\0') &&
+        (tip->text != NULL && *tip->text != '\0'))
+    {
+        markup = g_strdup_printf("%s\n%s", tip->title, tip->text);
+    }
+    else if (tip->title != NULL && *tip->title != '\0')
+    {
+        markup = g_strdup(tip->title);
+    }
+    else if (tip->text != NULL && *tip->text != '\0')
+    {
+        markup = g_strdup(tip->text);
+    }
+
+    gtk_tooltip_set_markup(tooltip,markup);
+    g_free(markup);
+    return TRUE;
+}
+
 static void
 kiran_sn_icon_init(KiranSnIcon *self)
 {
@@ -1322,6 +1345,9 @@ kiran_sn_icon_init(KiranSnIcon *self)
     priv->category = KIRAN_NOTIFY_ICON_CATEGORY_APPLICATION_STATUS;
     priv->app_category = NULL;
     priv->icon = NULL;
+
+    g_signal_connect(GTK_WIDGET(self), "query-tooltip", G_CALLBACK(kiran_sn_icon_query_tooltip), self);
+    gtk_widget_set_has_tooltip(GTK_WIDGET(self), TRUE);
 
     priv->image = gtk_image_new();
     gtk_container_add(GTK_CONTAINER(self), priv->image);

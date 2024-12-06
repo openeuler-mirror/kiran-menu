@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "tasklist-window-context-menu.h"
@@ -52,7 +47,8 @@ void TasklistWindowContextMenu::refresh()
     /* 最大化 */
     item = Gtk::make_managed<Gtk::MenuItem>(_("Maximize"));
     item->signal_activate().connect(
-        [this]() -> void {
+        [this]() -> void
+        {
             auto window = win.lock();
             if (window)
             {
@@ -69,7 +65,8 @@ void TasklistWindowContextMenu::refresh()
     /* 最小化 */
     item = Gtk::make_managed<Gtk::MenuItem>(_("Minimize"));
     item->signal_activate().connect(
-        [this]() -> void {
+        [this]() -> void
+        {
             auto window = win.lock();
             if (window)
                 window->minimize();
@@ -79,7 +76,8 @@ void TasklistWindowContextMenu::refresh()
     /* 恢复大小 */
     item = Gtk::make_managed<Gtk::MenuItem>(_("Restore"));
     item->signal_activate().connect(
-        [this]() -> void {
+        [this]() -> void
+        {
             auto window = win.lock();
             if (window)
             {
@@ -97,7 +95,8 @@ void TasklistWindowContextMenu::refresh()
     /* 移动 */
     item = Gtk::make_managed<Gtk::MenuItem>(_("Move"));
     item->signal_activate().connect(
-        [this]() -> void {
+        [this]() -> void
+        {
             auto window = win.lock();
             if (window)
             {
@@ -109,7 +108,8 @@ void TasklistWindowContextMenu::refresh()
     /* 总是置顶 */
     check_item = Gtk::make_managed<Gtk::CheckMenuItem>(_("Always on top"));
     check_item->signal_activate().connect(
-        [this, check_item]() -> void {
+        [this, check_item]() -> void
+        {
             auto window = win.lock();
             if (window)
             {
@@ -125,7 +125,8 @@ void TasklistWindowContextMenu::refresh()
     /* 仅在当前工作区 */
     radio_item = Gtk::make_managed<Gtk::RadioMenuItem>(group, _("Only on this workspace"));
     radio_item->signal_toggled().connect(
-        [this, radio_item]() -> void {
+        [this, radio_item]() -> void
+        {
             auto window = win.lock();
             if (window && radio_item->get_active())
                 window->set_on_visible_workspace(false);
@@ -136,7 +137,8 @@ void TasklistWindowContextMenu::refresh()
     /* 总在可见工作区 */
     radio_item = Gtk::make_managed<Gtk::RadioMenuItem>(group, _("Always on visible workspace"));
     radio_item->signal_toggled().connect(
-        [this, radio_item]() -> void {
+        [this, radio_item]() -> void
+        {
             auto window = win.lock();
             if (window && radio_item->get_active())
                 window->set_on_visible_workspace(true);
@@ -154,7 +156,8 @@ void TasklistWindowContextMenu::refresh()
     /* 关闭窗口选项 */
     item = Gtk::make_managed<Gtk::MenuItem>(_("Close Window"));
     item->signal_activate().connect(
-        [this]() -> void {
+        [this]() -> void
+        {
             auto window = win.lock();
             if (!window)
                 return;
@@ -171,7 +174,6 @@ void TasklistWindowContextMenu::refresh()
  */
 Gtk::Menu *TasklistWindowContextMenu::create_workspace_submenu(void)
 {
-    Gtk::MenuItem *item;
     auto window = win.lock();
 
     if (!window)
@@ -180,6 +182,7 @@ Gtk::Menu *TasklistWindowContextMenu::create_workspace_submenu(void)
     auto menu = Gtk::make_managed<KiranOpacityMenu>();
     for (auto workspace : Kiran::WorkspaceManager::get_instance()->get_workspaces())
     {
+        Gtk::MenuItem *item = nullptr;
         item = Gtk::make_managed<Gtk::MenuItem>(workspace->get_name());
         item->signal_activate().connect(
             sigc::bind<int>(

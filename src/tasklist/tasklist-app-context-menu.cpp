@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd.
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
  *
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "tasklist-app-context-menu.h"
@@ -23,11 +18,14 @@
 #include "global.h"
 #include "kiran-helper.h"
 #include "lib/base.h"
+#include "lib/common.h"
 
-TasklistAppContextMenu::TasklistAppContextMenu(const std::shared_ptr<Kiran::App> &app_)
+TasklistAppContextMenu::TasklistAppContextMenu(const std::shared_ptr<Kiran::App> &app_) : app(app_)
 {
-    app = app_;
     get_style_context()->add_class("previewer-context-menu");
+
+    settings_ = Gio::Settings::create(STARTMENU_LOCKDOWN_SCHEMA);
+
     refresh();
 }
 
@@ -36,7 +34,7 @@ void TasklistAppContextMenu::refresh()
     Gtk::MenuItem *item = nullptr;
     std::shared_ptr<Kiran::App> app_ = app.lock();
 
-    //清空之前的菜单项
+    // 清空之前的菜单项
     KiranHelper::remove_all_for_container(*this);
 
     if (!app_)
@@ -49,7 +47,8 @@ void TasklistAppContextMenu::refresh()
     {
         item = Gtk::make_managed<Gtk::MenuItem>(app_->get_action_name(action_name));
         item->signal_activate().connect(
-            [action_name, this]() -> void {
+            [action_name, this]() -> void
+            {
                 if (!app.expired())
                     app.lock()->launch_action(action_name);
             });
@@ -61,7 +60,8 @@ void TasklistAppContextMenu::refresh()
     {
         item = Gtk::make_managed<Gtk::MenuItem>(_("Launch"));
         item->signal_activate().connect(
-            [this]() -> void {
+            [this]() -> void
+            {
                 auto app_ = app.lock();
                 if (app_)
                     app_->launch();
@@ -71,7 +71,8 @@ void TasklistAppContextMenu::refresh()
     {
         item = Gtk::make_managed<Gtk::MenuItem>(_("Close all windows"));
         item->signal_activate().connect(
-            [this]() -> void {
+            [this]() -> void
+            {
                 auto app_ = app.lock();
                 if (app_)
                     app_->close_all_windows();
@@ -103,37 +104,41 @@ void TasklistAppContextMenu::refresh()
     }
     append(*item);
 
-    if (!KiranHelper::app_is_in_fixed_list(app_))
+    if (!this->settings_->get_boolean(STARTMENU_LOCKDOWN_KEY_DISABLE_FIXED_APP))
     {
-        item = Gtk::make_managed<Gtk::MenuItem>(_("Pin to taskbar"));
-        item->signal_activate().connect(
-            sigc::hide_return(
-                sigc::bind(sigc::ptr_fun(KiranHelper::add_app_to_fixed_list), app.lock())));
-    }
-    else
-    {
-        item = Gtk::make_managed<Gtk::MenuItem>(_("Unpin to taskbar"));
-        item->signal_activate().connect(
-            [this]() -> void {
-                auto app_ = app.lock();
-                if (app_)
+        if (!KiranHelper::app_is_in_fixed_list(app_))
+        {
+            item = Gtk::make_managed<Gtk::MenuItem>(_("Pin to taskbar"));
+            item->signal_activate().connect(
+                sigc::hide_return(
+                    sigc::bind(sigc::ptr_fun(KiranHelper::add_app_to_fixed_list), app.lock())));
+        }
+        else
+        {
+            item = Gtk::make_managed<Gtk::MenuItem>(_("Unpin to taskbar"));
+            item->signal_activate().connect(
+                [this]() -> void
                 {
-                    KiranHelper::remove_app_from_fixed_list(app_);
-                    if (app_->get_kind() == Kiran::AppKind::USER_TASKBAR)
+                    auto app_ = app.lock();
+                    if (app_)
                     {
-                        /* 从磁盘上删除该应用 */
-                        Kiran::AppManager::get_instance()->remove_app_from_disk(app_->get_desktop_id());
+                        KiranHelper::remove_app_from_fixed_list(app_);
+                        if (app_->get_kind() == Kiran::AppKind::USER_TASKBAR)
+                        {
+                            /* 从磁盘上删除该应用 */
+                            Kiran::AppManager::get_instance()->remove_app_from_disk(app_->get_desktop_id());
+                        }
                     }
-                }
-            });
-    }
+                });
+        }
 
-    if (app_->get_kind() == Kiran::AppKind::FAKE_DESKTOP)
-    {
-        /*
-         * 无desktop文件的app无法固定到任务栏
-         */
-        item->set_sensitive(false);
+        if (app_->get_kind() == Kiran::AppKind::FAKE_DESKTOP)
+        {
+            /*
+             * 无desktop文件的app无法固定到任务栏
+             */
+            item->set_sensitive(false);
+        }
+        append(*item);
     }
-    append(*item);
 }

@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     tangjie02 <tangjie02@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #pragma once
@@ -88,6 +83,7 @@ public:
     const std::string &get_name() { return this->name_; }
     // 获取desktop文件中的Name[locale]字段值
     const std::string &get_locale_name() { return this->locale_name_; }
+    const std::list<std::string> &get_locale_name_pinyin_list() { return this->locale_name_pinyin_list_; }
     // 获取desktop文件中的Comment字段值
     const std::string &get_comment() { return this->comment_; }
     // 获取desktop文件中的Comment[locale]字段值
@@ -169,6 +165,7 @@ private:
 
     std::string name_;
     std::string locale_name_;
+    std::list<std::string> locale_name_pinyin_list_;
 
     std::string comment_;
     std::string locale_comment_;

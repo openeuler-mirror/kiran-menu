@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #ifndef TASKLISTAPPLETWIDGET_H
@@ -26,7 +21,7 @@
 class TasklistAppletWidget : public Gtk::Box
 {
 public:
-    TasklistAppletWidget(MatePanelApplet *applet);
+    explicit TasklistAppletWidget(MatePanelApplet *applet);
 
     /**
      * @brief on_app_buttons_page_changed 回调函数，应用按钮当前分页发生变化时调用
@@ -55,7 +50,7 @@ protected:
      * @param tooltip_text         按钮的提示文本
      * @return  返回创建的按钮，该按钮已经调用Gtk::managed接口，将随父控件一起销毁
      */
-    Gtk::Button *create_paging_button(std::string icon_resource, std::string tooltip_text);
+    Gtk::Button *create_paging_button(const std::string &icon_name, const std::string &tooltip_text);
 
 private:
     Gtk::Box button_box;                 //分页按钮所在布局

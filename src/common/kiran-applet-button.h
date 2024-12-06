@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #ifndef KIRANAPPLETBUTTON_H
@@ -26,7 +21,7 @@
 class KiranAppletButton : public Gtk::ToggleButton
 {
 public:
-    KiranAppletButton(MatePanelApplet *applet_);
+    explicit KiranAppletButton(MatePanelApplet *applet_);
     ~KiranAppletButton() override;
 
     MatePanelApplet *get_applet();
@@ -36,13 +31,13 @@ protected:
     virtual void get_preferred_height_vfunc(int &minimum_height, int &natural_height) const override;
     virtual void on_size_allocate(Gtk::Allocation &allocation) override;
     virtual bool on_draw(const ::Cairo::RefPtr<Cairo::Context> &cr) override;
-    virtual void set_icon_from_resource(const std::string &resource);
+    virtual void set_icon_from_theme(const std::string &name);
     void generate_pixbuf();
 
 private:
     MatePanelApplet *applet;
 
-    std::string icon_resource;
+    std::string icon_name;
     Glib::RefPtr<Gdk::Pixbuf> icon_pixbuf;  //图标
     int icon_size;                          //图标显示尺寸
 };

@@ -1,20 +1,15 @@
 /**
- * @Copyright (C) 2020 ~ 2021 KylinSec Co., Ltd. 
- *
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * kiran-cc-daemon is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          http://license.coscl.org.cn/MulanPSL2 
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
+ * See the Mulan PSL v2 for more details.  
+ * 
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; If not, see <http: //www.gnu.org/licenses/>. 
  */
 
 #include "menu-applet-button.h"
@@ -28,14 +23,15 @@
 MenuAppletButton::MenuAppletButton(MatePanelApplet *panel_applet) : KiranAppletButton(panel_applet)
 {
     set_tooltip_text(_("Kiran Start Menu"));
-    set_icon_from_resource("/kiran-menu/icon/logo");
+    set_icon_from_theme("kiran-menu");
     get_style_context()->add_class("menu-applet-button");
 
     window.signal_size_changed().connect(
         sigc::mem_fun(*this, &MenuAppletButton::reposition_applet_window));
 
-    window.signal_map().connect(
-        sigc::mem_fun(*this, &MenuAppletButton::reposition_applet_window));
+    window.signal_map().connect(sigc::mem_fun(*this, &MenuAppletButton::reposition_applet_window));
+
+    window.signal_unmap().connect(sigc::mem_fun(*this, &MenuAppletButton::on_window_hide_cb));
 
     window.signal_unmap_event().connect(
         [this](GdkEventAny *event) -> bool
@@ -98,4 +94,10 @@ void MenuAppletButton::reposition_applet_window()
         break;
     }
     window.move(root_x, root_y);
+}
+
+void MenuAppletButton::on_window_hide_cb()
+{
+    // 当窗口隐藏时，按钮的状态需要改为取消激活
+    this->set_active(false);
 }

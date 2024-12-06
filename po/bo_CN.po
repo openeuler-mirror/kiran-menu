@@ -1,0 +1,404 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020
+# This file is distributed under the same license as the kiran-menu package.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: 2.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-04-28 15:05+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../src/common/kiran-search-entry.cpp:31
+msgid "Search for applications"
+msgstr "རེ་འདུན་ཞུ་ཡིག་འཚོལ་ཞིབ་བྱེད་པ"
+
+#: ../src/menu/menu-app-item.cpp:168
+#: ../src/tasklist/tasklist-app-context-menu.cpp:57
+msgid "Launch"
+msgstr "འཕེན་གཏོང་།"
+
+#: ../src/menu/menu-app-item.cpp:172
+msgid "Add to desktop"
+msgstr "ཅོག་ཙེའི་སྟེང་དུ་ཁ་སྣོན་"
+
+#: ../src/menu/menu-app-item.cpp:178
+#: ../src/tasklist/tasklist-app-context-menu.cpp:79
+msgid "Add to favorites"
+msgstr "དགའ་ཕྱོགས་ཁ་སྣོན་བྱས་པ།"
+
+#: ../src/menu/menu-app-item.cpp:187
+#: ../src/tasklist/tasklist-app-context-menu.cpp:86
+msgid "Remove from favorites"
+msgstr "དགའ་ཕྱོགས་མེད་པར་བཟོ་བ།"
+
+#: ../src/menu/menu-app-item.cpp:198
+#: ../src/tasklist/tasklist-app-context-menu.cpp:110
+msgid "Unpin to taskbar"
+msgstr "ལས་འགན་གྱི་ཀ་བའི་སྟེང་དུ་བཀོད་པ་རེད།"
+
+#: ../src/menu/menu-app-item.cpp:203
+#: ../src/tasklist/tasklist-app-context-menu.cpp:103
+msgid "Pin to taskbar"
+msgstr "ལས་འགན་སྒྲུབ་པར་ཁབ་རྒྱག་པ།"
+
+#: ../src/menu/menu-applet-button.cpp:24
+msgid "Kiran Start Menu"
+msgstr "ཁི་ལན་གྱི་མགོ་རྩོམ་པའི་ཟས་ཐོ།"
+
+#. 扩展模式下的常用应用布局
+#: ../src/menu/menu-applet-window.cpp:238
+msgid "Frequently used"
+msgstr "རྒྱུན་དུ་བཀོལ་སྤྱོད་བྱེད་པ།"
+
+#: ../src/menu/menu-applet-window.cpp:241
+msgid "No frequent apps"
+msgstr "རྒྱུན་དུ་ཉེར་སྤྱོད་བྱེད་མི་"
+
+#. 扩展模式下的收藏夹应用布局
+#. 紧凑模式下的收藏夹应用布局
+#: ../src/menu/menu-applet-window.cpp:245
+#: ../src/menu/menu-applet-window.cpp:252
+msgid "Favorite Apps"
+msgstr "ཆེས་དགའ་བའི་ཉེར་སྤྱོད།"
+
+#: ../src/menu/menu-applet-window.cpp:248
+#: ../src/menu/menu-applet-window.cpp:255
+msgid "No favorite apps found"
+msgstr "ཆེས་དགའ་བའི་ཉེར་སྤྱོད་གོ་རིམ་མ་"
+
+#. 搜索结果布局
+#: ../src/menu/menu-applet-window.cpp:266
+msgid "Search Results"
+msgstr "འཚོལ་ཞིབ་བྱས་འབྲས།"
+
+#: ../src/menu/menu-applet-window.cpp:269
+msgid "No matched apps found!"
+msgstr "ཆ་འགྲིག་གི་ཉེར་སྤྱོད་གོ་རིམ་མ་རྙེད།"
+
+#: ../src/menu/menu-applet-window.cpp:321
+msgid "Hello"
+msgstr "ཝེ།"
+
+#: ../src/menu/menu-applet-window.cpp:654
+msgid "Run"
+msgstr "འཁོར་སྐྱོད་བྱེད་བཞིན་"
+
+#: ../src/menu/menu-applet-window.cpp:659
+msgid "Search Files"
+msgstr "འཚོལ་བཤེར་ཡིག་ཆ།"
+
+#: ../src/menu/menu-applet-window.cpp:664
+msgid "Home Directory"
+msgstr "ཁྱིམ་ཚང་གི་དཀར་ཆག"
+
+#: ../src/menu/menu-applet-window.cpp:669
+msgid "Control center"
+msgstr "ཚོད་འཛིན་ལྟེ་གནས།"
+
+#: ../src/menu/menu-applet-window.cpp:674
+msgid "System monitor"
+msgstr "མ་ལག་ལྟ་ཞིབ་ཚད་ལེན"
+
+#: ../src/menu/menu-applet-window.cpp:835
+msgid "%a %b %e %Y"
+msgstr "%a %b %e %Y"
+
+#: ../src/menu/menu-applet.cpp:50
+msgid "Kiran Menu Applet"
+msgstr "ཁི་ལན་གྱི་ཟས་ཐོའི་ཀུ་ཤུ་ཀུང་སི།"
+
+#: ../src/menu/menu-applet.cpp:52
+msgid "Startup menu designed for Kiran Desktop"
+msgstr "ཁི་ལན་གྱི་ཅོག་ཙེའི་སྟེང་ཇུས་འགོད་བྱས་པའི་གསར་གཏོད་ཟས་ཐོ།"
+
+#: ../src/menu/menu-applet.cpp:62 ../src/tasklist/tasklist-applet.cpp:36
+#: ../src/workspace/workspace-applet.cpp:35
+msgid "About"
+msgstr "འབྲེལ་ཡོད་ཀྱི་སྐོར།"
+
+#: ../src/menu/menu-applet.cpp:62 ../src/tasklist/tasklist-applet.cpp:36
+#: ../src/workspace/workspace-applet.cpp:35
+msgid "About this applet"
+msgstr "ཀུ་ཤུ་འདིའི་སྐོར།"
+
+#. TODO: 菜单中的应用分类后端目前没有做翻译，暂时放到前端调用_("xxx")进行翻译，正常应该是后端翻译后返回给前端，后续需要调整这里的翻译逻辑
+#: ../src/menu/menu-category-item.cpp:20
+msgid "Office"
+msgstr "གཞུང་ལས་ཁང་།"
+
+#: ../src/menu/menu-category-item.cpp:21
+msgid "Development"
+msgstr "འཕེལ་རྒྱས་"
+
+#: ../src/menu/menu-category-item.cpp:22
+msgid "Network"
+msgstr "དྲ་རྒྱ།"
+
+#: ../src/menu/menu-category-item.cpp:23
+msgid "Graphics"
+msgstr "རི་མོ།"
+
+#: ../src/menu/menu-category-item.cpp:24
+msgid "Multimedia"
+msgstr "སྨྱན་སྦྱོར་མང་པོ།"
+
+#: ../src/menu/menu-category-item.cpp:25
+msgid "Utilities"
+msgstr "སྤྱི་སྤྱོད་བྱ་གཞག"
+
+#: ../src/menu/menu-category-item.cpp:26
+msgid "Settings"
+msgstr "སྒྲིག་བཀོད།"
+
+#: ../src/menu/menu-category-item.cpp:27
+msgid "Others"
+msgstr "དེ་མིན་ད་དུང་"
+
+#: ../src/menu/menu-new-apps-container.cpp:83
+#: ../src/menu/menu-new-apps-container.cpp:109
+msgid "Expand"
+msgstr "རྒྱ་སྐྱེད་གཏོང་བ།"
+
+#: ../src/menu/menu-new-apps-container.cpp:100
+msgid "Shrink"
+msgstr "ཆུང་དུ་གཏོང་བ།"
+
+#: ../src/menu/menu-new-apps-container.cpp:121
+msgid "New Installed"
+msgstr "གསར་དུ་སྒྲིག་སྦྱོར་བྱས་པ།"
+
+#: ../src/menu/menu-power-button.cpp:26
+msgid "Power options"
+msgstr "སྒུལ་ཤུགས་ཀྱི་བསལ་འདེམས་"
+
+#: ../src/menu/menu-power-menu.cpp:29
+msgid "Lock screen"
+msgstr "སྒོ་ལྕགས་རྒྱག་པའི་བརྙན་ཤེལ"
+
+#: ../src/menu/menu-power-menu.cpp:39
+msgid "Switch user"
+msgstr "གློག་སྒོ་འབྱེད་པའི་སྤྱོད་མཁན"
+
+#: ../src/menu/menu-power-menu.cpp:47
+msgid "Logout"
+msgstr "ཐོ་འགོད་བྱེད་པ།"
+
+#: ../src/menu/menu-power-menu.cpp:56
+msgid "Suspend"
+msgstr "གནས་སྐབས་མཚམས་འཇོག་"
+
+#: ../src/menu/menu-power-menu.cpp:65
+msgid "Hibernate"
+msgstr "ཧིན་རྡུ་ཉི་ཞི་ཡ།"
+
+#: ../src/menu/menu-power-menu.cpp:75
+msgid "Reboot"
+msgstr "བསྐྱར་དུ་འཁོར་བ།"
+
+#: ../src/menu/menu-power-menu.cpp:84
+msgid "Shutdown"
+msgstr "ལས་མཚམས་འཇོག་པ།"
+
+#: ../src/menu/menu-power-menu.cpp:120
+msgid ""
+"The logined users reach the maximum limit at the same time, you cannot "
+"switch to the greeter interface, Please log off some logined users first."
+msgstr ""
+"ཐོ་འགོད་བྱས་པའི་སྤྱོད་མཁན་རྣམས་དུས་མཚུངས་སུ་ཚད་གཞི་མཐོ་ཤོས་སུ་སླེབས་པ་དང་། "
+"ཁྱེད་ཚོས་འཚམས་འདྲིའི་འབྲེལ་མཐུད་ལ་བརྗེ་མི་ཐུབ་པས། "
+"སྔོན་ལ་ཐོ་འགོད་བྱས་པའི་སྤྱོད་མཁན་ཁ་ཤས་ཐོ་འགོད་བྱེད་རོགས།"
+
+#: ../src/menu/menu-power-menu.cpp:123
+#: ../src/menu/recent-files-list-box.cpp:93
+#: ../src/menu/recent-files-list-box.cpp:113
+#: ../src/menu/recent-files-list-box.cpp:147
+msgid "System Warning"
+msgstr "མ་ལག་གི་ཉེན་བརྡ།"
+
+#: ../src/menu/recent-files-list-box.cpp:92
+#: ../src/menu/recent-files-list-box.cpp:112
+msgid "File does not exist"
+msgstr "ཡིག་ཆ་མེད་པ།"
+
+#: ../src/menu/recent-files-list-box.cpp:141
+msgid ""
+"All recent files information will be lost.\n"
+"Are you sure to clear the whole lists?"
+msgstr ""
+"ཉེ་ལམ་གྱི་ཡིག་ཚགས་ཀྱི་ཆ་འཕྲིན་ཚང་མ་བོར་བརླག་ཏུ་འགྲོ\n"
+"ཁྱོད་ཀྱིས་ངེས་པར་དུ་མིང་ཐོ་ཧྲིལ་བོ་གཙང་སེལ་བྱེད་དགོས་སམ།"
+
+#: ../src/menu/recent-files-list-box.cpp:219
+msgid "Open File"
+msgstr "ཁ་ཕྱེ་བའི་ཡིག་ཆ།"
+
+#: ../src/menu/recent-files-list-box.cpp:224
+msgid "Open File Location"
+msgstr "ཡིག་ཆའི་གནས་ཡུལ་ཁ་ཕྱེ་བ།"
+
+#: ../src/menu/recent-files-list-box.cpp:229
+msgid "Remove from list"
+msgstr "མིང་ཐོའི་ནང་ནས་ཕྱིར་འཐེན་"
+
+#: ../src/menu/recent-files-list-box.cpp:234
+msgid "Clear the whole list"
+msgstr "མིང་ཐོ་ཧྲིལ་པོ་གཙང་བཤེར་བྱ་དགོས།"
+
+#: ../src/menu/recent-files-widget.cpp:29
+msgid "The Recently files list is empty!"
+msgstr "ཉེ་ཆར་ཡིག་ཚགས་ཀྱི་རེའུ་མིག་སྟོང་བ་རེད།"
+
+#: ../src/menu/recent-files-widget.cpp:44
+msgid "Search files"
+msgstr "འཚོལ་བཤེར་ཡིག་ཆ།"
+
+#: ../src/tasklist/tasklist-app-context-menu.cpp:67
+msgid "Close all windows"
+msgstr "སྒེའུ་ཁུང་ཡོད་ཚད་ཀྱི་སྒོ་"
+
+#: ../src/tasklist/tasklist-applet-widget.cpp:106
+msgid "Previous"
+msgstr "སྔོན་ཆད།"
+
+#: ../src/tasklist/tasklist-applet-widget.cpp:107
+msgid "Next"
+msgstr "གོམ་སྟབས་རྗེས་མར།"
+
+#: ../src/tasklist/tasklist-applet.cpp:23
+msgid "Kiran Tasklist Applet"
+msgstr "ཁི་ལན་གྱི་ལས་འགན་སྒྲུབ་མཁན་ཨ་ཕུའུ་ལེ་ཐི།"
+
+#: ../src/tasklist/tasklist-applet.cpp:25
+msgid "Task switcher designed for Kiran Desktop"
+msgstr "ཁི་ལན་གྱི་ཅོག་ཙེའི་སྟེང་ཇུས་འགོད་བྱས་པའི་ལས་འགན་བརྗེ་རེས་"
+
+#. 最大化
+#: ../src/tasklist/tasklist-window-context-menu.cpp:48
+msgid "Maximize"
+msgstr "ཚད་གཞི་མཐོ་ཤོས་ཀྱི་སྒོ་ནས"
+
+#. 最小化
+#: ../src/tasklist/tasklist-window-context-menu.cpp:65
+msgid "Minimize"
+msgstr "ཉུང་དུ་གཏོང་གང་ཐུབ་བྱ་དགོས།"
+
+#. 恢复大小
+#: ../src/tasklist/tasklist-window-context-menu.cpp:75
+msgid "Restore"
+msgstr "སླར་གསོ་བྱེད་པ།"
+
+#. 移动
+#: ../src/tasklist/tasklist-window-context-menu.cpp:93
+msgid "Move"
+msgstr "གནས་སྤོ་བྱ་དགོས།"
+
+#. 总是置顶
+#: ../src/tasklist/tasklist-window-context-menu.cpp:105
+msgid "Always on top"
+msgstr "ཐོག་མཐའ་བར་གསུམ་དུ་གོང་ནས་འོག"
+
+#. 仅在当前工作区
+#: ../src/tasklist/tasklist-window-context-menu.cpp:121
+msgid "Only on this workspace"
+msgstr "ལས་ཀའི་བར་སྟོང་འདིའི་སྟེང་ནས་ད་གཟོད"
+
+#. 总在可见工作区
+#: ../src/tasklist/tasklist-window-context-menu.cpp:132
+msgid "Always on visible workspace"
+msgstr "ཐོག་མཐའ་བར་གསུམ་དུ་མཐོང་ཐུབ་པའི་ལས་ཀའི་བར་སྟོང"
+
+#. 移动到其它工作区
+#: ../src/tasklist/tasklist-window-context-menu.cpp:143
+msgid "Move to another workspace"
+msgstr "ལས་ཀའི་བར་སྟོང་གཞན་ཞིག་ཏུ་སྤོས་པ།"
+
+#. 关闭窗口选项
+#: ../src/tasklist/tasklist-window-context-menu.cpp:150
+msgid "Close Window"
+msgstr "སྒེའུ་ཁུང་གི་སྒོ་རྒྱག་"
+
+#: ../src/workspace/workspace-applet.cpp:22
+msgid "Kiran Workspace switcher Applet"
+msgstr "ཁི་ལན་གྱི་ལས་ཀའི་བར་སྟོང་བརྗེ་རེས་བྱེད་མཁན་ཀུ་ཤུ་"
+
+#: ../src/workspace/workspace-applet.cpp:24
+msgid "Workspace switcher designed for Kiran Desktop"
+msgstr "ཁི་ལན་གྱི་ཅོག་ཙེའི་སྟེང་ཇུས་འགོད་བྱས་པའི་ལས་ཀའི་བར་སྟོང་གི་གློག"
+
+#: ../data/menu.ui.xml.h:1
+msgid "Favorite applications"
+msgstr "ཆེས་དགའ་བའི་ཉེར་སྤྱོད།"
+
+#: ../data/menu.ui.xml.h:2
+msgid "page0"
+msgstr "ཤོག་ངོས་0"
+
+#: ../data/menu.ui.xml.h:3
+msgid "page1"
+msgstr "ཤོག་ངོས་1"
+
+#: ../data/menu.ui.xml.h:4
+msgid "All applications"
+msgstr "རེ་འདུན་ཞུ་ཡིག་ཡོད་ཚད།"
+
+#: ../data/menu.ui.xml.h:5
+msgid "Recent files"
+msgstr "ཉེ་དུས་ཀྱི་ཡིག་ཆ།"
+
+#: ../data/menu.ui.xml.h:6
+msgid "Hello, ---"
+msgstr "ཝེ།---"
+
+#: ../data/menu.ui.xml.h:7
+msgid "Click to change date and time settings"
+msgstr "དུས་ཚོད་དང་དུས་ཚོད་ཀྱི་སྒྲིག་བཀོད་ལ་འགྱུར་ལྡོག་གཏོང་དགོས།"
+
+#: ../data/menu.ui.xml.h:8
+msgid "------"
+msgstr "------"
+
+#: ../data/workspace-applet-window.ui.xml.h:1
+msgid "Create new workspace"
+msgstr "ལས་ཀའི་བར་སྟོང་གསར་པ་གཏོད་དགོས"
+
+#~ msgid "The logined users reach the maximum limit at the same time."
+#~ msgstr ""
+#~ "ཐོ་འགོད་བྱས་པའི་སྤྱོད་མཁན་རྣམས་དུས་མཚུངས་སུ་ཚད་གཞི་མཐོ་ཤོས་སུ་སླེབས་ཡོད།"
+
+#~ msgid "Open help"
+#~ msgstr "སྒོ་འབྱེད་རོགས་རམ།"
+
+#~ msgid "Edit Profiles"
+#~ msgstr "དཔྱད་གཞིའི་ཡིག་རིགས་རྩོམ་སྒྲིག་བྱེད་"
+
+#~ msgid "Tray"
+#~ msgstr "སྡེར་མ།"
+
+#~ msgid "About Tray"
+#~ msgstr "སྡེར་མའི་སྐོར།"
+
+#~ msgid "The Tray displays the system notify icon"
+#~ msgstr "སྡེར་མའི་ནང་དུ་མ་ལག་གིས་བརྡ་ཐོ་གཏོང་བའི་མཚོན་རྟགས་མངོན་པར་བྱས་ཡོད།"
+
+#~ msgid "Click to edit user information"
+#~ msgstr "བེད་སྤྱོད་བྱེད་མཁན་གྱི་ཆ་འཕྲིན་རྩོམ་སྒྲིག་བྱེད"
+
+#~ msgid "Favorites"
+#~ msgstr "དགའ་པོ་བྱེད་མཁན།"
+
+#~ msgid "No favorite apps!"
+#~ msgstr "ཆེས་དགའ་བའི་ཉེར་སྤྱོད་གོ་རིམ་མེད།"
+
+#~ msgid "Preferences"
+#~ msgstr "གཟིགས་སྐྱོང་སྲིད་གླེང་།"
+
+#~ msgid "_About"
+#~ msgstr "_About"

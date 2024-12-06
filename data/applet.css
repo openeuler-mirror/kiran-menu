@@ -1,74 +1,232 @@
 @define-color placeholder_text_color #c8c8c8;
 @define-color tasklist_app_indicator_color #3ca8ea;
-@define-color tasklist_app_active_color rgba(255, 255, 255, 0.3);
 @define-color thumbnail-hover-color #569CD6;
 @define-color tasklist_attention_color alpha(#fbaf43, 0.6);
 
-* {
-    font-family: "Noto Sans CJK SC";
-    text-shadow: none;
-    box-shadow: none;
-    -gtk-icon-shadow: none;
-    -gtk-icon-effect: none;
-}
+
+/* from 2.6 /usr/share/themes/Kiran-dark/gtk-3.0/gtk.css */
+/*
+widget text/foreground color */
+@define-color theme_fg_color #ffffff;
+/*
+text color for entries, views and content in general */
+@define-color theme_text_color #ffffff;
+/*
+widget base background color */
+@define-color theme_bg_color #222222;
+/*
+text widgets and the like base background color */
+@define-color theme_base_color #222222;
+/*
+base background color of selections */
+@define-color theme_selected_bg_color #2eb3ff;
+/*
+text/foreground color of selections */
+@define-color theme_selected_fg_color #ffffff;
+/*
+base background color of insensitive widgets */
+@define-color insensitive_bg_color #1f1f1f;
+/*
+text foreground color of insensitive widgets */
+@define-color insensitive_fg_color rgba(232, 232, 232, 0.35);
+/*
+insensitive text widgets and the like base background color */
+@define-color insensitive_base_color #1f1f1f;
+/*
+insensitive text color for entries, views and content in general */
+@define-color insensitive_text_color rgba(232, 232, 232, 0.35);
+/*
+base background color of insensitive selections */
+@define-color insensitive_selected_bg_color rgba(19, 169, 255, 0.35);
+/*
+text foreground color of insensitive selections */
+@define-color insensitive_selected_fg_color rgba(232, 232, 232, 0.35);
+/*
+text foreground color of insensitive unfocused selections */
+@define-color insensitive_unfocused_selected_fg_color rgba(186, 185, 185, 0.37);
+/*
+widget text/foreground color on backdrop windows */
+@define-color theme_unfocused_fg_color rgba(239, 239, 239, 0.955);
+/*
+text color for entries, views and content in general on backdrop windows */
+@define-color theme_unfocused_text_color rgba(239, 239, 239, 0.955);
+/*
+widget base background color on backdrop windows */
+@define-color theme_unfocused_bg_color #2a2a2a;
+/*
+text widgets and the like base background color on backdrop windows */
+@define-color theme_unfocused_base_color #2a2a2a;
+/*
+base background color of selections on backdrop windows */
+@define-color theme_unfocused_selected_bg_color rgba(53, 172, 239, 0.955);
+/*
+text/foreground color of selections on backdrop windows */
+@define-color theme_unfocused_selected_fg_color rgba(239, 239, 239, 0.955);
+/*
+insensitive color on backdrop windows*/
+@define-color unfocused_insensitive_color #272727;
+/*
+backdground color of insensitive widgets on backdrop windows*/
+@define-color insensitive_unfocused_bg_color #272727;
+/*
+text foreground color of insensitive widgets on backdrop windows*/
+@define-color insensitive_unfocused_fg_color rgba(186, 185, 185, 0.37);
+/*
+widgets main borders color */
+@define-color borders #393939;
+/*
+widgets main borders color on backdrop windows */
+@define-color unfocused_borders rgba(63, 63, 63, 0.955);
+/*
+widgets main borders color insensitive */
+@define-color insensitive_borders rgba(52, 52, 52, 0.35);
+/*
+widgets main borders color insensitive backdrop */
+@define-color unfocused_insensitive_borders rgba(75, 75, 74, 0.37);
+/*
+textview main backgound color */
+@define-color switch_slider_color #ffffff;
+@define-color container_hover_color mix(@theme_bg_color, @theme_fg_color, 0.1);
+@define-color container_active_color mix(@theme_bg_color, @theme_fg_color, 0.2);
+@define-color backdrop_base_color @theme_base_color;
+@define-color backdrop_borders_color mix(@borders, @theme_bg_color, 0.8);
+/* --------------------------------------------------------------- Default Colors --------------------------------------------------------------- */
+@define-color theme_default_background_normal #222222;
+@define-color theme_default_background_insensitive #1f1f1f;
+@define-color theme_default_background_backdrop #2a2a2a;
+@define-color theme_default_background_backdrop_insensitive rgba(38, 38, 38, 0.35);
+@define-color theme_default_foreground_normal #ffffff;
+@define-color theme_default_foreground_insensitive rgba(232, 232, 232, 0.35);
+@define-color theme_default_foreground_backdrop rgba(239, 239, 239, 0.955);
+@define-color theme_default_foreground_backdrop_insensitive rgba(217, 217, 217, 0.305);
+@define-color theme_default_border_normal #393939;
+@define-color theme_default_border_insensitive rgba(52, 52, 52, 0.35);
+@define-color theme_default_border_backdrop rgba(63, 63, 63, 0.955);
+@define-color theme_default_border_backdrop_insensitive rgba(57, 57, 57, 0.305);
+@define-color theme_default_warning #fa4949;
+@define-color theme_default_warning_backdrop rgba(235, 77, 77, 0.955);
+@define-color theme_default_error #cc0000;
+@define-color theme_default_error_backdrop rgba(194, 12, 12, 0.955);
+@define-color theme_default_success #68be14;
+@define-color theme_default_success_backdrop rgba(105, 181, 30, 0.955);
+/* these are pretty self explicative */
+@define-color warning_color #fa4949;
+@define-color error_color #cc0000;
+@define-color success_color #68be14;
+/* --------------------------------------------------------------- Widget Colors --------------------------------------------------------------- */
+@define-color theme_widget_background_normal #2c2c2c;
+@define-color theme_widget_background_hover #414141;
+@define-color theme_widget_background_active #565656;
+@define-color theme_widget_background_checked #2eb3ff;
+@define-color theme_widget_background_insensitive rgba(40, 40, 40, 0.35);
+@define-color theme_widget_background_backdrop rgba(51, 51, 51, 0.955);
+@define-color theme_widget_background_backdrop_checked rgba(53, 172, 239, 0.955);
+@define-color theme_widget_background_backdrop_insensitive rgba(46, 46, 46, 0.305);
+@define-color theme_widget_foreground_normal #ffffff;
+@define-color theme_widget_foreground_hover #bfbfbf;
+@define-color theme_widget_foreground_active #aaaaaa;
+@define-color theme_widget_foreground_checked #2eb3ff;
+@define-color theme_widget_foreground_insensitive rgba(232, 232, 232, 0.35);
+@define-color theme_widget_foreground_backdrop rgba(239, 239, 239, 0.955);
+@define-color theme_widget_foreground_backdrop_checked rgba(53, 172, 239, 0.955);
+@define-color theme_widget_foreground_backdrop_insensitive rgba(217, 217, 217, 0.305);
+@define-color theme_widget_border_normal #393939;
+@define-color theme_widget_border_hover #c3c3c3;
+@define-color theme_widget_border_focus #2eb3ff;
+@define-color theme_widget_border_insensitive rgba(52, 52, 52, 0.35);
+@define-color theme_widget_border_backdrop rgba(63, 63, 63, 0.955);
+@define-color theme_widget_border_backdrop_insensitive rgba(57, 57, 57, 0.305);
+/* --------------------------------------------------------------- Bare Colors --------------------------------------------------------------- */
+@define-color theme_bare_background_normal #595959;
+@define-color theme_bare_background_hover #696969;
+@define-color theme_bare_background_active #7a7a7a;
+@define-color theme_bare_background_checked #2eb3ff;
+@define-color theme_bare_background_insensitive rgba(81, 81, 81, 0.35);
+@define-color theme_bare_background_backdrop rgba(92, 91, 91, 0.955);
+@define-color theme_bare_background_backdrop_checked rgba(53, 172, 239, 0.955);
+@define-color theme_bare_background_backdrop_insensitive rgba(84, 83, 83, 0.305);
+@define-color theme_bare_foreground_normal #ffffff;
+@define-color theme_bare_foreground_hover #cdcdcd;
+@define-color theme_bare_foreground_active #bcbcbc;
+@define-color theme_bare_foreground_checked #2eb3ff;
+@define-color theme_bare_foreground_insensitive rgba(232, 232, 232, 0.35);
+@define-color theme_bare_foreground_backdrop rgba(239, 239, 239, 0.955);
+@define-color theme_bare_foreground_backdrop_checked rgba(53, 172, 239, 0.955);
+@define-color theme_bare_foreground_backdrop_insensitive rgba(217, 217, 217, 0.305);
+/* --------------------------------------------------------------- Window Colors --------------------------------------------------------------- */
+@define-color theme_window_background_normal #222222;
+@define-color theme_window_background_insensitive #1f1f1f;
+@define-color theme_window_background_backdrop #2a2a2a;
+@define-color theme_window_background_backdrop_insensitive rgba(38, 38, 38, 0.35);
+@define-color theme_window_foreground_normal #ffffff;
+@define-color theme_window_foreground_insensitive rgba(232, 232, 232, 0.35);
+@define-color theme_window_foreground_backdrop rgba(239, 239, 239, 0.955);
+@define-color theme_window_foreground_backdrop_insensitive rgba(217, 217, 217, 0.305);
+@define-color theme_window_border_normal #393939;
+@define-color theme_window_border_insensitive rgba(52, 52, 52, 0.35);
+@define-color theme_window_border_backdrop rgba(63, 63, 63, 0.955);
+@define-color theme_window_border_backdrop_insensitive rgba(57, 57, 57, 0.305);
+/* --------------------------------------------------------------- View Colors --------------------------------------------------------------- */
+@define-color theme_view_background_normal #222222;
+@define-color theme_view_background_insensitive #1f1f1f;
+@define-color theme_view_background_backdrop #2a2a2a;
+@define-color theme_view_background_backdrop_insensitive rgba(38, 38, 38, 0.35);
+@define-color theme_view_foreground_normal #ffffff;
+@define-color theme_view_foreground_insensitive rgba(232, 232, 232, 0.35);
+@define-color theme_view_foreground_backdrop rgba(239, 239, 239, 0.955);
+@define-color theme_view_foreground_backdrop_insensitive rgba(217, 217, 217, 0.305);
+@define-color theme_view_border_normal #393939;
+@define-color theme_view_border_focus #2eb3ff;
+@define-color theme_view_border_insensitive rgba(52, 52, 52, 0.35);
+@define-color theme_view_border_backdrop rgba(63, 63, 63, 0.955);
+@define-color theme_view_border_backdrop_insensitive rgba(57, 57, 57, 0.305);
+/* -------------------------------------------------------------- Titlebar Colors -------------------------------------------------------------- */
+@define-color theme_titlebar_background_normal #222222;
+@define-color theme_titlebar_background_insensitive #1f1f1f;
+@define-color theme_titlebar_background_backdrop #2a2a2a;
+@define-color theme_titlebar_background_backdrop_insensitive rgba(38, 38, 38, 0.35);
+@define-color theme_titlebar_foreground_normal #ffffff;
+@define-color theme_titlebar_foreground_insensitive rgba(232, 232, 232, 0.35);
+@define-color theme_titlebar_foreground_backdrop rgba(239, 239, 239, 0.955);
+@define-color theme_titlebar_foreground_backdrop_insensitive rgba(217, 217, 217, 0.305);
+@define-color theme_titlebar_border_normal #393939;
+@define-color theme_titlebar_border_insensitive rgba(52, 52, 52, 0.35);
+@define-color theme_titlebar_border_backdrop rgba(63, 63, 63, 0.955);
+@define-color theme_titlebar_border_backdrop_insensitive rgba(57, 57, 57, 0.305);
+
 
 button.kiran-applet-button {
     border-radius: 0px;
     border: none;
+    background: #0c0c0c;
 }
+
 
 /* 开始菜单主窗口 */
 window#menu-applet-window {
-    background: rgba(28, 28, 28, 0.9);
     min-width: 760px;
     min-height: 682px;
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
 
     -gtkmm__CustomObject_KiranMenuWindow-compact-min-height: 682px;
     -gtkmm__CustomObject_KiranMenuWindow-expand-min-height: 682px;
 }
 
-/* 开始菜单任务栏按钮 */
-button.toggle.menu-applet-button {
-    background: transparent;
-    box-shadow: none;
-}
-button.toggle.menu-applet-button:active {
-    background: rgba(255, 255, 255, 0.35);
-    box-shadow: none;
-}
-button.toggle.menu-applet-button:hover {
-    background: rgba(255, 255, 255, 0.2);
-    box-shadow: none;
+/* 开始菜单应用按钮和分类标签 */
+button.menu-app-item.horizontal,
+button.menu-category-item {
+    border-width: 0px;
+    border-radius: 0px;
+    outline: none;
 }
 
-/* 开始菜单应用按钮和分类标签 */
-button.menu-app-item.horizontal, button.menu-category-item {
-    background: transparent;
-    color: #ffffff;
-    border-width: 0px;
-    border-right-width: 3px;
-    border-style: solid;
-    border-color: transparent;
-    border-radius: 0px;
-    border-image: none;
-    outline: none;
-    box-shadow: none;
-}
-button.menu-app-item.horizontal:hover, button.menu-category-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: #4cb5ff;
-    border-style: solid;
-    border-width: 0px;
-    border-right-width: 3px;
-}
 button.menu-app-item.horizontal {
     min-height: 40px;
     padding: 0px;
     padding-left: 24px;
     -gtkmm__CustomObject_KiranMenuAppItem-icon-spacing: 12px;
 }
+
 button.menu-category-item {
     min-height: 40px;
     margin-top: 10px;
@@ -79,6 +237,7 @@ button.menu-category-item {
 
     -gtkmm__CustomObject_KiranMenuCategoryItem-icon-spacing: 12px;
 }
+
 button.menu-app-item.vertical {
     min-height: 100px;
     min-width: 88px;
@@ -90,86 +249,37 @@ button.menu-app-item.vertical {
     padding: 10px 8px 10px 8px;
     border-image: none;
     outline: none;
-    background: transparent;
-    color: white;
-}
-button.menu-app-item.vertical:hover {
-    background: rgba(255, 255, 255, 0.1);
 }
 
+
 button.menu-app-item:focus,
-button.menu-category-item:focus
-{
+button.menu-category-item:focus {
     outline-offset: -2px;
     outline-style: dotted;
-    outline-color: #ffffff;
     outline-width: 1px;
 }
 
 /* 开始菜单侧边栏按钮 */
 button.menu-app-launcher {
-    border-width: 1px;
-    border-style: solid;
     border-color: transparent;
-    background: transparent;
-    box-shadow: none;
-    border-image: none;
-
     min-height: 30px;
-}
-button.menu-app-launcher:focus{
-    outline-offset: -2px;
-    outline-style: dotted;
-    outline-color: #ffffff;
-    outline-width: 1px;
-    border-color: transparent;
-    box-shadow: none;
-    border-image: none;
-}
-button.menu-app-launcher:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: transparent;
-    box-shadow: none;
-    outline: none;
-    border-image: none;
-}
-
-/* 开始菜单窗口 分割线 */
-window#menu-applet-window separator.horizontal, window.menu-applet-window separator.vertical
-{
-    background-color: rgba(255, 255, 255, 0.2);
 }
 
 /* 开始菜单应用搜索框 */
 entry.menu-search-entry {
     margin: 10px 10px 10px 10px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 3px;
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
     padding: 3px 10px 3px 10px;
     box-shadow: none;
-    caret-color: #ffffff;
     min-height: 24px;
-}
-entry.menu-search-entry:focus {
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: none;
-}
-entry.menu-search-entry selection {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.2);
 }
 
 /* 开始菜单区域框 */
 .menu-section-box {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     padding-bottom: 10px;
     padding-left: 5px;
     padding-right: 5px;
+    color: #000000;
 }
 
 
@@ -178,71 +288,51 @@ label.empty-prompt-text {
     color: #8b8b8b;
 }
 
+
 /* 开始菜单：应用列表展开按钮 */
 button.toggle.menu-expand-button {
     box-shadow: none;
-    background: transparent;
     border: none;
     border-image: none;
-    color: #ffffff;
     padding-left: 24px;
     min-height: 32px;
 }
 
-button.toggle.menu-expand-button:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
 
-button.toggle.menu-expand-button:focus{
+button.toggle.menu-expand-button:focus {
     outline-offset: -2px;
     outline-style: dotted;
-    outline-color: #ffffff;
     outline-width: 1px;
     border-color: transparent;
     box-shadow: none;
     border-image: none;
 }
 
-.tasklist-widget {
-    background: none;
+/* 所有应用列表页 */
+.all-apps-page {
+    margin-right: 10px;
 }
 
-.tasklist-widget:drop(active) {
-    background: rgba(255, 255, 255, 0.15);
+.tasklist-widget {
+    background: #0c0c0c;
 }
 
 button.kiran-tasklist-button {
+    background: transparent;
     border: none;
     border-radius: 0px;
-    background: transparent;
     -gtkmm__CustomObject_KiranTasklistAppButton-indicator-size: 4px;
 }
-button.kiran-tasklist-button:hover{
-    border: none;
-    border-radius: 0px;
-    background: rgba(255, 255, 255, 0.2);
-}
 
-button.kiran-tasklist-button:active,
-button.kiran-tasklist-button:drop(active)
-{
+button.tasklist-arrow-button {
+    background: transparent;
     border: none;
-    border-radius: 0px;
-    background: rgba(255, 255, 255, 0.35);
-}
-
-window.app-previewer {
-    /*background: transparent;*/
-    background: rgba(0, 0, 0, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 0px;
 }
 
 window.app-previewer button.window-thumbnail {
-    border-radius: 0px;
     min-width: 200px;
     background: transparent;
-    color: #ffffff;
     padding: 8px;
 }
 
@@ -251,7 +341,6 @@ window.app-previewer button.window-thumbnail.vertical {
 }
 
 window.app-previewer button.window-thumbnail.horizontal {
-    /*border: 1px solid rgba(255, 255, 255, 0.2);*/
     border: 1px solid transparent;
     min-height: 140px;
 }
@@ -259,14 +348,12 @@ window.app-previewer button.window-thumbnail.horizontal {
 window.app-previewer button.window-thumbnail.vertical:hover,
 window.app-previewer button.window-thumbnail.horizontal:hover,
 window.app-previewer button.window-thumbnail:hover {
-    border: 1px solid gray;
-    border-radius: 0px;
-    border-color: rgba(46,179,255, 0.6);
-    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(46, 179, 255, 0.6);
 }
 
 
-window.app-previewer scrolledwindow, window.app-previewer viewport {
+window.app-previewer scrolledwindow,
+window.app-previewer viewport {
     background: transparent;
     border: none;
 }
@@ -281,7 +368,7 @@ button.kiran-thumbnail button.close-btn {
     padding: 0px;
 }
 
-button.kiran-thumbnail button.close-btn:hover{
+button.kiran-thumbnail button.close-btn:hover {
     background-image: url("/kiran-tasklist/icon/close_prelight");
     padding: 0px;
 }
@@ -291,154 +378,21 @@ button.kiran-thumbnail button.close-btn:active {
     padding: 0px;
 }
 
-menu.opacity-menu {
-    background: rgba(0, 0, 0, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 8px;
-    padding-top: 10px;
-    padding-bottom: 10px;
-}
-
-menu.opacity-menu menuitem{
-    color: white;
-    background: transparent;
-    min-height: 28px;
-    padding-left: 12px;
-    padding-right: 12px;
-
-    border-width: 0px;
-    border-right-width: 4px;
-    border-color: transparent;
-    border-style: solid;
-}
-
-menu.opacity-menu menuitem:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-width: 0px;
-    border-right-width: 4px;
-    border-color: #3ca8ea;
-    border-style: solid;
-}
-
-
-scrollbar {
-    -GtkScrollbar-has-backward-stepper: 0;
-    -GtkScrollbar-has-forward-stepper: 0;
-    border-radius: 0px;
-}
-
-scrollbar.horizontal, scrollbar.vertical{
-    border: none;
-    background: transparent;
-    border-image: none;
-}
-
-scrollbar.horizontal {
-    min-height:5px;
-    margin-top: 3px;
-    margin-bottom: 3px;
-}
-
-scrollbar.vertical, scrollbar.vertical trough {
-    min-width:5px;
-}
-
-
-scrollbar.horizontal trough, scrollbar.vertical trough {
-   background: none;
-   border-image: none;
-   border: none;
-}
-
-scrollbar.horizontal button, scrollbar.horizontal button {
-    min-height: 0px;
-    min-width: 0px;
-    background: transparent;
-    border: none;
-}
-
-scrollbar.horizontal slider, scrollbar.vertical slider {
-    background: rgba(255, 255, 255, 0.2);
-    border-image: none;
-    border: none;
-    border-radius: 0px;
-}
-
-scrollbar.horizontal slider {
-    min-width: 40px;
-    min-height: 5px;
-}
-
-scrollbar.vertical slider {
-    min-width: 5px;
-    min-height: 40px;
-}
-
-scrollbar.horizontal slider:active, scrollbar.horizontal slider:hover, scrollbar.vertical slider:active, scrollbar.vertical slider:hover{
-    background-color: rgba(255, 255, 255, 0.3);
-    border: none;
-    border-radius: 0px;
-}
-
-button.tasklist-arrow-button {
-    padding: 0px;
-    min-width: 16px;
-    min-height: 16px;
-    border: none;
-    background: transparent;
-}
-
-button.tasklist-arrow-button:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-button.tasklist-arrow-button:disabled {
-    /*background: rgba(255, 255, 255, 0.2);*/
-    border: none;
-}
-
 /* workspace */
-
-window.workspace-previewer .workspace-list-box {
-    background: rgba(0, 0, 0, 0.7);
-}
-
-
-
-window.workspace-previewer button.workspace-thumbnail {
-    background: transparent;
-    color: #ffffff;
-    border: none;
-}
-
-window.workspace-previewer button.workspace-thumbnail:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: transparent;
-}
 
 window.workspace-previewer button.window-thumbnail,
 window.workspace-previewer button.window-thumbnail:hover {
-    color: #ffffff;
+    color: white;
     border: none;
     padding: 0px;
     box-shadow: none;
     border-image: none;
     background: transparent;
-    text-shadow: -1px 1px 2px alpha(#000000, 0.6), 1px 1px 2px alpha(#000000, 0.6),
-                1px -1px 2px alpha(#000000, 0.6), -1px -1px 2px alpha(#000000, 0.6);
+    /* text-shadow: -1px 1px 2px alpha(#000000, 0.6), 1px 1px 2px alpha(#000000, 0.6),
+                1px -1px 2px alpha(#000000, 0.6), -1px -1px 2px alpha(#000000, 0.6); */
     font-size: 13px;
 }
 
-window.workspace-previewer button#add-button {
-    background: transparent;
-    color: #ffffff;
-    border: none;
-}
-
-window.workspace-previewer button#add-button:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border: none;
-}
 
 
 button.toggle.kiran-showdesktop-button {
@@ -452,50 +406,26 @@ button.toggle.kiran-showdesktop-button:hover {
 }
 
 button.toggle.kiran-showdesktop-button:checked,
-button.toggle.kiran-showdesktop-button:active
-{
+button.toggle.kiran-showdesktop-button:active {
     background: rgba(255, 255, 255, 0.4);
 }
 
-scrolledwindow.category-list-box, scrolledwindow.category-list-box viewport {
-    background: rgba(28, 28, 28, 0.9);
-}
-
-.stack-switcher button{
-    background: none;
-    border: none;
-    border-radius: 0px;
+.stack-switcher button {
     min-height: 30px;
-}
-
-.stack-switcher button:hover{
-    background: rgba(255, 255, 255, 0.15);
-    border: none;
-    border-radius: 0px;
-    box-shadow: none;
-}
-
-.stack-switcher button:active, .stack-switcher button:checked{
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    box-shadow: none;
 }
 
 list.menu-recent-list {
     border: none;
-    background: none;
+    background: transparent;
     margin: 10px 0px 10px 0px;
     padding: 0px;
 }
 
 list.menu-recent-list row {
-    background: transparent;
-    color: #ffffff;
     padding: 2px 10px 2px 10px;
-    margin: 0px;
+    margin-right: 14px;
     min-height: 40px;
     border-width: 0px;
-    border-right: 3px solid transparent;
 }
 
 list.menu-recent-list row image:first-child {
@@ -503,81 +433,229 @@ list.menu-recent-list row image:first-child {
     margin-right: 8px;
 }
 
-list.menu-recent-list row:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-width: 0px;
-    border-right: 3px solid #2eb3ff;
-}
-
-list.menu-recent-list row:selected {
-    background: rgba(255, 255, 255, 0.20);
-    border-width: 0px;
-    border-right: 3px solid #2eb3ff;
-}
-
-scrolledwindow, scrolledwindow viewport {
+scrolledwindow,
+scrolledwindow viewport {
     background: none;
     border: none;
 }
 
+#menu-left-container {
+    border-radius: 8px;
+}
+
+#menu-mid-container {
+    border-radius: 8px;
+}
+
 /* Tray */
-#iconButton
-{
-  border-color: rgba(255, 255, 255, 0.1);
-  border-width: 0px;
-  background-color: rgb(34, 34, 34);
+#iconWinButton {
+    border-radius: 0px;
+    border-width: 0px;
+    background-color: #0c0c0c;
+    background-repeat: no-repeat;
+    background-position: center;
+    min-width: 24px;
+    margin: 0px;
+    padding: 0px;
 }
 
-#iconButton:hover
-{
-  background-color: rgba(255, 255, 255, 0.1);
+#iconWinButton:hover {
+    background-color: #414141;
 }
 
-#iconButtonPanel
-{
-  border-radius: 0px;
-  border-color: rgba(255, 255, 256, 0.1);
-  border-width: 0px;
-  background-color: @taskbar_bg_color;
+#iconWinButton:disabled,
+label:disabled selection#iconWinButton {
+    background-color: rgba(40, 40, 40, 0.35);
 }
 
-#iconButtonPanel:hover
-{
-  background-color: rgba(255, 255, 255, 0.1);
+#trayWindow {
+    border-radius: 6px;
+    border-width: 1px;
+    background-color: #0c0c0c;
 }
 
-#iconWinButton
-{
-  border-width: 0px;
-  background-color: @taskbar_bg_color;
-  background-image: url("/kiran-tray/icon/arrow-up");
-  background-repeat: no-repeat;
-  background-position: center;
-  min-width: 24px;
-  margin: 0px;
-  padding: 0px;
+#trayGrid {
+    margin: 0px;
+    background-color: #0c0c0c;
 }
 
-#iconWinButton:hover
-{
-  background-color: rgba(255, 255, 255, 0.1);
+#trayBox {
+    margin: 0px;
+    background-color: #0c0c0c;
 }
 
-#trayWindowBox
-{
-  border-color: rgba(255, 255, 255, 0.2);
-  background-color: rgb(34, 34, 34);
-  border-width: 1px;
-  margin: 0px;
-  padding: 0px;
+/***************
+ * Base States *
+ ***************/
+
+.background {
+    background: @theme_bg_color;
 }
 
-#trayGrid
-{
-  margin: 0px;
+button {
+    border: 1px solid;
+    border-radius: 4px;
+    padding: 6px 6px;
+    background-clip: border-box;
+    box-shadow: none;
+    text-shadow: none;
+    -gtk-icon-shadow: none;
+    color: @theme_widget_foreground_normal;
+    border-color: @theme_widget_border_normal;
+    background-color: @theme_widget_background_normal;
 }
 
-#trayBox
-{
-  margin: 0px 5px 0px 0px;
+button:hover {
+    border-color: @theme_widget_border_normal;
+    background-color: @theme_widget_background_hover;
+    -gtk-icon-effect: none;
+}
+
+button:checked {
+    border-color: @theme_widget_border_normal;
+    background-color: @theme_widget_background_active;
+    transition-duration: 50ms;
+}
+
+button:disabled {
+    color: @theme_widget_foreground_insensitive;
+    border-color: @theme_widget_border_insensitive;
+    background-color: @theme_widget_background_insensitive;
+}
+
+button separator {
+    background-color: transparent;
+    background-image: none;
+    color: transparent;
+}
+
+scrollbar {
+    -GtkScrollbar-has-backward-stepper: 0;
+    -GtkScrollbar-has-forward-stepper: 0;
+    border-radius: 0px;
+}
+
+scrollbar.horizontal,
+scrollbar.vertical {
+    border: none;
+    background: transparent;
+    border-image: none;
+}
+
+scrollbar {
+    background-color: @theme_widget_background_normal;
+    border: none;
+}
+
+scrollbar:backdrop {
+    background-color: @theme_widget_background_backdrop;
+    border-color: @theme_widget_border_backdrop;
+    transition: 200ms ease-out;
+}
+
+scrollbar slider {
+    min-width: 6px;
+    min-height: 6px;
+    margin: -1px;
+    border: 4px solid transparent;
+    border-radius: 8px;
+    background-clip: padding-box;
+    background-color: @theme_bare_background_normal;
+}
+
+scrollbar slider:hover {
+    background-color: @theme_bare_background_hover;
+}
+
+scrollbar slider:active,
+scrollbar slider:checked {
+    background-color: @theme_bare_background_checked;
+}
+
+scrollbar slider:backdrop {
+    background-color: @theme_bare_background_backdrop;
+}
+
+scrollbar.horizontal slider {
+    min-width: 40px;
+}
+
+scrollbar.vertical slider {
+    min-height: 40px;
+}
+
+window#menu-applet-window .block-section {
+    background-color: @theme_widget_background_normal;
+}
+
+window#menu-applet-window .block-section:backdrop,
+window#menu-applet-window label:backdrop selection.block-section,
+label:backdrop window#menu-applet-window selection.block-section {
+    background-color: @theme_widget_background_backdrop;
+}
+
+@define-color tasklist_app_active_color alpha(@theme_widget_foreground_normal, 0.3);
+
+menu.opacity-menu {
+    background-color: alpha(@theme_window_background_normal, 0.85);
+}
+
+menu.opacity-menu menuitem {
+    background-color: transparent;
+    color: @theme_text_color;
+    min-height: 28px;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+menu.opacity-menu menuitem:hover {
+    background-color: alpha(@theme_widget_foreground_normal, 0.15);
+}
+
+window.app-previewer {
+    background-color: alpha(@theme_window_background_normal, 0.85);
+    border: 1px solid @theme_window_border_normal;
+}
+
+window.workspace-previewer .workspace-list-box {
+    background-color: alpha(@theme_window_background_normal, 0.7);
+}
+
+window.workspace-previewer button.workspace-thumbnail {
+    background-color: transparent;
+    border: none;
+}
+
+window.workspace-previewer button.workspace-thumbnail:hover {
+    background-color: alpha(@theme_window_foreground_normal, 0.15);
+    border-color: transparent;
+}
+
+window.workspace-previewer button#add-button {
+    background: transparent;
+    border: none;
+}
+
+window.workspace-previewer button#add-button:hover {
+    background-color: alpha(@theme_window_foreground_normal, 0.15);
+}
+
+tooltip {
+    padding: 2px;
+    border-radius: 6px;
+}
+
+tooltip label {
+    color: @theme_text_color;
+}
+
+tooltip.background {
+    background-color: @theme_window_background_normal;
+    background-clip: padding-box;
+    border: 1px solid @theme_window_border_normal;
+}
+
+label#username-label,
+label#date-label {
+    color: @theme_text_color;
 }
