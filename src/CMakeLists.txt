@@ -113,7 +113,6 @@ target_link_libraries(
          "${KLOG_GTK3_LIBRARIES}"
          "${FMT_LIBRARIES}"
          "X11"
-         "m"
-         ${XCB_IMAGE_LIBRARIES})
+         "m")
 
 target_link_libraries(${TARGET_NAME} PRIVATE kiran-menu-backend)

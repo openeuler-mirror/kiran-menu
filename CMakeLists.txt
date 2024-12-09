@@ -17,7 +17,6 @@ pkg_search_module(GDKMM3 REQUIRED gdkmm-3.0)
 pkg_search_module(X11_XCB REQUIRED x11-xcb)
 pkg_search_module(XCB_RES REQUIRED xcb-res)
 pkg_search_module(XCOMPOSITE REQUIRED xcomposite)
-pkg_search_module(XCB_IMAGE REQUIRED xcb-image)
 
 #set(PANEL_NAME "kiran-panel")
 #pkg_search_module(PANEL REQUIRED libkiranpanelapplet-4.0)
