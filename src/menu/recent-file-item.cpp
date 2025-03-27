@@ -12,11 +12,12 @@
  * Author:     liuxinhao <liuxinhao@kylinsec.com.cn>
  */
 #include "recent-file-item.h"
+#include <glibmm/i18n.h>
+#include "global.h"
 #include "kiran-opacity-menu.h"
 #include "lib/base.h"
-#include <glibmm/i18n.h>
 
-RecentFileItem::RecentFileItem(const Glib::RefPtr<Gtk::RecentInfo>& info)
+RecentFileItem::RecentFileItem(const Glib::RefPtr<Gtk::RecentInfo> &info)
     : Gtk::ListBoxRow(),
       info_(info)
 {
@@ -47,11 +48,11 @@ void RecentFileItem::init()
 
     widget->add(*box);
     add(*widget);
-    
+
     init_context_menu(widget);
 }
 
-void RecentFileItem::init_context_menu(Gtk::Widget* widget)
+void RecentFileItem::init_context_menu(Gtk::Widget *widget)
 {
     widget->add_events(Gdk::KEY_PRESS_MASK);
 
@@ -72,16 +73,16 @@ void RecentFileItem::init_context_menu(Gtk::Widget* widget)
     item = Gtk::make_managed<Gtk::MenuItem>(_("Clear the whole list"));
     item->signal_activate().connect(sigc::mem_fun(*this, &RecentFileItem::clear_files_list));
     menu_->append(*item);
-    
+
     menu_->show_all();
-    
+
     widget->signal_button_press_event().connect(sigc::mem_fun(*this, &RecentFileItem::item_pressed));
     menu_->attach_to_widget(*widget);
 }
 
 bool RecentFileItem::check_exists()
 {
-    g_return_val_if_fail(!uri().empty(),false);
+    g_return_val_if_fail(!uri().empty(), false);
 
     const Glib::ustring uri = this->uri();
     auto file = Gio::File::create_for_uri(uri);
@@ -101,7 +102,7 @@ bool RecentFileItem::item_pressed(const GdkEventButton *button_event)
     if (gdk_event_triggers_context_menu(event))
     {
         /* 右键点击时，选择点击项并显示右键菜单 */
-        auto list_box = (Gtk::ListBox*)this->get_parent();
+        auto list_box = (Gtk::ListBox *)this->get_parent();
         list_box->select_row(*this);
         this->menu_->popup_at_pointer(event);
         return true;
@@ -112,7 +113,7 @@ bool RecentFileItem::item_pressed(const GdkEventButton *button_event)
 
 void RecentFileItem::open_file()
 {
-    if( !check_exists() )
+    if (!check_exists())
     {
         Gtk::MessageDialog dialog(_("File does not exist"), true, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
         dialog.set_title(_("System Warning"));
@@ -126,7 +127,7 @@ void RecentFileItem::open_file()
 
 void RecentFileItem::open_file_lcation()
 {
-    if( !check_exists() )
+    if (!check_exists())
     {
         Gtk::MessageDialog dialog(_("File does not exist"), true, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
         dialog.set_title(_("System Warning"));
@@ -157,10 +158,10 @@ void RecentFileItem::remove_file_from_list()
 void RecentFileItem::clear_files_list()
 {
     Gtk::MessageDialog dialog(_("All recent files information will be lost.\nAre you sure to clear the whole lists?"),
-                        true,
-                        Gtk::MESSAGE_QUESTION,
-                        Gtk::BUTTONS_YES_NO,
-                        true);
+                              true,
+                              Gtk::MESSAGE_QUESTION,
+                              Gtk::BUTTONS_YES_NO,
+                              true);
     dialog.set_title(_("System Warning"));
 
     if (dialog.run() != Gtk::RESPONSE_YES)
@@ -172,10 +173,10 @@ void RecentFileItem::clear_files_list()
 
 Glib::ustring RecentFileItem::uri() const
 {
-    return info_? info_->get_uri() : Glib::ustring();
+    return info_ ? info_->get_uri() : Glib::ustring();
 }
 
 Glib::ustring RecentFileItem::display_name() const
 {
-    return info_? info_->get_display_name() : Glib::ustring();
+    return info_ ? info_->get_display_name() : Glib::ustring();
 }
