@@ -125,7 +125,21 @@ bool KiranPower::suspend()
     catch (const Gio::DBus::Error &e)
     {
         KLOG_WARNING("Failed to call suspend method: %s", e.what().c_str());
-        return false;
+
+        // 使用老接口
+        try
+        {
+            Glib::Variant<bool> variant = Glib::Variant<bool>::create(false);
+            Glib::VariantContainerBase container = Glib::VariantContainerBase::create_tuple(variant);
+
+            this->login1_proxy_->call_sync("Suspend", container, 300);
+            return true;
+        }
+        catch (const Gio::DBus::Error &e)
+        {
+            KLOG_WARNING("Failed to call Suspend method: %s", e.what().c_str());
+            return false;
+        }
     }
 }
 
@@ -141,7 +155,21 @@ bool KiranPower::hibernate()
     catch (const Gio::DBus::Error &e)
     {
         KLOG_WARNING("Failed to call hibernate method: %s", e.what().c_str());
-        return false;
+
+        // 使用老接口
+        try
+        {
+            Glib::Variant<bool> variant = Glib::Variant<bool>::create(false);
+            Glib::VariantContainerBase container = Glib::VariantContainerBase::create_tuple(variant);
+
+            this->login1_proxy_->call_sync("Hibernate", container, 300);
+            return true;
+        }
+        catch (const Gio::DBus::Error &e)
+        {
+            KLOG_WARNING("Failed to call Hibernate method: %s", e.what().c_str());
+            return false;
+        }
     }
 }
 
@@ -157,7 +185,18 @@ bool KiranPower::shutdown()
     catch (const Gio::DBus::Error &e)
     {
         KLOG_WARNING("Failed to call shutdown method: %s", e.what().c_str());
-        return false;
+
+        // 使用老接口
+        try
+        {
+            this->session_manager_proxy_->call_sync("RequestShutdown");
+            return true;
+        }
+        catch (const Gio::DBus::Error &e)
+        {
+            KLOG_WARNING("Failed to call RequestShutdown method: %s", e.what().c_str());
+            return false;
+        }
     }
 }
 
@@ -173,7 +212,18 @@ bool KiranPower::reboot()
     catch (const Gio::DBus::Error &e)
     {
         KLOG_WARNING("Failed to call reboot method: %s", e.what().c_str());
-        return false;
+
+        // 使用老接口
+        try
+        {
+            this->session_manager_proxy_->call_sync("RequestReboot");
+            return true;
+        }
+        catch (const Gio::DBus::Error &e)
+        {
+            KLOG_WARNING("Failed to call RequestReboot method: %s", e.what().c_str());
+            return false;
+        }
     }
 }
 
@@ -280,9 +330,22 @@ bool KiranPower::can_suspend()
     }
     catch (const Gio::DBus::Error &e)
     {
-        // 如果获取失败，就假设其可以挂起，由挂起操作调用时做检查
         KLOG_WARNING("Failed to query CanSuspend: %s", e.what().c_str());
-        return true;
+
+        // 使用老接口
+        try
+        {
+            auto result = this->login1_proxy_->call_sync("CanSuspend").get_child();
+            auto data = Glib::VariantBase::cast_dynamic<Glib::Variant<Glib::ustring>>(result).get();
+
+            return (data == "yes");
+        }
+        catch (const Gio::DBus::Error &e)
+        {
+            // 如果获取失败，就假设其可以挂起，由挂起操作调用时做检查
+            KLOG_WARNING("Failed to call CanSuspend method: %s", e.what().c_str());
+            return true;
+        }
     }
 }
 
@@ -299,7 +362,21 @@ bool KiranPower::can_hibernate()
     {
         // 如果获取失败，就假设其可以挂起，由挂起操作调用时做检查
         KLOG_WARNING("Failed to query CanHibernate: %s", e.what().c_str());
-        return true;
+
+        // 使用老接口
+        try
+        {
+            auto result = this->login1_proxy_->call_sync("CanHibernate").get_child();
+            auto data = Glib::VariantBase::cast_dynamic<Glib::Variant<Glib::ustring>>(result).get();
+
+            return (data == "yes");
+        }
+        catch (const Gio::DBus::Error &e)
+        {
+            // 如果获取失败，就假设其可以挂起，由挂起操作调用时做检查
+            KLOG_WARNING("Failed to call CanSuspend method: %s", e.what().c_str());
+            return true;
+        }
     }
 }
 
@@ -316,7 +393,21 @@ bool KiranPower::can_shutdown()
     {
         // 如果获取失败，就假设其可以关机，由关机操作调用时做检查
         KLOG_WARNING("Failed to query CanPowerOff: %s", e.what().c_str());
-        return true;
+
+        // 使用老接口
+        try
+        {
+            auto result = this->login1_proxy_->call_sync("CanPowerOff").get_child();
+            auto data = Glib::VariantBase::cast_dynamic<Glib::Variant<Glib::ustring>>(result).get();
+
+            return (data == "yes");
+        }
+        catch (const Gio::DBus::Error &e)
+        {
+            // 如果获取失败，就假设其可以挂起，由挂起操作调用时做检查
+            KLOG_WARNING("Failed to call CanPowerOff method: %s", e.what().c_str());
+            return true;
+        }
     }
 }
 
@@ -331,9 +422,22 @@ bool KiranPower::can_reboot()
     }
     catch (const Gio::DBus::Error &e)
     {
-        // 如果获取失败，就假设其可以关机，由关机操作调用时做检查
         KLOG_WARNING("Failed to query Reboot: %s", e.what().c_str());
-        return true;
+
+        // 使用老接口
+        try
+        {
+            auto result = this->login1_proxy_->call_sync("CanReboot").get_child();
+            auto data = Glib::VariantBase::cast_dynamic<Glib::Variant<Glib::ustring>>(result).get();
+
+            return (data == "yes");
+        }
+        catch (const Gio::DBus::Error &e)
+        {
+            // 如果获取失败，就假设其可以挂起，由挂起操作调用时做检查
+            KLOG_WARNING("Failed to call CanReboot method: %s", e.what().c_str());
+            return true;
+        }
     }
 }
 
