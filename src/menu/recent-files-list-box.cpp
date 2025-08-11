@@ -66,7 +66,7 @@ void RecentFilesListBox::clean()
             break;
 
         remove(*row);
-        delete row;
+        //delete row; // 通过Gtk::make_managed管理的对象不需要手动delete
     }
 }
 
