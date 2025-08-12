@@ -22,11 +22,18 @@
 
 void print_apps(const Kiran::AppVec &apps, const std::string &type)
 {
-    g_print("\n--------------------- %s ------------------------\n", type.c_str());
+    if (apps.empty())
+    {
+        g_print("\n--------------------- %s ------------------------\n", type.c_str());
+        g_print("No apps.\n\n");
+        return;
+    }
 
+    g_print("\n--------------------- %s ------------------------\n", type.c_str());
     for (auto app : apps)
     {
-        g_print("desktop_id: %s\n", app->get_desktop_id().c_str());
+        if (app) 
+            g_print("desktop_id: %s\n", app->get_desktop_id().c_str());
     }
     g_print("\n");
 }
@@ -59,7 +66,7 @@ void timing_print(gconstpointer data)
     print_apps(taskbar_skeleton->get_fixed_apps(), "fixed apps");
 
     gint64 start_clock = g_get_real_time();
-    for (int i = 0; i <= CASES; ++i)
+    for (int i = 0; i < CASES; ++i)
     {
         auto all_apps = menu_skeleton->get_all_sorted_apps();
     }
