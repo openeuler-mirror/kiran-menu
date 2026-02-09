@@ -1,14 +1,14 @@
 /**
- * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd. 
+ * Copyright (c) 2020 ~ 2021 KylinSec Co., Ltd.
  * kiran-cc-daemon is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2. 
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
  * You may obtain a copy of Mulan PSL v2 at:
- *          http://license.coscl.org.cn/MulanPSL2 
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, 
- * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, 
- * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.  
- * See the Mulan PSL v2 for more details.  
- * 
+ *          http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ *
  * Author:     songchuanfei <songchuanfei@kylinos.com.cn>
  */
 
@@ -85,7 +85,7 @@ MenuPowerMenu::MenuPowerMenu()
     for (auto child : get_children())
     {
         Gtk::MenuItem *item = dynamic_cast<Gtk::MenuItem *>(child);
-        //点击电源菜单选项后收起开始菜单窗口
+        // 点击电源菜单选项后收起开始菜单窗口
         item->signal_activate().connect(
             sigc::mem_fun(*this, &MenuPowerMenu::hide_menu_window));
     }
@@ -110,6 +110,9 @@ void MenuPowerMenu::on_switch_user_cb()
     if (power->get_graphical_ntvs() >= power->get_ntvs_total())
     {
         KLOG_DEBUG("Total ntvs: %d, graphical ntvs: %d.", power->get_ntvs_total(), power->get_graphical_ntvs());
+
+        // 弹出对话框前先隐藏开始菜单
+        hide_menu_window();
 
         Gtk::MessageDialog dialog(_("The logined users reach the maximum limit at the same time, "
                                     "you cannot switch to the greeter interface, Please log off some logined users first."),
