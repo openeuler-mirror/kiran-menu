@@ -108,6 +108,7 @@ KiranAccountsUser *kiran_accounts_manager_get_user_by_id(KiranAccountsManager *s
 
         g_variant_get(result, "(o)", &object_path);
         user = kiran_accounts_user_new(object_path);
+        g_free((gchar *)object_path);  /* g_variant_get("o") 返回的字符串由调用方负责 g_free */
         g_variant_unref(result);
     }
     return user;
