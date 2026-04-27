@@ -51,6 +51,7 @@ struct _KiranTrayPrivate
     KiranSnManagerGenSkeleton *skeleton;
 };
 
+static void kiran_tray_dispose(GObject *object);
 static void kiran_tray_finalize(GObject *object);
 static GObject *kiran_tray_constructor(GType type,
                                        guint n_construct_properties,
@@ -253,6 +254,7 @@ kiran_tray_class_init(KiranTrayClass *klass)
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
     GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(klass);
 
+    gobject_class->dispose = kiran_tray_dispose;
     gobject_class->finalize = kiran_tray_finalize;
     gobject_class->constructor = kiran_tray_constructor;
     widget_class->realize = kiran_tray_realize;
@@ -654,34 +656,52 @@ icons_win_hide_cb(GtkWidget *widget,
 }
 
 static void
-kiran_tray_finalize(GObject *object)
+kiran_tray_dispose(GObject *object)
 {
     KiranTray *tray = KIRAN_TRAY(object);
     KiranTrayPrivate *priv = tray->priv;
 
-    g_signal_handlers_disconnect_by_func(priv->settings,
-                                         G_CALLBACK(gsettings_changed_panel_icon_ids),
-                                         tray);
+    /* 在 dispose 阶段而不是 finalize 阶段断开信号连接：
+     * - GSettings 的 changed 信号可能通过 idle 回调延迟触发
+     * - 如果在 finalize 才断开，idle 回调可能已在队列中
+     * - dispose 是对象销毁的第一个阶段，此时断开可以防止回调访问无效对象
+     */
 
-    g_signal_handlers_disconnect_by_func(priv->settings,
-                                         G_CALLBACK(gsettings_changed_panel_icon_size),
-                                         tray);
+    if (priv->settings != NULL)
+    {
+        g_signal_handlers_disconnect_by_func(priv->settings,
+                                             G_CALLBACK(gsettings_changed_panel_icon_ids),
+                                             tray);
 
-    g_signal_handlers_disconnect_by_func(priv->settings,
-                                         G_CALLBACK(gsettings_changed_panel_icon_padding),
-                                         tray);
+        g_signal_handlers_disconnect_by_func(priv->settings,
+                                             G_CALLBACK(gsettings_changed_panel_icon_size),
+                                             tray);
+
+        g_signal_handlers_disconnect_by_func(priv->settings,
+                                             G_CALLBACK(gsettings_changed_panel_icon_padding),
+                                             tray);
+        g_object_unref(priv->settings);
+        priv->settings = NULL;
+    }
+
     if (priv->bus_name_id > 0)
     {
         g_bus_unown_name(priv->bus_name_id);
         priv->bus_name_id = 0;
     }
 
-    g_object_unref(priv->settings);
-    priv->settings = NULL;
+    if (priv->icons_win != NULL)
+    {
+        gtk_widget_destroy(priv->icons_win);
+        priv->icons_win = NULL;
+    }
 
-    gtk_widget_destroy(priv->icons_win);
-    priv->icons_win = NULL;
+    G_OBJECT_CLASS(kiran_tray_parent_class)->dispose(object);
+}
 
+static void
+kiran_tray_finalize(GObject *object)
+{
     G_OBJECT_CLASS(kiran_tray_parent_class)->finalize(object);
 }
 
