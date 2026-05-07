@@ -807,16 +807,18 @@ void AppManager::load_desktop_apps()
             if (g_str_has_prefix(child_name, "userapp-") && g_str_has_suffix(child_name, ".desktop"))
             {
                 auto file = g_file_enumerator_get_child(enumerator, info);
+                auto path = g_file_get_path(file);
                 KLOG_DEBUG("Found user desktop file '%s'", child_name);
-                register_app(old_apps, g_file_get_path(file), AppKind::USER_TASKBAR);
+                register_app(old_apps, path, AppKind::USER_TASKBAR);
+                g_free(path);
                 g_object_unref(file);
             }
             g_object_unref(info);
         } while (true);
 
         g_object_unref(enumerator);
-        g_object_unref(userapp_dir);
     }
+    g_object_unref(userapp_dir);
 
     // 加载系统应用
     auto registered_apps = Gio::AppInfo::get_all();
