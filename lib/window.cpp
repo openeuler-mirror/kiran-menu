@@ -753,7 +753,7 @@ void Window::update_real_toplevel_xid()
     gdk_x11_display_error_trap_push(gdk_display);
 
     XQueryTree(display, window, &root_window, &parent_window, &children_windows, &n_children);
-    if( n_children )
+    if (children_windows)
     {
         XFree(children_windows);
     }

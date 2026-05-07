@@ -60,6 +60,7 @@ private:
     bool menu_shown;
     sigc::signal<void> m_signal_launched;
     sigc::connection idle_drag_connection_;
+    sigc::connection drag_failed_connection_;
 
     bool is_in_favorite();
     bool is_fixed_on_taskbar();
