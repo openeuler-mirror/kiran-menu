@@ -103,6 +103,8 @@ private:
 
     // desktop应用变化的信号处理
     static void desktop_app_changed(AppManager *manager);
+    // 系统 GAppInfoMonitor 的 changed 防抖（多次触发合并为一次延时处理）
+    static gboolean desktop_app_changed_timeout(gpointer user_data);
 
     // 启动一个应用时的信号处理
     static void app_opened(WnckScreen *screen, WnckApplication *wnck_application, gpointer user_data);
@@ -152,6 +154,7 @@ private:
 
     GAppInfoMonitor *system_app_monitor; /* 系统应用监控器 */
     GFileMonitor *user_app_monitor;      /* 用户应用目录监控器 */
+    guint system_app_changed_debounce_id_; /* 系统应用列表变化防抖定时器 */
 };
 
 }  // namespace Kiran
