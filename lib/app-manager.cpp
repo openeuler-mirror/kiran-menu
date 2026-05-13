@@ -31,12 +31,19 @@ namespace Kiran
 
 AppManager::AppManager(WindowManager *window_manager) : window_manager_(window_manager),
                                                         system_app_monitor(nullptr),
-                                                        user_app_monitor(nullptr)
+                                                        user_app_monitor(nullptr),
+                                                        system_app_changed_debounce_id_(0)
 {
 }
 
 AppManager::~AppManager()
 {
+    if (system_app_changed_debounce_id_ != 0)
+    {
+        g_source_remove(system_app_changed_debounce_id_);
+        system_app_changed_debounce_id_ = 0;
+    }
+
     if (system_app_monitor)
         g_object_unref(system_app_monitor);
 
@@ -939,15 +946,29 @@ void AppManager::register_app(std::map<std::string, std::shared_ptr<App>> &old_a
     }
 }
 
+gboolean AppManager::desktop_app_changed_timeout(gpointer user_data)
+{
+    auto *app_manager = static_cast<AppManager *>(user_data);
+    g_return_val_if_fail(app_manager == AppManager::get_instance(), G_SOURCE_REMOVE);
+
+    app_manager->system_app_changed_debounce_id_ = 0;
+
+    KLOG_PROFILE("");
+    app_manager->load_desktop_apps();
+    app_manager->app_desktop_changed_.emit();
+
+    return G_SOURCE_REMOVE;
+}
+
 void AppManager::desktop_app_changed(AppManager *app_manager)
 {
-    KLOG_PROFILE("");
-
     g_return_if_fail(app_manager == AppManager::get_instance());
 
-    app_manager->load_desktop_apps();
+    if (app_manager->system_app_changed_debounce_id_ != 0)
+        return;
 
-    app_manager->app_desktop_changed_.emit();
+    app_manager->system_app_changed_debounce_id_ =
+        g_timeout_add_seconds(2, AppManager::desktop_app_changed_timeout, app_manager);
 }
 
 void AppManager::app_opened(WnckScreen *screen, WnckApplication *wnck_application, gpointer user_data)
