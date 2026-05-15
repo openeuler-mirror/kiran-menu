@@ -57,6 +57,8 @@ MenuAppItem::MenuAppItem(const std::shared_ptr<Kiran::App> &app_, int _icon_size
 
 MenuAppItem::~MenuAppItem()
 {
+    this->drag_failed_connection_.disconnect();
+    drag_source_unset();
     this->idle_drag_connection_.disconnect();
 }
 
@@ -73,7 +75,7 @@ void MenuAppItem::init_drag_and_drop()
     targets.push_back(target);
     drag_source_set(targets, Gdk::BUTTON1_MASK, Gdk::ACTION_COPY);
 
-    signal_drag_failed().connect(sigc::mem_fun(*this, &MenuAppItem::on_drag_failed));
+    drag_failed_connection_ = signal_drag_failed().connect(sigc::mem_fun(*this, &MenuAppItem::on_drag_failed));
 }
 
 bool MenuAppItem::on_button_press_event(GdkEventButton *button_event)
