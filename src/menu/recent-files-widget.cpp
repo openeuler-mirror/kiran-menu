@@ -50,7 +50,8 @@ void RecentFilesWidget::init_ui()
 void RecentFilesWidget::on_recent_list_changed()
 {
     auto manager = Gtk::RecentManager::get_default();
-    if (manager->get_items().size() != 0)
+    /* 使用 GObject 属性 size（书签条目数），避免 get_items() 仅为判空而分配全部 GtkRecentInfo 造成内存泄漏 */
+    if (manager->property_size().get_value() > 0)
     {
         if (list.get_parent() == nullptr)
         {
