@@ -94,6 +94,9 @@ kiran_x11_tray_icon_finalize(GObject *object)
     g_free(priv->name);
     g_free(priv->icon);
     g_free(priv->app_category);
+
+    //释放父类对象
+    G_OBJECT_CLASS(kiran_x11_tray_icon_parent_class)->finalize(object);
 }
 
 static void
