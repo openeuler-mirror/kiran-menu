@@ -699,15 +699,22 @@ void Window::state_changed(WnckWindow *wnck_window, gpointer user_data)
 void Window::process_events(GdkXEvent *xevent, GdkEvent *event)
 {
     auto x_event = (XEvent *)xevent;
+    bool need_update_pixmap = false;
 
     if ( x_event->type == ReparentNotify )
     {
         update_real_toplevel_xid();
-        update_window_pixmap();
+        need_update_pixmap = true;
     }
     else if (x_event->type == MapNotify || x_event->type == ConfigureNotify )
     {
-        this->update_window_pixmap();
+        need_update_pixmap = true;
+    }
+
+    if (need_update_pixmap && !this->load_pixmap_)
+    {
+        auto timeout = Glib::MainContext::get_default()->signal_timeout();
+        this->load_pixmap_ = timeout.connect(sigc::mem_fun(this, &Window::update_window_pixmap), 200);
     }
 }
 
@@ -753,7 +760,7 @@ void Window::update_real_toplevel_xid()
     gdk_x11_display_error_trap_push(gdk_display);
 
     XQueryTree(display, window, &root_window, &parent_window, &children_windows, &n_children);
-    if( n_children )
+    if (children_windows)
     {
         XFree(children_windows);
     }
