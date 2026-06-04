@@ -26,8 +26,8 @@ RecentFileItem::RecentFileItem(const Glib::RefPtr<Gtk::RecentInfo> &info)
 
 RecentFileItem::~RecentFileItem()
 {
-    menu_->popdown();
-    menu_.clear();
+    if (menu_)
+        menu_->popdown();
 }
 
 void RecentFileItem::init()
@@ -56,7 +56,7 @@ void RecentFileItem::init_context_menu(Gtk::Widget *widget)
 {
     widget->add_events(Gdk::KEY_PRESS_MASK);
 
-    menu_ = Glib::RefPtr<KiranOpacityMenu>(new KiranOpacityMenu());
+    menu_ = Gtk::make_managed<KiranOpacityMenu>();
 
     auto item = Gtk::make_managed<Gtk::MenuItem>(_("Open File"));
     item->signal_activate().connect(sigc::mem_fun(*this, &RecentFileItem::open_file));

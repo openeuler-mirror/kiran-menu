@@ -14,6 +14,8 @@
 #pragma once
 #include <gtkmm.h>
 
+class KiranOpacityMenu;
+
 class RecentFileItem : public Gtk::ListBoxRow
 {
 public:
@@ -38,5 +40,5 @@ private:
 
 private:
     Glib::RefPtr<Gtk::RecentInfo> info_;
-    Glib::RefPtr<Gtk::Menu> menu_;
+    KiranOpacityMenu* menu_ = nullptr;
 };
