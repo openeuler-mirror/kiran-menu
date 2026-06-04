@@ -135,11 +135,11 @@ create_widget_from_menuitem(DbusmenuMenuitem *item)
 
             for (child = children; child; child = child->next)
             {
-                GtkWidget *gmi = create_widget_from_menuitem(child->data);
+                GtkWidget *child_gmi = create_widget_from_menuitem(child->data);
 
-                gtk_menu_shell_append(GTK_MENU_SHELL(submenu), gmi);
+                gtk_menu_shell_append(GTK_MENU_SHELL(submenu), child_gmi);
 
-                g_signal_connect(gmi,
+                g_signal_connect(child_gmi,
                                  "activate",
                                  G_CALLBACK(activate_cb),
                                  child->data);
@@ -169,8 +169,6 @@ create_widget_from_menuitem(DbusmenuMenuitem *item)
     if (icon_data)
         g_object_unref(icon_data);
 
-    g_object_ref_sink(gmi);
-
     return gmi;
 }
 
@@ -194,9 +192,9 @@ kiran_sn_icon_menu_remove_widget_all(KiranSnIconMenu *menu)
     GList *container_children = gtk_container_get_children(GTK_CONTAINER(menu));
     for (child = container_children; child; child = child->next)
     {
-        gtk_container_remove(GTK_CONTAINER(menu), GTK_WIDGET(child->data));
         gtk_widget_destroy(GTK_WIDGET(child->data));
     }
+    g_list_free(container_children);
 }
 
 static void
