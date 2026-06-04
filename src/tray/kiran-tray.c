@@ -952,10 +952,15 @@ record_tray_notify_icon(KiranNotifyIcon *icon)
                         {
                             if (!xmlStrcmp(id_node->name, (const xmlChar *)APP_ID_NODE_NAME))
                             {
-                                if (!xmlStrcmp(xmlNodeGetContent(id_node), (const xmlChar *)id))
+                                xmlChar *content = xmlNodeGetContent(id_node);
+                                if (content != NULL)
                                 {
-                                    is_exist = TRUE;
-                                    break;
+                                    is_exist = !xmlStrcmp(content, (const xmlChar *)id);
+                                    xmlFree(content);
+                                    if (is_exist)
+                                    {
+                                        break;
+                                    }
                                 }
                             }
                             id_node = id_node->next;
