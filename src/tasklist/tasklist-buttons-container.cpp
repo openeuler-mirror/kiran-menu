@@ -169,9 +169,7 @@ void TasklistButtonsContainer::schedule_pointer_check()
     if (!pointer_check.connected())
     {
         pointer_check = Glib::signal_timeout().connect(
-            sigc::bind_return<bool>(
-                sigc::mem_fun(*this, &TasklistButtonsContainer::check_and_toggle_previewer),
-                false),
+            sigc::mem_fun(*this, &TasklistButtonsContainer::check_and_toggle_previewer),
             PREVIEWER_ANIMATION_TIMEOUT);
     }
 }
@@ -181,7 +179,7 @@ void TasklistButtonsContainer::stop_pointer_check()
     pointer_check.disconnect();
 }
 
-void TasklistButtonsContainer::check_and_toggle_previewer()
+bool TasklistButtonsContainer::check_and_toggle_previewer()
 {
     GdkPoint point;
     auto pointer_device = get_display()->get_default_seat()->get_pointer();
@@ -192,15 +190,15 @@ void TasklistButtonsContainer::check_and_toggle_previewer()
     {
         /* 当前正进行拖动操作，不显示预览窗口 */
         hide_previewer();
-        return;
+        return false;
     }
 
-    if (previewer->contains_pointer())
+    if (previewer->is_visible() && previewer->contains_pointer())
     {
         /*
-         * 鼠标位于预览窗口内
+         * 预览窗口已显示且鼠标位于预览窗口内，继续轮询
          */
-        return;
+        return true;
     }
 
     for (auto data : app_buttons)
@@ -224,12 +222,14 @@ void TasklistButtonsContainer::check_and_toggle_previewer()
              * 鼠标位于某个应用按钮的上方，将应用预览窗口移动到对应的应用按钮处
              */
             move_previewer(button);
-            return;
+            return previewer->is_visible();
         }
     }
 
     /*鼠标位于任务栏应用按钮之外，直接隐藏预览窗口*/
-    hide_previewer();
+    if (previewer->is_visible())
+        hide_previewer();
+    return false;
 }
 
 /**
@@ -460,6 +460,7 @@ void TasklistButtonsContainer::move_previewer(TasklistAppButton *target_button)
     }
     previewer->set_relative_to(target_button, get_previewer_position());
     previewer->show();
+    schedule_pointer_check();
 }
 
 void TasklistButtonsContainer::hide_previewer()
@@ -467,6 +468,7 @@ void TasklistButtonsContainer::hide_previewer()
     if (previewer->has_context_menu_opened())
         return;
     previewer->hide();
+    stop_pointer_check();
 }
 
 Gtk::PositionType TasklistButtonsContainer::get_previewer_position()
