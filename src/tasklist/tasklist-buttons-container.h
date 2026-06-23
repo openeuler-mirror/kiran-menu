@@ -236,7 +236,7 @@ protected:
     /**
      * @brief 检查鼠标位置，以决定是否显示预览窗口以及预览窗口位置
      */
-    void check_and_toggle_previewer();
+    bool check_and_toggle_previewer();
 
     /**
      * @brief 设置定时器，延时检查鼠标位置
