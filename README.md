@@ -1,6 +1,7 @@
 # 开始菜单
 
 ## 编译环境要求
+
   * mate-panel-devel >= 1.22
   * mate-desktop-devel >= 1.22
   * cmake >= 3.0
@@ -27,6 +28,7 @@
 ```
 
 ## 运行
+
 1. 安装以下运行依赖:
     * mate-screensaver
     * kiran-session-daemon
@@ -38,11 +40,13 @@
 3. 在对话框中找到 "Kiran开始菜单"，"Kiran应用窗口切换插件"或"Kiran工作区切换插件”, 点击 "添加" 按钮即可
 
 ## 调试
+
 程序采用zlog接口进行日志记录。默认情况下，程序会读取/etc/zlog.conf配置，并将日志信息会打印到$HOME/.cache/kiran/kiran-applet/kiran-applet.log中。
 
 调试时可以通过设置ZLOG_CONF环境变量来自定义zlog配置文件路径。
 
 ## 设置
+
 开始菜单、窗口切换插件和工作区预览插件均采用gsettings的方式来提供配置选项
 
 | 插件 | GSettings路径                                                                                       | 说明| since|
