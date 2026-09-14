@@ -56,7 +56,7 @@ void RecentFileItem::init_context_menu(Gtk::Widget *widget)
 {
     widget->add_events(Gdk::KEY_PRESS_MASK);
 
-    menu_ = Gtk::make_managed<KiranOpacityMenu>();
+    menu_.reset(new KiranOpacityMenu());
 
     auto item = Gtk::make_managed<Gtk::MenuItem>(_("Open File"));
     item->signal_activate().connect(sigc::mem_fun(*this, &RecentFileItem::open_file));
