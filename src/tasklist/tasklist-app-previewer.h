@@ -50,6 +50,13 @@ public:
     void set_relative_to(TasklistAppButton *button, Gtk::PositionType pos);
 
     /**
+     * @brief clear_relative_to 清除预览窗口对指定应用按钮的引用
+     *        在按钮即将被销毁时调用，避免 relative_to 成为悬垂指针
+     * @param button    即将被销毁的应用按钮
+     */
+    void clear_relative_to(TasklistAppButton *button);
+
+    /**
      * @brief add_window_thumbnail  将给定窗口的缩略图添加到预览窗口中显示
      * @param window    待添加的窗口
      */
