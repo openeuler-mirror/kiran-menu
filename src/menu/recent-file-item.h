@@ -13,6 +13,7 @@
  */
 #pragma once
 #include <gtkmm.h>
+#include <memory>
 
 class KiranOpacityMenu;
 
@@ -40,5 +41,5 @@ private:
 
 private:
     Glib::RefPtr<Gtk::RecentInfo> info_;
-    KiranOpacityMenu* menu_ = nullptr;
+    std::unique_ptr<KiranOpacityMenu> menu_;
 };
