@@ -250,6 +250,7 @@ void TasklistButtonsContainer::remove_app_button(const KiranAppPointer &app)
     }
 
     KLOG_DEBUG("remove button for app '%s'", app->get_name().data());
+    previewer->clear_relative_to(button);
     remove(*button);
     app_buttons.erase(app);
 
@@ -1097,6 +1098,7 @@ void TasklistButtonsContainer::load_applications()
          * 对于已卸载应用和Fake Desktop应用，删除对应的应用按钮，
          * 原应用上的窗口随后会重新分配
          */
+        previewer->clear_relative_to(button);
         remove(*button);
         delete button;
     }
