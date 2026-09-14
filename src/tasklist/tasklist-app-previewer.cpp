@@ -67,6 +67,12 @@ void TasklistAppPreviewer::set_relative_to(TasklistAppButton *widget, Gtk::Posit
     set_position(pos);
 }
 
+void TasklistAppPreviewer::clear_relative_to(TasklistAppButton *widget)
+{
+    if (relative_to == widget)
+        relative_to = nullptr;
+}
+
 void TasklistAppPreviewer::reposition()
 {
     int parent_x, parent_y, new_x = 0, new_y = 0;
@@ -81,6 +87,8 @@ void TasklistAppPreviewer::reposition()
         realize();
 
     auto relative_window = relative_to->get_window();
+    if (!relative_window)
+        return;
     relative_window->get_origin(parent_x, parent_y);
     parent_allocation = relative_to->get_allocation();
 
