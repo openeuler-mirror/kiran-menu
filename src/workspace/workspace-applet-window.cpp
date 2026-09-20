@@ -27,9 +27,20 @@
 #include <gdk/gdkkeysyms.h>
 #include <libmate-desktop/mate-bg.h>
 
-WorkspaceAppletWindow::WorkspaceAppletWindow() : selected_workspace(-1)
+WorkspaceAppletWindow::WorkspaceAppletWindow() : selected_workspace(-1),
+                                                 bg(nullptr),
+                                                 bg_surface(nullptr),
+                                                 bg_dirty(true),
+                                                 bg_surface_width(0),
+                                                 bg_surface_height(0)
 {
     init_ui();
+
+    /* 绘制和设置变更回调复用同一组背景设置对象，避免重复注册dconf watch */
+    bg = mate_bg_new();
+    bg_settings = Gio::Settings::create("org.mate.background");
+    bg_settings->signal_changed().connect(
+        sigc::hide(sigc::mem_fun(*this, &WorkspaceAppletWindow::on_background_settings_changed)));
 
     set_app_paintable(true);
     set_skip_pager_hint(true);
@@ -56,6 +67,15 @@ WorkspaceAppletWindow::WorkspaceAppletWindow() : selected_workspace(-1)
     get_style_context()->add_class("workspace-previewer");
 }
 
+WorkspaceAppletWindow::~WorkspaceAppletWindow()
+{
+    if (bg_surface)
+        cairo_surface_destroy(bg_surface);
+
+    if (bg)
+        g_object_unref(bg);
+}
+
 void WorkspaceAppletWindow::on_realize()
 {
     Glib::RefPtr<Gdk::Visual> rgba_visual;
@@ -70,18 +90,23 @@ void WorkspaceAppletWindow::on_realize()
 
 bool WorkspaceAppletWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
 {
-    cairo_surface_t *surface;
-    MateBG *bg = mate_bg_new();
+    int width = get_width();
+    int height = get_height();
 
-    //先绘制桌面背景图
-    mate_bg_load_from_preferences(bg);
-    surface = mate_bg_create_surface(bg, get_window()->gobj(), get_width(), get_height(), FALSE);
-    cairo_set_source_surface(cr->cobj(), surface, 0, 0);
-    cairo_paint(cr->cobj());
+    if (bg_dirty || bg_surface_width != width || bg_surface_height != height)
+        reload_bg_surface();
 
-    g_object_unref(bg);
-    cairo_surface_flush(surface);
-    cairo_surface_destroy(surface);
+    if (bg_surface)
+    {
+        //先绘制桌面背景图
+        cairo_set_source_surface(cr->cobj(), bg_surface, 0, 0);
+        cairo_paint(cr->cobj());
+    }
+    else
+    {
+        cr->set_source_rgba(0, 0, 0, 1);
+        cr->paint();
+    }
 
     //绘制暗色阴影
     cairo_set_source_rgba(cr->cobj(), 0, 0, 0, 0.2);
@@ -90,6 +115,50 @@ bool WorkspaceAppletWindow::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
     propagate_draw(*main_layout, cr);
 
     return false;
+}
+
+void WorkspaceAppletWindow::on_background_settings_changed()
+{
+    bg_dirty = true;
+    queue_draw();
+}
+
+void WorkspaceAppletWindow::reload_bg_surface()
+{
+    int width = get_width();
+    int height = get_height();
+    cairo_surface_t *surface = nullptr;
+
+    if (bg && get_window())
+    {
+        mate_bg_load_from_gsettings(bg, bg_settings->gobj());
+        surface = mate_bg_create_surface(bg, get_window()->gobj(), width, height, FALSE);
+    }
+
+    if (surface)
+    {
+        if (bg_surface)
+            cairo_surface_destroy(bg_surface);
+        bg_surface = surface;
+        /* 仅在成功替换 surface 时更新缓存尺寸 */
+        bg_surface_width = width;
+        bg_surface_height = height;
+        bg_dirty = false;
+        return;
+    }
+
+    if (!bg_surface)
+    {
+        KLOG_WARNING("background surface is unavailable, fill window with solid color");
+    }
+
+    /*
+     * 记录本次已尝试的尺寸，即使保留旧 surface 也不在同尺寸下逐帧重试。
+     * 后续仅在背景设置或屏幕尺寸变化再次置脏时重试。
+     */
+    bg_surface_width = width;
+    bg_surface_height = height;
+    bg_dirty = false;
 }
 
 bool WorkspaceAppletWindow::on_key_press_event(GdkEventKey *event)
@@ -219,6 +288,9 @@ void WorkspaceAppletWindow::on_map()
     Glib::signal_idle().connect_once(sigc::mem_fun(*this, &WorkspaceAppletWindow::load_workspaces));
     Gtk::Window::on_map();
     set_on_all_workspaces();
+
+    /* 每次显示概览时至少重试一次背景生成，避免创建失败后长期无背景 */
+    bg_dirty = true;
 }
 
 void WorkspaceAppletWindow::update_workspace(int workspace_num)
@@ -264,4 +336,6 @@ void WorkspaceAppletWindow::resize_and_reposition()
     move(rect.get_x(), rect.get_y());
     KLOG_DEBUG("screen size changed to %d x %d, resize and reposition applet window now", rect.get_width(), rect.get_height());
     resize(rect.get_width(), rect.get_height());
+
+    bg_dirty = true;
 }
