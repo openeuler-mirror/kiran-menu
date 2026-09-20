@@ -40,7 +40,7 @@ WorkspaceThumbnail::WorkspaceThumbnail(KiranWorkspacePointer &workspace_) : work
         sigc::mem_fun(*this, &WorkspaceThumbnail::on_settings_changed));
 
     /*屏幕大小变化时重绘背景*/
-    Gdk::Screen::get_default()->signal_size_changed().connect(
+    screen_size_changed_conn = Gdk::Screen::get_default()->signal_size_changed().connect(
         sigc::mem_fun(*this, &WorkspaceThumbnail::on_background_changed));
 
     /* 窗口列表发生变化时重绘缩略图 */
@@ -59,6 +59,10 @@ WorkspaceThumbnail::WorkspaceThumbnail(KiranWorkspacePointer &workspace_) : work
 
 WorkspaceThumbnail::~WorkspaceThumbnail()
 {
+    /* 断开全局屏幕信号连接，避免控件销毁后回调访问已释放对象 */
+    if (screen_size_changed_conn.connected())
+        screen_size_changed_conn.disconnect();
+
     if (bg_surface)
     {
         cairo_surface_destroy(bg_surface);

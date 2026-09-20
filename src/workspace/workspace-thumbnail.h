@@ -92,6 +92,7 @@ protected:
 
 private:
     Glib::RefPtr<Gio::Settings> bg_settings;     /* 桌面背景设置，用于监控桌面壁纸变化 */
+    sigc::connection screen_size_changed_conn;   /* 屏幕尺寸变化信号连接，析构时需断开 */
     Glib::RefPtr<Gio::Settings> applet_settings; /* 工作区切换插件设置 */
     std::weak_ptr<Kiran::Workspace> workspace;   /* 关联的工作区对象 */
 
