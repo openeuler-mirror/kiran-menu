@@ -56,7 +56,8 @@ public:
 
     /**
      * @brief 回调函数: 重新绘制工作区缩略图背景
-     *        通常在桌面壁纸变化时调用
+     *        通常在桌面壁纸变化或屏幕尺寸变化时调用。
+     *        只设置背景的脏标记，实际重新加载推迟到绘制阶段完成
      */
     void on_background_changed();
 
@@ -95,6 +96,7 @@ private:
     std::weak_ptr<Kiran::Workspace> workspace;   /* 关联的工作区对象 */
 
     cairo_surface_t *bg_surface;       /* 桌面背景 */
+    bool bg_dirty;                     /* 桌面背景是否需要重新加载 */
     double surface_scale;              /* 绘制窗口缩略图时的缩放比例 */
     int surface_width, surface_height; /* 缓存的bg_surface的宽度和高度 */
     int border_width;                  /* 选中时绘制的缩略图图片边框宽度 */
