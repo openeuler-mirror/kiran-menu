@@ -23,10 +23,16 @@
 
 WorkspaceThumbnail::WorkspaceThumbnail(KiranWorkspacePointer &workspace_) : workspace(workspace_),
                                                                             bg_surface(nullptr),
+                                                                            bg_dirty(true),
                                                                             border_width(4),
                                                                             drop_check(false),
                                                                             draw_windows(false)
 {
+    /* 桌面背景设置对象只创建一次，绘制和设置变更回调不再创建新的GSettings */
+    bg_settings = Gio::Settings::create("org.mate.background");
+    bg_settings->signal_changed().connect(
+        sigc::hide(sigc::mem_fun(*this, &WorkspaceThumbnail::on_background_changed)));
+
     /* 插件设置变化时重绘 */
     applet_settings = Gio::Settings::create(WORKSPACE_SCHEMA);
     draw_windows = applet_settings->get_boolean(WORKSPACE_KEY_DRAW_WINDOWS);
@@ -84,7 +90,7 @@ KiranWorkspacePointer WorkspaceThumbnail::get_workspace()
 
 void WorkspaceThumbnail::on_background_changed()
 {
-    reload_bg_surface();
+    bg_dirty = true;
     queue_draw();
 }
 
@@ -100,8 +106,10 @@ void WorkspaceThumbnail::init_drag_and_drop()
 bool WorkspaceThumbnail::reload_bg_surface()
 {
     Gtk::Allocation allocation;
-    double x_scale, y_scale;
+    double x_scale, y_scale, new_surface_scale;
+    int new_surface_width, new_surface_height;
     MateBG *bg = nullptr;
+    cairo_surface_t *surface = nullptr;
     auto screen = get_screen();
 
     /**
@@ -109,31 +117,49 @@ bool WorkspaceThumbnail::reload_bg_surface()
      * 为了应对多显示器扩展显示的情况，这里使用screen的大小
      */
     allocation = get_thumbnail_area()->get_allocation();
-    surface_width = allocation.get_width() - 2 * border_width;
-    surface_height = allocation.get_height() - 2 * border_width;
-    x_scale = surface_width * 1.0 / screen->get_width();
-    y_scale = surface_height * 1.0 / screen->get_height();
-    surface_scale = MIN(x_scale, y_scale);
+    new_surface_width = allocation.get_width() - 2 * border_width;
+    new_surface_height = allocation.get_height() - 2 * border_width;
+    x_scale = new_surface_width * 1.0 / screen->get_width();
+    y_scale = new_surface_height * 1.0 / screen->get_height();
+    new_surface_scale = MIN(x_scale, y_scale);
 
-    surface_width = static_cast<int>(screen->get_width() * surface_scale);
-    surface_height = static_cast<int>(screen->get_height() * surface_scale);
+    new_surface_width = static_cast<int>(screen->get_width() * new_surface_scale);
+    new_surface_height = static_cast<int>(screen->get_height() * new_surface_scale);
+
+    if (!get_realized())
+        return false;
+
+    bg = mate_bg_new();
+    mate_bg_load_from_gsettings(bg, bg_settings->gobj());
+
+    surface = mate_bg_create_surface(bg,
+                                     get_window()->gobj(),
+                                     new_surface_width,
+                                     new_surface_height,
+                                     FALSE);
+    g_object_unref(bg);
+
+    bg_dirty = false;
+
+    if (!surface)
+    {
+        if (!bg_surface)
+        {
+            surface_scale = new_surface_scale;
+            surface_width = new_surface_width;
+            surface_height = new_surface_height;
+        }
+        return bg_surface != nullptr;
+    }
 
     if (bg_surface)
         cairo_surface_destroy(bg_surface);
 
-    bg = mate_bg_new();
-    mate_bg_load_from_preferences(bg);
-
-    if (!get_realized())
-        return true;
-
-    bg_surface = mate_bg_create_surface(bg,
-                                        get_window()->gobj(),
-                                        surface_width,
-                                        surface_height,
-                                        FALSE);
-    g_object_unref(bg);
-    return bg_surface != nullptr;
+    bg_surface = surface;
+    surface_scale = new_surface_scale;
+    surface_width = new_surface_width;
+    surface_height = new_surface_height;
+    return true;
 }
 
 bool WorkspaceThumbnail::draw_thumbnail_image(Gtk::Widget *thumbnail_area_, const Cairo::RefPtr<Cairo::Context> &cr)
@@ -149,19 +175,22 @@ bool WorkspaceThumbnail::draw_thumbnail_image(Gtk::Widget *thumbnail_area_, cons
         return false;
 
     allocation = thumbnail_area_->get_allocation();
-    // 调用mate-desktop接口来获取桌面背景图片, 省去缩放等相关操作
-    if (!bg_surface)
+    if (bg_dirty)
         reload_bg_surface();
 
     // 背景图片居中显示
     surface_offset_x = (allocation.get_width() - surface_width) / 2.0;
     surface_offset_y = (allocation.get_height() - surface_height) / 2.0;
 
-    Cairo::RefPtr<Cairo::ImageSurface> surface(new Cairo::ImageSurface(bg_surface, false));
-    cr->set_source(surface,
-                   surface_offset_x,
-                   surface_offset_y);
-    cr->paint();
+    if (bg_surface)
+    {
+        // 调用mate-desktop接口来获取桌面背景图片, 省去缩放等相关操作
+        Cairo::RefPtr<Cairo::ImageSurface> surface(new Cairo::ImageSurface(bg_surface, false));
+        cr->set_source(surface,
+                       surface_offset_x,
+                       surface_offset_y);
+        cr->paint();
+    }
 
     cr->rectangle(surface_offset_x, surface_offset_y, surface_width, surface_height);
     cr->clip();
