@@ -468,17 +468,6 @@ label:disabled selection#iconWinButton {
     background-color: rgba(40, 40, 40, 0.35);
 }
 
-#trayWindow {
-    border-radius: 6px;
-    border-width: 1px;
-    background-color: #0c0c0c;
-}
-
-#trayGrid {
-    margin: 0px;
-    background-color: #0c0c0c;
-}
-
 #trayBox {
     margin: 0px;
     background-color: #0c0c0c;
