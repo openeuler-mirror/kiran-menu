@@ -19,8 +19,7 @@ ninja install
 
 执行：
 glib-compile-schemas /usr/share/glib-2.0/schemas/ 命令
-会添加panel-icon-ids设置项目，其中的id号表示将这些通知图标放置在面板上，
-如果没有在其中，则显示窗口托盘内。
+hide-icon-ids可设置哪些通知图标隐藏，不予显示。
 tray-icon-size可设置托盘内图标的大小。
 
 文件安装完后， 会生成一个叫做Kiran系统托盘的applet，
