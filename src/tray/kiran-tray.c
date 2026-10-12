@@ -21,7 +21,6 @@
 #include <libxml/xmlmemory.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include "kiran-notify-icon-window.h"
 #include "kiran-notify-icon.h"
 #include "kiran-sn-tray-manager.h"
 #include "kiran-x11-tray-manager.h"
@@ -36,12 +35,9 @@
 
 struct _KiranTrayPrivate
 {
-    GtkWidget *icons_win_button;
-    GtkWidget *icons_win;
     GSList *icons;
     GSList *managers;
     GSettings *settings;
-    KiranTrayLoaction location;
 };
 
 static void kiran_tray_dispose(GObject *object);
@@ -54,7 +50,6 @@ static void kiran_tray_unrealize(GtkWidget *widget);
 
 static void kiran_tray_add_manager(KiranTray *tray, KiranTrayManager *manager);
 static void kiran_tray_icons_refresh(KiranTray *tray);
-static void position_notify_icon_window(KiranTray *tray, gboolean change_y);
 static void kiran_tray_style_updated(GtkWidget *widget);
 
 G_DEFINE_TYPE_WITH_PRIVATE(KiranTray, kiran_tray, GTK_TYPE_BOX)
@@ -85,141 +80,6 @@ kiran_tray_set_icon_padding(KiranTray *tray)
     icon_padding = g_settings_get_int(priv->settings, KEY_TRAY_ICON_PADDING);
 
     gtk_box_set_spacing(GTK_BOX(tray), icon_padding);
-}
-
-static KiranNotifyIcon *
-kiran_tray_find_icon_by_id(KiranTray *tray,
-                           const gchar *id)
-{
-    KiranTrayPrivate *priv;
-    GSList *iterator = NULL;
-
-    priv = tray->priv;
-
-    for (iterator = priv->icons; iterator; iterator = iterator->next)
-    {
-        const gchar *icon_id;
-
-        if (!KIRAN_IS_NOTIFY_ICON(iterator->data))
-            continue;
-
-        icon_id = kiran_notify_icon_get_id(KIRAN_NOTIFY_ICON(iterator->data));
-        if (g_strcmp0(icon_id, id) == 0)
-        {
-            return iterator->data;
-        }
-    }
-
-    return NULL;
-}
-
-static void
-gsettings_changed_panel_icon_ids(GSettings *settings,
-                                 gchar *key,
-                                 KiranTray *tray)
-{
-    KiranTrayPrivate *priv = tray->priv;
-    KiranNotifyIcon *icon;
-    gchar **panel_icon_ids;
-    gboolean find = TRUE;
-    gint i;
-    GList *children;
-    GList *child;
-
-    panel_icon_ids = g_settings_get_strv(settings, KEY_PANEL_ICON_IDS);
-    children = gtk_container_get_children(GTK_CONTAINER(tray));
-
-    if (panel_icon_ids)
-    {
-        for (i = 0; panel_icon_ids && panel_icon_ids[i]; i++)
-        {
-            icon = kiran_tray_find_icon_by_id(tray, panel_icon_ids[i]);
-
-            if (icon)
-            {
-                find = FALSE;
-
-                for (child = children; child; child = child->next)
-                {
-                    const gchar *id;
-
-                    if (!KIRAN_IS_NOTIFY_ICON(child->data))
-                        continue;
-
-                    id = kiran_notify_icon_get_id(KIRAN_NOTIFY_ICON(child->data));
-
-                    if (g_strcmp0(id, panel_icon_ids[i]) == 0)
-                    {
-                        find = TRUE;
-                        break;
-                    }
-                }
-
-                //remove from tray to panel
-                if (!find)
-                {
-                    KiranNotifyIconWay way = kiran_notify_icon_get_way(icon);
-
-                    if (way == KIRAN_NOTIFY_ICON_WAY_X11)
-                        kiran_notify_icon_window_remove_icon(KIRAN_NOTIFY_ICON_WINDOW(priv->icons_win), icon);
-                    else if (way == KIRAN_NOTIFY_ICON_WAY_DBUS)
-                    {
-                        g_object_ref(icon);
-                        kiran_notify_icon_window_remove_icon(KIRAN_NOTIFY_ICON_WINDOW(priv->icons_win), icon);
-                        gtk_box_pack_start(GTK_BOX(tray), GTK_WIDGET(icon), FALSE, TRUE, 0);
-                        kiran_tray_icons_refresh(tray);
-                    }
-
-                    if (kiran_notify_icon_window_get_icons_number(KIRAN_NOTIFY_ICON_WINDOW(priv->icons_win)) <= 0)
-                    {
-                        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->icons_win_button), FALSE);
-                        gtk_widget_hide(priv->icons_win);
-                        gtk_widget_hide(priv->icons_win_button);
-                    }
-                }
-            }
-        }
-
-        for (child = children; child; child = child->next)
-        {
-            const gchar *id;
-
-            if (!KIRAN_IS_NOTIFY_ICON(child->data))
-                continue;
-
-            id = kiran_notify_icon_get_id(KIRAN_NOTIFY_ICON(child->data));
-            find = FALSE;
-            for (i = 0; panel_icon_ids && panel_icon_ids[i]; i++)
-            {
-                if (g_strcmp0(id, panel_icon_ids[i]) == 0)
-                {
-                    find = TRUE;
-                    break;
-                }
-            }
-
-            //remove from panel to tray
-            if (!find)
-            {
-                KiranNotifyIconWay way = kiran_notify_icon_get_way(child->data);
-
-                if (way == KIRAN_NOTIFY_ICON_WAY_X11)
-                    gtk_container_remove(GTK_CONTAINER(tray), GTK_WIDGET(child->data));
-                else if (way == KIRAN_NOTIFY_ICON_WAY_DBUS)
-                {
-                    g_object_ref(child->data);
-                    gtk_container_remove(GTK_CONTAINER(tray), GTK_WIDGET(child->data));
-                    kiran_notify_icon_window_add_icon(KIRAN_NOTIFY_ICON_WINDOW(priv->icons_win), child->data);
-                    gtk_widget_show(priv->icons_win_button);
-                }
-            }
-        }
-
-        position_notify_icon_window(tray, FALSE);
-
-        g_strfreev(panel_icon_ids);
-    }
-    g_list_free(children);
 }
 
 static void
@@ -262,10 +122,8 @@ kiran_tray_init(KiranTray *self)
 
     priv = self->priv = kiran_tray_get_instance_private(self);
     priv->settings = g_settings_new(KIRAN_TRAY_SCHEMA);
-    g_signal_connect(priv->settings, "changed::" KEY_PANEL_ICON_IDS, G_CALLBACK(gsettings_changed_panel_icon_ids), self);
     g_signal_connect(priv->settings, "changed::" KEY_TRAY_ICON_SIZE, G_CALLBACK(gsettings_changed_panel_icon_size), self);
     g_signal_connect(priv->settings, "changed::" KEY_TRAY_ICON_PADDING, G_CALLBACK(gsettings_changed_panel_icon_padding), self);
-    priv->location = APPLET_ORIENT_UP;
 
     provider = gtk_css_provider_new();
     display = gdk_display_get_default();
@@ -302,160 +160,6 @@ kiran_tray_icons_refresh(KiranTray *tray)
 }
 
 static void
-position_notify_icon_window(KiranTray *tray, gboolean change_y)
-{
-    GtkAllocation allocation;
-    GdkDisplay *display;
-    GdkScreen *screen;
-    GdkRectangle monitor;
-    GdkGravity gravity = GDK_GRAVITY_NORTH_WEST;
-    int button_w, button_h;
-    int x, y;
-    int w, h;
-    int i, n;
-    gboolean found_monitor = FALSE;
-    KiranTrayPrivate *priv = tray->priv;
-
-    if (!GDK_IS_X11_DISPLAY(gdk_display_get_default()))
-        return;
-
-    if (!gtk_widget_is_visible(priv->icons_win))
-        return;
-
-    /* Get root origin of the toggle button, and position above that. */
-    gdk_window_get_origin(gtk_widget_get_window(priv->icons_win_button),
-                          &x, &y);
-
-    gtk_widget_get_size_request(GTK_WIDGET(priv->icons_win), &w, &h);
-
-    gtk_widget_get_allocation(priv->icons_win_button, &allocation);
-    button_w = allocation.width;
-    button_h = allocation.height;
-
-    screen = gtk_window_get_screen(GTK_WINDOW(priv->icons_win));
-    display = gdk_screen_get_display(screen);
-
-    n = gdk_display_get_n_monitors(display);
-    for (i = 0; i < n; i++)
-    {
-        gdk_monitor_get_geometry(gdk_display_get_monitor(display, i), &monitor);
-        if (x >= monitor.x && x <= monitor.x + monitor.width &&
-            y >= monitor.y && y <= monitor.y + monitor.height)
-        {
-            found_monitor = TRUE;
-            break;
-        }
-    }
-
-    if (!found_monitor)
-    {
-        /* eek, we should be on one of those xinerama
-               monitors */
-        monitor.x = 0;
-        monitor.y = 0;
-        monitor.width = WidthOfScreen(gdk_x11_screen_get_xscreen(screen));
-        monitor.height = HeightOfScreen(gdk_x11_screen_get_xscreen(screen));
-    }
-
-    /* Based on panel orientation, position the popup.
-     * Ignore window gravity since the window is undecorated.
-     * The orientations are all named backward from what
-     * I expected.
-     */
-    switch (priv->location)
-    {
-    case APPLET_ORIENT_RIGHT:
-        x += button_w;
-        if ((y + h) > monitor.y + monitor.height)
-            y -= (y + h) - (monitor.y + monitor.height);
-
-        if ((y + h) > (monitor.height / 2))
-            gravity = GDK_GRAVITY_SOUTH_WEST;
-        else
-            gravity = GDK_GRAVITY_NORTH_WEST;
-
-        break;
-    case APPLET_ORIENT_LEFT:
-        x -= w;
-        if ((y + h) > monitor.y + monitor.height)
-            y -= (y + h) - (monitor.y + monitor.height);
-
-        if ((y + h) > (monitor.height / 2))
-            gravity = GDK_GRAVITY_SOUTH_EAST;
-        else
-            gravity = GDK_GRAVITY_NORTH_EAST;
-
-        break;
-    case APPLET_ORIENT_DOWN:
-        y += button_h;
-        if ((x + w) > monitor.x + monitor.width)
-            x -= (x + w) - (monitor.x + monitor.width);
-
-        x -= (w - button_w) / 2;
-        gravity = GDK_GRAVITY_NORTH_WEST;
-
-        break;
-    case APPLET_ORIENT_UP:
-        y -= h;
-        if ((x + w) > monitor.x + monitor.width)
-            x -= (x + w) - (monitor.x + monitor.width);
-
-        x -= (w - button_w) / 2;
-
-        gravity = GDK_GRAVITY_SOUTH_WEST;
-
-        break;
-    }
-
-    //避免移出屏幕外
-    if (x < 0)
-        x = 0;
-
-    if (y < 0)
-        y = 0;
-
-    if (change_y)
-        gtk_window_move(GTK_WINDOW(priv->icons_win), x, y);
-    else
-    {
-        gint root_x;
-        gint root_y;
-
-        gtk_window_get_position(GTK_WINDOW(priv->icons_win), &root_x, &root_y);
-        gtk_window_move(GTK_WINDOW(priv->icons_win), x, root_y);
-    }
-
-    gtk_window_set_gravity(GTK_WINDOW(priv->icons_win), gravity);
-}
-
-static void
-icons_win_button_toggled_cb(GtkWidget *widget,
-                            gpointer user_data)
-{
-    KiranTray *tray = KIRAN_TRAY(user_data);
-    KiranTrayPrivate *priv = tray->priv;
-
-    if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(tray->priv->icons_win_button)))
-    {
-        gtk_widget_hide(priv->icons_win);
-    }
-    else
-    {
-        gtk_widget_show(priv->icons_win);
-        position_notify_icon_window(tray, TRUE);
-    }
-}
-
-static void
-icons_win_hide_cb(GtkWidget *widget,
-                  gpointer user_data)
-{
-    KiranTray *tray = KIRAN_TRAY(user_data);
-
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(tray->priv->icons_win_button), FALSE);
-}
-
-static void
 kiran_tray_dispose(GObject *object)
 {
     KiranTray *tray = KIRAN_TRAY(object);
@@ -470,10 +174,6 @@ kiran_tray_dispose(GObject *object)
     if (priv->settings != NULL)
     {
         g_signal_handlers_disconnect_by_func(priv->settings,
-                                             G_CALLBACK(gsettings_changed_panel_icon_ids),
-                                             tray);
-
-        g_signal_handlers_disconnect_by_func(priv->settings,
                                              G_CALLBACK(gsettings_changed_panel_icon_size),
                                              tray);
 
@@ -482,12 +182,6 @@ kiran_tray_dispose(GObject *object)
                                              tray);
         g_object_unref(priv->settings);
         priv->settings = NULL;
-    }
-
-    if (priv->icons_win != NULL)
-    {
-        gtk_widget_destroy(priv->icons_win);
-        priv->icons_win = NULL;
     }
 
     G_OBJECT_CLASS(kiran_tray_parent_class)->dispose(object);
@@ -512,19 +206,6 @@ kiran_tray_constructor(GType type,
     gtk_box_set_homogeneous(GTK_BOX(tray), FALSE);
     gtk_widget_set_name(GTK_WIDGET(tray), "trayBox");
     kiran_tray_set_icon_padding(tray);
-
-    tray->priv->icons_win = kiran_notify_icon_window_new();
-    tray->priv->icons_win_button = gtk_toggle_button_new();
-    GtkWidget *arrow_image = gtk_image_new_from_icon_name("kiran-menu-arrow-up-symbolic", GTK_ICON_SIZE_BUTTON);
-    gtk_button_set_image(GTK_BUTTON(tray->priv->icons_win_button), arrow_image);
-    gtk_toggle_button_set_mode(GTK_TOGGLE_BUTTON(tray->priv->icons_win_button), TRUE);
-    gtk_widget_set_name(tray->priv->icons_win_button, "iconWinButton");
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(tray->priv->icons_win_button), FALSE);
-
-    g_signal_connect(tray->priv->icons_win_button, "toggled", G_CALLBACK(icons_win_button_toggled_cb), tray);
-    g_signal_connect(tray->priv->icons_win, "hide", G_CALLBACK(icons_win_hide_cb), tray);
-
-    gtk_box_pack_start(GTK_BOX(tray), GTK_WIDGET(tray->priv->icons_win_button), FALSE, TRUE, 0);
 
     return obj;
 }
@@ -584,45 +265,31 @@ kiran_tray_style_updated(GtkWidget *widget)
     }
 }
 
-static gint
-kiran_tray_get_icon_type(GSettings *settings, const char *id)
+static gboolean
+kiran_tray_icon_is_hidden(GSettings *settings, const char *id)
 {
-    gchar **panel_icon_ids;
     gchar **hide_icon_ids;
-    gint ret = ICON_SHOW_IN_WINDOW;
+    gboolean hidden = FALSE;
     gint i;
 
     if (!id)
-        return ret;
+        return FALSE;
 
     hide_icon_ids = g_settings_get_strv(settings, KEY_HIDE_ICON_IDS);
     if (hide_icon_ids)
     {
-        for (i = 0; hide_icon_ids && hide_icon_ids[i]; i++)
+        for (i = 0; hide_icon_ids[i]; i++)
         {
             if (g_strcmp0(id, hide_icon_ids[i]) == 0)
             {
-                g_strfreev(hide_icon_ids);
-                return ICON_NOT_SHOW;
+                hidden = TRUE;
+                break;
             }
         }
         g_strfreev(hide_icon_ids);
     }
 
-    panel_icon_ids = g_settings_get_strv(settings, KEY_PANEL_ICON_IDS);
-    if (panel_icon_ids)
-    {
-        for (i = 0; panel_icon_ids && panel_icon_ids[i]; i++)
-        {
-            if (g_strcmp0(id, panel_icon_ids[i]) == 0)
-            {
-                ret = ICON_SHOW_IN_PANEL;
-            }
-        }
-        g_strfreev(panel_icon_ids);
-    }
-
-    return ret;
+    return hidden;
 }
 
 static xmlNodePtr
@@ -795,7 +462,6 @@ kiran_tray_notify_icon_added(KiranTrayManager *manager,
 {
     KiranTrayPrivate *priv;
     const char *id;
-    gint type;
 
     g_return_if_fail(KIRAN_IS_TRAY_MANAGER(manager));
     g_return_if_fail(KIRAN_IS_NOTIFY_ICON(icon));
@@ -804,7 +470,6 @@ kiran_tray_notify_icon_added(KiranTrayManager *manager,
     priv = tray->priv;
 
     id = kiran_notify_icon_get_id(icon);
-    type = kiran_tray_get_icon_type(priv->settings, id);
 
     /* 系统已知的通知图标如声音，网络，电池等不需要记录 */
     if (kiran_notify_icon_get_category(icon) != KIRAN_NOTIFY_ICON_CATEGORY_HARDWARE)
@@ -817,27 +482,11 @@ kiran_tray_notify_icon_added(KiranTrayManager *manager,
 
     gtk_widget_set_name (GTK_WIDGET (icon), "iconWinButton");
 
-    if (type != ICON_NOT_SHOW)
+    if (!kiran_tray_icon_is_hidden(priv->settings, id))
     {
         gtk_box_pack_start(GTK_BOX(tray), GTK_WIDGET(icon), FALSE, TRUE, 0);
         kiran_tray_icons_refresh(tray);
     }
-
-    /*
-    if (type == ICON_SHOW_IN_PANEL)
-    {
-        gtk_box_pack_start(GTK_BOX(tray), GTK_WIDGET(icon), FALSE, TRUE, 0);
-        kiran_tray_icons_refresh(tray);
-    }
-    else if (type == ICON_SHOW_IN_WINDOW)
-    {
-        kiran_notify_icon_window_add_icon(KIRAN_NOTIFY_ICON_WINDOW(priv->icons_win), icon);
-
-        if (!gtk_widget_is_visible(priv->icons_win_button))
-            gtk_widget_show(priv->icons_win_button);
-        position_notify_icon_window(tray, FALSE);
-    }
-    */
 
     priv->icons = g_slist_prepend(priv->icons, icon);
 }
@@ -848,8 +497,6 @@ kiran_tray_notify_icon_removed(KiranTrayManager *manager,
                                KiranTray *tray)
 {
     KiranTrayPrivate *priv;
-    const char *id;
-    gint type;
 
     g_return_if_fail(KIRAN_IS_TRAY_MANAGER(manager));
     g_return_if_fail(KIRAN_IS_NOTIFY_ICON(icon));
@@ -857,33 +504,9 @@ kiran_tray_notify_icon_removed(KiranTrayManager *manager,
 
     priv = tray->priv;
 
-    id = kiran_notify_icon_get_id(icon);
-    type = kiran_tray_get_icon_type(priv->settings, id);
-
-    if(type != ICON_NOT_SHOW)
-    {
+    /* 隐藏区域已删除, 图标只可能挂在面板容器上; 按实际父容器删除, 避免删到无子关系容器的告警 */
+    if (gtk_widget_get_parent(GTK_WIDGET(icon)) == GTK_WIDGET(tray))
         gtk_container_remove(GTK_CONTAINER(tray), GTK_WIDGET(icon));
-    }
-
-    /*
-    if (type == ICON_SHOW_IN_PANEL)
-    {
-        gtk_container_remove(GTK_CONTAINER(tray), GTK_WIDGET(icon));
-    }
-    else if (type == ICON_SHOW_IN_WINDOW)
-    {
-        kiran_notify_icon_window_remove_icon(KIRAN_NOTIFY_ICON_WINDOW(priv->icons_win), icon);
-
-        if (kiran_notify_icon_window_get_icons_number(KIRAN_NOTIFY_ICON_WINDOW(priv->icons_win)) <= 0)
-        {
-            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->icons_win_button), FALSE);
-            gtk_widget_hide(priv->icons_win);
-            gtk_widget_hide(priv->icons_win_button);
-        }
-
-        position_notify_icon_window(tray, FALSE);
-    }
-    */
 
     priv->icons = g_slist_remove(priv->icons, icon);
 }
