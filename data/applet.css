@@ -284,17 +284,6 @@ scrolledwindow, scrolledwindow viewport {
   padding: 0px;
 }
 
-#trayWindow
-{
-  border-radius: 6px;
-  border-width: 1px;
-}
-
-#trayGrid
-{
-  margin: 0px;
-}
-
 #trayBox
 {
   margin: 0px 5px 0px 0px;
