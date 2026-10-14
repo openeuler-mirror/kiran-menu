@@ -208,15 +208,15 @@ void WorkspaceWindowsOverview::reload_thumbnails()
         int max_height = 0;
 
         //把窗口按照先宽度，后高度的方式进行排序，值大的在前，只是为了好看^^)
-        std::sort(row.begin(), row.end(), [&windows](uint32_t i, uint32_t j)
+        std::sort(row.begin(), row.end(), [&windows](int16_t i, int16_t j)
                   {
                       auto w1 = windows.at(i);
                       auto w2 = windows.at(j);
 
                       if (REAL_WINDOW_WIDTH(w1) != REAL_WINDOW_WIDTH(w2))
-                          return REAL_WINDOW_WIDTH(w1) >= REAL_WINDOW_WIDTH(w2);
+                          return REAL_WINDOW_WIDTH(w1) > REAL_WINDOW_WIDTH(w2);
                       else
-                          return REAL_WINDOW_HEIGHT(w1) >= REAL_WINDOW_HEIGHT(w2);
+                          return REAL_WINDOW_HEIGHT(w1) > REAL_WINDOW_HEIGHT(w2);
                   });
 
         /*
