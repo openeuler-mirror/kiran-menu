@@ -16,6 +16,7 @@
 #define TASKLISTAPPLETWIDGET_H
 
 #include <gtkmm.h>
+#include "taskbar-capabilities.h"
 #include "tasklist-buttons-container.h"
 
 class TasklistAppletWidget : public Gtk::Box
@@ -53,6 +54,7 @@ protected:
     Gtk::Button *create_paging_button(const std::string &icon_name, const std::string &tooltip_text);
 
 private:
+    TaskbarCapabilities::PinningProvider pinning_provider;
     Gtk::Box button_box;                 //分页按钮所在布局
     Gtk::Button *prev_btn, *next_btn;    //分页按钮
     TasklistButtonsContainer container;  //按钮容器
