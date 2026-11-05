@@ -21,6 +21,7 @@
 #include "kiran-helper.h"
 #include "lib/base.h"
 #include "lib/common.h"
+#include "taskbar-capabilities.h"
 
 #define MENU_ITEM_COUNT G_N_ELEMENTS(item_labels)
 
@@ -201,7 +202,8 @@ void MenuAppItem::create_context_menu()
     }
     context_menu.append(*item);
 
-    if (!this->settings_->get_boolean(STARTMENU_LOCKDOWN_KEY_DISABLE_FIXED_APP))
+    if (!this->settings_->get_boolean(STARTMENU_LOCKDOWN_KEY_DISABLE_FIXED_APP) &&
+        TaskbarCapabilities::is_taskbar_pinning_available())
     {
         if (is_fixed_on_taskbar())
         {
