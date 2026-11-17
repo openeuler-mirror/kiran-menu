@@ -734,7 +734,7 @@ bool Window::update_window_pixmap()
 
     gdk_x11_display_error_trap_push(gdk_display);
 
-    uint64_t thumbnail_window = this->real_toplevle_xid_;
+    ::Window thumbnail_window = this->real_toplevle_xid_;
     this->pixmap_ = XCompositeNameWindowPixmap(display, thumbnail_window);
     
     if (gdk_x11_display_error_trap_pop(gdk_display))
@@ -752,9 +752,9 @@ void Window::update_real_toplevel_xid()
     auto gdk_display = gdk_x11_lookup_xdisplay(display);
     g_return_if_fail(gdk_display);
 
-    uint64_t window = this->get_xid();
-    uint64_t root_window=0,parent_window=0;
-    uint64_t* children_windows = NULL;
+    ::Window window = static_cast<::Window>(this->get_xid());
+    ::Window root_window = None, parent_window = None;
+    ::Window* children_windows = nullptr;
     unsigned int n_children = 0;
 
     gdk_x11_display_error_trap_push(gdk_display);
