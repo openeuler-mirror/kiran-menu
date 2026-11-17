@@ -302,6 +302,7 @@ icon_surface_new(GVariant *variant,
     tmp = surface_from_variant(variant, width, height);
     if (cairo_surface_status(tmp) != CAIRO_STATUS_SUCCESS)
     {
+        cairo_surface_destroy(tmp);
         cairo_surface_destroy(surface);
         return NULL;
     }
