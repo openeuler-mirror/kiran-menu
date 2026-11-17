@@ -339,8 +339,18 @@ icon_pixmap_new(GVariant *variant)
     while (g_variant_iter_next(&iter, "(ii@ay)", &width, &height, &value))
     {
         cairo_surface_t *surface;
+        gint stride;
 
-        if (width == 0 || height == 0)
+        if (width <= 0 || height <= 0)
+        {
+            g_variant_unref(value);
+            continue;
+        }
+
+        stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
+        if (stride <= 0 ||
+            (gsize)height > G_MAXSIZE / (gsize)stride ||
+            g_variant_get_size(value) < (gsize)stride * (gsize)height)
         {
             g_variant_unref(value);
             continue;
