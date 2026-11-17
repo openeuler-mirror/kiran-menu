@@ -15,6 +15,7 @@
 #include "kiran-sn-icon.h"
 #include <glib/gstdio.h>
 #include <math.h>
+#include <string.h>
 #include "kiran-notify-icon.h"
 #include "kiran-sn-icon-menu.h"
 #include "kiran-sn-item-gen.h"
@@ -302,6 +303,7 @@ icon_surface_new(GVariant *variant,
     tmp = surface_from_variant(variant, width, height);
     if (cairo_surface_status(tmp) != CAIRO_STATUS_SUCCESS)
     {
+        cairo_surface_destroy(tmp);
         cairo_surface_destroy(surface);
         return NULL;
     }
@@ -340,8 +342,18 @@ icon_pixmap_new(GVariant *variant)
     while (g_variant_iter_next(&iter, "(ii@ay)", &width, &height, &value))
     {
         cairo_surface_t *surface;
+        gint stride;
 
-        if (width == 0 || height == 0)
+        if (width <= 0 || height <= 0)
+        {
+            g_variant_unref(value);
+            continue;
+        }
+
+        stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
+        if (stride <= 0 ||
+            (gsize)height > G_MAXSIZE / (gsize)stride ||
+            g_variant_get_size(value) < (gsize)stride * (gsize)height)
         {
             g_variant_unref(value);
             continue;
@@ -496,6 +508,28 @@ get_surface(KiranSnIcon *icon,
         return cairo_surface_reference(pixmap->surface);
 }
 
+static gchar *
+safe_icon_file_id(const gchar *id)
+{
+    gchar *base;
+
+    if (id == NULL || id[0] == '\0')
+        return NULL;
+
+    base = g_path_get_basename(id);
+    if (base == NULL || base[0] == '\0' ||
+        g_strcmp0(base, ".") == 0 ||
+        g_strcmp0(base, "..") == 0 ||
+        strchr(base, '/') != NULL ||
+        strchr(base, '\\') != NULL)
+    {
+        g_free(base);
+        return NULL;
+    }
+
+    return base;
+}
+
 static void
 update(KiranSnIcon *icon)
 {
@@ -558,14 +592,24 @@ update(KiranSnIcon *icon)
                               icon_size);
         if (surface != NULL)
         {
+            gchar *file_id;
+
             gtk_image_set_from_surface(GTK_IMAGE(priv->image), surface);
 
+            file_id = safe_icon_file_id(priv->id);
             g_free(priv->icon);
-            priv->icon = g_strdup_printf("%s/.config/kiran-tray/icon/%s.png",
-                                         g_get_home_dir(),
-                                         priv->id);
+            priv->icon = NULL;
 
-            if (!g_file_test(priv->icon, G_FILE_TEST_EXISTS))
+            if (file_id != NULL)
+            {
+                priv->icon = g_strdup_printf("%s/.config/kiran-tray/icon/%s.png",
+                                             g_get_home_dir(),
+                                             file_id);
+                g_free(file_id);
+            }
+
+            if (priv->icon != NULL &&
+                !g_file_test(priv->icon, G_FILE_TEST_EXISTS))
             {
                 gchar *dir = NULL;
 
