@@ -14,11 +14,34 @@
 
 #include <app-manager.h>
 #include <glib/gstdio.h>
+#include <string.h>
 
 #include "kiran-notify-icon.h"
 #include "kiran-x11-tray-icon.h"
 #include "kiran-x11-tray-socket.h"
 #include "lib/base.h"
+
+static gchar *
+safe_icon_file_id(const gchar *id)
+{
+    gchar *base;
+
+    if (id == NULL || id[0] == '\0')
+        return NULL;
+
+    base = g_path_get_basename(id);
+    if (base == NULL || base[0] == '\0' ||
+        g_strcmp0(base, ".") == 0 ||
+        g_strcmp0(base, "..") == 0 ||
+        strchr(base, '/') != NULL ||
+        strchr(base, '\\') != NULL)
+    {
+        g_free(base);
+        return NULL;
+    }
+
+    return base;
+}
 
 struct _KiranX11TrayIconPrivate
 {
@@ -150,7 +173,8 @@ kiran_x11_tray_icon_draw(GtkWidget *widget,
     {
         /* 如果没有对应的桌面文件， 则保存一张对应的窗口图片 */
 
-        if (!g_file_test(priv->icon, G_FILE_TEST_EXISTS))
+        if (priv->icon != NULL &&
+            !g_file_test(priv->icon, G_FILE_TEST_EXISTS))
         {
             /* 还没有保存过， 则进行保存 */
             GdkWindow *gdk_window;
@@ -527,13 +551,21 @@ kiran_x11_tray_icon_new(Window icon_window)
         }
         else
         {
+            gchar *file_id;
+
             //未找到对应的desktop文件
             icon->priv->id = g_strdup(res_name);
             icon->priv->name = g_strdup(res_name);
             icon->priv->app_category = g_strdup("ApplicationStatus");
+
+            file_id = safe_icon_file_id(res_name);
+            if (file_id == NULL)
+                file_id = g_strdup("unknown");
+
             icon->priv->icon = g_strdup_printf("%s/.config/kiran-tray/icon/%s.png",
                                                g_get_home_dir(),
-                                               icon->priv->id);
+                                               file_id);
+            g_free(file_id);
 
             icon->priv->has_desktop = FALSE;
         }
